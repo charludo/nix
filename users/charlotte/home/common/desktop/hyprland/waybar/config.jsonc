@@ -1,0 +1,78 @@
+[
+  {
+    "name": "top",
+    "margin": "15px 0px -5px 0px",
+    "layer": "top",
+    "position": "top",
+    "output": ["DP-2"],
+    "include": ["~/.config/waybar/default-modules.jsonc"],
+    "modules-left": ["clock", "custom/weather"],
+    "modules-center": ["hyprland/workspaces"],
+    "modules-right": [
+      "disk#home",
+      "disk#nas",
+      "cpu",
+      "memory",
+      "temperature",
+      "battery",
+      "custom/power"
+    ],
+    "hyprland/workspaces": {
+      "warp-on-scroll": false,
+      "all-outputs": false,
+      "format": "{icon}", 
+      "format-icons": {
+        "default": "",
+        "urgent": "",
+        "active": ""
+      },
+      "persistent-workspaces": {
+        "1": ["DP-2"],
+        "3": ["DP-2"],
+        "5": ["DP-2"],
+        "7": ["DP-2"],
+        "9": ["DP-2"]
+      }
+    }
+  },
+  {
+    "name": "bottom",
+    "margin": "-5px 0px 15px 0px",
+    "layer": "top",
+    "position": "bottom",
+    "output": ["DP-3"],
+    "include": ["~/.config/waybar/default-modules.jsonc"],
+    "modules-left": [
+      "bluetooth",
+      "network#lan",
+      "network#wifi",
+      "custom/wireguard"
+    ],
+    "modules-center": ["hyprland/workspaces"],
+    "modules-right": [
+      "pulseaudio/slider",
+      "custom/playerctl",
+      "custom/mail",
+      "custom/reddit",
+      "custom/updates",
+      "tray"
+    ],
+    "hyprland/workspaces": {
+      "warp-on-scroll": false,
+      "all-outputs": false,
+      "format": "{icon}",
+      "format-icons": {
+        "default": "",
+        "urgent": "",
+        "active": ""
+      },
+      "persistent-workspaces": {
+        "2": ["DP-3"],
+        "4": ["DP-3"],
+        "6": ["DP-3"],
+        "8": ["DP-3"],
+        "10": ["DP-3"]
+      }
+    }
+  }
+]

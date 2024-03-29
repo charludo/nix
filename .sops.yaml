@@ -1,0 +1,18 @@
+keys:
+  - &users:
+    - &charlotte age1tzayy2c75wn59vwp59e85a6p0derah9dvd94g2dan9uems8wufesc83573
+  - &hosts:
+    - &drone age1vzpn0t97ga4vlfnyvfh4vhhzwkd5kyz6qanf45qff4gf8uqjp37sk4pukr
+creation_rules:
+  - path_regex: hosts/common/secrets.sops.ya?ml$
+    key_groups:
+    - age:
+      - *drone
+  - path_regex: hosts/common/optional/wifi.sops.ya?ml$
+    key_groups:
+    - age:
+      - *drone
+  - path_regex: users/charlotte/user_secrets.sops.ya?ml$
+    key_groups:
+    - age:
+      - *charlotte
