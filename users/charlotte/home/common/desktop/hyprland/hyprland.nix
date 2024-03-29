@@ -139,7 +139,7 @@
             workspaces = [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" ];
             terminal = config.home.sessionVariables.TERMINAL;
 
-            rofi = "${pkgs.rofi.override {plugins = [pkgs.rofi-emoji];}}/bin/rofi";
+            rofi = "${pkgs.rofi-wayland.override {plugins = [pkgs.rofi-emoji];}}/bin/rofi";
             rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             clipboard = "${rofi} -modi \"emoji,clipboard:rofi-cliphist\" -show emoji -show-icons";

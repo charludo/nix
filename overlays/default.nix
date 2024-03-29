@@ -30,10 +30,11 @@ in
   # };
 
   # Modifies existing packages
-  # modifications = final: prev: {
-  # vimPlugins = prev.vimPlugins // {
-  # vim-numbertoggle = addPatches prev.vimPlugins.vim-numbertoggle [ ./vim-numbertoggle-command-mode.patch ];
-  # };
+  modifications = final: prev: {
+    rofi-emoji = prev.rofi-emoji.override { rofi-unwrapped = prev.rofi-wayland-unwrapped; };
+    # vimPlugins = prev.vimPlugins // {
+    # vim-numbertoggle = addPatches prev.vimPlugins.vim-numbertoggle [ ./vim-numbertoggle-command-mode.patch ];
+  };
 
   # passExtensions = prev.passExtensions // {
   # https://github.com/tadfisher/pass-otp/pull/173

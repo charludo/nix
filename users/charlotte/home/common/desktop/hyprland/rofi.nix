@@ -33,7 +33,7 @@ let
       };
 
       "#window" = {
-        background-color = mkLiteral "rgba(20, 20, 20, 50%)";
+        background-color = mkLiteral "rgba(20, 20, 20, 0%)";
         border = 0;
         padding = "35% 35%";
         width = "100%";
@@ -334,6 +334,7 @@ in
 
   programs.rofi = {
     enable = true;
+    package = pkgs.rofi-wayland;
     font = "${config.fontProfiles.regular.family} 13";
     location = "center";
     plugins = [ pkgs.rofi-power-menu pkgs.rofi-emoji ];

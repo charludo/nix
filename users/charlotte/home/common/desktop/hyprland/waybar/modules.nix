@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   curl = "${pkgs.curl}/bin/curl";
-  rofi = "${pkgs.rofi}/bin/rofi";
+  rofi = "${pkgs.rofi-wayland}/bin/rofi";
   firefox = "${pkgs.firefox}/bin/firefox";
   thunderbird = "${pkgs.thunderbird}/bin/thunderbird";
   pavucontrol = "${pkgs.pavucontrol}/bin/pavucontrol";

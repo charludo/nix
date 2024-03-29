@@ -14,7 +14,7 @@ in
   ];
 
   # Use this method for built-in schemes:
-  # colorscheme = lib.mkDefault colorSchemes.gruvchad;
+  # colorscheme = lib.mkDefault colorSchemes.tokyo-city-terminal-dark;
 
   # Use this method for custom imported schemes:
   colorscheme = lib.mkDefault customSchemes.gruvchad;
