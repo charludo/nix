@@ -26,7 +26,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    private-email.url = "git+ssh://git@github.com/charludo/email";
+    private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:

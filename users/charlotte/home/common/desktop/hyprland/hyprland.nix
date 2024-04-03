@@ -144,6 +144,7 @@
             rofi = "${pkgs.rofi-wayland.override {plugins = [pkgs.rofi-emoji];}}/bin/rofi";
             rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
+            projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             clipboard = "${rofi} -modi \"emoji,clipboard:rofi-cliphist\" -show emoji -show-icons";
             rbw = "rbw-unlock && ${rofi-rbw} --target password --prompt \"   Bitwarden   \"";
             screenshots = "${rofi} -modi \"screenshot:rofi-screenshot,screencapture:rofi-screencapture\" -show screenshot";
@@ -163,6 +164,7 @@
 
             # Rofi
             "${mainMod},d,exec,${menu}"
+            "${shiftMod},d,exec,${projects}"
             "${mainMod},p,exec,${clipboard}"
             "${shiftMod},p,exec,${rbw}"
             ",PRINT,exec,${screenshots}"

@@ -4,13 +4,13 @@
     filetypes = [ "python" ];
     settings.plugins = {
       black.enabled = true;
-      black.line_length = 150;
+      black.line_length = 100;
 
       isort.enabled = true;
       pylint.enabled = true;
 
       pycodestyle.enabled = true;
-      pycodestyle.maxLineLength = 150;
+      pycodestyle.maxLineLength = 100;
       pycodestyle.ignore = [ "E501" "W503" "R0903" ];
     };
   };

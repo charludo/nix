@@ -2,10 +2,8 @@
 {
   programs.nixvim.plugins.lsp.servers.rust-analyzer = {
     enable = true;
-    rootDir = ''require("lspconfig/util").root_pattern("Cargo.toml")'';
-    filetypes = [ "rust" ];
-    installCargo = true;
-    installRustc = true;
+    installCargo = false;
+    installRustc = false;
     settings.cargo.features = "all";
     settings.diagnostics.styleLints.enable = true;
   };

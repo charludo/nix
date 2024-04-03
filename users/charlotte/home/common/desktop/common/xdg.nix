@@ -23,7 +23,6 @@
     videos = "${config.home.homeDirectory}/Videos";
     extraConfig = {
       XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projekte";
-      XDG_WEBDESIGN_DIR = "${config.home.homeDirectory}/Webdesign";
     };
   };
 }

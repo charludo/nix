@@ -9,6 +9,7 @@
 
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
+      ../common/optional/docker.nix
       ../common/optional/greetd.nix
       ../common/optional/nas.nix
       ../common/optional/nvim.nix

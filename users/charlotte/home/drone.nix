@@ -74,4 +74,7 @@ in
     } // customWaybarModules;
   };
 
+  # Projects to manage on this machine
+  projects = inputs.private-settings.projects;
+
 }

@@ -4,4 +4,5 @@
   fonts = import ./fonts.nix;
   icons = import ./icons.nix;
   monitors = import ./monitors.nix;
+  projects = import ./projects.nix;
 }

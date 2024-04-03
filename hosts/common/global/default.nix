@@ -26,4 +26,7 @@
     killall
   ];
 
+  system.activationScripts.script.text = ''
+    ln -s /run/current-system/sw/bin/bash /bin/bash
+  '';
 }

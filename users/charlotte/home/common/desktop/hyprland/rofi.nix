@@ -318,12 +318,45 @@ let
       fi
     '';
   };
+  rofi-projects = pkgs.writeShellApplication {
+    name = "rofi-projects";
+    runtimeInputs = [ pkgs.hyprshot ];
+    text = /* bash */ ''
+      set +o nounset
+
+      all=(${builtins.concatStringsSep " " (map (entry: entry.name) config.projects)})
+
+      echo -e "\0no-custom\x1ftrue"
+      echo -e "\0markup-rows\x1ftrue"
+
+      if [ -z "$1" ]
+      then
+          for entry in "''${all[@]}"
+          do
+              echo -e "''${entry}"
+          done
+      else
+          for entry in "''${all[@]}"
+          do
+              if [ "$1" = "''${entry}" ]
+              then
+                  # shellcheck disable=SC1065
+                  coproc ( ${config.home.sessionVariables.TERMINAL} --working-directory "${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/''${entry}" -e nvim)
+                  exit 0
+              fi
+          done
+          echo "Invalid selection: $1" >&2
+          exit 1
+      fi
+    '';
+  };
 in
 {
   home.packages = [
     rofi-cliphist
     rofi-screenshot
     rofi-screencapture
+    rofi-projects
 
     pkgs.cliphist
     pkgs.rofi-rbw
@@ -341,7 +374,6 @@ in
     terminal = "${config.home.sessionVariables.TERMINAL}";
     theme = rofi-theme;
     extraConfig = {
-      modi = "drun,ssh,emoji,filebrowser,clipboard,power-menu,screenshot";
       icon-theme = "${config.iconsProfile.name}       ";
       show-icons = true;
       drun-display-format = "{icon} {name}";
@@ -357,6 +389,7 @@ in
       display-power-menu = " 󰐥  Power   ";
       display-screenshot = " 󰹑   Screenshot   ";
       display-screencapture = "    Screencapture   ";
+      display-projects = "    Projects   ";
       sidebar-mode = true;
       parse-known-hosts = false;
       kb-mode-next = "Alt+Right,Control+Tab";

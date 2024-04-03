@@ -62,6 +62,8 @@ in
             local icon = icons[item.kind] or ""
             icon = " " .. icon .. " "
             item.kind = string.format("%s %s", icon, item.kind or "")
+            item.abbr = string.sub(item.abbr, 1, 20)
+            item.menu = string.sub(item.menu or "", 1, 50)
 
             return item
           end
@@ -121,6 +123,7 @@ in
         { name = "luasnip"; priority = 4; }
         { name = "emoji"; priority = 5; }
         { name = "latex_symbols"; priority = 5; }
+        { name = "rust_analyzer"; priority = 6; }
         { name = "buffer"; priority = 3; }
         { name = "nvim_lua"; priority = 4; }
         { name = "path"; priority = 5; }

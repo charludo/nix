@@ -496,19 +496,19 @@
         "type": "github"
       }
     },
-    "private-email": {
+    "private-settings": {
       "locked": {
-        "lastModified": 1711634467,
-        "narHash": "sha256-+rP4HqxDKWz6bx8trMNzWdyrDp/8kE14H9z/6sBVpD8=",
+        "lastModified": 1712245467,
+        "narHash": "sha256-c8IoMRUEdIXBKz08S/rZjf5VItLWvzjLCbpqPpFmxpM=",
         "ref": "refs/heads/main",
-        "rev": "38e7008fa23c6ce4c0b9e208e8b5fa9f1f504175",
-        "revCount": 8,
+        "rev": "46869c97e9e0db216199733beb226783160bb141",
+        "revCount": 11,
         "type": "git",
-        "url": "ssh://git@github.com/charludo/email"
+        "url": "ssh://git@github.com/charludo/nix-private"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/charludo/email"
+        "url": "ssh://git@github.com/charludo/nix-private"
       }
     },
     "root": {
@@ -520,7 +520,7 @@
         "nix-colors": "nix-colors",
         "nixpkgs": "nixpkgs_4",
         "nixvim": "nixvim",
-        "private-email": "private-email",
+        "private-settings": "private-settings",
         "sops-nix": "sops-nix"
       }
     },

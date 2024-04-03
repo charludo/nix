@@ -31,7 +31,7 @@
     };
   };
 
-  accounts.email.accounts = inputs.private-email.accounts;
+  accounts.email.accounts = inputs.private-settings.accounts;
 
   home.file.".thunderbird/${config.home.username}/xulstore.json" = {
     force = true;
