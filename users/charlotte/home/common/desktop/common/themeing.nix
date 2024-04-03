@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   fontProfiles = {
     enable = true;
@@ -26,4 +26,17 @@
   home.packages = [
     pkgs.noto-fonts-color-emoji
   ];
+
+  home.sessionVariables = {
+    XCURSOR_THEME = config.cursorProfile.name;
+    XCURSOR_SIZE = config.cursorProfile.size;
+  };
+
+  home.pointerCursor = {
+    gtk.enable = true;
+    x11.enable = true;
+    name = config.cursorProfile.name;
+    package = config.cursorProfile.package;
+    size = config.cursorProfile.size;
+  };
 }

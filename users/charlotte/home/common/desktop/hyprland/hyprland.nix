@@ -84,10 +84,12 @@
           new_window_takes_over_fullscreen = 2;
         };
 
-        # windowrulev2 = [ "nomaximizerequest, class:.*" ];
         layerrule = [
           "blur,waybar"
           "ignorezero,waybar"
+
+          "blur,rofi"
+          "ignorezero,rofi"
         ];
 
         binds = {

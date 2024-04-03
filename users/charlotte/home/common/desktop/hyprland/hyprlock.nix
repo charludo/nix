@@ -1,4 +1,4 @@
-{ config, inputs, lib, ... }:
+{ config, inputs, ... }:
 let
   primaryMonitor = (builtins.head (builtins.filter (monitor: monitor.primary) config.monitors)).name;
 in

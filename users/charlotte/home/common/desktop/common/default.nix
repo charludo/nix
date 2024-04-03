@@ -23,5 +23,7 @@
 
     mattermost-desktop
     telegram-desktop
+
+    orca-slicer
   ];
 }
