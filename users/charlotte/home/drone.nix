@@ -14,10 +14,13 @@ in
   ];
 
   # Use this method for built-in schemes:
-  # colorscheme = lib.mkDefault colorSchemes.tokyo-city-terminal-dark;
+  colorscheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 
   # Use this method for custom imported schemes:
-  colorscheme = lib.mkDefault customSchemes.gruvchad;
+  # colorscheme = lib.mkDefault customSchemes.gruvchad;
+
+  # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
+  # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
   background = builtins.toString ./common/desktop/backgrounds/wolf.png;
   #  -------
