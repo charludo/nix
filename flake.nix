@@ -18,6 +18,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hyprlock.url = "github:hyprwm/hyprlock";
     hyprpaper.url = "github:hyprwm/hyprpaper";
 
@@ -29,7 +34,7 @@
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-generators, ... } @ inputs:
     let
       inherit (self) outputs;
       lib = nixpkgs.lib // home-manager.lib;
@@ -48,6 +53,12 @@
         # Laptop
         drone = lib.nixosSystem {
           modules = [ ./hosts/drone ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Adblocking
+        blocky = lib.nixosSystem {
+          modules = [ ./hosts/blocky ];
           specialArgs = { inherit inputs outputs; };
         };
       };

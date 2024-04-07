@@ -14,6 +14,7 @@ pkgs.writeShellApplication {
     echo "- regenerated public key"
 
     private_age=$(ssh-to-age -private-key -i "$1")
+    mkdir -p "$HOME/.config/sops/age"
     echo "$private_age" >> "$HOME/.config/sops/age/keys.txt"
     echo "- converted private key to age and added to key list"
 

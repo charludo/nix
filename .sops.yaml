@@ -1,8 +1,10 @@
 keys:
   - &users:
     - &charlotte age1tzayy2c75wn59vwp59e85a6p0derah9dvd94g2dan9uems8wufesc83573
+    - &paki age1lzpcrkt9sn5clwet05j9re7z24gaghpmz0eszn44cefmc3yt953sdzzx5y
   - &hosts:
     - &drone age1vzpn0t97ga4vlfnyvfh4vhhzwkd5kyz6qanf45qff4gf8uqjp37sk4pukr
+    - &blocky age1hemy4mz50w4z2rwllhjd5j2ld5ncwslplv09lf4ne6e33m4tw37sy9z02f
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:

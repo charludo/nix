@@ -22,6 +22,18 @@ in
     packages = with pkgs; [ home-manager git ];
   };
 
+  security.sudo.extraRules = [
+    {
+      users = [ "charlotte" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "SETENV" ];
+        }
+      ];
+    }
+  ];
+
   home-manager.users.charlotte = import ./home/${config.networking.hostName}.nix;
   environment.shells = with pkgs; [ zsh bash ];
 
