@@ -21,6 +21,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ cfg.enable cfg.name cfg.package ];
+    home.packages = [ cfg.package ];
   };
 }

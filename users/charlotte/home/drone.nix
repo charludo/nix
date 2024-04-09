@@ -22,7 +22,7 @@ in
   # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
   # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
-  background = builtins.toString ./common/desktop/backgrounds/wolf.png;
+  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/wolf.png;
   #  -------
   # | eDP-1 |
   #  -------
@@ -32,7 +32,6 @@ in
     height = 1080;
     x = 0;
     y = 0;
-    workspace = "1";
     primary = true;
   }];
 
@@ -61,7 +60,6 @@ in
         "battery"
         "custom/mail"
         "custom/reddit"
-        "custom/updates"
         "tray"
       ];
       "hyprland/workspaces" = {
@@ -79,5 +77,4 @@ in
 
   # Projects to manage on this machine
   projects = inputs.private-settings.projects;
-
 }

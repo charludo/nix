@@ -1,1 +1,3 @@
-{ }
+{
+  nas = import ./nas.nix;
+}

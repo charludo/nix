@@ -1,10 +1,10 @@
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 {
-  sops.secrets.nas = { };
+  sops.secrets.nas = lib.mkIf (config.enableNas or config.enableNasBackup) { };
 
-  environment.systemPackages = [ pkgs.cifs-utils ];
+  environment.systemPackages = lib.mkIf (config.enableNas or config.enableNasBackup) [ pkgs.cifs-utils ];
 
-  fileSystems."/media/NAS" = {
+  fileSystems."/media/NAS" = lib.mkIf config.enableNas {
     device = "//192.168.30.11/NAS";
     fsType = "cifs";
     options =
@@ -14,7 +14,7 @@
       [ "${automount_opts},credentials=${config.sops.secrets.nas.path}" ];
   };
 
-  fileSystems."/media/Backup" = {
+  fileSystems."/media/Backup" = lib.mkIf config.enableNasBackup {
     device = "//192.168.30.11/Backup";
     fsType = "cifs";
     options =

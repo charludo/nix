@@ -50,6 +50,12 @@
 
       # Available through 'nixos-rebuild --flake .#hostname'
       nixosConfigurations = {
+        # Desktop
+        hub = lib.nixosSystem {
+          modules = [ ./hosts/hub ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Laptop
         drone = lib.nixosSystem {
           modules = [ ./hosts/drone ];

@@ -2,6 +2,7 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     ./locale.nix
+    ./nas.nix
     ./nix.nix
     ./openssh.nix
     ./sops.nix
@@ -27,6 +28,6 @@
   ];
 
   system.activationScripts.script.text = ''
-    ln -s /run/current-system/sw/bin/bash /bin/bash
+    ln -sf /run/current-system/sw/bin/bash /bin/bash
   '';
 }

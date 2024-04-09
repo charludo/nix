@@ -13,7 +13,7 @@ in
       "git"
     ];
 
-    openssh.authorizedKeys.keys = [ (builtins.readFile ../charlotte/ssh.pub) ];
+    openssh.authorizedKeys.keys = [ (builtins.readFile ../charlotte/ssh.pub) (builtins.readFile ../marie/ssh.pub) ];
     packages = with pkgs; [ git dig ];
   };
 

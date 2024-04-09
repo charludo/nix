@@ -1,6 +1,7 @@
 {
   programs.ssh = {
     enable = true;
+    userKnownHostsFile = "/dev/null";
     matchBlocks = {
       jellyfin = { hostname = "192.168.20.36"; };
       torrenter = { hostname = "192.168.20.20"; };
@@ -9,7 +10,10 @@
       proxmox = { hostname = "192.168.30.15"; user = "root"; };
       duesseldorf = { hostname = "78.31.66.125"; user = "charlotte"; };
       "* !duesseldorf !proxmox" = { user = "paki"; };
-      "jellyfin torrenter paperless blocky proxmos".extraOptions."StrictHostKeyChecking" = "no";
+      "jellyfin torrenter paperless blocky proxmos".extraOptions = {
+        "StrictHostKeyChecking" = "no";
+        "LogLevel" = "quiet";
+      };
     };
   };
 }

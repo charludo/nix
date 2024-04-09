@@ -2,7 +2,6 @@
 
 let
   inherit (lib) mkOption types;
-  cfg = config.monitors;
 in
 {
   options.monitors = mkOption {
@@ -40,7 +39,11 @@ in
           type = types.bool;
           default = true;
         };
-        workspace = mkOption {
+        workspaces = mkOption {
+          type = types.nullOr (types.listOf types.str);
+          default = null;
+        };
+        wallpaper = mkOption {
           type = types.nullOr types.str;
           default = null;
         };

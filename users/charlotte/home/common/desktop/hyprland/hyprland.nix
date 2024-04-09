@@ -118,11 +118,9 @@
             "${m.name},${if m.enabled then "${resolution},${position},1" else "disable"}"
           )
           (config.monitors) ++ [ ",preferred,auto,auto" ];
-        workspace = map
-          (m:
-            "${m.name},${m.workspace}"
-          )
-          (lib.filter (m: m.enabled && m.workspace != null) config.monitors);
+        workspace = lib.lists.flatten (map
+          (m: map (w: "${w},monitor:${m.name}") m.workspaces)
+          (lib.filter (m: m.enabled && m.workspaces != null) config.monitors));
 
         exec = [
           "hyprctl setcursor ${config.cursorProfile.name} ${toString config.cursorProfile.size}"

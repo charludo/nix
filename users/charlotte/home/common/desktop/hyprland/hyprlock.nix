@@ -16,7 +16,7 @@ in
     backgrounds = [
       {
         monitor = "";
-        path = "${config.background}";
+        path = "${config.defaultWallpaper}";
 
         blur_passes = 1;
         blur_size = 7;

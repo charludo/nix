@@ -10,7 +10,6 @@
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
       ../common/optional/greetd.nix
-      ../common/optional/nas.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/surfshark.nix
@@ -20,6 +19,9 @@
 
       ../../users/charlotte/user.nix
     ];
+
+  enableNas = true;
+  enableNasBackup = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -35,6 +37,7 @@
   environment.etc."NetworkManager/system-connections/hoehle.nmconnection" = {
     source = "${config.sops.secrets.wireguard-drone.path}";
   };
+
 
   hardware.opengl.enable = true;
 
