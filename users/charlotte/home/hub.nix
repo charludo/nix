@@ -37,7 +37,6 @@ in
       x = 0;
       y = 0;
       workspaces = [ "1" "3" "5" "7" "9" ];
-      primary = true;
     }
     {
       name = "DP-3";
@@ -47,13 +46,14 @@ in
       y = 1440;
       workspaces = [ "2" "4" "6" "8" "10" ];
       # wallpaper = builtins.toString ./common/desktop/backgrounds/river.png;
+      primary = true;
     }
   ];
 
   # Configure waybar for this devices monitor setup
   programs.waybar.settings = {
     top = {
-      margin = "-15px 0px -5px 0px";
+      margin = "15px 0px -5px 0px";
       layer = "top";
       position = "top";
       output = [ "DP-2" ];
@@ -81,17 +81,17 @@ in
           active = "";
         };
         persistent-workspaces = {
-          "1" = [ "DP-2" ];
-          "3" = [ "DP-2" ];
-          "5" = [ "DP-2" ];
-          "7" = [ "DP-2" ];
-          "9" = [ "DP-2" ];
+          "1" = [ ];
+          "3" = [ ];
+          "5" = [ ];
+          "7" = [ ];
+          "9" = [ ];
         };
       };
     } // customWaybarModules;
 
     bottom = {
-      margin = "-5px 0px -15px 0px";
+      margin = "-5px 0px 15px 0px";
       layer = "top";
       position = "bottom";
       output = [ "DP-3" ];
@@ -99,7 +99,6 @@ in
         "bluetooth"
         "network#lan"
         "network#wifi"
-        "custom/wireguard"
       ];
       modules-center = [ "hyprland/workspaces" ];
       modules-right = [
@@ -119,11 +118,11 @@ in
           active = "";
         };
         persistent-workspaces = {
-          "2" = [ "DP-3" ];
-          "4" = [ "DP-3" ];
-          "6" = [ "DP-3" ];
-          "8" = [ "DP-3" ];
-          "10" = [ "DP-3" ];
+          "2" = [ ];
+          "4" = [ ];
+          "6" = [ ];
+          "8" = [ ];
+          "10" = [ ];
         };
       };
     } // customWaybarModules;
@@ -131,4 +130,17 @@ in
 
   # Projects to manage on this machine
   projects = inputs.private-settings.projects;
+
+  # XDG dirs are (partly) symlinks to an external drive
+  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
+  home.file = {
+    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
+    "${config.xdg.userDirs.documents}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
+    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
+    "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
+    "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
+  };
+
+  # Otherwise way to big on hub
+  programs.alacritty.settings.font.size = lib.mkForce 12;
 }

@@ -1,6 +1,7 @@
 { inputs, outputs, pkgs, ... }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
+    ./auto-update.nix
     ./locale.nix
     ./nas.nix
     ./nix.nix
@@ -15,6 +16,8 @@
       allowUnfree = true;
     };
   };
+
+  users.mutableUsers = false;
 
   console.keyMap = "us-acentos";
   networking.domain = "ad.paki.place";

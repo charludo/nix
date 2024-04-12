@@ -8,9 +8,6 @@
     ./ui
   ];
 
-  home.file.".config/nvchad/lua/custom" = { source = ./lua; recursive = true; };
-  home.shellAliases.nvchad = "NVIM_APPNAME=nvchad nvim";
-
   programs.nixvim = {
     enable = true;
     defaultEditor = true;

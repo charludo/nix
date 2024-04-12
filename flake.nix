@@ -67,10 +67,22 @@
           modules = [ ./hosts/blocky ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Installer (used with nixos-generators install-iso)
+        installer = lib.nixosSystem {
+          modules = [ ./hosts/installer ];
+          specialArgs = { inherit inputs outputs; };
+        };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
       homeConfigurations = {
+        "charlotte@hub" = lib.homeManagerConfiguration {
+          modules = [ ./users/charlotte/home/hub.nix ];
+          pkgs = nixpkgs.legacyPackages.${system};
+          extraSpecialArgs = { inherit inputs outputs; };
+        };
+
         "charlotte@drone" = lib.homeManagerConfiguration {
           modules = [ ./users/charlotte/home/drone.nix ];
           pkgs = nixpkgs.legacyPackages.${system};

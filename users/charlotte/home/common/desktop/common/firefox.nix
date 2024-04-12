@@ -48,6 +48,18 @@
             icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = [ "@np" ];
           };
+          "Nix Options" = {
+            urls = [{
+              template = "https://search.nixos.org/options";
+              params = [
+                { name = "type"; value = "options"; }
+                { name = "channel"; value = "unstable"; }
+                { name = "query"; value = "{searchTerms}"; }
+              ];
+            }];
+            icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = [ "@no" ];
+          };
           "HM Options" = {
             urls = [{
               template = "https://home-manager-options.extranix.com/";
@@ -57,7 +69,7 @@
               ];
             }];
             icon = "${pkgs.fetchurl {
-                url = "https://mipmip.github.io/home-manager-option-search/images/favicon.png";
+                url = "https://home-manager-options.extranix.com/images/favicon.png";
                 sha256 = "sha256-oFp+eoTLXd0GAK/VrYRUeoXntJDfTu6VnzisEt+bW74=";
               }}";
             definedAliases = [ "@nh" ];

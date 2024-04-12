@@ -9,6 +9,7 @@
     ./jellyfin.nix
     ./mpv.nix
     ./pavucontrol.nix
+    ./pdfpc.nix
     ./playerctl.nix
     ./qt.nix
     ./sioyek.nix

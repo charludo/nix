@@ -4,9 +4,11 @@
   imports =
     [
       ./hardware-configuration.nix
+      ../common/optional/vmify.nix
 
       ../common/global
 
+      ../common/optional/bluetooth.nix
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
       ../common/optional/greetd.nix
@@ -30,12 +32,13 @@
     label = "Media";
   };
 
+  boot.initrd.luks.devices."luks-6caf2086-fb9b-4668-b5d8-2f4df815c58b".device = "/dev/disk/by-uuid/6caf2086-fb9b-4668-b5d8-2f4df815c58b";
+
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
     enable = true;
     efiSupport = true;
     devices = [ "nodev" ];
-    configurationLimit = 5;
     useOSProber = true;
   };
 

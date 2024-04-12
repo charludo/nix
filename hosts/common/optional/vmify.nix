@@ -12,4 +12,20 @@
   formatConfigs.qcow-efi = { config, ... }: {
     services.openssh.enable = true;
   };
+
+  formatConfigs.install-iso = { config, lib, pkgs, ... }: {
+    boot.loader.grub.enable = lib.mkForce false;
+    boot.loader.systemd-boot.enable = lib.mkForce false;
+    networking.networkmanager.enable = lib.mkForce false;
+    services.openssh.settings = {
+      PasswordAuthentication = lib.mkForce true;
+      PermitRootLogin = lib.mkForce "yes";
+    };
+    environment.systemPackages = [ pkgs.nixos-install-tools ];
+  };
+
+  formatConfigs.iso = { config, lib, ... }: {
+    boot.loader.grub.enable = lib.mkForce false;
+    boot.loader.systemd-boot.enable = lib.mkForce false;
+  };
 }

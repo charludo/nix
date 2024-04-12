@@ -7,6 +7,9 @@ in
   users.users.charlotte = {
     isNormalUser = true;
     shell = pkgs.zsh;
+
+    uid = 1000;
+    group = "charlotte";
     extraGroups = [
       "wheel"
       "video"
@@ -21,6 +24,8 @@ in
     hashedPasswordFile = config.sops.secrets.charlotte-password.path;
     packages = with pkgs; [ home-manager git ];
   };
+
+  users.groups.charlotte.gid = 1000;
 
   security.sudo.extraRules = [
     {

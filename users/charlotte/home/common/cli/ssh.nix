@@ -1,7 +1,7 @@
 {
   programs.ssh = {
     enable = true;
-    userKnownHostsFile = "/dev/null";
+    addKeysToAgent = "yes";
     matchBlocks = {
       jellyfin = { hostname = "192.168.20.36"; };
       torrenter = { hostname = "192.168.20.20"; };
@@ -13,6 +13,10 @@
       "jellyfin torrenter paperless blocky proxmos".extraOptions = {
         "StrictHostKeyChecking" = "no";
         "LogLevel" = "quiet";
+      };
+      "*" = {
+        identityFile = "~/.ssh/id_ed25519";
+        identitiesOnly = true;
       };
     };
   };

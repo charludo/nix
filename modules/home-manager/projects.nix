@@ -16,6 +16,10 @@ in
           example = "git@github.com:example/project";
           default = "";
         };
+        enableDirenv = mkOption {
+          type = types.bool;
+          default = true;
+        };
       };
     });
     default = [ ];

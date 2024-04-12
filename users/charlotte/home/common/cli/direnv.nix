@@ -6,7 +6,7 @@ let
         text = /* bash */ ''
           ''${DIRENV_DISABLE:+exit}
           export DIRENV_DISABLE="1"
-          if [ -f flake.nix ]; then
+          if [ -f flake.nix ] && [ ${(if entry.enableDirenv then "true" else "false")} = true ]; then
             use flake .
           fi
           if  [ ! -d .git ] && [ -n "${entry.repo}" ]; then
