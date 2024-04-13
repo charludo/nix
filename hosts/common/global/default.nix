@@ -28,6 +28,7 @@
     unzip
     ripgrep
     killall
+    wget
   ];
 
   system.activationScripts.script.text = ''

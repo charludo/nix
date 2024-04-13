@@ -1,10 +1,13 @@
-{ config, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 let
+  # These CONSTANTLY change and have different hashes depending on what server 
+  # you connect to, so I'm putting a cached version on github. More work to update,
+  # but whatever...
   configFiles = pkgs.stdenv.mkDerivation {
     name = "surfshark-config";
     src = pkgs.fetchurl {
-      url = "https://my.surfshark.com/vpn/api/v1/server/configurations";
-      sha256 = "sha256-mRVsB0XFLr40ssJlEleewH6R9HwFCsryBHbmsaYpegE=";
+      url = "https://github.com/charludo/surfshark-configs/raw/main/Surfshark_Config.zip";
+      sha256 = "sha256-dIjNXy2UQ0nAVrp3guy2xDLu1gUvqYBXK9EnG7C3y68=";
     };
     phases = [ "installPhase" ];
     buildInputs = [ pkgs.unzip pkgs.rename ];
