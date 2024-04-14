@@ -3,8 +3,8 @@
   fontProfiles = {
     enable = true;
     monospace = {
-      family = "FiraCode Nerd Font";
-      package = pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; };
+      family = "GeistMono Nerd Font";
+      package = pkgs.nerdfonts.override { fonts = [ "FiraCode" "Lilex" "GeistMono" ]; };
     };
     regular = {
       family = "Cantarell";

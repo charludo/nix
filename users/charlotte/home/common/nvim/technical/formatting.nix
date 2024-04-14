@@ -1,0 +1,19 @@
+{
+  programs.nixvim.plugins.conform-nvim = {
+    enable = true;
+    formatOnSave = /* lua */ ''
+      {
+        lsp_fallback = true,
+        timout_md = 500,
+      }
+    '';
+    formattersByFt = {
+      "_" = [ "trim_whitespace" ];
+    };
+  };
+
+  programs.nixvim.keymaps = [
+    { mode = [ "n" ]; key = "<leader>af"; action = ''<cmd>lua vim.o.eventignore = vim.o.eventignore == "" and "BufWritePre" or ""<cr>''; options = { desc = "toggle auto-formatting"; }; }
+    { mode = [ "n" ]; key = "<leader>fm"; action = ''<cmd>lua require("conform").format()<cr>''; options = { desc = "format buffer"; }; }
+  ];
+}

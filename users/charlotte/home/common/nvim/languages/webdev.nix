@@ -1,16 +1,47 @@
+{ pkgs, ... }:
 {
   programs.nixvim.plugins.lsp.servers = {
-    ccls.enable = true;
     html.enable = true;
     htmx.enable = true;
     eslint.enable = true;
     phpactor.enable = true;
   };
-  programs.nixvim.plugins.none-ls.sources = {
-    formatting.prettierd.enable = true;
-    formatting.stylelint.enable = true;
-    formatting.djlint.enable = true;
-    formatting.djlint.withArgs = ''{ filetypes = { "jinja", "jinja.html", "twig", "htmldjango", "django", "html" } }'';
-    diagnostics.djlint.enable = true;
+
+  programs.nixvim.plugins.lint.lintersByFt = {
+    javascript = [ "eslint_d" ];
+    javascriptreact = [ "eslint_d" ];
+    "javascript.jsx" = [ "eslint_d" ];
+    typescript = [ "eslint_d" ];
+    typescriptreact = [ "eslint_d" ];
+    "typescript.txs" = [ "eslint_d" ];
+    vue = [ "eslint_d" ];
+    svelte = [ "eslint_d" ];
+    astro = [ "eslint_d" ];
   };
+  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+    css = [ "prettierd" ];
+    sass = [ "prettierd" ];
+    scss = [ "prettierd" ];
+    less = [ "prettierd" ];
+
+    jinja = [ "djlint" ];
+    "jinja.html" = [ "djlint" ];
+    twig = [ "djlint" ];
+    htmldjango = [ "djlint" ];
+    django = [ "djlint" ];
+    html = [ "djlint" ];
+
+    javascript = [ "prettierd" ];
+    javascriptreact = [ "prettierd" ];
+    "javascript.jsx" = [ "prettierd" ];
+    typescript = [ "prettierd" ];
+    typescriptreact = [ "prettierd" ];
+    "typescript.txs" = [ "prettierd" ];
+    vue = [ "prettierd" ];
+    svelte = [ "prettierd" ];
+    astro = [ "prettierd" ];
+
+    php = [ "php-cs-fixer" ];
+  };
+  programs.nixvim.extraPackages = with pkgs; [ djlint prettierd eslint_d php83Packages.php-cs-fixer ];
 }

@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   imports = [
     ./c.nix
@@ -19,18 +20,11 @@
     jsonls.enable = true;
     yamlls.enable = true;
   };
-  programs.nixvim.plugins.none-ls.sources = {
-    # config languages 
-    formatting.nixpkgs_fmt.enable = true;
-    formatting.stylua.enable = true;
 
-    # bash
-    diagnostics.zsh.enable = true;
-    formatting.shfmt.enable = true;
-
-    # spelling
-    diagnostics.codespell.enable = true;
-    diagnostics.stylelint.enable = true;
-    completion.spell.enable = true;
+  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+    nix = [ "nixpkgs_fmt" ];
+    lua = [ "stylua" ];
+    sh = [ "shfmt" ];
   };
+  programs.nixvim.extraPackages = with pkgs; [ nixpkgs-fmt stylua shfmt ];
 }

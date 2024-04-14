@@ -1,22 +1,20 @@
+{ pkgs, ... }:
 {
   programs.nixvim.plugins.lsp.servers.pylsp = {
     enable = true;
     filetypes = [ "python" ];
     settings.plugins = {
       black.enabled = true;
-      black.line_length = 100;
+      black.line_length = 90;
 
       isort.enabled = true;
       pylint.enabled = true;
 
       pycodestyle.enabled = true;
-      pycodestyle.maxLineLength = 100;
+      pycodestyle.maxLineLength = 90;
       pycodestyle.ignore = [ "E501" "W503" "R0903" ];
     };
   };
-  programs.nixvim.plugins.none-ls.sources = {
-    diagnostics.pylint.enable = true;
-    diagnostics.mypy.enable = true;
-    formatting.black.enable = true;
-  };
+  programs.nixvim.plugins.lint.lintersByFt.python = [ "pylint" ];
+  programs.nixvim.extraPackages = [ pkgs.pylint ];
 }

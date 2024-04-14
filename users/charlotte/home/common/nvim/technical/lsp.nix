@@ -14,10 +14,6 @@ in
     };
   };
 
-  programs.nixvim.keymaps = [
-    { mode = [ "n" ]; key = "<leader>af"; action = ''<cmd>lua vim.o.eventignore = vim.o.eventignore == "" and "BufWritePre" or ""<cr>''; options = { desc = "toggle auto-formatting"; }; }
-  ];
-
   programs.nixvim.highlight = {
     LspReferenceText = { fg = colors.darker_black; bg = colors.white; };
     LspReferenceRead = { fg = colors.darker_black; bg = colors.white; };

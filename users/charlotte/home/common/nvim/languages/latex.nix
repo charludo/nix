@@ -6,9 +6,6 @@ let
   });
 in
 {
-  home.packages = [ tex ];
-  programs.nixvim.plugins.lsp.servers.ltex.enable = true;
-  programs.nixvim.plugins.none-ls.sources = { };
   programs.nixvim.plugins.vimtex = {
     enable = true;
     texlivePackage = tex;
@@ -17,4 +14,14 @@ in
     };
   };
   programs.nixvim.opts.conceallevel = 2;
+
+  programs.nixvim.plugins.lsp.servers.ltex.enable = true;
+  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+    bib = [ "latexindent" ];
+    plaintex = [ "latexindent" ];
+    tex = [ "latexindent" ];
+    quarto = [ "latexindent" ];
+    context = [ "latexindent" ];
+  };
+  programs.nixvim.extraPackages = [ tex ];
 }

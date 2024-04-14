@@ -142,5 +142,5 @@ in
   };
 
   # Otherwise way to big on hub
-  programs.alacritty.settings.font.size = lib.mkForce 12;
+  programs.alacritty.settings.font.size = lib.mkForce 13;
 }
