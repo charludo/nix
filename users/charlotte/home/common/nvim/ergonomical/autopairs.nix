@@ -1,7 +1,7 @@
 {
   programs.nixvim.plugins.nvim-autopairs = {
     enable = true;
-    disabledFiletypes = [ "TelescopePrompt" "vim" ];
+    settings.disabled_filetype = [ "TelescopePrompt" "vim" ];
   };
 
   programs.nixvim.extraConfigLua = /* lua */ ''

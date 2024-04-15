@@ -172,10 +172,10 @@ in
   '';
 
   programs.nixvim.keymaps = [
-    { mode = [ "n" ]; key = "<leader>h"; action = "<cmd>lua chadterm_new { pos = 'sp', size = 0.3 }<cr>"; options = { desc = "Terminal New horizontal term"; }; }
-    { mode = [ "n" ]; key = "<leader>v"; action = "<cmd>lua chadterm_new { pos = 'vsp', size = 0.3 }<cr>"; options = { desc = "Terminal New vertical window"; }; }
-    { mode = [ "n" "t" ]; key = "<A-v>"; action = "<cmd>lua chadterm_toggle { pos = 'vsp', id = 'vtoggleTerm', size = 0.3 }<cr>"; options = { desc = "Terminal Toggleable vertical term"; }; }
-    { mode = [ "n" "t" ]; key = "<A-h>"; action = "<cmd>lua chadterm_toggle { pos = 'sp', id = 'htoggleTerm', size = 0.3 }<cr>"; options = { desc = "Terminal New horizontal term"; }; }
+    { mode = [ "n" ]; key = "<leader>h"; action = "<cmd>lua chadterm_new { pos = 'sp', size = 0.4 }<cr>"; options = { desc = "Terminal New horizontal term"; }; }
+    { mode = [ "n" ]; key = "<leader>v"; action = "<cmd>lua chadterm_new { pos = 'vsp', size = 0.4 }<cr>"; options = { desc = "Terminal New vertical window"; }; }
+    { mode = [ "n" "t" ]; key = "<A-v>"; action = "<cmd>lua chadterm_toggle { pos = 'vsp', id = 'vtoggleTerm', size = 0.4 }<cr>"; options = { desc = "Terminal Toggleable vertical term"; }; }
+    { mode = [ "n" "t" ]; key = "<A-h>"; action = "<cmd>lua chadterm_toggle { pos = 'sp', id = 'htoggleTerm', size = 0.4 }<cr>"; options = { desc = "Terminal New horizontal term"; }; }
     { mode = [ "n" "t" ]; key = "<A-i>"; action = "<cmd>lua chadterm_toggle { pos = 'float', id = 'floatTerm' }<cr>"; options = { desc = "Terminal Toggle Floating term"; }; }
   ];
 

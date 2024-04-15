@@ -22,24 +22,24 @@ in
 
     theme = lib.mkForce {
       normal.a = { fg = colors.base01; bg = colors.base0B; };
-      normal.b = { fg = colors.base05; bg = colors.base02; };
-      normal.c = { fg = colors.base04; bg = colors.base01; };
+      normal.b = { fg = colors.base05; bg = colors.grey; };
+      normal.c = { fg = colors.base04; bg = colors.line; };
 
       insert.a = { fg = colors.base01; bg = colors.base0A; };
-      insert.b = { fg = colors.base05; bg = colors.base02; };
-      insert.c = { fg = colors.base04; bg = colors.base01; };
+      insert.b = { fg = colors.base05; bg = colors.grey; };
+      insert.c = { fg = colors.base04; bg = colors.line; };
 
       visual.a = { fg = colors.base01; bg = colors.base09; };
-      visual.b = { fg = colors.base05; bg = colors.base02; };
-      visual.c = { fg = colors.base04; bg = colors.base01; };
+      visual.b = { fg = colors.base05; bg = colors.grey; };
+      visual.c = { fg = colors.base04; bg = colors.line; };
 
       terminal.a = { fg = colors.base01; bg = colors.base08; };
-      terminal.b = { fg = colors.base05; bg = colors.base02; };
-      terminal.c = { fg = colors.base04; bg = colors.base01; };
+      terminal.b = { fg = colors.base05; bg = colors.grey; };
+      terminal.c = { fg = colors.base04; bg = colors.line; };
 
       command.a = { fg = colors.base01; bg = colors.base0D; };
-      command.b = { fg = colors.base05; bg = colors.base02; };
-      command.c = { fg = colors.base04; bg = colors.base01; };
+      command.b = { fg = colors.base05; bg = colors.grey; };
+      command.c = { fg = colors.base04; bg = colors.line; };
 
       inactive.a = { fg = colors.base03; bg = colors.base01; };
       inactive.b = { fg = colors.base03; bg = colors.base01; };

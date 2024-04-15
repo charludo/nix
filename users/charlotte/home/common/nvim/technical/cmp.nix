@@ -62,8 +62,8 @@ in
             local icon = icons[item.kind] or ""
             icon = " " .. icon .. " "
             item.kind = string.format("%s %s", icon, item.kind or "")
-            item.abbr = string.sub(item.abbr, 1, 20)
-            item.menu = string.sub(item.menu or "", 1, 50)
+            item.abbr = string.sub(item.abbr, 1, 40)
+            item.menu = string.sub(item.menu or "", 1, 60)
 
             return item
           end

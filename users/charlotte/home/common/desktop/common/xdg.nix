@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
   xdg.desktopEntries.code = {
     name = "Code";
@@ -23,6 +23,18 @@
     videos = "${config.home.homeDirectory}/Videos";
     extraConfig = {
       XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projekte";
+    };
+  };
+  xdg = {
+    portal = {
+      enable = true;
+      config = {
+        common.default = [ "hyprland" "gtk" ];
+      };
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-hyprland
+        xdg-desktop-portal-gtk
+      ];
     };
   };
 }

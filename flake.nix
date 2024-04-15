@@ -68,6 +68,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Stirling PDF
+        pdf = lib.nixosSystem {
+          modules = [ ./hosts/pdf ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Installer (used with nixos-generators install-iso)
         installer = lib.nixosSystem {
           modules = [ ./hosts/installer ];

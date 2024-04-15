@@ -6,7 +6,7 @@ in
   programs.nixvim.plugins.telescope = {
     enable = true;
 
-    defaults = {
+    settings.defaults = {
       vimgrep_arguments = [
         "rg"
         "-L"
@@ -67,10 +67,12 @@ in
 
     extensions.fzf-native = {
       enable = true;
-      fuzzy = true;
-      overrideGenericSorter = true;
-      overrideFileSorter = true;
-      caseMode = "smart_case";
+      settings = {
+        fuzzy = true;
+        override_generic_sorter = true;
+        override_file_sorter = true;
+        case_mode = "smart_case";
+      };
     };
   };
 

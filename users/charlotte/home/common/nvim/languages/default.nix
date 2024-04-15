@@ -26,5 +26,6 @@
     lua = [ "stylua" ];
     sh = [ "shfmt" ];
   };
+  programs.nixvim.plugins.conform-nvim.formatters.shfmt.args = [ "-sr" "-kp" "-i" "4" "-filename" "$FILENAME" ];
   programs.nixvim.extraPackages = with pkgs; [ nixpkgs-fmt stylua shfmt ];
 }
