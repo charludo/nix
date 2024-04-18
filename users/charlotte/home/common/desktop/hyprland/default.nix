@@ -21,6 +21,8 @@
   home.sessionVariables = {
     MOZ_ENABLE_WAYLAND = 1;
     QT_QPA_PLATFORM = "wayland";
+    XDG_CURRENT_DESKTOP = "Hyprland";
+    XDG_SESSION_DESKTOP = "Hyprland";
   };
 
   systemd.user.services.polkit-gnome-authentication-agent-1 = {

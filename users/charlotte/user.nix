@@ -42,6 +42,26 @@ in
   home-manager.users.charlotte = import ./home/${config.networking.hostName}.nix;
   environment.shells = with pkgs; [ zsh bash ];
 
+  # All this to enable screensharing.
+  xdg.portal = {
+    enable = true;
+    wlr = {
+      enable = true;
+      settings = {
+        screencast = {
+          chooser_type = "simple";
+          chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -ro";
+        };
+      };
+    };
+    config.common.default = [ "hyprland" "gtk" ];
+    extraPortals = with pkgs; [
+      xdg-desktop-portal-wlr
+      xdg-desktop-portal-hyprland
+      xdg-desktop-portal-gtk
+    ];
+  };
+
   # It sucks that this is here, but thunar won't properly work otherwise / when installed through home-manager
   environment.sessionVariables.GIO_EXTRA_MODULES = lib.mkDefault "$GIO_EXTRA_MODULES:${config.services.gvfs.package}/lib/gio/modules";
   services.gvfs.enable = true;
