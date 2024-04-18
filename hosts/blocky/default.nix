@@ -30,6 +30,7 @@
   };
   services.resolved.enable = false;
 
+  services.qemuGuest.enable = true;
 
   services.blocky = {
     enable = true;

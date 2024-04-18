@@ -4,7 +4,6 @@
   imports =
     [
       ./hardware-configuration.nix
-      ../common/optional/vmify.nix
 
       ../common/global
 
@@ -32,7 +31,22 @@
     label = "Media";
   };
 
-  boot.initrd.luks.devices."luks-6caf2086-fb9b-4668-b5d8-2f4df815c58b".device = "/dev/disk/by-uuid/6caf2086-fb9b-4668-b5d8-2f4df815c58b";
+  boot.initrd.luks.devices = {
+    "luks-f6e55a8b-1146-43dc-81c7-7bf5deb78fa6" = {
+      device = "/dev/disk/by-uuid/f6e55a8b-1146-43dc-81c7-7bf5deb78fa6";
+      keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
+      keyFileSize = 4096;
+      fallbackToPassword = true;
+      bypassWorkqueues = true;
+    };
+    "luks-6caf2086-fb9b-4668-b5d8-2f4df815c58b" = {
+      device = "/dev/disk/by-uuid/6caf2086-fb9b-4668-b5d8-2f4df815c58b";
+      keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
+      keyFileSize = 4096;
+      fallbackToPassword = true;
+      bypassWorkqueues = true;
+    };
+  };
 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.grub = {
@@ -42,7 +56,7 @@
     useOSProber = true;
   };
 
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  boot.initrd.kernelModules = [ "amdgpu" "usb_storage" ];
   boot.kernelParams = [ "video=DP-2:2560x1440@59.91" "video=DP-3:2560x1440@59.91" ];
 
   networking.networkmanager.enable = true;

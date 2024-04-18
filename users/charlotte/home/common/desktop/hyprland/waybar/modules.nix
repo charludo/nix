@@ -63,6 +63,7 @@ in
   };
 
   bluetooth = {
+    interval = 10;
     format = "󰂱";
     format-disabled = "󰂲";
     format-connected = "󰂯 {device_alias}";

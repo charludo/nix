@@ -30,6 +30,8 @@
     };
   };
 
+  services.qemuGuest.enable = true;
+
   environment.systemPackages = [ pkgs.stirling-pdf ];
   systemd.services.stirling-pdf = {
     description = "Stirling PDF Service";

@@ -7,10 +7,10 @@
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
-  services.qemuGuest.enable = true;
 
-  formatConfigs.qcow-efi = { config, ... }: {
-    services.openssh.enable = true;
+  formatConfigs.qcow-efi = { config, lib, ... }: {
+    services.qemuGuest.enable = lib.mkForce true;
+    services.openssh.enable = lib.mkForce true;
   };
 
   formatConfigs.install-iso = { config, lib, pkgs, ... }: {

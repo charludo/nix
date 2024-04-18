@@ -30,6 +30,8 @@
     };
   };
 
+  services.qemuGuest.enable = true;
+
   services.paperless = {
     enable = true;
     mediaDir = "";
