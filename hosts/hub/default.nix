@@ -61,7 +61,7 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "hub";
-  networking.nameservers = [ "192.168.30.5" "192.168.30.13" "1.1.1.1" ];
+  networking.nameservers = [ "192.168.30.13" ];
 
   hardware.opengl.enable = true;
   hardware.opengl.extraPackages = [ pkgs.amdvlk ];

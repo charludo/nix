@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   _module.args.defaultUser = "paki";
   imports =
@@ -87,9 +88,16 @@
           ads = [
             "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
           ];
+          allowed = [
+            (pkgs.writeText "custom-whitelist.txt"
+              ''
+                *.awin1.com
+              '')
+          ];
         };
-        clientGroupsBlock = {
+        clientGroupsBlock = rec {
           default = [ "ads" "tracking" "malicious" "crypto" ];
+          Desktop = default ++ [ "allowed" ];
         };
       };
       caching = {
