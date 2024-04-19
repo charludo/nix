@@ -8,6 +8,7 @@ in
     extraGroups = [
       "wheel"
       "networkmanager"
+      "nas"
     ] ++ ifTheyExist [
       "docker"
       "git"

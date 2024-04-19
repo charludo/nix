@@ -20,7 +20,7 @@
   users.mutableUsers = false;
 
   console.keyMap = "us-acentos";
-  networking.domain = "ad.paki.place";
+  networking.domain = inputs.private-settings.domains.ad;
 
   environment.systemPackages = with pkgs; [
     jq

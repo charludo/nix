@@ -1,11 +1,12 @@
 keys:
-  - &users:
+  - &users
     - &charlotte age1tzayy2c75wn59vwp59e85a6p0derah9dvd94g2dan9uems8wufesc83573
     - &paki age1lzpcrkt9sn5clwet05j9re7z24gaghpmz0eszn44cefmc3yt953sdzzx5y
-  - &hosts:
+  - &hosts
     - &hub age1ds7xuydgcyp46gagvrnpxwnnsxp5v39zyfz77j6gmtjjm2uqjaqs4ajas4
     - &drone age1vzpn0t97ga4vlfnyvfh4vhhzwkd5kyz6qanf45qff4gf8uqjp37sk4pukr
     - &blocky age1hemy4mz50w4z2rwllhjd5j2ld5ncwslplv09lf4ne6e33m4tw37sy9z02f
+    - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
     - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
@@ -13,6 +14,7 @@ creation_rules:
       - age:
           - *hub
           - *drone
+          - *paperless
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:

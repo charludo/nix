@@ -68,6 +68,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Paperless-NGX
+        paperless = lib.nixosSystem {
+          modules = [ ./hosts/paperless ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Stirling PDF
         pdf = lib.nixosSystem {
           modules = [ ./hosts/pdf ];

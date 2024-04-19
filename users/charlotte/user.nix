@@ -15,6 +15,7 @@ in
       "video"
       "audio"
       "networkmanager"
+      "nas"
     ] ++ ifTheyExist [
       "docker"
       "git"
