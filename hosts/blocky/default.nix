@@ -97,8 +97,12 @@
         };
         clientGroupsBlock = rec {
           default = [ "ads" "tracking" "malicious" "crypto" ];
-          Desktop = default ++ [ "allowed" ];
+          "hub*" = default ++ [ "allowed" ];
         };
+      };
+      clientLookup = {
+        upstream = "192.168.30.5:53";
+        # singleNameOrder = [ 2 1 ];
       };
       caching = {
         minTime = "5m";

@@ -63,19 +63,19 @@
         };
 
         # Adblocking
-        blocky = lib.nixosSystem {
+        SRV-BLOCKY = lib.nixosSystem {
           modules = [ ./hosts/blocky ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # Paperless-NGX
-        paperless = lib.nixosSystem {
+        SRV-PAPERLESS = lib.nixosSystem {
           modules = [ ./hosts/paperless ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # Stirling PDF
-        pdf = lib.nixosSystem {
+        SRV-PDF = lib.nixosSystem {
           modules = [ ./hosts/pdf ];
           specialArgs = { inherit inputs outputs; };
         };
