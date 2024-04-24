@@ -5,7 +5,7 @@
     enable = true;
     userName = "charludo";
     userEmail = "github@charlotteharludo.com";
-    ignores = [ "Session.vim" "main.shada" ".envrc" ".direnv" ".venv" ];
+    ignores = [ "Session.vim" "main.shada" ".envrc" ".direnv" ".venv" ".dmypy.json" ];
     extraConfig = {
       init = { defaultBranch = "main"; };
       pull = { rebase = true; };

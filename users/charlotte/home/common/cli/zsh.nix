@@ -26,6 +26,7 @@
 
       ZSH_HIGHLIGHT_HIGHLIGHTERS=(main cursor)
       typeset -gA ZSH_HIGHLIGHT_STYLES
+      typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
       ZSH_HIGHLIGHT_STYLES[comment]='fg=#"${config.colorScheme.palette.base04}"'
       ZSH_HIGHLIGHT_STYLES[alias]='fg=#"${config.colorScheme.palette.base0B}"'
       ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#"${config.colorScheme.palette.base0B}"'

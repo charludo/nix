@@ -48,6 +48,10 @@ in
     "@regexp" = { fg = colors.base0F; };
   };
 
+  programs.nixvim.keymaps = [
+    { key = "<M-CR>"; action = "<cmd>lua vim.lsp.buf.code_action()<CR>"; options = { desc = "Code Actions"; }; mode = [ "n" ]; }
+  ];
+
   programs.nixvim.extraConfigLua = /* lua */ '' 
     -- shamelessly copied from: https://github.com/NvChad/ui/blob/v2.5/lua/nvchad/lsp/init.lua
     local function lspSymbol(name, icon)
@@ -81,5 +85,17 @@ in
       opts.border = "single"
       return opts
     end
-'';
+    vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+      border = {
+        { "╭" },
+        { "─" },
+        { "╮" },
+        { "│" },
+        { "╯" },
+        { "─" },
+        { "╰" },
+        { "│" },
+      }
+    })
+  '';
 } 

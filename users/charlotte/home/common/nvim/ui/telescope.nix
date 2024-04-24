@@ -74,6 +74,7 @@ in
         case_mode = "smart_case";
       };
     };
+    extensions.ui-select.enable = true;
   };
 
   programs.nixvim.keymaps = [

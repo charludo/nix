@@ -5,6 +5,7 @@ in
 {
   imports = [
     ./bufferline.nix
+    ./colorizer.nix
     ./lualine.nix
     ./nvim-tree.nix
     ./telescope.nix

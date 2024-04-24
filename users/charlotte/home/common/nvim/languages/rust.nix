@@ -2,8 +2,8 @@
 {
   programs.nixvim.plugins.lsp.servers.rust-analyzer = {
     enable = true;
-    installCargo = false;
-    installRustc = false;
+    installCargo = true;
+    installRustc = true;
     settings.cargo.features = "all";
     settings.diagnostics.styleLints.enable = true;
   };
