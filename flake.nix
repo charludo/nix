@@ -31,6 +31,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    mailserver = {
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
   };
 
@@ -59,6 +64,12 @@
         # Laptop
         drone = lib.nixosSystem {
           modules = [ ./hosts/drone ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # nixos-rebuild switch --flake ".#gsv" --target-host gsv
+        gsv = lib.nixosSystem {
+          modules = [ ./hosts/gsv ];
           specialArgs = { inherit inputs outputs; };
         };
 
