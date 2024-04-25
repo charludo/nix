@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ inputs, config, ... }:
 {
   _module.args.defaultUser = "paki";
   imports =
@@ -16,10 +16,10 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking = {
-    hostName = "SRV-PDF";
+    hostName = "SRV-WASTEBIN";
     interfaces = {
       ens18.ipv4.addresses = [{
-        address = "192.168.20.38";
+        address = "192.168.20.39";
         prefixLength = 27;
       }];
     };
@@ -27,22 +27,20 @@
     nameservers = [ "1.1.1.1" ];
     firewall = {
       allowedTCPPorts = [ 8080 ];
-      allowedUDPPorts = [ 8080 ];
     };
   };
 
   services.qemuGuest.enable = true;
 
-  environment.systemPackages = [ pkgs.stirling-pdf ];
-  systemd.services.stirling-pdf = {
-    description = "Stirling PDF Service";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.stirling-pdf}/bin/Stirling-PDF";
-      Restart = "always";
-      RestartSec = "20s";
+  sops.secrets.wastebin = { sopsFile = ./wastebin-secrets.sops.yaml; };
+  services.wastebin = {
+    enable = true;
+    secretFile = config.sops.secrets.wastebin.path;
+    settings = {
+      WASTEBIN_BASE_URL = inputs.private-settings.domains.wastebin;
+      WASTEBIN_ADDRESS_PORT = "0.0.0.0:8080";
     };
   };
+
   system.stateVersion = "23.11";
 }

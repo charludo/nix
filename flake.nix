@@ -91,6 +91,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # WasteBin (Rust PasteBin)
+        SRV-WASTEBIN = lib.nixosSystem {
+          modules = [ ./hosts/SRV-WASTEBIN ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Installer (used with nixos-generators install-iso)
         installer = lib.nixosSystem {
           modules = [ ./hosts/installer ];

@@ -9,6 +9,7 @@ keys:
     - &blocky age1hemy4mz50w4z2rwllhjd5j2ld5ncwslplv09lf4ne6e33m4tw37sy9z02f
     - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
     - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
+    - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
@@ -25,6 +26,11 @@ creation_rules:
     key_groups:
       - age:
           - *gsv
+          - *charlotte
+  - path_regex: hosts/SRV-WASTEBIN/wastebin-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *wastebin
           - *charlotte
   - path_regex: users/charlotte/user_secrets.sops.ya?ml$
     key_groups:
