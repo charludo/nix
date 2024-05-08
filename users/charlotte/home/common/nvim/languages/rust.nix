@@ -2,8 +2,8 @@
 {
   programs.nixvim.plugins.lsp.servers.rust-analyzer = {
     enable = true;
-    installCargo = true;
-    installRustc = true;
+    installCargo = false;
+    installRustc = false;
     settings.cargo.features = "all";
     settings.diagnostics.styleLints.enable = true;
   };
@@ -12,8 +12,7 @@
   programs.nixvim.extraPackages = [ pkgs.rustfmt ];
 
   programs.nixvim.extraPlugins = with pkgs.vimPlugins; [
-    { plugin = rust-vim; }
-    { plugin = crates-nvim; }
+    { plugin = crates-nvim; config = "lua require('crates').setup()"; }
   ];
 
   programs.nixvim.keymaps = [

@@ -14,10 +14,10 @@ in
       wastebin = { hostname = "192.168.20.39"; };
       blocky = { hostname = "192.168.30.13"; };
       proxmox = { hostname = "192.168.30.15"; user = "root"; };
+      home-assistant = { hostname = "192.168.10.27"; user = "root"; };
       gsv = { hostname = gsv.ip; user = gsv.user; port = gsv.port; };
       gsv-boot = { hostname = gsv.ip; user = gsv.user; port = gsv.port-boot; };
-      duesseldorf = { hostname = "78.31.66.125"; user = "charlotte"; };
-      "* !duesseldorf !proxmox !gsv !gsv-boot" = { user = "paki"; };
+      "* !proxmox !home-assistant !gsv !gsv-boot" = { user = "paki"; };
       "jellyfin torrenter paperless pdf blocky proxmos".extraOptions = {
         "StrictHostKeyChecking" = "no";
         "LogLevel" = "quiet";

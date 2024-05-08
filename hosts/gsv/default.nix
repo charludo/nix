@@ -281,7 +281,7 @@ in
           action = defaultAction;
           maxretry = 1;
         };
-        ngingx-botsearch.settings = {
+        nginx-botsearch.settings = {
           enabled = true;
           filter = "nginx-botsearch";
           logpath = "/var/log/nginx/access.log";
