@@ -18,6 +18,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    plasma-manager = {
+      url = "github:pjones/plasma-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -94,6 +100,12 @@
         # WasteBin (Rust PasteBin)
         SRV-WASTEBIN = lib.nixosSystem {
           modules = [ ./hosts/SRV-WASTEBIN ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Graphical Remote
+        CL-NIX-3 = lib.nixosSystem {
+          modules = [ ./hosts/CL-NIX-3 ];
           specialArgs = { inherit inputs outputs; };
         };
 
