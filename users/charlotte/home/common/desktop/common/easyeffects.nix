@@ -278,7 +278,7 @@ in
     }
   '';
   home.file.".config/easyeffects/input/Default.json".text = /* json */ ''
-      {
+    {
         "input": {
             "blocklist": [],
             "deesser#0": {
@@ -289,10 +289,10 @@ in
                 "f2-freq": 4500.0,
                 "f2-level": 12.0,
                 "f2-q": 1.0,
-                "input-gain": 0.0,
+                "input-gain": 0.1,
                 "laxity": 15,
                 "makeup": 0.0,
-                "mode": "Wide",
+                "mode": "Split",
                 "output-gain": 0.1,
                 "ratio": 3.0,
                 "sc-listen": false,
@@ -306,11 +306,26 @@ in
                 "output-gain": 0.0,
                 "residual-echo-suppression": -70
             },
+            "filter#0": {
+                "balance": 0.0,
+                "bypass": false,
+                "equal-mode": "FIR",
+                "frequency": 7000.0,
+                "gain": 0.0,
+                "input-gain": 0.0,
+                "mode": "LRX (BT)",
+                "output-gain": 0.0,
+                "quality": 0.0,
+                "slope": "x1",
+                "type": "Low-pass",
+                "width": 12.0
+            },
             "plugins_order": [
                 "speex#0",
                 "rnnoise#0",
                 "echo_canceller#0",
-                "deesser#0"
+                "deesser#0",
+                "filter#0"
             ],
             "rnnoise#0": {
                 "bypass": false,

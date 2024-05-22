@@ -15,7 +15,7 @@
         name = "Drucker";
         location = "Home";
         description = "Brother HL-L2375DW";
-        deviceUri = "ipp://192.168.50.101";
+        deviceUri = "ipp://192.168.50.100";
         model = "drv:///brlaser.drv/brl2375w.ppd";
         ppdOptions = {
           PageSize = "A4";

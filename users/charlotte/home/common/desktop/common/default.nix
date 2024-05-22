@@ -26,5 +26,6 @@
     telegram-desktop
 
     orca-slicer
+    musescore
   ];
 }
