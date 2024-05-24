@@ -13,7 +13,7 @@ in
         no_fade_in = false;
       };
 
-      backgrounds = [
+      background = [
         {
           monitor = "";
           path = "${config.defaultWallpaper}";
@@ -28,14 +28,10 @@ in
         }
       ];
 
-      input-fields = [
+      input-field = [
         {
           monitor = "${primaryMonitor}";
-
-          size = {
-            width = 250;
-            height = 45;
-          };
+          size = "250, 45";
           outline_thickness = 2;
           dots_size = 0.33;
           dots_spacing = 0.25;
@@ -48,27 +44,21 @@ in
           placeholder_text = "";
           hide_input = false;
 
-          position = {
-            x = 0;
-            y = -30;
-          };
+          position = "0, -30";
           halign = "center";
           valign = "center";
         }
       ];
 
-      labels = [
+      label = [
         {
           monitor = "${primaryMonitor}";
           text = "enter password for <span font_family=\"${config.fontProfiles.monospace.family}\">$USER</span>";
           color = "#${config.colorScheme.palette.base00}";
           font_size = 24;
           font_family = "${config.fontProfiles.regular.family}";
-          position = {
-            x = 0;
-            y = 30;
-          };
 
+          position = "0, 30";
           halign = "center";
           valign = "center";
         }
