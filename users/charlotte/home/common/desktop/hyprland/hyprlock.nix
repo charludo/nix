@@ -18,8 +18,8 @@ in
           monitor = "";
           path = "${config.defaultWallpaper}";
 
-          blur_passes = 1;
-          blur_size = 7;
+          blur_passes = 2;
+          blur_size = 5;
           noise = 0.0117;
           contrast = 0.8916;
           brightness = 0.8172;
@@ -36,10 +36,10 @@ in
           dots_size = 0.33;
           dots_spacing = 0.25;
           dots_center = true;
-          outer_color = "rgb(0, 0, 0, 0.15)";
-          inner_color = "rgb(0, 0, 0, 0)";
-          check_color = "rgb(0, 0, 0, 0)";
-          font_color = "#${config.colorScheme.palette.base09}";
+          outer_color = "rgba(255, 255, 255, 0.15)";
+          inner_color = "rgba(0, 0, 0, 0)";
+          check_color = "rgba(0, 0, 0, 0)";
+          font_color = "rgba(255, 255, 255, 0.8)";
           fade_on_empty = true;
           placeholder_text = "";
           hide_input = false;
@@ -54,7 +54,7 @@ in
         {
           monitor = "${primaryMonitor}";
           text = "enter password for <span font_family=\"${config.fontProfiles.monospace.family}\">$USER</span>";
-          color = "#${config.colorScheme.palette.base00}";
+          color = "rgba(255, 255, 255, 0.8)";
           font_size = 24;
           font_family = "${config.fontProfiles.regular.family}";
 

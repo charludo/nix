@@ -124,7 +124,7 @@
 
         exec = [
           "systemctl --user import-environment"
-          "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+          # "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
           "hyprctl setcursor ${config.cursorProfile.name} ${toString config.cursorProfile.size}"
           "waybar" # Start from here because using systemd misses users's environment...
           "wl-paste --watch cliphist store"

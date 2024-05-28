@@ -8,6 +8,17 @@
     ./ui
   ];
 
+  xdg.desktopEntries.code = {
+    name = "Code";
+    type = "Application";
+    comment = "Open NeoVim inside terminal";
+    terminal = false;
+    exec = "alacritty -e nvim";
+    categories = [ "Development" "Utility" ];
+    icon = "nvim";
+    mimeType = [ "text/*" ];
+  };
+
   programs.nixvim = {
     enable = true;
     defaultEditor = true;

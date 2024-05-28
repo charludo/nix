@@ -55,24 +55,14 @@ in
         };
       };
     };
-    config.common.default = [ "hyprland" "gtk" ];
+    config.common.default = [ "hyprland" ];
     extraPortals = with pkgs; [
       xdg-desktop-portal-wlr
       xdg-desktop-portal-hyprland
-      xdg-desktop-portal-gtk
     ];
   };
 
-  # It sucks that this is here, but thunar won't properly work otherwise / when installed through home-manager
-  environment.sessionVariables.GIO_EXTRA_MODULES = lib.mkDefault "$GIO_EXTRA_MODULES:${config.services.gvfs.package}/lib/gio/modules";
-  services.gvfs.enable = true;
-  services.tumbler.enable = true;
-  programs.thunar.enable = true;
-  programs.file-roller.enable = true;
-  programs.thunar.plugins = with pkgs.xfce; [
-    thunar-archive-plugin
-    thunar-volman
-  ];
+  services.udisks2.enable = true;
 
   fonts.fontconfig = {
     enable = true;
