@@ -64,6 +64,8 @@
   networking.nameservers = [ "192.168.30.13" ];
 
   hardware.opengl.enable = true;
+  hardware.opengl.driSupport = true;
+  hardware.opengl.driSupport32Bit = true;
   hardware.opengl.extraPackages = [ pkgs.amdvlk ];
 
   system.stateVersion = "23.11";
