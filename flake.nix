@@ -70,6 +70,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Gaming
+        excession = lib.nixosSystem {
+          modules = [ ./hosts/excession ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # nixos-rebuild switch --flake ".#gsv" --target-host gsv
         gsv = lib.nixosSystem {
           modules = [ ./hosts/gsv ];
