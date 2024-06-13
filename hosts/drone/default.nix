@@ -38,6 +38,7 @@
     source = "${config.sops.secrets.wireguard-drone.path}";
   };
 
+  services.gvfs.enable = true;
 
   hardware.opengl.enable = true;
 
