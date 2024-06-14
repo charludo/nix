@@ -3,6 +3,7 @@
   wayland.windowManager.hyprland = {
     enable = true;
     systemd.enable = true;
+    xwayland.enable = true;
 
     settings =
       let
@@ -160,6 +161,9 @@
             "${mainMod},Return,exec,${terminal}"
             "${mainMod},q,killactive"
             "${mainMod},l,exec,${hyprlock}"
+
+            "${mainMod},Tab,cyclenext"
+            "${mainMod},Tab,bringactivetotop"
 
             # Rofi
             "${mainMod},d,exec,${menu}"

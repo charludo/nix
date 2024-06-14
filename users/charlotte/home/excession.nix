@@ -1,25 +1,38 @@
 { inputs, lib, pkgs, config, ... }:
 let
+  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config; };
   inherit (inputs.nix-colors) colorSchemes;
+  customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
   imports = [
     ./common
-    ./common/cli
+    ./common/games
     ./common/nvim
-    ./common/desktop/common
+    ./common/desktop/hyprland
+    ./common/cli/bitwarden.nix
+    ./common/cli/direnv.nix
+    ./common/cli/git.nix
+    ./common/cli/ssh.nix
+    ./common/cli/zsh.nix
+    ./common/desktop/common/alacritty.nix
+    ./common/desktop/common/discord.nix
+    ./common/desktop/common/easyeffects.nix
+    ./common/desktop/common/firefox.nix
+    ./common/desktop/common/gtk.nix
+    ./common/desktop/common/jellyfin.nix
+    ./common/desktop/common/mpv.nix
+    ./common/desktop/common/nemo.nix
+    ./common/desktop/common/playerctl.nix
+    ./common/desktop/common/qt.nix
+    ./common/desktop/common/themeing.nix
+    ./common/desktop/common/xdg.nix
   ];
 
-  # Use this method for built-in schemes:
+  home.packages = with pkgs; [ telegram-desktop ];
+
   colorscheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
-
-  # Use this method for custom imported schemes:
-  # colorscheme = lib.mkDefault customSchemes.gruvchad;
-
-  # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
-  # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
-
-  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/wolf.png;
+  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/eso.png;
   #  ------
   # | DP-2 |
   #  ------
@@ -42,11 +55,99 @@ in
       x = 0;
       y = 1440;
       workspaces = [ "2" "4" "6" "8" "10" ];
-      # wallpaper = builtins.toString ./common/desktop/backgrounds/river.png;
       primary = true;
     }
   ];
 
+  wayland.windowManager.hyprland.settings = {
+    exec = [
+      "steam -bigpicture"
+      "firefox"
+      "webcord"
+      "jellyfinmediaplayer"
+    ];
+
+    windowrulev2 = [
+      "opaque, class:(steam)$"
+      "workspace 2, class:(steam),title:()"
+      "workspace 1 silent, class:(firefox),title:()"
+      "workspace 3 silent, class:(WebCord),title:()"
+      "workspace 3 silent, class:(org.jellyfin.),title:()"
+    ];
+  };
+
+  # Configure waybar for this devices monitor setup
+  programs.waybar.settings = {
+    top = {
+      margin = "15px 0px -5px 0px";
+      layer = "top";
+      position = "top";
+      output = [ "DP-2" ];
+      modules-left = [
+        "clock"
+        "custom/weather"
+      ];
+      modules-center = [ "hyprland/workspaces" ];
+      modules-right = [
+        "disk#home"
+        "disk#nas"
+        "cpu"
+        "memory"
+        "temperature"
+        "battery"
+        "custom/power"
+      ];
+      "hyprland/workspaces" = {
+        warp-on-scroll = false;
+        all-outputs = false;
+        format = "{icon}";
+        format-icons = {
+          default = "";
+          urgent = "";
+          active = "";
+        };
+        persistent-workspaces = {
+          "1" = [ ];
+          "3" = [ ];
+          "5" = [ ];
+          "7" = [ ];
+          "9" = [ ];
+        };
+      };
+    } // customWaybarModules;
+
+    bottom = {
+      margin = "-5px 0px 15px 0px";
+      layer = "top";
+      position = "bottom";
+      output = [ "DP-2" ];
+      modules-left = [
+        "bluetooth"
+        "network#lan"
+        "network#wifi"
+      ];
+      modules-center = [ "hyprland/workspaces" ];
+      modules-right = [
+        "pulseaudio/slider"
+        "custom/playerctl"
+        "custom/reddit"
+        "tray"
+      ];
+      "hyprland/workspaces" = {
+        warp-on-scroll = false;
+        all-outputs = false;
+        format = "{icon}";
+        format-icons = {
+          default = "";
+          urgent = "";
+          active = "";
+        };
+        persistent-workspaces = {
+          "2" = [ ];
+        };
+      };
+    } // customWaybarModules;
+  };
 
   # Projects to manage on this machine
   projects = [{ name = "nix"; repo = "git@github.com:charludo/nix"; enableDirenv = false; }];
@@ -61,6 +162,6 @@ in
     "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
   };
 
-  # Otherwise way to big on hub
+  # Otherwise way too big on hub
   programs.alacritty.settings.font.size = lib.mkForce 13;
 }

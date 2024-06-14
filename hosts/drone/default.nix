@@ -9,9 +9,12 @@
 
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
+      ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
+      ../common/optional/gvfs.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
+      ../common/optional/screensharing.nix
       ../common/optional/surfshark.nix
       ../common/optional/suspend.nix
       ../common/optional/wifi.nix
@@ -37,8 +40,6 @@
   environment.etc."NetworkManager/system-connections/hoehle.nmconnection" = {
     source = "${config.sops.secrets.wireguard-drone.path}";
   };
-
-  services.gvfs.enable = true;
 
   hardware.opengl.enable = true;
 

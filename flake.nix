@@ -34,12 +34,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.4.1";
+
     mailserver = {
       url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
+    eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
   };
 
   outputs = { self, nixpkgs, home-manager, nixos-generators, ... } @ inputs:
@@ -135,6 +138,12 @@
 
         "charlotte@drone" = lib.homeManagerConfiguration {
           modules = [ ./users/charlotte/home/drone.nix ];
+          pkgs = nixpkgs.legacyPackages.${system};
+          extraSpecialArgs = { inherit inputs outputs; };
+        };
+
+        "charlotte@excession" = lib.homeManagerConfiguration {
+          modules = [ ./users/charlotte/home/excession.nix ];
           pkgs = nixpkgs.legacyPackages.${system};
           extraSpecialArgs = { inherit inputs outputs; };
         };

@@ -10,13 +10,17 @@
       ../common/optional/bluetooth.nix
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
+      ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
+      ../common/optional/gvfs.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/rsync.nix
+      ../common/optional/screensharing.nix
       ../common/optional/surfshark.nix
       ../common/optional/suspend.nix
       ../common/optional/wifi.nix
+      ../common/optional/zammad.nix
       ../common/optional/zsh.nix
 
       ../../users/charlotte/user.nix
@@ -67,9 +71,7 @@
   hardware.opengl.enable = true;
   hardware.opengl.driSupport = true;
   hardware.opengl.driSupport32Bit = true;
-  hardware.opengl.extraPackages = [ pkgs.amdvlk ];
-
-  services.gvfs.enable = true;
+  hardware.opengl.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
 
   system.stateVersion = "23.11";
 }
