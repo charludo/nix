@@ -112,6 +112,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Cloud Backup
+        SRV-CLOUDSYNC = lib.nixosSystem {
+          modules = [ ./hosts/SRV-CLOUDSYNC ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Installer (used with nixos-generators install-iso)
         installer = lib.nixosSystem {
           modules = [ ./hosts/installer ];
