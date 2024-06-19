@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ config, pkgs, inputs, ... }:
 {
   _module.args.defaultUser = "paki";
   imports =
@@ -31,28 +31,19 @@
 
   services.qemuGuest.enable = true;
 
-  environment.systemPackages = [ pkgs.rsync ];
-
-  systemd = {
-    timers."cloudsync-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "cloudsync.service";
-      };
+  sops.secrets.borg = { };
+  services.borgbackup.jobs.remoteBackup = {
+    paths = [ "/media/NAS/CloudSync" ];
+    exclude = [ "'**/node_modules'" "'**/.venv'" "'**/.cache'" ];
+    doInit = false;
+    repo = "${inputs.private-settings.domains.cloudsync}:pakiplace";
+    encryption = {
+      mode = "repokey";
+      passCommand = "cat ${config.sops.secrets.borg.path}";
     };
-
-    services."cloudsync" = {
-      requires = [ "media-NAS.mount" ];
-      script = ''
-        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && ${pkgs.rsync}/bin/rsync --progress -e '${pkgs.openssh}/bin/ssh -p 23 -i /etc/ssh/ssh_host_ed25519_key' --recursive /media/NAS/CloudSync ${inputs.private-settings.domains.cloudsync}:pakiplace
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
+    environment = { BORG_RSH = "ssh -p 23 -i /etc/ssh/ssh_host_ed25519_key"; };
+    compression = "auto,lzma";
+    startAt = "03:15";
   };
 
   system.stateVersion = "23.11";

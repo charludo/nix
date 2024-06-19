@@ -18,8 +18,10 @@
       pylsp_mypy.dmypy = true;
 
       ruff.enabled = true;
+      ruff.lineLength = 88;
     };
   };
   programs.nixvim.plugins.lint.lintersByFt.python = [ "pylint" ];
-  programs.nixvim.extraPackages = [ pkgs.pylint ];
+  programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
+  home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
 }
