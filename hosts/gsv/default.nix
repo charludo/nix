@@ -7,6 +7,7 @@ in
 {
   imports = [
     ./hardware-configuration.nix
+    ./wireguard.nix
 
     ../common/global/locale.nix
     ../common/global/nix.nix
