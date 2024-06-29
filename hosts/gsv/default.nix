@@ -14,6 +14,7 @@ in
     ../common/global/openssh.nix
     ../common/global/sops.nix
 
+    ../common/optional/blocky.nix
     ../common/optional/monit.nix
 
     inputs.mailserver.nixosModule
@@ -38,9 +39,9 @@ in
     address = gsv.ip;
     prefixLength = gsv.prefixLength;
   }];
-  networking.defaultGateway = gsv.gateway;
-  networking.nameservers = gsv.dns;
-  services.resolved.enable = true;
+  networking.defaultGateway = { address = gsv.gateway; interface = gsv.interface; };
+  networking.firewall = { allowedTCPPorts = [ 53 80 443 ]; allowedUDPPorts = [ 53 ]; };
+  services.blocky.settings.ports.dns = 53;
 
   # Boot partition is mirrored over all ZFS mirrors
   fileSystems."/boot-1".options = [ "nofail" ];
@@ -112,6 +113,8 @@ in
       enforced = "body";
     };
     loginAccounts = loginAccounts;
+
+    localDnsResolver = false;
   };
 
   services.roundcube = {
@@ -125,7 +128,6 @@ in
       $config['smtp_pass'] = "%p";
     '';
   };
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
 
   services.nginx = {
     enable = true;

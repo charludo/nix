@@ -22,7 +22,7 @@ in
   # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
   # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
-  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/wolf.png;
+  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/river.png;
   #  ------
   # | DP-2 |
   #  ------

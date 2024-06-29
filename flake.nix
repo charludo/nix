@@ -85,39 +85,47 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # ---
+        # VMs
+        # ---
+
+        # Graphical Remote
+        CL-NIX-1 = lib.nixosSystem {
+          modules = [ ./vms/CL-NIX-1.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+        CL-NIX-3 = lib.nixosSystem {
+          modules = [ ./vms/CL-NIX-3.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Adblocking
         SRV-BLOCKY = lib.nixosSystem {
-          modules = [ ./hosts/SRV-BLOCKY ];
+          modules = [ ./vms/SRV-BLOCKY.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # Paperless-NGX
         SRV-PAPERLESS = lib.nixosSystem {
-          modules = [ ./hosts/SRV-PAPERLESS ];
+          modules = [ ./vms/SRV-PAPERLESS.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # Stirling PDF
         SRV-PDF = lib.nixosSystem {
-          modules = [ ./hosts/SRV-PDF ];
+          modules = [ ./vms/SRV-PDF.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # WasteBin (Rust PasteBin)
         SRV-WASTEBIN = lib.nixosSystem {
-          modules = [ ./hosts/SRV-WASTEBIN ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Graphical Remote
-        CL-NIX-3 = lib.nixosSystem {
-          modules = [ ./hosts/CL-NIX-3 ];
+          modules = [ ./vms/SRV-WASTEBIN.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
         # Cloud Backup
         SRV-CLOUDSYNC = lib.nixosSystem {
-          modules = [ ./hosts/SRV-CLOUDSYNC ];
+          modules = [ ./vms/SRV-CLOUDSYNC.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
@@ -152,6 +160,7 @@
       # Available through 'nix develop ".#shellname"'
       devShells.${system} = {
         keyctl = (import ./shells/keyctl { inherit pkgs; });
+        vmctl = (import ./shells/vmctl { inherit pkgs; });
       };
     };
 }

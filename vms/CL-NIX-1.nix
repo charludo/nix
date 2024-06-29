@@ -1,0 +1,46 @@
+{ lib, pkgs, ... }:
+{
+  _module.args.defaultUser = "marie";
+  imports = [
+    ./_common.nix
+
+    ../common/optional/dconf.nix
+    ../common/optional/pipewire.nix
+    ../common/optional/vmify.nix
+
+    ../../users/marie/user.nix
+  ];
+
+  users.mutableUsers = lib.mkForce true;
+
+  vm = {
+    id = 3020;
+    name = "CL-NIX-1";
+
+    hardware.cores = 4;
+    hardware.memory = 4096;
+    hardware.storage = "8G";
+
+    networking = {
+      address = "192.168.30.95";
+      gateway = "192.168.30.1";
+      prefixLength = 24;
+    };
+  };
+
+  services.xserver.enable = true;
+  services.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.plasma5.enable = true;
+
+  environment.plasma5.excludePackages = with pkgs.libsForQt5; [
+    plasma-browser-integration
+  ];
+
+  services.xrdp = {
+    enable = true;
+    defaultWindowManager = "startplasma-x11";
+    openFirewall = true;
+  };
+
+  system.stateVersion = "23.11";
+}

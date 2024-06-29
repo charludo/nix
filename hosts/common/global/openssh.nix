@@ -20,12 +20,12 @@ in
   };
 
   programs.ssh = {
-    knownHosts = builtins.mapAttrs
+    knownHosts = lib.filterAttrs (_: v: v.publicKeyFile != null) (builtins.mapAttrs
       (name: _: {
-        publicKeyFile = pubKey name;
+        publicKeyFile = if builtins.pathExists (pubKey name) then (pubKey name) else null;
         extraHostNames = (lib.optional (name == hostName) "localhost");
       })
-      hosts;
+      hosts);
   };
 
   security.pam.sshAgentAuth = {

@@ -33,10 +33,15 @@ creation_rules:
       - age:
           - *gsv
           - *charlotte
-  - path_regex: hosts/SRV-WASTEBIN/wastebin-secrets.sops.ya?ml$
+  - path_regex: vms/secrets/wastebin-secrets.sops.ya?ml$
     key_groups:
       - age:
           - *wastebin
+          - *charlotte
+  - path_regex: vms/secrets/cloudsync-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *cloudsync
           - *charlotte
   - path_regex: users/charlotte/user_secrets.sops.ya?ml$
     key_groups:

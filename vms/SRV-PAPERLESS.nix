@@ -11,43 +11,28 @@ let
   };
 in
 {
-  _module.args.defaultUser = "paki";
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common/optional/vmify.nix
+  imports = [ ./_common.nix ];
 
-      ../common/global
-      ../common/optional/nvim.nix
+  vm = {
+    id = 2203;
+    name = "SRV-PAPERLESS";
 
-      ../../users/paki/user.nix
-    ];
+    hardware.cores = 4;
+    hardware.memory = 4096;
+    hardware.storage = "8G";
+
+    networking.address = "192.168.20.37";
+    networking.gateway = "192.168.20.34";
+    networking.prefixLength = 27;
+
+    networking.openPorts.tcp = [ 8000 ];
+    networking.openPorts.udp = [ 8000 ];
+  };
 
   enableNas = true;
   enableNasBackup = true;
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  networking = {
-    hostName = "SRV-PAPERLESS";
-    interfaces = {
-      ens18.ipv4.addresses = [{
-        address = "192.168.20.37";
-        prefixLength = 27;
-      }];
-    };
-    defaultGateway = "192.168.20.34";
-    nameservers = [ "192.168.30.5" "192.168.30.13" "1.1.1.1" ];
-    firewall = {
-      allowedTCPPorts = [ 8000 ];
-      allowedUDPPorts = [ 8000 ];
-    };
-  };
-
-  services.qemuGuest.enable = true;
-
   users.users.paperless.extraGroups = [ "nas" ];
+
   services.paperless = {
     enable = true;
     address = "0.0.0.0";

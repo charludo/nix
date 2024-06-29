@@ -1,44 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
-  _module.args.defaultUser = "paki";
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common/optional/vmify.nix
-
-      ../common/global
-      ../common/optional/nvim.nix
-
-      ../../users/paki/user.nix
-    ];
-
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  networking = {
-    hostName = "SRV-BLOCKY";
-    interfaces = {
-      ens18.ipv4.addresses = [{
-        address = "192.168.30.13";
-        prefixLength = 24;
-      }];
-    };
-    defaultGateway = "192.168.30.1";
-    firewall = {
-      allowedTCPPorts = [ 53 443 853 ];
-      allowedUDPPorts = [ 53 443 853 ];
-    };
-  };
-  services.resolved.enable = false;
-
-  services.qemuGuest.enable = true;
-
+  services.resolved.enable = lib.mkForce false;
   services.blocky = {
     enable = true;
     settings = {
-      ports.dns = 53;
-      ports.tls = 853;
-      ports.https = 443;
       upstreams.groups.default = [
         "https://one.one.one.one/dns-query"
       ];
@@ -95,22 +60,10 @@
               '')
           ];
         };
-        clientGroupsBlock = rec {
+        clientGroupsBlock = {
           default = [ "ads" "tracking" "malicious" "crypto" ];
-          "hub*" = default ++ [ "allowed" ];
         };
-      };
-      clientLookup = {
-        upstream = "192.168.30.5:53";
-        # singleNameOrder = [ 2 1 ];
-      };
-      caching = {
-        minTime = "5m";
-        maxTime = "30m";
-        prefetching = true;
       };
     };
   };
-
-  system.stateVersion = "23.11";
 }

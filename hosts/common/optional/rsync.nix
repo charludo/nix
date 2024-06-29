@@ -12,12 +12,12 @@
     '';
   };
 
-  # systemd.timers."rsync-media-backup-hourly" = {
-  #   wantedBy = [ "timers.target" ];
-  #   timerConfig = {
-  #     OnBootSec = "30min";
-  #     OnUnitActiveSec = "1h";
-  #     Unit = "rsync-media-backup.service";
-  #   };
-  # };
+  systemd.timers."rsync-media-backup-hourly" = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30min";
+      OnUnitActiveSec = "1h";
+      Unit = "rsync-media-backup.service";
+    };
+  };
 }
