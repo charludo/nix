@@ -7,5 +7,6 @@ in
     enable = true;
     openFirewall = true;
     relayIP = gsv.ip;
+    extraSignalArgs = [ "-k" "_" ];
   };
 }
