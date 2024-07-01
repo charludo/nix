@@ -13,6 +13,7 @@ keys:
     - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
     - &cl-nix age16dzq2pcwn3zn424ea3sg509rpfwd3tleyfxnx2n3fgmhtk482d5sveq6t2
     - &cloudsync age1zh2q440tk3muyhlc90xjcml92qavafhrzp3hv9zqge3kzwhqwqnskr6fls
+    - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
@@ -22,6 +23,7 @@ creation_rules:
           - *excession
           - *paperless
           - *cloudsync
+          - *git
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:

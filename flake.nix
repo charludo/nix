@@ -129,6 +129,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Forgejo Git server
+        SRV-GIT = lib.nixosSystem {
+          modules = [ ./vms/SRV-GIT.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Installer (used with nixos-generators install-iso)
         installer = lib.nixosSystem {
           modules = [ ./hosts/installer ];
