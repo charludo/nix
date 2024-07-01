@@ -1,4 +1,4 @@
-{ pkgs, config, inputs, lib, ... }:
+{ pkgs, config, inputs, ... }:
 {
   imports = [ ./_common.nix ];
 
@@ -14,8 +14,8 @@
     networking.gateway = "192.168.30.1";
     networking.prefixLength = 24;
 
-    networking.openPorts.tcp = [ 3000 ];
-    networking.openPorts.udp = [ 3000 ];
+    networking.openPorts.tcp = [ 80 ];
+    networking.openPorts.udp = [ 80 ];
   };
 
   users.users.git.group = "git";
@@ -33,6 +33,16 @@
         HTTP_PORT = 3000;
       };
       service.DISABLE_REGISTRATION = true;
+    };
+  };
+
+  services.nginx = {
+    enable = true;
+    virtualHosts.${config.services.forgejo.settings.server.DOMAIN} = {
+      extraConfig = ''
+        client_max_body_size 512M;
+      '';
+      locations."/".proxyPass = "http://localhost:${toString config.services.forgejo.settings.server.HTTP_PORT}";
     };
   };
 

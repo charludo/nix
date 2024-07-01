@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 {
   imports = [ ./_common.nix ];
 
@@ -14,8 +14,8 @@
     networking.gateway = "192.168.20.34";
     networking.prefixLength = 27;
 
-    networking.openPorts.tcp = [ 8080 ];
-    networking.openPorts.udp = [ 8080 ];
+    networking.openPorts.tcp = [ 80 ];
+    networking.openPorts.udp = [ 80 ];
   };
 
   environment.systemPackages = [ pkgs.stirling-pdf ];
@@ -29,5 +29,15 @@
       RestartSec = "20s";
     };
   };
+  services.nginx = {
+    enable = true;
+    virtualHosts."pdf.${inputs.private-settings.domains.ad}" = {
+      extraConfig = ''
+        client_max_body_size 512M;
+      '';
+      locations."/".proxyPass = "http://localhost:8080";
+    };
+  };
+
   system.stateVersion = "23.11";
 }
