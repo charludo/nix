@@ -17,11 +17,28 @@ in
       htpasswd_filename = builtins.toString htpasswd;
       htpasswd_encryption = "bcrypt";
     };
+    settings.web = {
+      type = "radicale_infcloud";
+      infcloud_config = ''
+        globalInterfaceLanguage = "de_DE";
+                        globalTimeZone = "Europe/Berlin";
+      '';
+    };
   };
+
+  systemd.services.radicale.environment.PYTHONPATH =
+    let
+      python = pkgs.python312.withPackages (pkgs: with pkgs; [
+        radicale_infcloud
+        pytz
+        setuptools
+      ]);
+    in
+    "${python}/${pkgs.python312.sitePackages}";
 
   services.nginx = {
     virtualHosts = {
-      "cal.${gsv.domain}" = {
+      "dav.${gsv.domain}" = {
         forceSSL = true;
         enableACME = true;
         locations."/" = {
@@ -30,6 +47,15 @@ in
             proxy_set_header  X-Script-Name /;
             proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_pass_header Authorization;
+          '';
+        };
+      };
+      "calendar.${gsv.domain}" = {
+        forceSSL = true;
+        enableACME = true;
+        locations."/" = {
+          extraConfig = ''
+            return 301 https://dav.${gsv.domain}/.web/infcloud/;
           '';
         };
       };
