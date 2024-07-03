@@ -31,7 +31,7 @@ in
   users.groups.marie.gid = 1000;
 
   home-manager.sharedModules = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
-  home-manager.users.marie = import ./home/${config.networking.hostName}.nix;
+  home-manager.users.marie = import ./home/CL-NIX.nix;
 
   environment.shells = with pkgs; [ bash ];
 }

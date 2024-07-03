@@ -8,7 +8,7 @@
     workspace = {
       clickItemTo = "select";
       lookAndFeel = "org.kde.breezedark.desktop";
-      cursorTheme = "Bibata-Modern-Ice";
+      cursor.theme = "Bibata-Modern-Ice";
       iconTheme = "Papirus-Dark";
       wallpaper = "${pkgs.libsForQt5.plasma-workspace-wallpapers}/share/wallpapers/summer_1am/contents/images/1080x1920.jpg";
     };

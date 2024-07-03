@@ -4,11 +4,11 @@
   imports = [
     ./_common.nix
 
-    ../common/optional/dconf.nix
-    ../common/optional/pipewire.nix
-    ../common/optional/vmify.nix
+    ../hosts/common/optional/dconf.nix
+    ../hosts/common/optional/pipewire.nix
+    ../hosts/common/optional/vmify.nix
 
-    ../../users/marie/user.nix
+    ../users/marie/user.nix
   ];
 
   users.mutableUsers = lib.mkForce true;

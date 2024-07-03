@@ -6,7 +6,7 @@
       auto-optimise-store = lib.mkDefault true;
       experimental-features = [ "nix-command" "flakes" "repl-flake" ];
       warn-dirty = true;
-      system-features = [ "kvm" ];
+      system-features = [ "kvm" "big-parallel" ];
       # flake-registry = "";
     };
 

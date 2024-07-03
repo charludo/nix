@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  palette = config.colorScheme.palette;
+  palette = config.colorscheme.palette;
 
   max = x: y: if x > y then x else y;
   min = x: y: if x < y then x else y;

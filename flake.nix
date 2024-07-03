@@ -44,6 +44,7 @@
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
     muse-sounds-manager.url = "github:thilobillerbeck/muse-sounds-manager-nix";
+    idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
   outputs = { self, nixpkgs, home-manager, nixos-generators, ... } @ inputs:
@@ -136,11 +137,23 @@
           specialArgs = { inherit inputs outputs; };
         };
 
-        # Installer (used with nixos-generators install-iso)
-        installer = lib.nixosSystem {
-          modules = [ ./hosts/installer ];
+        # Jellyfin Media Server
+        SRV-JELLYFIN = lib.nixosSystem {
+          modules = [ ./vms/SRV-JELLYFIN.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Helper for downloading Linux ISOs
+        SRV-TORRENTER = lib.nixosSystem {
+          modules = [ ./vms/SRV-TORRENTER.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Installer (used with nixos-generators install-iso)
+        # installer = lib.nixosSystem {
+        # modules = [ ./hosts/installer ];
+        # specialArgs = { inherit inputs outputs; };
+        # };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
@@ -168,6 +181,7 @@
       devShells.${system} = {
         keyctl = (import ./shells/keyctl { inherit pkgs; });
         vmctl = (import ./shells/vmctl { inherit pkgs; });
+        remux = (import ./shells/remux.nix { inherit pkgs; });
       };
     };
 }

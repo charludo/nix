@@ -3,7 +3,10 @@ let
   colors = import ../colors.nix { inherit config lib; };
 in
 {
-  programs.nixvim.plugins.treesitter.enable = true;
+  programs.nixvim.plugins.treesitter = {
+    enable = true;
+    settings.highlight.enable = true;
+  };
 
   programs.nixvim.keymaps = [
     { key = "<leader>ts"; action = "<cmd>TSBufToggle highlight<CR>"; options = { desc = "toggle tree sitter syntax highlighting"; }; mode = [ "n" ]; }

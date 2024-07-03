@@ -1,10 +1,7 @@
 { inputs, lib, pkgs, config, outputs, ... }:
-let
-  inherit (inputs.nix-colors) colorSchemes;
-in
 {
   imports = [
-    inputs.nix-colors.homeManagerModule
+    inputs.nix-colors.homeManagerModules.colorscheme
     inputs.sops-nix.homeManagerModules.sops
   ] ++ (builtins.attrValues outputs.homeManagerModules);
 
