@@ -32,10 +32,9 @@ in
     hostId = gsv.hostId;
     useDHCP = false;
     enableIPv6 = false;
-    interfaces.${gsv.interface}.ipv4.addresses = [{
-      address = gsv.ip;
-      prefixLength = gsv.prefixLength;
-    }];
+    interfaces.${gsv.interface}.ipv4.addresses = [
+      { address = gsv.ip; prefixLength = gsv.prefixLength; }
+    ];
     defaultGateway = {
       address = gsv.gateway;
       interface = gsv.interface;

@@ -1,11 +1,11 @@
 { config, pkgs, inputs, ... }:
 let
-  inherit (inputs.private-settings) gsv;
+  inherit (inputs.private-settings) domains;
 in
 {
   services.roundcube = {
     enable = true;
-    hostName = "mail.${gsv.domain}";
+    hostName = "mail.${domains.personal}";
     configureNginx = true;
     dicts = with pkgs.aspellDicts; [ de en ];
     extraConfig = ''

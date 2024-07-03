@@ -1,14 +1,14 @@
 { inputs, ... }:
 let
-  inherit (inputs.private-settings) gsv loginAccounts;
+  inherit (inputs.private-settings) domains loginAccounts forwards;
 in
 {
   imports = [ inputs.mailserver.nixosModule ];
 
   mailserver = {
     enable = true;
-    fqdn = "mail.${gsv.domain}";
-    domains = [ gsv.domain ];
+    fqdn = "mail.${domains.personal}";
+    domains = [ domains.personal domains.blog ];
     messageSizeLimit = 209715200;
     certificateScheme = "acme";
     fullTextSearch = {
@@ -18,6 +18,7 @@ in
       enforced = "body";
     };
     loginAccounts = loginAccounts;
+    forwards = forwards;
     localDnsResolver = false;
   };
 }

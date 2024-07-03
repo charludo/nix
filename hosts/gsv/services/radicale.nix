@@ -1,6 +1,6 @@
 { config, pkgs, lib, inputs, ... }:
 let
-  inherit (inputs.private-settings) gsv;
+  inherit (inputs.private-settings) domains;
 
   mailAccounts = config.mailserver.loginAccounts;
   htpasswd = pkgs.writeText "radicale.users" (lib.concatStrings
@@ -38,7 +38,7 @@ in
 
   services.nginx = {
     virtualHosts = {
-      "dav.${gsv.domain}" = {
+      "dav.${domains.personal}" = {
         forceSSL = true;
         enableACME = true;
         locations."/" = {
@@ -50,12 +50,12 @@ in
           '';
         };
       };
-      "calendar.${gsv.domain}" = {
+      "calendar.${domains.personal}" = {
         forceSSL = true;
         enableACME = true;
         locations."/" = {
           extraConfig = ''
-            return 301 https://dav.${gsv.domain}/.web/infcloud/;
+            return 301 https://dav.${domains.personal}/.web/infcloud/;
           '';
         };
       };
