@@ -19,4 +19,7 @@ in
     dovecot.enable = true;
     rspamd.enable = true;
   };
+
+  # activate telegram notifications
+  sops.secrets.telegram-bot = { };
 }
