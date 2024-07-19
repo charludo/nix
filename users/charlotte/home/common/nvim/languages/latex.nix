@@ -2,7 +2,7 @@
 let
   tex = (pkgs.texlive.combine {
     inherit (pkgs.texlive) scheme-full
-      supertabular csquotes textpos appendix inconsolata lstaddons pgfplots todonotes;
+      supertabular csquotes textpos appendix inconsolata lstaddons pgfplots todonotes xetex;
   });
 in
 {
@@ -10,6 +10,7 @@ in
     enable = true;
     texlivePackage = tex;
     settings = {
+      compiler_method = "xetex";
       view_method = "sioyek";
     };
   };
