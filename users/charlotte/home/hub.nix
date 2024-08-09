@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, config, ... }:
 let
   customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config; };
-  inherit (inputs.nix-colors) colorSchemes;
+  inherit (inputs.nix-colors) colorschemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -14,7 +14,7 @@ in
   ];
 
   # Use this method for built-in schemes:
-  colorscheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
+  colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
 
   # Use this method for custom imported schemes:
   # colorscheme = lib.mkDefault customSchemes.gruvchad;

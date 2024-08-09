@@ -14,6 +14,8 @@ keys:
     - &cl-nix age16dzq2pcwn3zn424ea3sg509rpfwd3tleyfxnx2n3fgmhtk482d5sveq6t2
     - &cloudsync age1zh2q440tk3muyhlc90xjcml92qavafhrzp3hv9zqge3kzwhqwqnskr6fls
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
+    - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
+    - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
@@ -24,6 +26,8 @@ creation_rules:
           - *paperless
           - *cloudsync
           - *git
+          - *jellyfin
+          - *torrenter
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:
@@ -44,6 +48,11 @@ creation_rules:
     key_groups:
       - age:
           - *cloudsync
+          - *charlotte
+  - path_regex: vms/secrets/torrenter-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *torrenter
           - *charlotte
   - path_regex: users/charlotte/user_secrets.sops.ya?ml$
     key_groups:

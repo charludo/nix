@@ -76,7 +76,7 @@ in
 
   cpu = {
     interval = 10;
-    format = "  {}%";
+    format = "   {usage}%";
     max-length = 10;
   };
 

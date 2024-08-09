@@ -1,4 +1,4 @@
-{ config, inputs, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   # These CONSTANTLY change and have different hashes depending on what server 
   # you connect to, so I'm putting a cached version on github. More work to update,

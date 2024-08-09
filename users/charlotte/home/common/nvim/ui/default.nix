@@ -14,7 +14,7 @@ in
 
   programs.nixvim.colorschemes.base16 = {
     enable = true;
-    colorscheme = builtins.mapAttrs (name: value: "#" + value) config.colorScheme.palette;
+    colorscheme = builtins.mapAttrs (name: value: "#" + value) config.colorscheme.palette;
   };
 
   programs.nixvim.keymaps = [

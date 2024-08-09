@@ -32,7 +32,7 @@
   proxmox.partitionTableType = lib.mkDefault "efi";
   proxmox.qemuExtraConf = {
     agent = 1;
-    ide2 = "none,media=cdrom";
+    ide2 = lib.mkForce "none,media=cdrom";
     kvm = 1;
   };
 
