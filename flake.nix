@@ -43,6 +43,7 @@
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
+    muse-sounds-manager.url = "github:thilobillerbeck/muse-sounds-manager-nix";
   };
 
   outputs = { self, nixpkgs, home-manager, nixos-generators, ... } @ inputs:

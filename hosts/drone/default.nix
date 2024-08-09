@@ -41,7 +41,7 @@
     source = "${config.sops.secrets.wireguard-drone.path}";
   };
 
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   system.stateVersion = "23.11";
 }

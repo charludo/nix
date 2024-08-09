@@ -11,7 +11,7 @@
   ];
   programs.nixvim.plugins.lsp.servers = {
     # config languages
-    nil_ls.enable = true;
+    nil-ls.enable = true;
     lua-ls.enable = true;
 
     # bash

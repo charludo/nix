@@ -10,5 +10,5 @@
   '';
   programs.nixvim.plugins.lint.lintersByFt.gdscript = [ "gdlint" ];
   programs.nixvim.plugins.conform-nvim.formattersByFt.gdscript = [ "gdformat" ];
-  programs.nixvim.extraPackages = [ pkgs.gdtoolkit ];
+  programs.nixvim.extraPackages = [ pkgs.gdtoolkit_4 ];
 }

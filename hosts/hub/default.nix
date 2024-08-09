@@ -68,10 +68,9 @@
   networking.hostName = "hub";
   networking.nameservers = [ "192.168.30.13" ];
 
-  hardware.opengl.enable = true;
-  hardware.opengl.driSupport = true;
-  hardware.opengl.driSupport32Bit = true;
-  hardware.opengl.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
+  hardware.graphics.enable = true;
+  hardware.graphics.enable32Bit = true;
+  hardware.graphics.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
 
   system.stateVersion = "23.11";
 }

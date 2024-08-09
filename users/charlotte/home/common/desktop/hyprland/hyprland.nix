@@ -69,9 +69,6 @@
           pseudotile = true;
           preserve_split = true;
         };
-        master = {
-          new_is_master = false;
-        };
 
         gestures = {
           workspace_swipe = true;

@@ -31,7 +31,8 @@ in
 
   # Modifies existing packages
   modifications = final: prev: {
-    rofi-emoji = prev.rofi-emoji.override { rofi-unwrapped = prev.rofi-wayland-unwrapped; };
+    rofi-emoji = prev.rofi-emoji-wayland;
+    # rofi-emoji = prev.rofi-emoji.override { rofi-unwrapped = prev.rofi-wayland-unwrapped; };
     # vimPlugins = prev.vimPlugins // {
     # vim-numbertoggle = addPatches prev.vimPlugins.vim-numbertoggle [ ./vim-numbertoggle-command-mode.patch ];
   };
