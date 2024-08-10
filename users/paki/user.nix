@@ -2,6 +2,8 @@
 let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
+  sops.secrets.paki-password = { neededForUsers = true; };
+
   users.users.paki = {
     isNormalUser = true;
     shell = pkgs.bash;
@@ -14,6 +16,7 @@ in
       "git"
     ];
 
+    hashedPasswordFile = config.sops.secrets.paki-password.path;
     openssh.authorizedKeys.keys = [ (builtins.readFile ../charlotte/ssh.pub) (builtins.readFile ../marie/ssh.pub) ];
     packages = with pkgs; [ git dig ];
   };

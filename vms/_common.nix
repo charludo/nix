@@ -12,12 +12,10 @@
     ../users/paki/user.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  vm.enable = true;
   proxmox.qemuConf = {
-    boot = lib.mkDefault "order=scsi0";
-    scsihw = lib.mkDefault "virtio-scsi-signle";
+    boot = lib.mkDefault "order=virtio0";
+    scsihw = lib.mkDefault "virtio-scsi-single";
     virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
     ostype = lib.mkDefault "l26";
     cores = config.vm.hardware.cores;
@@ -29,6 +27,7 @@
     diskSize = "auto";
     net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${builtins.substring 0 2 (toString config.vm.id)},firewall=1";
   };
+  proxmox.cloudInit.enable = false;
   proxmox.partitionTableType = lib.mkDefault "efi";
   proxmox.qemuExtraConf = {
     agent = 1;
@@ -52,6 +51,9 @@
     };
     useDHCP = lib.mkDefault true;
   };
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   nixpkgs.hostPlatform = "x86_64-linux";
   services.qemuGuest.enable = true;

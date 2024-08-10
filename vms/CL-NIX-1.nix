@@ -12,6 +12,7 @@
   ];
 
   users.mutableUsers = lib.mkForce true;
+  enableNasBackup = true;
 
   vm = {
     id = 3020;

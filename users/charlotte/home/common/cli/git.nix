@@ -1,15 +1,14 @@
-{ config, ... }:
+{ config, inputs, ... }:
 {
+  imports = [
+    ../../../../common/git.nix
+  ];
+
   home.file.".ssh/allowed_signers".text = "* ${builtins.readFile ../../../ssh.pub}";
   programs.git = {
-    enable = true;
-    userName = "charludo";
-    userEmail = "github@charlotteharludo.com";
-    ignores = [ "Session.vim" "main.shada" ".envrc" ".direnv" ".venv" ".dmypy.json" ];
+    userName = inputs.private-settings.git.charlotte.name;
+    userEmail = inputs.private-settings.git.charlotte.email;
     extraConfig = {
-      init = { defaultBranch = "main"; };
-      pull = { rebase = true; };
-      push = { autoSetupRemote = true; };
       safe = {
         directory = "${config.home.homeDirectory}/Documents";
       };

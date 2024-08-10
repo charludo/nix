@@ -1,9 +1,9 @@
 { lib, ... }:
-
 {
   options.vm = {
+    enable = lib.mkEnableOption (lib.mdDoc "make into vm");
     id = lib.mkOption { type = lib.types.int; };
-    name = lib.mkOption { type = lib.types.str; };
+    name = lib.mkOption { type = lib.types.strMatching "^$|^[[:alnum:]]([[:alnum:]_-]{0,61}[[:alnum:]])?$"; };
 
     hardware = {
       cores = lib.mkOption { type = lib.types.ints.positive; };

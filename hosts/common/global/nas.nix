@@ -3,8 +3,8 @@
   sops.secrets.nas = lib.mkIf (config.enableNas or config.enableNasBackup) { };
   users.groups.nas.gid = lib.mkIf (config.enableNas or config.enableNasBackup) 1111;
 
-  environment.systemPackages = lib.mkIf (config.enableNas or config.enableNasBackup) [ pkgs.cifs-utils ];
-  boot.supportedFilesystems = lib.mkIf (config.enableNas or config.enableNasBackup) [ "cifs" ];
+  environment.systemPackages = [ pkgs.cifs-utils ];
+  boot.supportedFilesystems = [ "cifs" ];
 
   systemd.mounts = [
     (lib.mkIf config.enableNas {

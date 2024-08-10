@@ -120,7 +120,7 @@ in
     name = "SRV-TORRENTER";
 
     hardware.cores = 4;
-    hardware.memory = 4096;
+    hardware.memory = 24576;
     hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
 
     networking.address = "192.168.20.20";

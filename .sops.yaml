@@ -2,6 +2,7 @@ keys:
   - &users
     - &charlotte age1tzayy2c75wn59vwp59e85a6p0derah9dvd94g2dan9uems8wufesc83573
     - &paki age1lzpcrkt9sn5clwet05j9re7z24gaghpmz0eszn44cefmc3yt953sdzzx5y
+    - &marie age14cj3mmrxlmk3jukarhxuufu8jt89jx9gquhfwjaawnxrlxytqpmsr5q99e
   - &hosts
     - &hub age1ds7xuydgcyp46gagvrnpxwnnsxp5v39zyfz77j6gmtjjm2uqjaqs4ajas4
     - &drone age1vzpn0t97ga4vlfnyvfh4vhhzwkd5kyz6qanf45qff4gf8uqjp37sk4pukr
@@ -23,6 +24,7 @@ creation_rules:
           - *hub
           - *drone
           - *excession
+          - *cl-nix
           - *paperless
           - *cloudsync
           - *git

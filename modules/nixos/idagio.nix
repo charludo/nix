@@ -6,7 +6,7 @@ let
   cfg = config.services.idagio;
   UID = 9417;
   GID = 9417;
-  idagio-web = pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python311Packages.flask ]; }/* python */ ''
+  idagio-web = pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python312Packages.flask ]; }/* python */ ''
     from flask import Flask, request, render_template_string
     import os
     import threading

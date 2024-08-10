@@ -31,6 +31,7 @@
                 "applications:firefox.desktop"
                 "applications:org.kde.dolphin.desktop"
                 "applications:org.kde.konsole.desktop"
+                "applications:codium.desktop"
                 "applications:org.remmina.Remmina.desktop"
               ];
             };
