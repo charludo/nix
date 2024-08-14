@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./alacritty.nix
@@ -9,6 +9,7 @@
     ./gtk.nix
     ./jellyfin.nix
     ./mpv.nix
+    ./musescore.nix
     ./nemo.nix
     ./pavucontrol.nix
     ./pdfpc.nix
@@ -28,8 +29,5 @@
     telegram-desktop
 
     orca-slicer
-
-    musescore
-    inputs.muse-sounds-manager.packages.x86_64-linux.muse-sounds-manager
   ];
 }

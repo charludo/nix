@@ -4,6 +4,7 @@
     ./autopairs.nix
     ./comment.nix
     ./git.nix
+    ./guess-indent.nix
     ./indent-blankline.nix
     ./neogen.nix
     ./projectmgr.nix
