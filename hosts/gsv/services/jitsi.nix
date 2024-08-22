@@ -83,7 +83,7 @@ in
     extraModules = [ "turn_external" ];
     extraConfig = ''
       turn_external_host = "turn.${domains.blog}"
-      turncredentials_secret = "1b217b550603140a7fc27e567cbd68c873a5d450dfd4039444cf261c98aacd0c3c7644598eabd678d784740ec9218076d4ccadeb93defc5c2b1a62bbe58b82d3"
+      turncredentials_secret = "${config.sops.secrets.coturn.path}"
     '';
   };
 }
