@@ -128,76 +128,8 @@ in
 
   home.file.".config/qpwgraph/cellolesson.qpwgraph".text = /* html */ ''
     <!DOCTYPE patchbay>
-    <patchbay name="patching" version="0.7.5">
+    <patchbay name="cellolesson" version="0.7.5">
      <items>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #1"/>
-       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FL"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band Out #1"/>
-       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #3"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Reverb Out #2"/>
-       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Reverb Out #1"/>
-       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter Out #2"/>
-       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #1"/>
-       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Gate In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #4"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter Out #1"/>
-       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FL"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #2"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter In #2"/>
-      </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
        <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #4"/>
@@ -223,12 +155,20 @@ in
        <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #2"/>
+       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #1"/>
        <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #1"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #2"/>
-       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Mono Compressor In #1"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
@@ -243,20 +183,20 @@ in
        <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter In #1"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Mono Compressor In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Gate Out #1"/>
        <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X (BT)" port="Razer Barracuda X (BT):capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Gate Out #2"/>
        <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FL"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Multi Source Aggregator" port="Multi Source Aggregator:capture_MONO"/>
+       <input node="Firefox" port="Firefox:input_MONO"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
@@ -267,8 +207,8 @@ in
        <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate In #1"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Multi Source Aggregator" port="Multi Source Aggregator:capture_MONO"/>
-       <input node="Firefox" port="Firefox:input_MONO"/>
+       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #2"/>
@@ -276,7 +216,75 @@ in
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #3"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate In #1"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #1"/>
+       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FL"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band Out #1"/>
+       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
        <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Reverb Out #2"/>
+       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Reverb Out #1"/>
+       <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #1"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Gate Out #1"/>
+       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Gate In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X (BT)" port="Razer Barracuda X (BT):capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #1"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter Out #2"/>
+       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FR"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #4"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #1"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Scarlett Solo (3rd Gen.) Input 2 Inst/Line" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Limiter Out #1"/>
+       <input node="Razer Barracuda X 2.4 Analog Stereo" port="Razer Barracuda X 2.4:playback_FL"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #2"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #2"/>
       </item>
      </items>
     </patchbay>
