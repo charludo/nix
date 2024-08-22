@@ -5,7 +5,7 @@ let
     runtimeInputs = [ pkgs.qpwgraph pkgs.calf ];
     text = ''
       ${pkgs.calf}/bin/calfjackhost --load "${config.home.homeDirectory}/.config/calf/cellolesson.xml" &
-      ${pkgs.qpwgraph}/bin/qpwgraph -a "${config.home.homeDirectory}/config/qpwgraph/cellolesson.qpwgraph"
+      ${pkgs.qpwgraph}/bin/qpwgraph -a "${config.home.homeDirectory}/.config/qpwgraph/cellolesson.qpwgraph"
     '';
   };
 in
