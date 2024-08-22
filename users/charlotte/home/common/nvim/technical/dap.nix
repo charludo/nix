@@ -1,5 +1,5 @@
 # shamelessly stolen from: https://github.com/redyf/Neve/blob/main/config/dap/dap.nix
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   colors = import ../colors.nix { inherit config lib; };
 in
@@ -27,6 +27,7 @@ in
     };
     configurations = { };
   };
+  programs.nixvim.extraPackages = [ pkgs.lldb_19 ];
 
   programs.nixvim.keymaps = [
     { mode = "n"; key = "<leader>dB"; action = "<cmd>lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>"; options = { silent = true; desc = "Breakpoint Condition"; }; }

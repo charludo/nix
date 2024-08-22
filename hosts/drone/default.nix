@@ -7,6 +7,7 @@
 
       ../common/global
 
+      ../common/optional/bluetooth.nix
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
       ../common/optional/fontconfig.nix

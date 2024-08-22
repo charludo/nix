@@ -7,6 +7,7 @@ in
     ./blocky.nix
     ./borg.nix
     ./fail2ban.nix
+    ./jitsi.nix
     ./mailserver.nix
     ./monit.nix
     ./radicale.nix

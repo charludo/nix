@@ -3,6 +3,7 @@
   imports = [
     ./alacritty.nix
     ./darktable.nix
+    ./daw.nix
     ./discord.nix
     ./easyeffects.nix
     ./firefox.nix

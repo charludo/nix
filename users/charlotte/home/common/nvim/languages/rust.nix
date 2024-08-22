@@ -16,4 +16,13 @@
   programs.nixvim.keymaps = [
     { mode = "n"; key = "<leader>cu"; action = "<cmd>lua require('crates').upgrade_all_crates()<cr>"; options = { silent = true; desc = "Update all crates"; }; }
   ];
+
+  programs.nixvim.plugins.dap.configurations.rust = [{
+    name = "Launch debugger";
+    type = "lldb";
+    request = "launch";
+    cwd = ''''${workspaceFolder}'';
+    program = "$\{file}";
+  }];
+  programs.nixvim.plugins.dap.adapters.executables.lldb.command = "rust-lldb";
 }
