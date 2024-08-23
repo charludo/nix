@@ -41,6 +41,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    musnix = { url = "github:musnix/musnix"; };
+
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
     muse-sounds-manager.url = "github:thilobillerbeck/muse-sounds-manager-nix";

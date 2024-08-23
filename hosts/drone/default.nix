@@ -13,6 +13,7 @@
       ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
       ../common/optional/gvfs.nix
+      ../common/optional/musnix.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/screensharing.nix

@@ -13,6 +13,8 @@ in
     ./common/desktop/hyprland
   ];
 
+  home.packages = [ pkgs.zoom-us ];
+
   # Use this method for built-in schemes:
   colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
 
