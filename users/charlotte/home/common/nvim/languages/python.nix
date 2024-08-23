@@ -24,4 +24,15 @@
   programs.nixvim.plugins.lint.lintersByFt.python = [ "pylint" ];
   programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
   home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
+
+  programs.nixvim.plugins.dap.configurations.python = [{
+    name = "Launch Django DAP";
+    type = "python";
+    request = "launch";
+    program = { __raw = /* lua */ '' vim.loop.cwd() .. "/.venv/bin/django-admin" ''; };
+    args = [ "runserver" "--noreload" ];
+    justMyCode = true;
+    django = true;
+    console = "integratedTerminal";
+  }];
 }
