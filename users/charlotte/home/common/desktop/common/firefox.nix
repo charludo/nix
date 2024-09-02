@@ -1,7 +1,10 @@
 { pkgs, ... }:
-
+let
+  firefox = pkgs.firefox.override { pkcs11Modules = [ pkgs.eid-mw ]; };
+in
 {
   programs.firefox = {
+    package = firefox;
     enable = true;
     profiles.charlotte = {
       extensions = with pkgs.inputs.firefox-addons; [

@@ -5,46 +5,49 @@ in
 {
   programs.nixvim.plugins.bufferline = {
     enable = true;
-    alwaysShowBufferline = true;
-    showTabIndicators = false;
-    highlights =
-      {
+    settings = {
+      highlights = {
         background = { fg = colors.light_grey; bg = colors.black2; };
-        indicatorVisible = { fg = colors.black2; bg = colors.black2; };
-        bufferSelected = { fg = colors.white; bg = colors.black; italic = false; bold = false; };
-        bufferVisible = { fg = colors.light_grey; bg = colors.black2; };
-        offsetSeparator = { fg = colors.light_grey; bg = colors.black; };
+        indicator_visible = { fg = colors.black2; bg = colors.black2; };
+        buffer_selected = { fg = colors.white; bg = colors.black; italic = false; bold = false; };
+        buffer_visible = { fg = colors.light_grey; bg = colors.black2; };
+        offset_separator = { fg = colors.light_grey; bg = colors.black; };
 
         error = { fg = colors.light_grey; bg = colors.black2; };
-        errorDiagnostic = { fg = colors.light_grey; bg = colors.black2; };
+        error_diagnostic = { fg = colors.light_grey; bg = colors.black2; };
 
-        closeButton = { fg = colors.light_grey; bg = colors.black2; };
-        closeButtonVisible = { fg = colors.light_grey; bg = colors.black2; };
-        closeButtonSelected = { fg = colors.red; bg = colors.black; };
+        close_button = { fg = colors.light_grey; bg = colors.black2; };
+        close_button_visible = { fg = colors.light_grey; bg = colors.black2; };
+        close_button_selected = { fg = colors.red; bg = colors.black; };
         fill = { fg = colors.grey_fg; bg = colors.black2; };
-        indicatorSelected = { fg = colors.black; bg = colors.black; };
+        indicator_selected = { fg = colors.black; bg = colors.black; };
 
         modified = { fg = colors.red; bg = colors.black2; };
-        modifiedVisible = { fg = colors.red; bg = colors.black2; };
-        modifiedSelected = { fg = colors.green; bg = colors.black; };
+        modified_visible = { fg = colors.red; bg = colors.black2; };
+        modified_selected = { fg = colors.green; bg = colors.black; };
 
         separator = { fg = colors.black2; bg = colors.black2; };
-        separatorVisible = { fg = colors.black2; bg = colors.black2; };
-        separatorSelected = { fg = colors.black2; bg = colors.black2; };
+        separator_visible = { fg = colors.black2; bg = colors.black2; };
+        separator_selected = { fg = colors.black2; bg = colors.black2; };
 
         tab = { fg = colors.light_grey; bg = colors.one_bg3; };
-        tabSelected = { fg = colors.black2; bg = colors.nord_blue; };
-        tabClose = { fg = colors.red; bg = colors.black; };
+        tab_selected = { fg = colors.black2; bg = colors.nord_blue; };
+        tab_close = { fg = colors.red; bg = colors.black; };
 
         duplicate = { fg = "NONE"; bg = colors.black2; };
-        duplicateSelected = { fg = colors.red; bg = colors.black; };
-        duplicateVisible = { fg = colors.blue; bg = colors.black2; };
+        duplicate_selected = { fg = colors.red; bg = colors.black; };
+        duplicate_visible = { fg = colors.blue; bg = colors.black2; };
       };
-    indicator.style = null;
-    indicator.icon = " ";
-    offsets = [
-      { filetype = "NvimTree"; padding = 1; highlight = "NvimTreeWinSeparator"; }
-    ];
+      options = {
+        always_show_bufferline = true;
+        show_tab_indicators = false;
+        offsets = [
+          { filetype = "NvimTree"; padding = 1; highlight = "NvimTreeWinSeparator"; }
+        ];
+        indicator.style = null;
+        indicator.icon = " ";
+      };
+    };
   };
 
   # Solves the issue of nvim-tree focusing after a buffer is deleted

@@ -18,7 +18,7 @@
     svelte = [ "eslint_d" ];
     astro = [ "eslint_d" ];
   };
-  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+  programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
     css = [ "prettierd" ];
     sass = [ "prettierd" ];
     scss = [ "prettierd" ];

@@ -17,7 +17,7 @@ in
   programs.nixvim.opts.conceallevel = 2;
 
   programs.nixvim.plugins.lsp.servers.ltex.enable = true;
-  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+  programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
     bib = [ "latexindent" ];
     plaintex = [ "latexindent" ];
     tex = [ "latexindent" ];

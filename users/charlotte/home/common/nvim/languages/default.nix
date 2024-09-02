@@ -22,11 +22,11 @@
     yamlls.enable = true;
   };
 
-  programs.nixvim.plugins.conform-nvim.formattersByFt = {
+  programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
     nix = [ "nixpkgs_fmt" ];
     lua = [ "stylua" ];
     sh = [ "shfmt" ];
   };
-  programs.nixvim.plugins.conform-nvim.formatters.shfmt.args = [ "-sr" "-kp" "-i" "4" "-filename" "$FILENAME" ];
+  programs.nixvim.plugins.conform-nvim.settings.formatters.shfmt.args = [ "-sr" "-kp" "-i" "4" "-filename" "$FILENAME" ];
   programs.nixvim.extraPackages = with pkgs; [ nixpkgs-fmt stylua shfmt ];
 }

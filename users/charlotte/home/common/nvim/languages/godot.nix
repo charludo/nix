@@ -9,6 +9,6 @@
     require'lspconfig'.gdscript.setup{capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())}
   '';
   programs.nixvim.plugins.lint.lintersByFt.gdscript = [ "gdlint" ];
-  programs.nixvim.plugins.conform-nvim.formattersByFt.gdscript = [ "gdformat" ];
+  programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.gdscript = [ "gdformat" ];
   programs.nixvim.extraPackages = [ pkgs.gdtoolkit_4 ];
 }

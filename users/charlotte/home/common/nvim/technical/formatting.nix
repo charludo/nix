@@ -1,14 +1,16 @@
 {
   programs.nixvim.plugins.conform-nvim = {
     enable = true;
-    formatOnSave = /* lua */ ''
-      {
-        lsp_fallback = true,
-        timout_md = 500,
-      }
-    '';
-    formattersByFt = {
-      "_" = [ "trim_whitespace" ];
+    settings = {
+      format_on_save = /* lua */ ''
+        {
+          lsp_fallback = true,
+          timout_md = 500,
+        }
+      '';
+      formatters_by_ft = {
+        "_" = [ "trim_whitespace" ];
+      };
     };
   };
 

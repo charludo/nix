@@ -34,5 +34,10 @@
     justMyCode = true;
     django = true;
     console = "integratedTerminal";
+    env = {
+      "DJANGO_SETTINGS_MODULE" = "true";
+      "INTEGREAT_CMS_DEBUG" = "true";
+      "INTEGREAT_CMS_SECRET_KEY" = "dummy";
+    };
   }];
 }
