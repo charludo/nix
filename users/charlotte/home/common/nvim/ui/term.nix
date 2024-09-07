@@ -77,8 +77,8 @@ in
 
       vim.wo[win].number = false
       vim.wo[win].relativenumber = false
-      -- vim.wo[win].foldcolumn = "0"
-      -- vim.wo[win].signcolumn = "no"
+      vim.wo[win].foldcolumn = "0"
+      vim.wo[win].signcolumn = "no"
       vim.bo[opts.buf].buflisted = false
       vim.wo[win].winhl = opts.hl or config.hl
       vim.cmd "startinsert"

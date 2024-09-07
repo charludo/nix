@@ -6,6 +6,9 @@
     installRustc = false;
     settings.cargo.features = "all";
     settings.diagnostics.styleLints.enable = true;
+    settings.completion.privateEditable.enable = true;
+    settings.inlayHints.lifetimeElisionHints.enable = "skip_trivial";
+    settings.check.command = "clippy";
   };
 
   programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
