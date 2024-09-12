@@ -17,10 +17,10 @@ in
 
     settings.options = {
       globalstatus = true;
-      componentSeparators.left = "";
-      componentSeparators.right = "";
-      sectionSeparators.left = "";
-      sectionSeparators.right = "";
+      component_separators.left = "";
+      component_separators.right = "";
+      section_separators.left = "";
+      section_separators.right = "";
 
       theme = lib.mkForce {
         normal.a = { fg = colors.base01; bg = colors.base0B; };
