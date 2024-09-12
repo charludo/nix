@@ -14,6 +14,7 @@
       ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
       ../common/optional/gvfs.nix
+      ../common/optional/keyring.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/rsync.nix

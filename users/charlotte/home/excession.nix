@@ -25,7 +25,7 @@ in
     ./common/desktop/common/nemo.nix
     ./common/desktop/common/playerctl.nix
     ./common/desktop/common/qt.nix
-    ./common/desktop/common/themeing.nix
+    ./common/desktop/common/theming.nix
     ./common/desktop/common/xdg.nix
   ];
 

@@ -25,7 +25,7 @@ in
       };
       p2p = {
         stunServers = [
-          { urls = "stun:turn.${domains.blog}:443"; }
+          { urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"; }
         ];
         iceTransportPolicy = "relay";
       };
@@ -48,42 +48,18 @@ in
   services.jitsi-videobridge = {
     enable = true;
     openFirewall = true;
-    config.videobridge.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES = "turn.${domains.blog}:443";
-  };
-
-  sops.secrets.coturn = { owner = "turnserver"; };
-  services.coturn = {
-    enable = true;
-    realm = "turn.${domains.blog}";
-
-    cert = "${config.security.acme.certs."turn.${domains.blog}".directory}/fullchain.pem";
-    pkey = "${config.security.acme.certs."turn.${domains.blog}".directory}/key.pem";
-
-    secure-stun = true;
-    lt-cred-mech = true;
-    use-auth-secret = true;
-    static-auth-secret-file = config.sops.secrets.coturn.path;
-
-    no-dtls = true;
-    no-tls = true;
-    extraConfig = ''
-      no-multicast-peers
-      total-quota=50
-    '';
-  };
-
-  services.nginx.virtualHosts = {
-    "turn.${domains.blog}" = {
-      forceSSL = true;
-      enableACME = true;
-    };
+    config.videobridge.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES = "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}";
   };
 
   services.prosody = {
     extraModules = [ "turn_external" ];
     extraConfig = ''
       turn_external_host = "turn.${domains.blog}"
-      turncredentials_secret = "${config.sops.secrets.coturn.path}"
+      turn_external_port = ${builtins.toString config.services.coturn.listening-port}
+      turn_external_secret = ""
     '';
   };
+
+  sops.secrets.coturn-env = { owner = "prosody"; };
+  systemd.services.prosody.serviceConfig.EnvironmentFile = config.sops.secrets.coturn-env.path;
 }

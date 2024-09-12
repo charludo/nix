@@ -25,6 +25,14 @@ rec {
       "file://${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}"
       "file:///media/NAS"
     ];
+
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
+
+    gtk4.extraConfig = {
+      gtk-application-prefer-dark-theme = true;
+    };
   };
 
   dconf = {

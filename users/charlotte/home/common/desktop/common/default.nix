@@ -17,7 +17,7 @@
     ./playerctl.nix
     ./qt.nix
     ./sioyek.nix
-    ./themeing.nix
+    ./theming.nix
     ./thunderbird.nix
     ./xdg.nix
   ];
@@ -28,6 +28,7 @@
 
     mattermost-desktop
     telegram-desktop
+    element-desktop
 
     orca-slicer
   ];

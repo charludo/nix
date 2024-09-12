@@ -9,10 +9,12 @@ in
     ./fail2ban.nix
     ./jitsi.nix
     ./mailserver.nix
+    ./matrix.nix
     ./monit.nix
     ./radicale.nix
     ./roundcube.nix
     ./rustdesk.nix
+    ./turn.nix
     ./wireguard.nix
   ];
 

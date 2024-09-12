@@ -5,13 +5,8 @@ in
 {
   programs.nixvim.plugins.lualine = {
     enable = true;
-    globalstatus = true;
-    componentSeparators.left = "";
-    componentSeparators.right = "";
-    sectionSeparators.left = "";
-    sectionSeparators.right = "";
 
-    sections = {
+    settings.sections = {
       lualine_a = [ "mode" ];
       lualine_b = [ "filename" ];
       lualine_c = [ "branch" ];
@@ -20,30 +15,38 @@ in
       lualine_z = [ "progress" ];
     };
 
-    theme = lib.mkForce {
-      normal.a = { fg = colors.base01; bg = colors.base0B; };
-      normal.b = { fg = colors.base05; bg = colors.grey; };
-      normal.c = { fg = colors.base04; bg = colors.line; };
+    settings.options = {
+      globalstatus = true;
+      componentSeparators.left = "";
+      componentSeparators.right = "";
+      sectionSeparators.left = "";
+      sectionSeparators.right = "";
 
-      insert.a = { fg = colors.base01; bg = colors.base0A; };
-      insert.b = { fg = colors.base05; bg = colors.grey; };
-      insert.c = { fg = colors.base04; bg = colors.line; };
+      theme = lib.mkForce {
+        normal.a = { fg = colors.base01; bg = colors.base0B; };
+        normal.b = { fg = colors.base05; bg = colors.grey; };
+        normal.c = { fg = colors.base04; bg = colors.line; };
 
-      visual.a = { fg = colors.base01; bg = colors.base09; };
-      visual.b = { fg = colors.base05; bg = colors.grey; };
-      visual.c = { fg = colors.base04; bg = colors.line; };
+        insert.a = { fg = colors.base01; bg = colors.base0A; };
+        insert.b = { fg = colors.base05; bg = colors.grey; };
+        insert.c = { fg = colors.base04; bg = colors.line; };
 
-      terminal.a = { fg = colors.base01; bg = colors.base08; };
-      terminal.b = { fg = colors.base05; bg = colors.grey; };
-      terminal.c = { fg = colors.base04; bg = colors.line; };
+        visual.a = { fg = colors.base01; bg = colors.base09; };
+        visual.b = { fg = colors.base05; bg = colors.grey; };
+        visual.c = { fg = colors.base04; bg = colors.line; };
 
-      command.a = { fg = colors.base01; bg = colors.base0D; };
-      command.b = { fg = colors.base05; bg = colors.grey; };
-      command.c = { fg = colors.base04; bg = colors.line; };
+        terminal.a = { fg = colors.base01; bg = colors.base08; };
+        terminal.b = { fg = colors.base05; bg = colors.grey; };
+        terminal.c = { fg = colors.base04; bg = colors.line; };
 
-      inactive.a = { fg = colors.base03; bg = colors.base01; };
-      inactive.b = { fg = colors.base03; bg = colors.base01; };
-      inactive.c = { fg = colors.base03; bg = colors.base01; };
+        command.a = { fg = colors.base01; bg = colors.base0D; };
+        command.b = { fg = colors.base05; bg = colors.grey; };
+        command.c = { fg = colors.base04; bg = colors.line; };
+
+        inactive.a = { fg = colors.base03; bg = colors.base01; };
+        inactive.b = { fg = colors.base03; bg = colors.base01; };
+        inactive.c = { fg = colors.base03; bg = colors.base01; };
+      };
     };
   };
 
