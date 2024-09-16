@@ -1,7 +1,6 @@
 { inputs, outputs, pkgs, ... }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
-    ./auto-update.nix
     ./locale.nix
     ./nas.nix
     ./nix.nix

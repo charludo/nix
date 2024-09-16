@@ -150,12 +150,6 @@
           modules = [ ./vms/SRV-TORRENTER.nix ];
           specialArgs = { inherit inputs outputs; };
         };
-
-        # Installer (used with nixos-generators install-iso)
-        # installer = lib.nixosSystem {
-        # modules = [ ./hosts/installer ];
-        # specialArgs = { inherit inputs outputs; };
-        # };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
