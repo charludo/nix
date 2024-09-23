@@ -62,4 +62,8 @@ in
 
   sops.secrets.coturn-env = { owner = "prosody"; };
   systemd.services.prosody.serviceConfig.EnvironmentFile = config.sops.secrets.coturn-env.path;
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "jitsi-meet-1.0.8043"
+  ];
 }

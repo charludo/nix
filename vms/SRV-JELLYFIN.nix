@@ -7,7 +7,7 @@
     name = "SRV-JELLYFIN";
 
     hardware.cores = 4;
-    hardware.memory = 8192;
+    hardware.memory = 16384;
     hardware.storage = "32G";
 
     networking.address = "192.168.20.36";

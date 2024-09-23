@@ -29,6 +29,7 @@
     mattermost-desktop
     telegram-desktop
     element-desktop
+    jitsi-meet-electron
 
     orca-slicer
   ];

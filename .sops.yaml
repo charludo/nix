@@ -17,6 +17,7 @@ keys:
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
     - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
+    - &matrix age1ptvksu3pffdgzwa0ep2u28at6mk9u8yhvxkuvkuvc7kl6x5k8shs7xca6n
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
@@ -30,6 +31,7 @@ creation_rules:
           - *git
           - *jellyfin
           - *torrenter
+          - *matrix
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:

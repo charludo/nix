@@ -45,7 +45,6 @@
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
-    muse-sounds-manager.url = "github:thilobillerbeck/muse-sounds-manager-nix";
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
@@ -148,6 +147,12 @@
         # Helper for downloading Linux ISOs
         SRV-TORRENTER = lib.nixosSystem {
           modules = [ ./vms/SRV-TORRENTER.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Matrix Server
+        SRV-MATRIX = lib.nixosSystem {
+          modules = [ ./vms/SRV-MATRIX.nix ];
           specialArgs = { inherit inputs outputs; };
         };
       };
