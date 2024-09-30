@@ -21,7 +21,7 @@ pkgs.writeShellApplication {
     nix build ".#nixosConfigurations.$1.config.formats.proxmox"
 
     echo "Copying result to proxmox image store..."
-    cp "result" "/media/Backup/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst"
+    cp "result/vzdump-qemu-$1.vma.zst" "/media/Backup/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst"
 
     echo "Importing VM $id..."
     # shellcheck disable=SC2029
@@ -29,7 +29,7 @@ pkgs.writeShellApplication {
 
     echo "Cleaning up..."
     # rm -f "/media/Backup/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst"
-    rm "result"
+    rm -rf "result"
 
     echo "Done!"
   '';

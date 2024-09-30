@@ -6,6 +6,7 @@ in
   imports = [
     ./blocky.nix
     ./borg.nix
+    ./crabfit.nix
     ./fail2ban.nix
     ./jitsi.nix
     ./mailserver.nix

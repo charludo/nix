@@ -155,6 +155,12 @@
           modules = [ ./vms/SRV-MATRIX.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Stateless Home automations
+        SRV-HOME = lib.nixosSystem {
+          modules = [ ./vms/SRV-HOME.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
