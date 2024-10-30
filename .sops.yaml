@@ -19,10 +19,12 @@ keys:
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
     - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
     - &matrix age1ptvksu3pffdgzwa0ep2u28at6mk9u8yhvxkuvkuvc7kl6x5k8shs7xca6n
+    - &mallorca age19er6r4e6w0vcslq0xvhfrfa8f8c64whp9ucz3vqrhly5xldhmcwq567evw
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
       - age:
+          - *charlotte
           - *hub
           - *drone
           - *excession
@@ -34,6 +36,7 @@ creation_rules:
           - *jellyfin
           - *torrenter
           - *matrix
+          - *mallorca
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:
