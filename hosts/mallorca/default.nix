@@ -3,6 +3,7 @@
   _module.args.defaultUser = "charlotte";
   imports =
     [
+      # ./immich.nix
       ./hardware-configuration.nix
 
       ../common/global
