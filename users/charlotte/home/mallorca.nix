@@ -57,7 +57,7 @@ in
       modules-right = [
         "bluetooth"
         "custom/wireguard"
-        "network#laptop"
+        "network#mallorca"
         "disk#home"
         "cpu"
         "memory"

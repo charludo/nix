@@ -140,6 +140,9 @@ rec {
       "org/gnome/desktop/wm/preferences" = {
         button-layout = "appmenu";
       };
+      "org/gtk/settings/file-chooser" = {
+        sort-directories-first = true;
+      };
     };
   };
 

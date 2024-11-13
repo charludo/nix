@@ -13,7 +13,6 @@ let
         fg-col2 = mkLiteral "#${config.colorscheme.palette.base08}";
         grey = mkLiteral "#${config.colorscheme.palette.base03}";
 
-        width = 600;
         font = "${config.fontProfiles.regular.family} 13";
       };
 
@@ -32,12 +31,13 @@ let
         text-color = mkLiteral "inherit";
       };
 
-      "#window" = {
-        background-color = mkLiteral "rgba(20, 20, 20, 0%)";
+      window = {
+        background-color = mkLiteral "rgba(0, 0, 0, 25%)";
         border = 0;
-        padding = "35% 35%";
-        width = "100%";
-        height = "100%";
+        fullscreen = true;
+        #width = mkLiteral "100%";
+        #height = mkLiteral "100%";
+        padding = mkLiteral "32.5% 32.5%";
       };
 
       mainbox = {
@@ -64,7 +64,6 @@ let
 
       textbox-prompt-colon = {
         expand = false;
-        str = ":";
       };
 
       entry = {
