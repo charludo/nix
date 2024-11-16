@@ -72,7 +72,8 @@ in
       "workspace 2, class:(steam),title:()"
       "workspace 1 silent, class:(firefox),title:()"
       "workspace 3 silent, class:(WebCord),title:()"
-      "workspace 3 silent, class:(org.jellyfin.),title:()"
+      "workspace 3 silent, class:(com.github.iwalton3.jellyfin-media-player),title:()"
+      "fullscreenstate 0, class:(com.github.iwalton3.jellyfin-media-player),title:()"
     ];
   };
 
