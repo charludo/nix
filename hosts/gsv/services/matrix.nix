@@ -1,6 +1,6 @@
 { config, inputs, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (inputs.private-settings) domains gsv;
 in
 {
   services.matrix-conduit = {
@@ -15,7 +15,7 @@ in
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
       ];
-      turn_secret = "";
+      turn_secret = gsv.turnSecret;
       enable_lightning_bolt = false;
     };
   };

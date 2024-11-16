@@ -9,6 +9,7 @@
 
       isort.enabled = true;
       pylint.enabled = true;
+      pylint.package = pkgs.pylint;
 
       pycodestyle.enabled = true;
       pycodestyle.maxLineLength = 88;
@@ -19,9 +20,10 @@
 
       ruff.enabled = true;
       ruff.lineLength = 88;
+      ruff.executable = "${pkgs.ruff}/bin/ruff";
     };
   };
-  programs.nixvim.plugins.lint.lintersByFt.python = [ "pylint" ];
+
   programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
   home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
 

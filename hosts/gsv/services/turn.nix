@@ -1,6 +1,6 @@
 { config, inputs, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (inputs.private-settings) domains gsv;
 in
 {
   sops.secrets.coturn = { owner = "turnserver"; };
@@ -11,7 +11,7 @@ in
     listening-ips = [ "0.0.0.0" ];
     listening-port = 3478;
 
-    relay-ips = [ "88.99.148.232" ];
+    relay-ips = [ gsv.ip ];
     min-port = 49152;
     max-port = 65535;
 

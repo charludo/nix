@@ -22,6 +22,8 @@ in
     { mode = [ "n" ]; key = "<leader>rn"; action = "<cmd>set rnu!<CR>"; options = { desc = "Toggle Relative number"; }; }
   ];
 
+  programs.nixvim.plugins.web-devicons.enable = true;
+
   programs.nixvim.highlight = {
     MatchWord = { bg = colors.grey; fg = colors.white; };
     Pmenu = { bg = colors.one_bg; };

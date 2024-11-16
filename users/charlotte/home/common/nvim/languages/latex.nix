@@ -10,7 +10,7 @@ in
     enable = true;
     texlivePackage = tex;
     settings = {
-      compiler_method = "xetex";
+      compiler_method = "latexmk";
       view_method = "sioyek";
     };
   };

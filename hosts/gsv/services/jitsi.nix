@@ -1,6 +1,6 @@
 { config, inputs, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (inputs.private-settings) domains gsv;
 in
 {
   services.jitsi-meet = {
@@ -56,10 +56,14 @@ in
     extraConfig = ''
       turn_external_host = "turn.${domains.blog}"
       turn_external_port = ${builtins.toString config.services.coturn.listening-port}
-      turn_external_secret = ""
+      turn_external_secret = "${gsv.turnSecret}"
     '';
   };
 
   sops.secrets.coturn-env = { owner = "prosody"; };
   systemd.services.prosody.serviceConfig.EnvironmentFile = config.sops.secrets.coturn-env.path;
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "jitsi-meet-1.0.8043"
+  ];
 }

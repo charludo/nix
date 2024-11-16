@@ -45,7 +45,6 @@
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
-    muse-sounds-manager.url = "github:thilobillerbeck/muse-sounds-manager-nix";
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
@@ -102,6 +101,10 @@
           modules = [ ./vms/CL-NIX-3.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+        CL-ROU = lib.nixosSystem {
+          modules = [ ./vms/CL-ROU.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
 
         # Adblocking
         SRV-BLOCKY = lib.nixosSystem {
@@ -148,6 +151,18 @@
         # Helper for downloading Linux ISOs
         SRV-TORRENTER = lib.nixosSystem {
           modules = [ ./vms/SRV-TORRENTER.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Matrix Server
+        SRV-MATRIX = lib.nixosSystem {
+          modules = [ ./vms/SRV-MATRIX.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Stateless Home automations
+        SRV-HOME = lib.nixosSystem {
+          modules = [ ./vms/SRV-HOME.nix ];
           specialArgs = { inherit inputs outputs; };
         };
       };

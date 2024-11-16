@@ -34,11 +34,11 @@ in
     <preset bank="0" program="0" plugin="sidechaincompressor" name="">
       <param name="bypass" value="0" />
       <param name="level_in" value="1" />
-      <param name="meter_in" value="0.0907648" />
-      <param name="meter_out" value="0.0907648" />
+      <param name="meter_in" value="0.000893601" />
+      <param name="meter_out" value="0.000893601" />
       <param name="clip_in" value="0" />
       <param name="clip_out" value="0" />
-      <param name="threshold" value="0.00272412" />
+      <param name="threshold" value="0.00975262" />
       <param name="ratio" value="4.29497e+09" />
       <param name="attack" value="96.9113" />
       <param name="release" value="75.9196" />
@@ -65,10 +65,10 @@ in
       <param name="bypass" value="0" />
       <param name="level_in" value="0.160428" />
       <param name="level_out" value="2.53854" />
-      <param name="meter_inL" value="0.0147537" />
-      <param name="meter_inR" value="0.0146042" />
-      <param name="meter_outL" value="0.0374527" />
-      <param name="meter_outR" value="0.0370734" />
+      <param name="meter_inL" value="0.000143359" />
+      <param name="meter_inR" value="0.000143359" />
+      <param name="meter_outL" value="0.000363922" />
+      <param name="meter_outR" value="0.000363922" />
       <param name="clip_inL" value="0" />
       <param name="clip_inR" value="0" />
       <param name="clip_outL" value="0" />
@@ -101,8 +101,8 @@ in
     </plugin>
     <plugin type="reverb" instance-name="Reverb" input-index="7" output-index="5">
     <preset bank="0" program="0" plugin="reverb" name="">
-      <param name="meter_inL" value="0.00181697" />
-      <param name="meter_inR" value="0.00181697" />
+      <param name="meter_inL" value="0.00115408" />
+      <param name="meter_inR" value="0.00115408" />
       <param name="clip_outL" value="0" />
       <param name="decay_time" value="0.701003" />
       <param name="hf_damp" value="5000" />
@@ -116,8 +116,8 @@ in
       <param name="on" value="1" />
       <param name="level_in" value="1" />
       <param name="level_out" value="1" />
-      <param name="meter_outL" value="0.00177844" />
-      <param name="meter_outR" value="0.00190864" />
+      <param name="meter_outL" value="0.00123558" />
+      <param name="meter_outR" value="0.00119083" />
       <param name="clip_inL" value="0" />
       <param name="clip_inR" value="0" />
       <param name="clip_outR" value="0" />
@@ -131,16 +131,16 @@ in
     <patchbay name="cellolesson" version="0.7.5">
      <items>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Multi Source Aggregator" port="Multi Source Aggregator:capture_MONO"/>
-       <input node="Built-in Audio Analog Stereo" port="ALC255 Analog:playback_FL"/>
+       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #2"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #1"/>
        <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Built-in Audio Analog Stereo" port="ALC255 Analog:capture_FR"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band Out #2"/>
@@ -151,12 +151,16 @@ in
        <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #1"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Reverb In #2"/>
+       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #2"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #2"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Multi Source Aggregator" port="Multi Source Aggregator:capture_MONO"/>
-       <input node="Built-in Audio Analog Stereo" port="ALC255 Analog:playback_FR"/>
+       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #4"/>
+      </item>
+      <item node-type="pipewire" port-type="pipewire-audio">
+       <output node="Razer Barracuda X 2.4 Mono" port="Razer Barracuda X 2.4:capture_MONO"/>
+       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #1"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Reverb Out #1"/>
@@ -167,24 +171,12 @@ in
        <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Built-in Audio Analog Stereo" port="ALC255 Analog:capture_FL"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #1"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
        <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #3"/>
       </item>
       <item node-type="pipewire" port-type="pipewire-audio">
        <output node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band Out #1"/>
        <input node="Multi Source Aggregator" port="Multi Source Aggregator:playback_MONO"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor Out #2"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Equalizer 5 Band In #2"/>
-      </item>
-      <item node-type="pipewire" port-type="pipewire-audio">
-       <output node="Scarlett Solo (3rd Gen.) Input 1 Mic" port="Scarlett Solo USB:capture_MONO"/>
-       <input node="Calf Studio Gear" port="Calf Studio Gear:Sidechain Compressor In #4"/>
       </item>
      </items>
     </patchbay>
