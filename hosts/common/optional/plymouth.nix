@@ -3,10 +3,10 @@
   boot = {
     plymouth = {
       enable = true;
-      theme = "red_loader";
+      theme = "dark_planet";
       themePackages = with pkgs; [
         (adi1090x-plymouth-themes.override {
-          selected_themes = [ "rings" "red_loader" ];
+          selected_themes = [ "rings" "red_loader" "hud_3" "dark_planet" "cuts" ];
         })
       ];
     };

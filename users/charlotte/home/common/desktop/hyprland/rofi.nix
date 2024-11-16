@@ -37,7 +37,8 @@ let
         fullscreen = true;
         #width = mkLiteral "100%";
         #height = mkLiteral "100%";
-        padding = mkLiteral "32.5% 32.5%";
+        # padding = mkLiteral "32.5% 32.5%";
+        padding = mkLiteral "calc(50% - 200px) calc(50% - 360px)";
       };
 
       mainbox = {

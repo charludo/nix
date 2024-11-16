@@ -5,7 +5,7 @@ let
   gtkCss = ''
     @define-color accent_color #${palette.base0D};
     @define-color accent_bg_color #${palette.base0D};
-    @define-color accent_fg_color #${palette.base00};
+    @define-color accent_fg_color #${palette.base02};
     @define-color destructive_color #${palette.base08};
     @define-color destructive_bg_color #${palette.base08};
     @define-color destructive_fg_color #${palette.base00};
@@ -19,17 +19,17 @@ let
     @define-color error_bg_color #${palette.base08};
     @define-color error_fg_color #${palette.base00};
     @define-color window_bg_color #${palette.base00};
-    @define-color window_fg_color #${palette.base05};
+    @define-color window_fg_color #${palette.base06};
     @define-color view_bg_color #${palette.base00};
-    @define-color view_fg_color #${palette.base05};
+    @define-color view_fg_color #${palette.base06};
     @define-color headerbar_bg_color #${palette.base01};
-    @define-color headerbar_fg_color #${palette.base05};
+    @define-color headerbar_fg_color #${palette.base06};
     @define-color headerbar_border_color rgba(0.0, 0.0, 0.0, 0.7);
     @define-color headerbar_backdrop_color @window_bg_color;
     @define-color headerbar_shade_color rgba(0, 0, 0, 0.07);
     @define-color headerbar_darker_shade_color rgba(0, 0, 0, 0.07);
     @define-color sidebar_bg_color #${palette.base01};
-    @define-color sidebar_fg_color #${palette.base05};
+    @define-color sidebar_fg_color #${palette.base06};
     @define-color sidebar_backdrop_color @window_bg_color;
     @define-color sidebar_shade_color rgba(0, 0, 0, 0.07);
     @define-color secondary_sidebar_bg_color @sidebar_bg_color;
@@ -37,12 +37,12 @@ let
     @define-color secondary_sidebar_backdrop_color @sidebar_backdrop_color;
     @define-color secondary_sidebar_shade_color @sidebar_shade_color;
     @define-color card_bg_color #${palette.base01};
-    @define-color card_fg_color #${palette.base05};
+    @define-color card_fg_color #${palette.base06};
     @define-color card_shade_color rgba(0, 0, 0, 0.07);
     @define-color dialog_bg_color #${palette.base01};
-    @define-color dialog_fg_color #${palette.base05};
+    @define-color dialog_fg_color #${palette.base06};
     @define-color popover_bg_color #${palette.base01};
-    @define-color popover_fg_color #${palette.base05};
+    @define-color popover_fg_color #${palette.base06};
     @define-color popover_shade_color rgba(0, 0, 0, 0.07);
     @define-color shade_color rgba(0, 0, 0, 0.07);
     @define-color scrollbar_outline_color #${palette.base02};
