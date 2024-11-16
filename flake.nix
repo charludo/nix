@@ -101,6 +101,10 @@
           modules = [ ./vms/CL-NIX-3.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+        CL-ROU = lib.nixosSystem {
+          modules = [ ./vms/CL-ROU.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
 
         # Adblocking
         SRV-BLOCKY = lib.nixosSystem {

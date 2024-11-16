@@ -16,7 +16,7 @@
   nix = {
     package = lib.mkDefault pkgs.nix;
     settings = {
-      experimental-features = [ "nix-command" "flakes" "repl-flake" ];
+      experimental-features = [ "nix-command" "flakes" ];
       warn-dirty = false;
     };
   };
@@ -45,9 +45,9 @@
     username = lib.mkDefault "charlotte";
     homeDirectory = lib.mkDefault "/home/${config.home.username}";
     stateVersion = lib.mkDefault "23.11";
-    sessionPath = [ "$HOME/.local/bin" ];
+    sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
     sessionVariables = {
-      FLAKE = "$HOME/nix";
+      FLAKE = "${config.home.homeDirectory}/Projekte/nix";
       EDITOR = "nvim";
       TERMINAL = "${pkgs.alacritty}/bin/alacritty";
     };

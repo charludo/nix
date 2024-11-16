@@ -77,6 +77,16 @@ in
               }}";
             definedAliases = [ "@nh" ];
           };
+          "Nixpkgs Status" = {
+            urls = [{
+              template = "https://nixpk.gs/pr-tracker.html";
+              params = [
+                { name = "pr"; value = "{searchTerms}"; }
+              ];
+            }];
+            icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = [ "@ns" ];
+          };
           "Bing".metaData.hidden = true;
           "DuckDuckGo".metaData.hidden = true;
           "eBay".metaData.hidden = true;

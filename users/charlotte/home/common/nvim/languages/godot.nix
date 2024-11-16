@@ -1,6 +1,7 @@
 { pkgs, ... }:
 {
   programs.nixvim.plugins.lsp.servers.gdscript.enable = true;
+  programs.nixvim.plugins.lsp.servers.gdscript.package = pkgs.gdtoolkit_4;
   programs.nixvim.keymaps = [
     { mode = [ "n" ]; key = "<leader>gr"; action = "<cmd>GodotRun<cr>"; options = { desc = "run Godot scene"; }; }
     { mode = [ "n" ]; key = "<leader>gs"; action = "<cmd>GodotRunCurrent<cr>"; options = { desc = "run current Godot scene"; }; }
@@ -10,5 +11,4 @@
   '';
   programs.nixvim.plugins.lint.lintersByFt.gdscript = [ "gdlint" ];
   programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.gdscript = [ "gdformat" ];
-  programs.nixvim.extraPackages = [ pkgs.gdtoolkit_4 ];
 }

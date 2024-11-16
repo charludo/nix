@@ -1,6 +1,6 @@
 { config, pkgs, inputs, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (inputs.private-settings) domains gsv;
 in
 {
   imports = [ ./_common.nix ];
@@ -33,7 +33,7 @@ in
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
       ];
-      turn_secret = "";
+      turn_secret = gsv.turnSecret;
 
       enable_lightning_bolt = false;
       max_request_size = 200000000; # 200MB
