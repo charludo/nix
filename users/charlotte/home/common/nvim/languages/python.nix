@@ -25,7 +25,7 @@
   };
 
   programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
-  home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
+  # home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
 
   programs.nixvim.plugins.dap.configurations.python = [{
     name = "Launch Django DAP";

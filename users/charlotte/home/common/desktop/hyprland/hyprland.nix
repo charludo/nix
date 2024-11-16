@@ -37,8 +37,8 @@
 
           blur = {
             enabled = true;
-            size = 5;
-            passes = 1;
+            size = 2;
+            passes = 3;
             new_optimizations = true;
             ignore_opacity = true;
           };
@@ -60,7 +60,7 @@
             "windowsOut, 1, 7, default, popin 80%"
             "border, 1, 10, default"
             "borderangle, 1, 8, default"
-            "fade, 1, 7, default"
+            "fade, 1, 3, default"
             "workspaces, 1, 6, default"
           ];
         };
@@ -87,7 +87,7 @@
           "ignorezero,waybar"
 
           "blur,rofi"
-          "ignorezero,rofi"
+          "animation fade,rofi"
         ];
 
         binds = {

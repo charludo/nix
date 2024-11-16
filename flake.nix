@@ -75,6 +75,12 @@
           modules = [ ./hosts/drone ];
           specialArgs = { inherit inputs outputs; };
         };
+        
+        # Laptop Mallorca
+        mallorca = lib.nixosSystem {
+          modules = [ ./hosts/mallorca ];
+          specialArgs = { inherit inputs outputs; };
+        };
 
         # Gaming
         excession = lib.nixosSystem {
@@ -183,6 +189,12 @@
 
         "charlotte@excession" = lib.homeManagerConfiguration {
           modules = [ ./users/charlotte/home/excession.nix ];
+          pkgs = nixpkgs.legacyPackages.${system};
+          extraSpecialArgs = { inherit inputs outputs; };
+        };
+
+        "charlotte@mallorca" = lib.homeManagerConfiguration {
+          modules = [ ./users/charlotte/home/mallorca.nix ];
           pkgs = nixpkgs.legacyPackages.${system};
           extraSpecialArgs = { inherit inputs outputs; };
         };
