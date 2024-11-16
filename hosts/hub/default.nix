@@ -17,7 +17,7 @@
       ../common/optional/keyring.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
-      ../common/optional/plymouth.nix
+      # ../common/optional/plymouth.nix
       ../common/optional/rsync.nix
       ../common/optional/screensharing.nix
       ../common/optional/surfshark.nix

@@ -43,11 +43,13 @@
             ignore_opacity = true;
           };
 
-          drop_shadow = false;
-          shadow_range = 4;
-          shadow_render_power = 3;
-          shadow_offset = "3 3";
-          "col.shadow" = "${base}";
+          shadow = {
+            enabled = true;
+            range = 4;
+            render_power = 3;
+            offset = "3 3";
+            color = "${base}";
+          };
         };
 
         animations = {

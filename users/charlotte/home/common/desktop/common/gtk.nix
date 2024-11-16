@@ -5,7 +5,7 @@ let
   gtkCss = ''
     @define-color accent_color #${palette.base0D};
     @define-color accent_bg_color #${palette.base0D};
-    @define-color accent_fg_color #${palette.base02};
+    @define-color accent_fg_color #${palette.base03};
     @define-color destructive_color #${palette.base08};
     @define-color destructive_bg_color #${palette.base08};
     @define-color destructive_fg_color #${palette.base00};
