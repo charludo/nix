@@ -75,7 +75,7 @@
           modules = [ ./hosts/drone ];
           specialArgs = { inherit inputs outputs; };
         };
-        
+
         # Laptop Mallorca
         mallorca = lib.nixosSystem {
           modules = [ ./hosts/mallorca ];
@@ -204,7 +204,8 @@
       devShells.${system} = {
         keyctl = (import ./shells/keyctl { inherit pkgs; });
         vmctl = (import ./shells/vmctl { inherit pkgs; });
-        remux = (import ./shells/remux.nix { inherit pkgs; });
+        remux = (import ./shells/remux { inherit pkgs; });
+        default = (import ./shells { inherit pkgs; });
       };
     };
 }

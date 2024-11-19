@@ -28,15 +28,16 @@ creation_rules:
           - *hub
           - *drone
           - *excession
+          - *mallorca
           - *cl-nix
           - *cl-rou
-          - *paperless
           - *cloudsync
           - *git
           - *jellyfin
-          - *torrenter
           - *matrix
-          - *mallorca
+          - *paperless
+          - *torrenter
+          - *wastebin
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
       - age:

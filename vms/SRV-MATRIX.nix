@@ -13,9 +13,6 @@ in
     hardware.memory = 8192;
     hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
 
-    networking.address = "192.168.20.41";
-    networking.gateway = "192.168.20.33";
-    networking.prefixLength = 27;
     networking.nameservers = [ "192.168.30.13" ];
     networking.openPorts.tcp = [ config.services.matrix-conduit.settings.global.port ];
   };

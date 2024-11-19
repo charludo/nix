@@ -10,10 +10,12 @@ pkgs.writeShellApplication {
          exit 1
      fi
      if [ -z "$2" ]; then
-         echo "Please provide the ssh host you want to target."
-         exit 1
+         address=$(eval "nix eval .#nixosConfigurations.$1.config.vm.networking.address")
+         host="paki@$address"
+     else
+         host="$2"
      fi
 
-    nixos-rebuild switch --flake ".#$1" --target-host "$2" --use-remote-sudo
+    nixos-rebuild switch --flake ".#$1" --target-host "$host" --use-remote-sudo
   '';
 }

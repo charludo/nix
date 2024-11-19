@@ -78,10 +78,6 @@ in
     hardware.memory = 1024;
     hardware.storage = "2G";
 
-    networking.address = "192.168.24.10";
-    networking.gateway = "192.168.24.1";
-    networking.prefixLength = 24;
-
     networking.openPorts.tcp = [ 80 ];
   };
 

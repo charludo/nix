@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, ... }:
 {
   options.vm = {
     enable = lib.mkEnableOption (lib.mdDoc "make into vm");
@@ -12,9 +12,18 @@
     };
 
     networking = {
-      address = lib.mkOption { type = lib.types.str; };
-      prefixLength = lib.mkOption { type = lib.types.int; };
-      gateway = lib.mkOption { type = lib.types.str; };
+      address = lib.mkOption {
+        type = lib.types.str;
+        default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1${builtins.substring 2 2 (toString config.vm.id)}";
+      };
+      gateway = lib.mkOption {
+        type = lib.types.str;
+        default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1";
+      };
+      prefixLength = lib.mkOption {
+        type = lib.types.int;
+        default = 24;
+      };
       bridge = lib.mkOption { type = lib.types.str; };
       nameservers = lib.mkOption {
         type = lib.types.listOf lib.types.str;

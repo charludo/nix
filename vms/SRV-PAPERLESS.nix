@@ -19,11 +19,7 @@ in
 
     hardware.cores = 4;
     hardware.memory = 4096;
-    hardware.storage = "8G";
-
-    networking.address = "192.168.20.37";
-    networking.gateway = "192.168.20.34";
-    networking.prefixLength = 27;
+    hardware.storage = "16G";
 
     networking.openPorts.tcp = [ 8000 ];
     networking.openPorts.udp = [ 8000 ];

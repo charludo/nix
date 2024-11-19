@@ -10,9 +10,6 @@
     hardware.memory = 16384;
     hardware.storage = "32G";
 
-    networking.address = "192.168.20.36";
-    networking.gateway = "192.168.20.33";
-    networking.prefixLength = 27;
     networking.nameservers = [ "1.1.1.1" ];
   };
 

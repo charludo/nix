@@ -28,7 +28,7 @@ pkgs.writeShellApplication {
     ssh proxmox "qmrestore /mnt/pve/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst $id --unique true"
 
     echo "Cleaning up..."
-    # rm -f "/media/Backup/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst"
+    rm -f "/media/Backup/proxmox_images/template/iso/vzdump-qemu-$id-2024_06_01-10_00_00.vma.zst"
     rm -rf "result"
 
     echo "Done!"

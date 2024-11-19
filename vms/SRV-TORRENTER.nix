@@ -21,66 +21,6 @@ let
       systemctl start "$random_service"
     '';
   };
-  remux = pkgs.writeShellApplication {
-    name = "remux";
-    runtimeInputs = [ pkgs.mkvtoolnix-cli pkgs.jq ];
-    text = /*bash */ ''
-      set +o nounset
-      # shellcheck disable=SC2154
-      if [ "$sonarr_eventtype" = "Test" ] || [ "$radarr_eventtype" = "Test" ]; then
-          echo "Got test event."
-          exit 0
-      fi 
-
-      if [ $# -gt 0 ]; then
-          in="$1"
-      elif [ -n "$sonarr_episodefile_path" ]; then
-          in="$sonarr_episodefile_path"
-      elif [ -n "$radarr_moviefile_path" ]; then
-          in="$radarr_moviefile_path"
-      else
-          >&2 echo "No file given. Something wrong?"
-          exit 1
-      fi
-
-      if [[ "$in" != *.mkv ]]; then
-          >&2 echo "Not an mkv. Cannot remux."
-          exit 0
-      fi
-
-      ok_audio=("en" "de" "ja" "eng" "ger" "jpn" "unknown" "und")
-      ok_subtitles=("en" "de" "eng" "ger" "unknown" "und")
-      track_info=$(mkvmerge -J "$in")
-      echo "$track_info" | jq -c '.tracks[]' | while read -r track; do
-          track_type=$(echo "$track" | jq -r '.type')
-          track_language=$(echo "$track" | jq -r '.properties.language')
-          if [[ ("$track_type" == "audio" && ! " ''${ok_audio[*]} " =~ $track_language) || ("$track_type" == "subtitles" && ! " ''${ok_subtitles[*]} " =~ $track_language)  ]]; then
-              >&2 echo "''${in##*/}, $track_type: $track_language"
-              touch "$in.marker"
-          fi
-      done
-      if [ -f "$in.marker" ]; then
-          rm "$in.marker"
-          mkvmerge -o "$in.tmp" -a de,en,ja,und -s de,en,und -B -M "$in"
-          mv -f "$in.tmp" "$in"
-          >&2 echo "Processed ''${in##*/}."
-      else
-          >&2 echo "Skipping ''${in##*/}."
-      fi
-    '';
-  };
-  remux-all = pkgs.writeShellApplication {
-    name = "remux-all";
-    runtimeInputs = [ remux ];
-    text = ''
-      find "/media/NAS/Filme & Serien/Serien" -type f -name "*.mkv" | while read -r file; do
-          ${remux}/bin/remux "$file"
-      done
-      find "/media/NAS/Filme & Serien/Filme" -type f -name "*.mkv" | while read -r file; do
-          ${remux}/bin/remux "$file"
-      done
-    '';
-  };
   restore-torrenter = pkgs.writeShellApplication {
     name = "restore-torrenter";
     runtimeInputs = [ pkgs.rsync ];
@@ -123,9 +63,6 @@ in
     hardware.memory = 24576;
     hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
 
-    networking.address = "192.168.20.20";
-    networking.gateway = "192.168.20.17";
-    networking.prefixLength = 28;
     networking.nameservers = [ "1.1.1.1" ];
   };
 
@@ -233,7 +170,14 @@ in
     mode = "0444";
   };
 
-  environment.systemPackages = [ remux remux-all restore-torrenter get-anime-music surfshark-random surfshark-stop ];
+  environment.systemPackages = [
+    restore-torrenter
+    get-anime-music
+    surfshark-random
+    surfshark-stop
+    (import ../shells/remux/remux.nix { inherit pkgs; })
+    (import ../shells/remux/remux-all.nix { inherit pkgs; })
+  ];
 
   systemd = {
     # Ensure qbittorrent/nzbget only start AFTER a VPN connection has been established, and the NAS is mounted for *arr

@@ -21,12 +21,6 @@
     hardware.cores = 4;
     hardware.memory = 4096;
     hardware.storage = "8G";
-
-    networking = {
-      address = "192.168.30.95";
-      gateway = "192.168.30.1";
-      prefixLength = 24;
-    };
   };
 
   services.xserver.enable = true;

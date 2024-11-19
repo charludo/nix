@@ -10,10 +10,6 @@
     hardware.memory = 2048;
     hardware.storage = "16G";
 
-    networking.address = "192.168.30.30";
-    networking.gateway = "192.168.30.1";
-    networking.prefixLength = 24;
-
     networking.openPorts.tcp = [ 80 ];
     networking.openPorts.udp = [ 80 ];
   };
