@@ -28,7 +28,7 @@ let
   openVPNConfigs = map getConfig (builtins.attrNames (builtins.readDir configFiles));
 in
 {
-  sops.secrets.openvpn = { };
+  sops.secrets.openvpn = { sopsFile = ../secrets.sops.yaml; };
   networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
   services.openvpn.servers = builtins.listToAttrs openVPNConfigs;

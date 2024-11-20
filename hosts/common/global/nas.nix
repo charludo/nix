@@ -6,6 +6,10 @@
   environment.systemPackages = [ pkgs.cifs-utils ];
   boot.supportedFilesystems = [ "cifs" ];
 
+  systemd.tmpfiles.rules = [
+    "d /media 0755 root nas -"
+  ];
+
   systemd.mounts = [
     (lib.mkIf config.enableNas {
       description = "Mount for NAS";

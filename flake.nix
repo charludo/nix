@@ -124,6 +124,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Immich
+        SRV-IMMICH = lib.nixosSystem {
+          modules = [ ./vms/SRV-IMMICH.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Stirling PDF
         SRV-PDF = lib.nixosSystem {
           modules = [ ./vms/SRV-PDF.nix ];
@@ -151,6 +157,24 @@
         # Jellyfin Media Server
         SRV-JELLYFIN = lib.nixosSystem {
           modules = [ ./vms/SRV-JELLYFIN.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Audiobook Server
+        SRV-AUDIOBOOKSHELF = lib.nixosSystem {
+          modules = [ ./vms/SRV-AUDIOBOOKSHELF.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Calibre Server
+        SRV-BOOKS = lib.nixosSystem {
+          modules = [ ./vms/SRV-BOOKS.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Mangas
+        SRV-SUWAYOMI = lib.nixosSystem {
+          modules = [ ./vms/SRV-SUWAYOMI.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 
