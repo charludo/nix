@@ -166,9 +166,9 @@
           specialArgs = { inherit inputs outputs; };
         };
 
-        # Calibre Server
-        SRV-BOOKS = lib.nixosSystem {
-          modules = [ ./vms/SRV-BOOKS.nix ];
+        # Kavita Reading Server
+        SRV-KAVITA = lib.nixosSystem {
+          modules = [ ./vms/SRV-KAVITA.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 

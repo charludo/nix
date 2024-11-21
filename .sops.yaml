@@ -18,6 +18,7 @@ keys:
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
     - &immich age163tzvxksswhx2tx982dlhwtmlpsdsqfy32jackgl6tkauawlv45qmv5ztw
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
+    - &kavita age1zy0l20adavg7wcnyzc3cw6nt8dh89lvrye3ac27539nzkfkfl5msuh2lqk
     - &matrix age1ptvksu3pffdgzwa0ep2u28at6mk9u8yhvxkuvkuvc7kl6x5k8shs7xca6n
     - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
     - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
@@ -41,6 +42,7 @@ creation_rules:
           - *git
           - *immich
           - *jellyfin
+          - *kavita
           - *matrix
           - *paperless
           - *suwayomi
@@ -71,6 +73,11 @@ creation_rules:
     key_groups:
       - age:
           - *torrenter
+          - *charlotte
+  - path_regex: vms/secrets/books-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *books
           - *charlotte
   - path_regex: users/charlotte/user_secrets.sops.ya?ml$
     key_groups:
