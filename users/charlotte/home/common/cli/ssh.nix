@@ -12,4 +12,5 @@ in
       gsv-boot = { hostname = gsv.ip; user = gsv.user; port = gsv.port-boot; };
     };
   };
+  home.shellAliases."ssh1" = "ssh -o StrictHostKeyChecking=no -o 'UserKnownHostsFile=/dev/null' -o 'LogLevel ERROR'";
 }

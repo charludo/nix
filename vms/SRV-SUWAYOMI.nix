@@ -71,10 +71,14 @@ in
     enable = true;
     openFirewall = true;
 
+    dataDir = "/media/NAS/Manga";
+
     settings.server.extensionRepos = [
       "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
     ];
   };
+
+  services.flaresolverr.enable = true;
 
   systemd = {
     services.suwayomi-server.after = [ "media-NAS.mount" ];

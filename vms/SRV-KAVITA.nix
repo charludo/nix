@@ -10,12 +10,14 @@
     hardware.storage = "16G";
 
     networking.nameservers = [ "1.1.1.1" ];
+    networking.openPorts.tcp = [ config.services.kavita.settings.Port ];
   };
 
   sops.secrets.kavita-token = { sopsFile = ./secrets/kavita-secrets.sops.yaml; };
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets.kavita-token.path;
+    settings.IpAddresses = "0.0.0.0";
   };
 
   enableNas = true;
