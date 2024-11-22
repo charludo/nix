@@ -83,6 +83,7 @@ in
 {
   white = "#${palette.base07}";
   black = "#${palette.base00}";
+  darkest_black = "#${darken palette.base00 18}";
   darker_black = "#${darken palette.base00 12}";
   black2 = "#${darken palette.base00 (-18)}";
   one_bg = "#${palette.base02}";
@@ -98,6 +99,7 @@ in
   line = "#${darken palette.base00 (-30)}";
   green = "#${darken palette.base0B (-12)}";
   vibrant_green = "#${palette.base0B}";
+  dark_blue = "#${darken palette.base0D (18)}";
   nord_blue = "#${darken palette.base0D (-12)}";
   blue = "#${palette.base0D}";
   yellow = "#${palette.base0A}";

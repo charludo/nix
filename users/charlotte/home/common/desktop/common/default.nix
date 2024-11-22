@@ -6,6 +6,7 @@
     ./daw.nix
     ./discord.nix
     ./easyeffects.nix
+    ./element.nix
     ./firefox.nix
     ./gtk.nix
     ./jellyfin.nix
@@ -28,7 +29,6 @@
 
     mattermost-desktop
     telegram-desktop
-    element-desktop
     jitsi-meet-electron
 
     orca-slicer
