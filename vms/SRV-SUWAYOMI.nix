@@ -71,7 +71,7 @@ in
     enable = true;
     openFirewall = true;
 
-    dataDir = "/media/NAS/Manga";
+    dataDir = "/var/lib/suwayomi-server";
 
     settings.server.extensionRepos = [
       "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
@@ -123,9 +123,36 @@ in
         User = "root";
       };
     };
+
+    timers."suwayomi-backup-daily" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        Unit = "suwayomi-backup-daily.service";
+      };
+    };
+    services."suwayomi-backup-daily" = {
+      script = ''
+        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace {}/ /media/NAS/Manga \;
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+      };
+    };
   };
 
-  environment.systemPackages = [ surfshark-random surfshark-stop ];
+  environment.systemPackages =
+    let
+      suwayomi-init = pkgs.writeShellApplication {
+        name = "suwayomi-init";
+        text = ''
+          [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/NAS/Manga/ ${config.services.suwayomi-server.dataDir}
+        '';
+      };
+    in
+    [ surfshark-random surfshark-stop suwayomi-init ];
 
   enableNas = true;
   enableNasBackup = true;
