@@ -134,6 +134,24 @@ in
     };
     services."suwayomi-backup-daily" = {
       script = ''
+        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ /media/Backup/suwayomi
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+      };
+    };
+
+    timers."suwayomi-sync" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+        Unit = "suwayomi-sync.service";
+      };
+    };
+    services."suwayomi-sync" = {
+      script = ''
         [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace {}/ /media/NAS/Manga \;
       '';
       serviceConfig = {
