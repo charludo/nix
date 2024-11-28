@@ -201,6 +201,12 @@
           modules = [ ./vms/SRV-VIKUNJA.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Vaultwarden
+        SRV-VAULTWARDEN = lib.nixosSystem {
+          modules = [ ./vms/SRV-VAULTWARDEN.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
       };
 
       # Available through 'home-manager --flake .#username@hostname'

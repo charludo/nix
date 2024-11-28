@@ -24,6 +24,8 @@ keys:
     - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
     - &suwayomi age1ngpcjtlku3xcudkzc90r89wtr53uwt7cmz696z7y86ttvxdzagws7mpemp
     - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
+    - &vaultwarden age1ddlp8f79due3v3kalugxnnygwqldgc4q34lwd7dvlrjcfg7xfphqxa5w7a
+    - &vikunja age1zsnsmg8qhnx2yrlk3gdwx0ctm46y4s4lpv3zcv78xj9dwshjgfqs50vnl3
     - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
@@ -47,6 +49,8 @@ creation_rules:
           - *paperless
           - *suwayomi
           - *torrenter
+          - *vaultwarden
+          - *vikunja
           - *wastebin
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
