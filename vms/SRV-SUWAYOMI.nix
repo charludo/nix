@@ -158,7 +158,7 @@ in
     };
     services."suwayomi-sync" = {
       script = ''
-        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace {}/ /media/NAS/Manga \;
+        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --inplace {}/ /media/NAS/Manga \;
       '';
       serviceConfig = {
         Type = "oneshot";
