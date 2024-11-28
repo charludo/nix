@@ -1,6 +1,6 @@
 { inputs, lib, pkgs, config, ... }:
 let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config; };
+  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config inputs; };
   inherit (inputs.nix-colors) colorschemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
@@ -61,6 +61,7 @@ in
         "temperature"
         "battery"
         "custom/mail"
+        "custom/lemmy"
         "custom/reddit"
         "tray"
       ];

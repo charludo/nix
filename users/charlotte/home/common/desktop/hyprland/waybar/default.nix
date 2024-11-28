@@ -43,6 +43,7 @@
       #custom-wireguard,
       #custom-playerctl,
       #custom-mail,
+      #custom-lemmy,
       #custom-reddit,
       #custom-updates {
         margin: 0px 4px;

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 let
   curl = "${pkgs.curl}/bin/curl";
   rofi = "${pkgs.rofi-wayland}/bin/rofi";
@@ -10,6 +10,7 @@ let
   playerctl = "waybar-playerctl";
   wireguard = "waybar-wireguard";
   reddit = "waybar-reddit";
+  lemmy = "waybar-lemmy";
   mail = "waybar-mail";
 in
 {
@@ -42,6 +43,12 @@ in
     exec = "${mail}";
     restart-interval = 300;
     on-click = "${thunderbird}";
+  };
+
+  "custom/lemmy" = {
+    exec = "${lemmy}";
+    restart-interval = 1200;
+    on-click = "${firefox} --new-tab \"${inputs.private-settings.lemmyInstance}/inbox\"";
   };
 
   "custom/reddit" = {

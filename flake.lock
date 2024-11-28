@@ -652,11 +652,11 @@
     },
     "private-settings": {
       "locked": {
-        "lastModified": 1731940410,
-        "narHash": "sha256-OFE2lWQSI5D/PoP3CRQLKOBcTmPg9bEZw6ErhV5cSVc=",
+        "lastModified": 1732802676,
+        "narHash": "sha256-jxuNXD1phak/n/jE/tFgtBe95D6SfZVMrkLofS0Bbwg=",
         "ref": "refs/heads/main",
-        "rev": "3df4b797870bcfcf27f895eaa770fd781ffef13f",
-        "revCount": 40,
+        "rev": "d78a14b31488cb332c935e359527b2206009d4b5",
+        "revCount": 41,
         "type": "git",
         "url": "ssh://git@github.com/charludo/nix-private"
       },
