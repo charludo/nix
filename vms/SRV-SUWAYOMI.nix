@@ -80,8 +80,14 @@ in
 
   services.flaresolverr.enable = true;
 
+  services.readarr = {
+    enable = true;
+    openFirewall = true;
+  };
+
   systemd = {
     services.suwayomi-server.after = [ "media-NAS.mount" ];
+    services.readarr.after = [ "media-NAS.mount" ];
 
     timers."surfshark-hop-weekly" = {
       wantedBy = [ "timers.target" ];
@@ -159,6 +165,25 @@ in
         User = "root";
       };
     };
+
+    timers."readarr-backup-daily" = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "daily";
+        Persistent = true;
+        Unit = "readarr-backup-daily.service";
+      };
+    };
+    services."readarr-backup-daily" = {
+      script = ''
+        [ "$(stat -f -c %T /media/Backup)" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ /media/Backup/torrenter/readarr2
+      '';
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+      };
+    };
   };
 
   environment.systemPackages =
@@ -166,15 +191,23 @@ in
       suwayomi-init = pkgs.writeShellApplication {
         name = "suwayomi-init";
         text = ''
-          [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/NAS/Manga/ ${config.services.suwayomi-server.dataDir}
+          [ "$(stat -f -c %T /media/Backup)" != "smb2" ] && exit 1
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Backup/suwayomi/ ${config.services.suwayomi-server.dataDir}
+        '';
+      };
+      readarr-init = pkgs.writeShellApplication {
+        name = "readarr-init";
+        text = ''
+          [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Backup/torrenter/readarr2/ ${config.services.readarr.dataDir}
         '';
       };
     in
-    [ surfshark-random surfshark-stop suwayomi-init ];
+    [ surfshark-random surfshark-stop suwayomi-init readarr-init ];
 
   enableNas = true;
   enableNasBackup = true;
   users.users."${config.services.suwayomi-server.user}".extraGroups = [ "nas" ];
+  users.users."${config.services.readarr.user}".extraGroups = [ "nas" ];
 
   system.stateVersion = "23.11";
 }
