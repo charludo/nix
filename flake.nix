@@ -195,6 +195,12 @@
           modules = [ ./vms/SRV-HOME.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Vikunja Server
+        SRV-VIKUNJA = lib.nixosSystem {
+          modules = [ ./vms/SRV-VIKUNJA.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
