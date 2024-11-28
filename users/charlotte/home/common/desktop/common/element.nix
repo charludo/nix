@@ -19,7 +19,7 @@ in
                         "accent": "${colors.base09}",
                         "primary-color": "${colors.base0D}",
                         "warning-color": "${colors.base08}d9",
-                        "alert": "${colors.base08}d9",
+                        "alert": "${colors.base07}",
                         "timeline-background-color": "${colors.base00}",
                         "roomlist-background-color": "${colors.darker_black}",
                         "sidebar-color": "${colors.darkest_black}",
