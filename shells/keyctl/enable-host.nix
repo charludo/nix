@@ -15,16 +15,8 @@ pkgs.writeShellApplication {
         exit 1
     fi
 
-    home="/home/$SUDO_USER"
-
     ssh-keygen -f "$1" -y > "$1.pub"
     echo "- regenerated public key"
-
-    private_age=$(ssh-to-age -private-key -i "$1")
-    mkdir -p "$home/.config/sops/age"
-    echo "$private_age" >> "$home/.config/sops/age/keys.txt"
-    chmod 600 "$home/.config/sops/age/keys.txt"
-    echo "- converted private key to age and added to key list"
 
     echo "done!"
   '';
