@@ -3,6 +3,7 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     openssh
     (import ./vm-new.nix { inherit pkgs; })
+    (import ./vm-init.nix { inherit pkgs; })
     (import ./vm-rebuild.nix { inherit pkgs; })
   ];
 
@@ -19,7 +20,8 @@ pkgs.mkShell {
 
     echo "The following scripts are available:"
     echo "===================================="
-    echo "- vm-new     <hostname>            | create a new VM and import it in proxmox"
-    echo "- vm-rebuild <hostname> <ssh host> | rebuild in existing VM"
+    echo "- vm-new     <hostname>              | create a new VM and import it in proxmox"
+    echo "- vm-init    <hostname>              | initialize a new VM with its SSH key"
+    echo "- vm-rebuild <hostname> [<ssh host>] | rebuild in existing VM"
   '';
 }
