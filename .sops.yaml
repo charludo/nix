@@ -78,6 +78,11 @@ creation_rules:
       - age:
           - *torrenter
           - *charlotte
+  - path_regex: vms/secrets/vaultwarden-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *vaultwarden
+          - *charlotte
   - path_regex: vms/secrets/books-secrets.sops.ya?ml$
     key_groups:
       - age:

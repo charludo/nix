@@ -20,11 +20,11 @@ in
     enable = true;
     frontendScheme = "https";
     frontendHostname = "planning.${domains.home}";
+    settings.service.enableregistration = false;
   };
 
   enableNas = true;
   enableNasBackup = true;
-  users.users."${config.services.vikunja.user}".extraGroups = [ "nas" ];
 
   systemd = {
     timers."vikunja-backup-daily" = {

@@ -16,15 +16,17 @@ in
     networking.openPorts.tcp = [ config.services.vaultwarden.config.ROCKET_PORT ];
   };
 
+  sops.secrets.vaultwarden = { sopsFile = ./secrets/vaultwarden-secrets.sops.yaml; };
   services.vaultwarden = {
     enable = true;
     backupDir = "/media/Backup/vaultwarden";
     config = {
       DOMAIN = "https://passwords.${domains.home}";
       SIGNUPS_ALLOWED = false;
-      ROCKET_ADDRESS = "127.0.0.1";
+      ROCKET_ADDRESS = "0.0.0.0";
       ROCKET_PORT = 8222;
     };
+    # environmentFile = config.sops.secrets.vaultwarden.path;
   };
 
   enableNas = true;

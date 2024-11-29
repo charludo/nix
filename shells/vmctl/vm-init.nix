@@ -43,7 +43,7 @@ pkgs.writeShellApplication {
     ssh -o StrictHostKeyChecking=no -o 'UserKnownHostsFile=/dev/null' -o 'LogLevel ERROR' "$host" << EOF
     set -e
     echo "$key_content" | sudo tee $ssh_key_path > /dev/null
-    nix develop github:charludo/nix#keyctl -c sudo enable-host $ssh_key_path
+    nix develop github:charludo/nix/more-vms#keyctl -c sudo enable-host $ssh_key_path
     sudo reboot
     EOF
 

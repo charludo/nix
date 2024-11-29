@@ -92,6 +92,10 @@
           "animation fade,rofi"
         ];
 
+        windowrulev2 = [
+          "floating 1, title:(Extension: (Bitwarden - Free Password Manager) - Bitwarden — Mozilla Firefox)"
+        ];
+
         binds = {
           movefocus_cycles_fullscreen = false;
         };
