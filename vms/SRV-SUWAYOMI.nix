@@ -75,6 +75,7 @@ in
 
     settings.server.extensionRepos = [
       "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
+      "https://raw.githubusercontent.com/ThePBone/tachiyomi-extensions-revived/repo/index.min.json"
     ];
   };
 
