@@ -1,6 +1,13 @@
-{ config, lib, outputs, ... }:
+{ lib, outputs, ... }:
 let
-  transform = attrs: { hostname = builtins.toString attrs.address; };
+  toLowercaseKeys = attrs: lib.listToAttrs (lib.mapAttrsToList (key: value: { name = lib.toLower (lib.replaceStrings [ "SRV-" ] [ "" ] key); value = value; }) attrs);
+  vms = toLowercaseKeys (lib.filterAttrs
+    (_: v: v.hostname != null)
+    (builtins.mapAttrs
+      (name: _: {
+        hostname = (if (lib.pathExists ../../vms/keys/ssh_host_${name}_ed25519_key.pub) then ((builtins.head outputs.nixosConfigurations.${name}.config.networking.interfaces.ens18.ipv4.addresses).address) else null);
+      })
+      outputs.nixosConfigurations));
 in
 {
   programs.ssh = {
@@ -11,7 +18,7 @@ in
       home-assistant = { hostname = "192.168.10.27"; user = "root"; };
 
       "* !proxmox !home-assistant !gsv !gsv-boot" = { user = "paki"; };
-      "jellyfin torrenter paperless pdf blocky proxmos wastebin cloudsync git cl-nix".extraOptions = {
+      "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames vms)}".extraOptions = {
         "StrictHostKeyChecking" = "no";
         "LogLevel" = "quiet";
       };
@@ -19,12 +26,6 @@ in
         identityFile = "~/.ssh/id_ed25519";
         identitiesOnly = true;
       };
-    } // lib.filterAttrs
-      (_: v: v.hostname != null)
-      (builtins.mapAttrs
-        (name: _: {
-          hostname = (if (lib.pathExists ../../vms/keys/ssh_host_${name}_ed25519_key.pub) then ((builtins.head outputs.nixosConfigurations.${name}.config.networking.interfaces.ens18.ipv4.addresses).address) else null);
-        })
-        outputs.nixosConfigurations);
+    } // vms;
   };
 }
