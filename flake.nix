@@ -124,6 +124,12 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Immich
+        SRV-IMMICH = lib.nixosSystem {
+          modules = [ ./vms/SRV-IMMICH.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Stirling PDF
         SRV-PDF = lib.nixosSystem {
           modules = [ ./vms/SRV-PDF.nix ];
@@ -154,6 +160,24 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Audiobook Server
+        SRV-AUDIOBOOKSHELF = lib.nixosSystem {
+          modules = [ ./vms/SRV-AUDIOBOOKSHELF.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Kavita Reading Server
+        SRV-KAVITA = lib.nixosSystem {
+          modules = [ ./vms/SRV-KAVITA.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Mangas
+        SRV-SUWAYOMI = lib.nixosSystem {
+          modules = [ ./vms/SRV-SUWAYOMI.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Helper for downloading Linux ISOs
         SRV-TORRENTER = lib.nixosSystem {
           modules = [ ./vms/SRV-TORRENTER.nix ];
@@ -169,6 +193,18 @@
         # Stateless Home automations
         SRV-HOME = lib.nixosSystem {
           modules = [ ./vms/SRV-HOME.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Vikunja Server
+        SRV-VIKUNJA = lib.nixosSystem {
+          modules = [ ./vms/SRV-VIKUNJA.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Vaultwarden
+        SRV-VAULTWARDEN = lib.nixosSystem {
+          modules = [ ./vms/SRV-VAULTWARDEN.nix ];
           specialArgs = { inherit inputs outputs; };
         };
       };

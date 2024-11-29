@@ -1,3 +1,14 @@
+{ lib, outputs, ... }:
+let
+  toLowercaseKeys = attrs: lib.listToAttrs (lib.mapAttrsToList (key: value: { name = lib.toLower (lib.replaceStrings [ "SRV-" ] [ "" ] key); value = value; }) attrs);
+  vms = toLowercaseKeys (lib.filterAttrs
+    (_: v: v.hostname != null)
+    (builtins.mapAttrs
+      (name: _: {
+        hostname = (if (lib.pathExists ../../vms/keys/ssh_host_${name}_ed25519_key.pub) then ((builtins.head outputs.nixosConfigurations.${name}.config.networking.interfaces.ens18.ipv4.addresses).address) else null);
+      })
+      outputs.nixosConfigurations));
+in
 {
   programs.ssh = {
     enable = true;
@@ -6,22 +17,8 @@
       proxmox = { hostname = "192.168.30.15"; user = "root"; };
       home-assistant = { hostname = "192.168.10.27"; user = "root"; };
 
-      cl-nix = { hostname = "192.168.30.95"; };
-      cl-rou = { hostname = "192.168.30.97"; };
-
-      blocky = { hostname = "192.168.30.13"; };
-      cloudsync = { hostname = "192.168.30.31"; };
-      git = { hostname = "192.168.30.30"; };
-      home = { hostname = "192.168.24.10"; };
-      jellyfin = { hostname = "192.168.20.36"; };
-      matrix = { hostname = "192.168.20.41"; };
-      paperless = { hostname = "192.168.20.37"; };
-      pdf = { hostname = "192.168.20.38"; };
-      torrenter = { hostname = "192.168.20.20"; };
-      wastebin = { hostname = "192.168.20.39"; };
-
       "* !proxmox !home-assistant !gsv !gsv-boot" = { user = "paki"; };
-      "jellyfin torrenter paperless pdf blocky proxmos wastebin cloudsync git cl-nix".extraOptions = {
+      "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames vms)}".extraOptions = {
         "StrictHostKeyChecking" = "no";
         "LogLevel" = "quiet";
       };
@@ -29,6 +26,6 @@
         identityFile = "~/.ssh/id_ed25519";
         identitiesOnly = true;
       };
-    };
+    } // vms;
   };
 }

@@ -1,25 +1,32 @@
 keys:
   - &users
     - &charlotte age1tzayy2c75wn59vwp59e85a6p0derah9dvd94g2dan9uems8wufesc83573
-    - &paki age1lzpcrkt9sn5clwet05j9re7z24gaghpmz0eszn44cefmc3yt953sdzzx5y
     - &marie age14cj3mmrxlmk3jukarhxuufu8jt89jx9gquhfwjaawnxrlxytqpmsr5q99e
+    - &paki age1lzpcrkt9sn5clwet05j9re7z24gaghpmz0eszn44cefmc3yt953sdzzx5y
   - &hosts
     - &hub age1ds7xuydgcyp46gagvrnpxwnnsxp5v39zyfz77j6gmtjjm2uqjaqs4ajas4
     - &drone age1vzpn0t97ga4vlfnyvfh4vhhzwkd5kyz6qanf45qff4gf8uqjp37sk4pukr
     - &gsv age1xfy5pmvherscvfg6fgzlrc4l2e69d4gkgg74znn5wmy0vvrdrgrszdu92c
     - &excession age14csac5fhagm5ddnxx38pxkgl9txsqs5dj8ehwjcxz2r8f257hy3se7z8r0
-    - &blocky age1hemy4mz50w4z2rwllhjd5j2ld5ncwslplv09lf4ne6e33m4tw37sy9z02f
-    - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
-    - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
-    - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
+    - &mallorca age19er6r4e6w0vcslq0xvhfrfa8f8c64whp9ucz3vqrhly5xldhmcwq567evw
     - &cl-nix age16dzq2pcwn3zn424ea3sg509rpfwd3tleyfxnx2n3fgmhtk482d5sveq6t2
     - &cl-rou age1mu3yqwp4wgawd0hxr92xxrywcws6a2tvj7xrp85jlj5j0w3j5uxq7l4677
+    - &audiobookshelf age1dztvc7vp4elzrsysrq9wky200673pnmqfejc7ppwp248wmuftdqqfxs2q2
+    - &blocky age1hemy4mz50w4z2rwllhjd5j2ld5ncwslplv09lf4ne6e33m4tw37sy9z02f
+    - &books age1d7vwyd3t9ehnglflg9mw7ftp35kwdk45y3w688s5puqgexfq8cqqy4z243
     - &cloudsync age1zh2q440tk3muyhlc90xjcml92qavafhrzp3hv9zqge3kzwhqwqnskr6fls
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
+    - &immich age163tzvxksswhx2tx982dlhwtmlpsdsqfy32jackgl6tkauawlv45qmv5ztw
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
-    - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
+    - &kavita age1zy0l20adavg7wcnyzc3cw6nt8dh89lvrye3ac27539nzkfkfl5msuh2lqk
     - &matrix age1ptvksu3pffdgzwa0ep2u28at6mk9u8yhvxkuvkuvc7kl6x5k8shs7xca6n
-    - &mallorca age19er6r4e6w0vcslq0xvhfrfa8f8c64whp9ucz3vqrhly5xldhmcwq567evw
+    - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
+    - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
+    - &suwayomi age1ngpcjtlku3xcudkzc90r89wtr53uwt7cmz696z7y86ttvxdzagws7mpemp
+    - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
+    - &vaultwarden age1ddlp8f79due3v3kalugxnnygwqldgc4q34lwd7dvlrjcfg7xfphqxa5w7a
+    - &vikunja age1zsnsmg8qhnx2yrlk3gdwx0ctm46y4s4lpv3zcv78xj9dwshjgfqs50vnl3
+    - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
     key_groups:
@@ -31,12 +38,19 @@ creation_rules:
           - *mallorca
           - *cl-nix
           - *cl-rou
+          - *audiobookshelf
+          - *books
           - *cloudsync
           - *git
+          - *immich
           - *jellyfin
+          - *kavita
           - *matrix
           - *paperless
+          - *suwayomi
           - *torrenter
+          - *vaultwarden
+          - *vikunja
           - *wastebin
   - path_regex: hosts/common/optional/wifi.sops.ya?ml$
     key_groups:
@@ -63,6 +77,16 @@ creation_rules:
     key_groups:
       - age:
           - *torrenter
+          - *charlotte
+  - path_regex: vms/secrets/vaultwarden-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *vaultwarden
+          - *charlotte
+  - path_regex: vms/secrets/books-secrets.sops.ya?ml$
+    key_groups:
+      - age:
+          - *books
           - *charlotte
   - path_regex: users/charlotte/user_secrets.sops.ya?ml$
     key_groups:
