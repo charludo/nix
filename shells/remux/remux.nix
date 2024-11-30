@@ -1,11 +1,9 @@
 { pkgs, ... }:
 pkgs.writeShellApplication {
   name = "remux";
-  runtimeInputs = [ pkgs.mkvtoolnix-cli pkgs.ffmpeg ];
+  runtimeInputs = [ pkgs.mkvtoolnix-cli pkgs.ffmpeg pkgs.jq ];
   text = /*bash */ ''
     set +o nounset
-    set +o errexit
-    set +o pipefail
     # shellcheck disable=SC2154
     if [ "$sonarr_eventtype" = "Test" ] || [ "$radarr_eventtype" = "Test" ]; then
         echo "Got test event."
@@ -32,10 +30,11 @@ pkgs.writeShellApplication {
     ok_audio=("en" "de" "ja" "eng" "ger" "jpn" "unknown" "und")
     ok_subtitles=("en" "de" "eng" "ger" "unknown" "und")
     track_info=$(mkvmerge -J "$in")
+    desired_audio_exists=$(echo "$track_info" | jq -r --argjson ok "$(printf '%s\n' "''${ok_audio[@]}" | jq -R . | jq -s .)" '[.tracks[] | select(.type == "audio" and (.properties.language | IN($ok[])))] | length > 0')
     echo "$track_info" | jq -c '.tracks[]' | while read -r track; do
         track_type=$(echo "$track" | jq -r '.type')
         track_language=$(echo "$track" | jq -r '.properties.language')
-        if [[ ("$track_type" == "audio" && ! " ''${ok_audio[*]} " =~ $track_language) || ("$track_type" == "subtitles" && ! " ''${ok_subtitles[*]} " =~ $track_language)  ]]; then
+        if [[ ("$track_type" == "audio" && ! " ''${ok_audio[*]} " =~ $track_language && "$desired_audio_exists" == "true") || ("$track_type" == "subtitles" && ! " ''${ok_subtitles[*]} " =~ $track_language)  ]]; then
             echo "''${in##*/}, $track_type: $track_language"
             touch "$in.marker"
         fi
