@@ -2,7 +2,7 @@
 let
   python3 = pkgs.python313.override {
     # Build without any X86_V2+ baseline (not available on our VMs)
-    packageOverrides = self: super: {
+    packageOverrides = _: super: {
       numpy = super.numpy.overridePythonAttrs (old: {
         mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dcpu-baseline=none" ];
       });

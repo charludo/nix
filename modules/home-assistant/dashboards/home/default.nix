@@ -1,0 +1,31 @@
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+  areas = config.hass.areas;
+in
+{
+  services.home-assistant = {
+    config = {
+      lovelace = {
+        dashboards.lovelace = {
+          mode = "yaml";
+          filename = "ui-lovelace.yaml";
+          title = "Home";
+          icon = "mdi:home";
+          show_in_sidebar = true;
+          require_admin = false;
+        };
+      };
+    };
+  };
+
+  services.home-assistant.lovelaceConfig = {
+    default = true;
+    views = [
+      (import ./view-home.nix { inherit lib e areas; })
+      (import ./view-botty.nix { inherit lib; })
+      (import ./view-sonos.nix { inherit lib; })
+      (import ./view-einstellungen.nix { inherit lib; })
+    ];
+  };
+}

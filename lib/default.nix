@@ -15,6 +15,7 @@ let
       {
         ci = import ./ci.nix { inherit lib; };
         colors = import ./colors.nix { inherit lib; };
+        ha = import ./home-assistant.nix { inherit lib; };
         helpers = import ./helpers.nix { inherit lib outputs; };
         mkConfigs = import ./mkConfigs.nix {
           inherit
