@@ -15,7 +15,7 @@ in
     addKeysToAgent = "yes";
     matchBlocks = {
       proxmox = { hostname = "192.168.30.15"; user = "root"; };
-      home-assistant = { hostname = "192.168.10.27"; user = "root"; };
+      home-assistant = { hostname = "192.168.24.127"; user = "root"; };
 
       "* !proxmox !home-assistant !gsv !gsv-boot" = { user = "paki"; };
       "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames vms)}".extraOptions = {

@@ -197,9 +197,21 @@
           specialArgs = { inherit inputs outputs; };
         };
 
+        # Homeassistant
+        SRV-HOMEASSISTANT = lib.nixosSystem {
+          modules = [ ./vms/SRV-HOMEASSISTANT.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
         # Vikunja Server
         SRV-VIKUNJA = lib.nixosSystem {
           modules = [ ./vms/SRV-VIKUNJA.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # TTS, STT, OpenWakeword
+        SRV-VOICE = lib.nixosSystem {
+          modules = [ ./vms/SRV-VOICE.nix ];
           specialArgs = { inherit inputs outputs; };
         };
 

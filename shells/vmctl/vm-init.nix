@@ -6,7 +6,7 @@ pkgs.writeShellApplication {
      set +o nounset
      set +o errexit
      if [ -z "$1" ]; then
-         echo "Please provide the hostname you want to rebuild."
+         echo "Please provide the hostname you want to initialize."
          exit 1
      fi
      if [ -z "$2" ]; then

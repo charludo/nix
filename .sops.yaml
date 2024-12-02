@@ -16,6 +16,7 @@ keys:
     - &books age1d7vwyd3t9ehnglflg9mw7ftp35kwdk45y3w688s5puqgexfq8cqqy4z243
     - &cloudsync age1zh2q440tk3muyhlc90xjcml92qavafhrzp3hv9zqge3kzwhqwqnskr6fls
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
+    - &homeassistant age17qxf0e6gdfxglxx8dyaka5majumt7k9ugkruvkl3r49d4lnfzsesmlezg8
     - &immich age163tzvxksswhx2tx982dlhwtmlpsdsqfy32jackgl6tkauawlv45qmv5ztw
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
     - &kavita age1zy0l20adavg7wcnyzc3cw6nt8dh89lvrye3ac27539nzkfkfl5msuh2lqk
@@ -26,6 +27,7 @@ keys:
     - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
     - &vaultwarden age1ddlp8f79due3v3kalugxnnygwqldgc4q34lwd7dvlrjcfg7xfphqxa5w7a
     - &vikunja age1zsnsmg8qhnx2yrlk3gdwx0ctm46y4s4lpv3zcv78xj9dwshjgfqs50vnl3
+    - &voice age1mfej0n9u7cj73pct8c4g9t6rnhmakjq4ddpqw56tmu3x735dtcvs4sjg6a
     - &wastebin age1tm4cc9kafx9kemve4sm48tm8pmdwex59pct7p8qsqa705h5y23kqv0jqu9
 creation_rules:
   - path_regex: hosts/common/secrets.sops.ya?ml$
