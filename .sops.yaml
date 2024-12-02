@@ -16,6 +16,7 @@ keys:
     - &books age1d7vwyd3t9ehnglflg9mw7ftp35kwdk45y3w688s5puqgexfq8cqqy4z243
     - &cloudsync age1zh2q440tk3muyhlc90xjcml92qavafhrzp3hv9zqge3kzwhqwqnskr6fls
     - &git age1g5xjx0hsjx3d6055nx5hgx9y4ef44yyru4077wn70wm0r0u8892q8rpf02
+    - &homeassistant age17qxf0e6gdfxglxx8dyaka5majumt7k9ugkruvkl3r49d4lnfzsesmlezg8
     - &immich age163tzvxksswhx2tx982dlhwtmlpsdsqfy32jackgl6tkauawlv45qmv5ztw
     - &jellyfin age1f54ff7nqmxrar54v9a0cgw5vjzz8g3hjduwv40rx5gwrm45yc40qmurjlx
     - &kavita age1zy0l20adavg7wcnyzc3cw6nt8dh89lvrye3ac27539nzkfkfl5msuh2lqk
