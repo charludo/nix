@@ -145,7 +145,7 @@
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             clipboard = "${rofi} -modi \"emoji,clipboard:rofi-cliphist\" -show emoji -show-icons";
-            rbw = "rbw-unlock && ${rofi-rbw} --target password --prompt \"   Bitwarden   \"";
+            rbw = "rbw-unlock && ${rofi-rbw} --target password --prompt \"   Vaultwarden   \"";
             screenshots = "${rofi} -modi \"screenshot:rofi-screenshot,screencapture:rofi-screencapture\" -show screenshot";
 
             # Not in 23.11 yet!
@@ -159,6 +159,7 @@
             # Program bindings
             "${mainMod},Return,exec,${terminal}"
             "${mainMod},q,killactive"
+            "${shiftMod},q,exec,${pkgs.hyprland}/bin/hyprctl kill"
             "${mainMod},l,exec,${hyprlock}"
 
             "${mainMod},Tab,cyclenext"

@@ -5,6 +5,9 @@
     monospace = {
       family = "GeistMono Nerd Font";
       package = pkgs.nerdfonts.override { fonts = [ "FiraCode" "Lilex" "GeistMono" ]; };
+      # package = pkgs.nerd-fonts.fira-code;
+      # package = pkgs.nerd-fonts.lilex;
+      # package = pkgs.nerd-fonts.geist-mono;
     };
     regular = {
       family = "Cantarell";

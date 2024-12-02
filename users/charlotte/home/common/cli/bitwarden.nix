@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 let
   pinentry-fake = pkgs.writeShellApplication {
     name = "pinentry-fake";
@@ -14,6 +14,7 @@ let
     text = ''
       rbw config set pinentry "pinentry-fake"
       rbw config set email "$(cat ${config.sops.secrets."bitwarden/mail".path})"
+      rbw config set base_url "https://passwords.${inputs.private-settings.domains.home}"
       rbw unlock
     '';
   };

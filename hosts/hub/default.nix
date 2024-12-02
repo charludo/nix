@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   _module.args.defaultUser = "charlotte";
   imports =
@@ -14,16 +14,13 @@
       ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
       ../common/optional/gvfs.nix
-      ../common/optional/keyring.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
-      # ../common/optional/plymouth.nix
       ../common/optional/rsync.nix
       ../common/optional/screensharing.nix
       ../common/optional/surfshark.nix
       ../common/optional/suspend.nix
       ../common/optional/wifi.nix
-      # ../common/optional/zammad.nix
       ../common/optional/zsh.nix
 
       ../../users/charlotte/user.nix
@@ -74,6 +71,12 @@
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
   hardware.graphics.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
+
+  # sops.secrets.pinchflat = { };
+  # services.pinchflat = {
+  # enable = true;
+  # secretsFile = config.sops.secrets.pinchflat.path;
+  # };
 
   system.stateVersion = "23.11";
 }
