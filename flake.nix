@@ -48,6 +48,11 @@
     eso-reshade.inputs.nixpkgs.follows = "nixpkgs";
     idagio.url = "github:charludo/IDAGIO-Downloader-Rust-ver";
     idagio.inputs.nixpkgs.follows = "nixpkgs";
+
+    hass-closest-intent.url = "github:charludo/hass-closest-intent";
+    hass-closest-intent.inputs.nixpkgs.follows = "nixpkgs";
+    hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
+    hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -55,21 +60,30 @@
     let
       inherit (self) outputs;
       system = "x86_64-linux";
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [
-          (import ./overlays/nixpkgs.nix)
-          (import ./overlays/ours.nix { inherit outputs; })
-          inputs.agenix-rekey.overlays.default
-          inputs.firefox-addons.overlays.default
-        ];
-        config = {
-          allowUnfree = true;
-          allowUnfreePredicate = _: true;
-          permittedInsecurePackages = import ./overlays/insecure.nix;
+      mkPkgs =
+        system:
+        import nixpkgs {
+          inherit system;
+          overlays = [
+            (import ./overlays/nixpkgs.nix)
+            (import ./overlays/ours.nix { inherit outputs; })
+            inputs.agenix-rekey.overlays.default
+            inputs.firefox-addons.overlays.default
+          ];
+          config = {
+            allowUnfree = true;
+            allowUnfreePredicate = _: true;
+            permittedInsecurePackages = import ./overlays/insecure.nix;
+          };
         };
-      };
+
+      pkgsFor = nixpkgs.lib.genAttrs systems mkPkgs;
+      pkgs = pkgsFor.${system};
       inherit (pkgs) lib;
       treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
     in
@@ -97,6 +111,8 @@
           (lib.mkConfigs.nixos "gsv" true [ inputs.mailserver.nixosModules.mailserver ])
 
           (lib.mkConfigs.nixos "desktop" true [ ])
+
+          (lib.mkConfigs.satellite "satellite-wohnzimmer")
         ]
         // lib.mkConfigs.vms ./vms;
 
@@ -115,8 +131,14 @@
         (lib.mkConfigs.home "marie" "desktop" [ ])
       ];
 
-      packages.${system} = import ./pkgs { inherit inputs pkgs; };
-      lib = import ./lib { inherit inputs outputs pkgs; };
+      packages = lib.genAttrs systems (
+        system:
+        import ./pkgs {
+          inherit inputs;
+          pkgs = pkgsFor.${system};
+        }
+      );
+      lib = import ./lib { inherit inputs outputs pkgsFor; };
 
       devShells.${system} = pkgs.callPackages ./shells { };
 

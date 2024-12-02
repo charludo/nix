@@ -29,4 +29,32 @@ _: prev: {
     '';
     doInstallCheck = false;
   });
+
+  # MA's stock Jellyfin provider never reads Jellyfin's Genres field.
+  music-assistant = prev.music-assistant.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./patches/music-assistant-jellyfin-genres.patch ];
+    disabledTests = (old.disabledTests or [ ]) ++ [
+      "test_parse_albums"
+      "test_parse_tracks"
+    ];
+    pytestFlagsArray = (old.pytestFlagsArray or [ ]) ++ [ "--snapshot-warn-unused" ];
+  });
+  home-assistant-custom-lovelace-modules = prev.home-assistant-custom-lovelace-modules // {
+    custom-sidebar = prev.home-assistant-custom-lovelace-modules.custom-sidebar.overrideAttrs (old: {
+      passthru = (old.passthru or { }) // {
+        entrypoint = "custom-sidebar.js";
+      };
+    });
+  };
+
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+    (_: pyprev: {
+      aiojellyfin = pyprev.aiojellyfin.overrideAttrs (a: {
+        patches = (a.patches or [ ]) ++ [ ./patches/aiojellyfin-genres-field.patch ];
+      });
+      pyopen-wakeword = pyprev.pyopen-wakeword.overridePythonAttrs (_: {
+        doCheck = false;
+      });
+    })
+  ];
 }

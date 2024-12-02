@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   nixosOptionsDoc,
   mdbook,
   stdenv,
@@ -11,6 +12,7 @@ let
     lib.evalModules {
       modules = [
         module
+        { _module.args.pkgs = pkgs; }
         ({ config._module.check = false; } // extraConfig)
       ];
     };
@@ -43,6 +45,7 @@ let
     "HomeManager" = mkOptionsDoc (mkOptions ../../../modules/home-manager { });
     "NixVim" = mkOptionsDoc (mkOptions ../../../modules/nixvim { });
     "VMs" = mkOptionsDoc (mkOptions ../../../modules/vms { });
+    "HomeAssistant" = mkOptionsDoc (mkOptions ../../../modules/home-assistant { });
   };
 
   nestedSummaries = lib.concatStringsSep "\n" (

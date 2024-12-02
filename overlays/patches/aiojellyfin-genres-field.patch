@@ -1,0 +1,20 @@
+Expose Jellyfin's Genres array on MediaItem.
+
+aiojellyfin's TypedDict-driven mashumaro decoder silently drops any
+JSON key that isn't declared on the TypedDict, so even when a caller
+passes `ItemFields.Genres` and Jellyfin returns `"Genres": [...]`, the
+field is stripped before the caller sees it. Declare `Genres` on
+`MediaItem` so it survives decoding.
+
+diff --git a/aiojellyfin/models.py b/aiojellyfin/models.py
+index 853bb82..352e201 100644
+--- a/aiojellyfin/models.py
++++ b/aiojellyfin/models.py
+@@ -105,6 +105,7 @@ class MediaItem(TypedDict, total=False):
+     AlbumArtists: list[ArtistItem]
+     MediaSources: list[MediaSource]
+     NormalizationGain: int | None
++    Genres: list[str]
+ 
+ 
+ MediaItemT = TypeVar("MediaItemT", bound=MediaItem)

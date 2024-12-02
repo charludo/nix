@@ -22,8 +22,9 @@ in
           HostName = "192.168.30.16";
           User = "root";
         };
-        home-assistant = {
-          HostName = "192.168.24.27";
+
+        satellite-wohnzimmer = {
+          hostname = "192.168.24.208";
           User = "root";
         };
 
