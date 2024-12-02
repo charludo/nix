@@ -33,7 +33,7 @@ in
       enable = true;
       model = "base";
       beamSize = 0;
-      language = "de";
+      language = "en";
       uri = "tcp://0.0.0.0:10300";
       # initialPrompt = ''
       # Das Folgende ist ein Befehl an einen Sprachassistenten.
@@ -41,5 +41,5 @@ in
       # '';
     };
   };
-  systemd.services."wyoming-faster-whisper-de".serviceConfig.ProcSubset = lib.mkForce "all";
+  systemd.services."wyoming-faster-whisper-en".serviceConfig.ProcSubset = lib.mkForce "all";
 }

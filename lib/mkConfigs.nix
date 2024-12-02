@@ -1,6 +1,6 @@
 {
   lib,
-  pkgs,
+  pkgsFor,
   inputs,
   outputs,
   ...
@@ -8,6 +8,7 @@
 let
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
+  pkgs = pkgsFor."x86_64-linux";
 in
 rec {
   homeModulesForOsConfig = [
@@ -100,6 +101,38 @@ rec {
         };
       }) (lib.helpers.allVMNames vmPath)
     );
+
+  satellite = hostname: {
+    name = hostname;
+    value = lib.nixosSystem {
+      modules = [
+        outputs.nixosModules.common
+        inputs.agenix.nixosModules.default
+        inputs.agenix-rekey.nixosModules.default
+        inputs.snow.nixosModules.default
+
+        # Ensures we use pkgs.ours as well here, and for the correct architecture
+        { nixpkgs.pkgs = pkgsFor."aarch64-linux"; }
+        { networking.hostName = hostname; }
+
+        "${inputs.nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+
+        ../hosts/common
+        ../users/paki/user.nix
+      ]
+      ++ (builtins.attrValues outputs.nixosModules)
+      ++ [ ../home-assistant/satellite ];
+      specialArgs = {
+        inherit
+          inputs
+          outputs
+          lib
+          private-settings
+          secrets
+          ;
+      };
+    };
+  };
 
   home = username: hostname: extraModules: {
     name = "${username}@${hostname}";
