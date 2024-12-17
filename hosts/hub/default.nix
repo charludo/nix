@@ -14,6 +14,7 @@
       ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
       ../common/optional/gvfs.nix
+      ../common/optional/ld.nix
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/rsync.nix
@@ -33,7 +34,6 @@
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";
     fsType = "ntfs-3g";
-    label = "Media";
   };
 
   boot.initrd.luks.devices = {
@@ -71,12 +71,6 @@
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
   hardware.graphics.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
-
-  # sops.secrets.pinchflat = { };
-  # services.pinchflat = {
-  # enable = true;
-  # secretsFile = config.sops.secrets.pinchflat.path;
-  # };
 
   system.stateVersion = "23.11";
 }

@@ -15,17 +15,15 @@
       pycodestyle.maxLineLength = 88;
       pycodestyle.ignore = [ "E501" "W503" "R0903" ];
 
-      # pylsp_mypy.enabled = true;
-      # pylsp_mypy.dmypy = true;
+      pylsp_mypy.enabled = true;
+      pylsp_mypy.dmypy = true;
 
       ruff.enabled = true;
       ruff.lineLength = 88;
-      ruff.executable = "${pkgs.ruff}/bin/ruff";
     };
   };
 
   programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
-  # home.shellAliases.ruff = "${pkgs.ruff}/bin/ruff";
 
   programs.nixvim.plugins.dap.configurations.python = [{
     name = "Launch Django DAP";

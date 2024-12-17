@@ -1,7 +1,7 @@
 {
-  programs.nixvim.plugins.nvim-colorizer = {
+  programs.nixvim.plugins.colorizer = {
     enable = true;
-    userDefaultOptions = {
+    settings.user_default_options = {
       AARRGGBB = false;
       RGB = true;
       RRGGBB = true;
@@ -13,6 +13,7 @@
       names = true;
       rgb_fn = true;
       tailwind = true;
+      sass.enable = true;
     };
   };
 }
