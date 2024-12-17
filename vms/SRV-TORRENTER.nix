@@ -183,9 +183,11 @@ in
     # Ensure qbittorrent/nzbget only start AFTER a VPN connection has been established, and the NAS is mounted for *arr
     services.nzbget.bindsTo = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
     services.nzbget.after = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
+    services.nzbget.partOf = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
     services.nzbget.path = [ pkgs.python311 ];
     services.qbittorrent.bindsTo = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
     services.qbittorrent.after = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
+    services.qbittorrent.partOf = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
     services.sonarr.after = [ "media-NAS.mount" ];
     services.radarr.after = [ "media-NAS.mount" ];
     services.lidarr.after = [ "media-NAS.mount" ];
