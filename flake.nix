@@ -45,6 +45,7 @@
     musnix = { url = "github:musnix/musnix"; };
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
+    personal-site.url = "git+ssh://git@github.com/charludo/personal-site";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };

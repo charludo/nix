@@ -12,6 +12,7 @@ in
     ./mailserver.nix
     # ./matrix.nix
     ./monit.nix
+    ./personal-site.nix
     ./radicale.nix
     ./roundcube.nix
     # ./rustdesk.nix

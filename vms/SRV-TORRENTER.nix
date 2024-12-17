@@ -55,6 +55,11 @@ in
     ../hosts/common/optional/surfshark.nix
   ];
 
+  nixpkgs.config.permittedInsecurePackages = [
+    "dotnet-sdk-6.0.428"
+    "aspnetcore-runtime-6.0.36"
+  ];
+
   vm = {
     id = 2101;
     name = "SRV-TORRENTER";
