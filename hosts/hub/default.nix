@@ -33,7 +33,6 @@
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";
     fsType = "ntfs-3g";
-    label = "Media";
   };
 
   boot.initrd.luks.devices = {
@@ -72,11 +71,12 @@
   hardware.graphics.enable32Bit = true;
   hardware.graphics.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
 
-  # sops.secrets.pinchflat = { };
-  # services.pinchflat = {
-  # enable = true;
-  # secretsFile = config.sops.secrets.pinchflat.path;
-  # };
+  sops.secrets.pinchflat = { };
+  services.pinchflat = {
+    enable = true;
+    openFirewall = true;
+    selfhosted = true;
+  };
 
   system.stateVersion = "23.11";
 }
