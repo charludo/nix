@@ -18,6 +18,7 @@ in
     ./common/desktop/common/alacritty.nix
     ./common/desktop/common/discord.nix
     ./common/desktop/common/easyeffects.nix
+    ./common/desktop/common/element.nix
     ./common/desktop/common/firefox.nix
     ./common/desktop/common/gtk.nix
     ./common/desktop/common/jellyfin.nix
