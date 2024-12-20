@@ -19,6 +19,7 @@
       ../common/optional/nvim.nix
       ../common/optional/pipewire.nix
       ../common/optional/screensharing.nix
+      ../common/optional/steam-firewall.nix
       ../common/optional/surfshark.nix
       ../common/optional/suspend.nix
       ../common/optional/wifi.nix

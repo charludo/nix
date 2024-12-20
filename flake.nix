@@ -12,6 +12,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-colors.url = "github:misterio77/nix-colors";
 
     sops-nix = {
@@ -50,7 +55,7 @@
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-generators, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, ... } @ inputs:
     let
       inherit (self) outputs;
       lib = nixpkgs.lib // home-manager.lib;
@@ -60,7 +65,7 @@
     in
     {
       inherit lib;
-      nixosModules = import ./modules/nixos;
+      nixosModules = (import ./modules/nixos) // jovian.outputs.nixosModules;
       homeManagerModules = import ./modules/home-manager;
       overlays = import ./overlays { inherit inputs outputs; };
 
@@ -87,6 +92,12 @@
         # Gaming
         excession = lib.nixosSystem {
           modules = [ ./hosts/excession ];
+          specialArgs = { inherit inputs outputs; };
+        };
+
+        # Gaming Mk II
+        steamdeck = lib.nixosSystem {
+          modules = [ ./hosts/steamdeck ];
           specialArgs = { inherit inputs outputs; };
         };
 

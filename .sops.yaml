@@ -22,6 +22,7 @@ keys:
     - &matrix age1ptvksu3pffdgzwa0ep2u28at6mk9u8yhvxkuvkuvc7kl6x5k8shs7xca6n
     - &paperless age1swxssnnpxggt86svl6kdjh8fsvsulrvg0hdarg5wsntmhfy8tqzsdgzmqa
     - &pdf age1grs5ak8e3flpwjt46tkzlnyu7jwtyyftqdm9h0j62wwgwwp3fyrsa42etp
+    - &steamdeck age1f35ldh0ql705qefgdnuufzts6nxxrh9lwspvfvl8470equcatg0s32tkva
     - &suwayomi age1ngpcjtlku3xcudkzc90r89wtr53uwt7cmz696z7y86ttvxdzagws7mpemp
     - &torrenter age1927sq0rr4d24plz40tyx3m4cc3vj690t8pd5hkshwenhuytd0spquzuuwc
     - &vaultwarden age1ddlp8f79due3v3kalugxnnygwqldgc4q34lwd7dvlrjcfg7xfphqxa5w7a
@@ -36,6 +37,7 @@ creation_rules:
           - *drone
           - *excession
           - *mallorca
+          - *steamdeck
           - *cl-nix
           - *cl-rou
           - *audiobookshelf
@@ -58,6 +60,7 @@ creation_rules:
           - *hub
           - *drone
           - *excession
+          - *steamdeck
   - path_regex: hosts/gsv/gsv-secrets.sops.ya?ml$
     key_groups:
       - age:

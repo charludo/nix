@@ -1,9 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   boot = {
     plymouth = {
       enable = true;
-      theme = "dark_planet";
+      theme = lib.mkDefault "dark_planet";
       themePackages = with pkgs; [
         (adi1090x-plymouth-themes.override {
           selected_themes = [ "rings" "red_loader" "hud_3" "dark_planet" "cuts" ];
