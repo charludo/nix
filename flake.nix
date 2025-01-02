@@ -253,7 +253,7 @@
       devShells.${system} = {
         keyctl = (import ./shells/keyctl { inherit pkgs; });
         vmctl = (import ./shells/vmctl { inherit pkgs; });
-        remux = (import ./shells/remux { inherit pkgs; });
+        remux = (import ./shells/remux { inherit pkgs lib; });
         default = (import ./shells { inherit pkgs; });
       };
     };

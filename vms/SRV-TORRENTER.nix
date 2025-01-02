@@ -29,10 +29,10 @@ let
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.radarr.user}:${config.services.radarr.group} /media/Backup/torrenter/radarr/ ${config.services.radarr.dataDir}
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.lidarr.user}:${config.services.lidarr.group} /media/Backup/torrenter/lidarr/ ${config.services.lidarr.dataDir}
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.readarr.user}:${config.services.readarr.group} /media/Backup/torrenter/readarr/ ${config.services.readarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} /media/Backup/torrenter/bazarr/ /var/lib/bazarr
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr /media/Backup/torrenter/prowlarr/ /var/lib/prowlarr
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} /media/Backup/torrenter/qbittorrent/ ${config.services.qbittorrent.dataDir}
     '';
+    # ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} /media/Backup/torrenter/bazarr/ /var/lib/bazarr
   };
   get-anime-music = pkgs.writeShellApplication {
     name = "get-anime-music";
@@ -120,8 +120,8 @@ in
     readarr.enable = true;
     readarr.openFirewall = true;
 
-    bazarr.enable = true;
-    bazarr.openFirewall = true;
+    # bazarr.enable = true;
+    # bazarr.openFirewall = true;
 
     prowlarr.enable = true;
     prowlarr.openFirewall = true;
@@ -154,7 +154,7 @@ in
     "${config.services.radarr.user}".extraGroups = [ "nas" ];
     "${config.services.lidarr.user}".extraGroups = [ "nas" ];
     "${config.services.readarr.user}".extraGroups = [ "nas" ];
-    "${config.services.bazarr.user}".extraGroups = [ "nas" ];
+    # "${config.services.bazarr.user}".extraGroups = [ "nas" ];
     "${config.services.qbittorrent.user}".extraGroups = [ "nas" ];
     "${config.services.nzbget.user}".extraGroups = [ "nas" ];
   };
@@ -180,8 +180,8 @@ in
     get-anime-music
     surfshark-random
     surfshark-stop
-    (import ../shells/remux/remux.nix { inherit pkgs; })
-    (import ../shells/remux/remux-all.nix { inherit pkgs; })
+
+    (import ../shells/remux/remux.nix { inherit pkgs lib; })
   ];
 
   systemd = {
@@ -197,7 +197,7 @@ in
     services.radarr.after = [ "media-NAS.mount" ];
     services.lidarr.after = [ "media-NAS.mount" ];
     services.readarr.after = [ "media-NAS.mount" ];
-    services.bazarr.after = [ "media-NAS.mount" ];
+    # services.bazarr.after = [ "media-NAS.mount" ];
     services.prowlarr.after = [ "media-NAS.mount" ];
 
     timers."anime-music-hourly" = {
@@ -274,10 +274,10 @@ in
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.radarr.dataDir}/ /media/Backup/torrenter/radarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.lidarr.dataDir}/ /media/Backup/torrenter/lidarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ /media/Backup/torrenter/readarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/bazarr/ /media/Backup/torrenter/bazarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ /media/Backup/torrenter/prowlarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.dataDir}/ /media/Backup/torrenter/qbittorrent
       '';
+      # ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/bazarr/ /media/Backup/torrenter/bazarr
       serviceConfig = {
         Type = "oneshot";
         User = "root";
