@@ -6,7 +6,7 @@ in
 
   users.users.charlotte = {
     isNormalUser = true;
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
 
     uid = 1000;
     group = "charlotte";
@@ -41,5 +41,5 @@ in
   ];
 
   home-manager.users.charlotte = import ./home/${config.networking.hostName}.nix;
-  environment.shells = with pkgs; [ zsh bash ];
+  environment.shells = with pkgs; [ fish bash ];
 }

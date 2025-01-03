@@ -10,6 +10,7 @@
       ../common/optional/bluetooth.nix
       ../common/optional/cups.nix
       ../common/optional/dconf.nix
+      ../common/optional/fish.nix
       ../common/optional/fontconfig.nix
       ../common/optional/greetd.nix
       ../common/optional/gvfs.nix
@@ -20,7 +21,6 @@
       ../common/optional/surfshark.nix
       ../common/optional/suspend.nix
       ../common/optional/wifi.nix
-      ../common/optional/zsh.nix
 
       ../../users/charlotte/user.nix
     ];

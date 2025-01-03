@@ -9,10 +9,10 @@ in
     ./common
     ./common/cli/bat.nix
     ./common/cli/direnv.nix
+    ./common/cli/fish.nix
     ./common/cli/fzf.nix
     ./common/cli/gh.nix
     ./common/cli/git.nix
-    ./common/cli/zsh.nix
     ./common/nvim
   ];
 

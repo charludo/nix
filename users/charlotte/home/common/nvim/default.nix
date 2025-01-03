@@ -24,7 +24,7 @@
     defaultEditor = true;
 
     opts = {
-      shell = "${pkgs.zsh}/bin/zsh";
+      shell = "${pkgs.fish}/bin/fish";
       termguicolors = true;
       title = true;
       ignorecase = true;

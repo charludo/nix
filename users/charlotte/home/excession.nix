@@ -12,9 +12,9 @@ in
     ./common/desktop/hyprland
     ./common/cli/bitwarden.nix
     ./common/cli/direnv.nix
+    ./common/cli/fish.nix
     ./common/cli/git.nix
     ./common/cli/ssh.nix
-    ./common/cli/zsh.nix
     ./common/desktop/common/alacritty.nix
     ./common/desktop/common/discord.nix
     ./common/desktop/common/easyeffects.nix

@@ -17,8 +17,8 @@
     networking.openPorts.udp = [ 8000 ];
   };
 
-  programs.zsh.enable = true;
-  users.defaultUserShell = pkgs.zsh;
+  programs.fish.enable = true;
+  users.defaultUserShell = pkgs.fish;
 
   system.stateVersion = "23.11";
 }
