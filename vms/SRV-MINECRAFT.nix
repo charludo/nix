@@ -24,11 +24,11 @@
       enable-rcon = false;
 
       gamemode = 0;
-      difficulty = 2;
+      difficulty = 1;
       hardcore = false;
       force-gamemode = true;
 
-      level-name = "world-1";
+      level-name = "world-2";
       level-seed = "-1743022870505021258";
 
       max-players = 5;

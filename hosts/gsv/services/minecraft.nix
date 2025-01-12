@@ -17,8 +17,8 @@
       hardcore = false;
       force-gamemode = true;
 
-      level-name = "world-2";
-      level-seed = "-1743022870505021258";
+      level-name = "world-3";
+      level-seed = "-1345672572347283467";
 
       max-players = 5;
       player-idle-timeout = 60;

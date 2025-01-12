@@ -54,5 +54,12 @@ in
         real_ip_header CF-Connecting-IP;
       '';
     # virtualHosts."${gsv.domain}" = { default = true; enableACME = true; addSSL = true; locations."/".proxyPass = "http://127.0.0.1:5232/"; };
+    # virtualHosts."_" = {
+    # serverName = "_";
+    # default = true;
+    # locations."/" = {
+    # return = "404";
+    # };
+    # };
   };
 }
