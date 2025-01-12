@@ -129,6 +129,8 @@
     lutris
     bottles
     wine
+
+    prismlauncher
   ];
   environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATH =

@@ -220,6 +220,12 @@
           modules = [ ./vms/SRV-VAULTWARDEN.nix ];
           specialArgs = { inherit inputs outputs; };
         };
+
+        # Minecraft internal
+        SRV-MINECRAFT = lib.nixosSystem {
+          modules = [ ./vms/SRV-MINECRAFT.nix ];
+          specialArgs = { inherit inputs outputs; };
+        };
       };
 
       # Available through 'home-manager --flake .#username@hostname'
