@@ -3,22 +3,35 @@ let
   inherit (inputs.private-settings) domains;
 in
 {
-  services.static-web-server = {
-    enable = true;
-    root = ''${inputs.personal-site.packages."x86_64-linux".default}'';
-    listen = "0.0.0.0:8787";
-  };
-
-  services.nginx.virtualHosts."${domains.personal}" = {
-    forceSSL = true;
-    enableACME = true;
-    locations."/" = {
-      proxyPass = "http://localhost:8787/";
+  services.nginx.virtualHosts = {
+    "${domains.personal}" = {
+      forceSSL = true;
+      enableACME = true;
+      locations."/" = {
+        root = ''${inputs.personal-site.packages."x86_64-linux".default}'';
+      };
       extraConfig = ''
-        proxy_set_header  X-Script-Name /;
-        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass_header Authorization;
+        error_page 404 /notfound;
       '';
+    };
+    "www.${domains.personal}" = {
+      forceSSL = true;
+      enableACME = true;
+      globalRedirect = domains.personal;
+    };
+
+    "${domains.blog}" = {
+      forceSSL = true;
+      enableACME = true;
+      locations."/" = {
+        root = ''${inputs.blog-site.packages."x86_64-linux".default}'';
+      };
+    };
+    "www.${domains.blog}" = {
+      forceSSL = true;
+      enableACME = true;
+      globalRedirect = domains.blog;
     };
   };
 }
+
