@@ -79,7 +79,7 @@ in
     ];
   };
 
-  services.flaresolverr.enable = true;
+  services.flaresolverr.enable = false; # https://github.com/NixOS/nixpkgs/issues/332776
 
   services.readarr = {
     enable = true;

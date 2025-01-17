@@ -14,7 +14,7 @@
   programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
   programs.nixvim.extraPackages = [ pkgs.rustfmt pkgs.lldb_17 ];
 
-  programs.nixvim.plugins.crates-nvim.enable = true;
+  programs.nixvim.plugins.crates.enable = true;
 
   programs.nixvim.keymaps = [
     { mode = "n"; key = "<leader>cu"; action = "<cmd>lua require('crates').upgrade_all_crates()<cr>"; options = { silent = true; desc = "Update all crates"; }; }

@@ -24,7 +24,6 @@
     name = config.vm.name;
     additionalSpace = config.vm.hardware.storage;
     bootSize = lib.mkDefault "256M";
-    diskSize = "auto";
     net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${builtins.substring 0 2 (toString config.vm.id)},firewall=1";
   };
   proxmox.cloudInit.enable = false;
@@ -34,6 +33,7 @@
     ide2 = lib.mkForce "none,media=cdrom";
     kvm = 1;
   };
+  virtualisation.diskSize = "auto";
 
   networking = {
     hostName = config.vm.name;

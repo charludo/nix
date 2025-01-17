@@ -32,8 +32,6 @@
     python = [ "ruff" ];
   };
 
-  programs.nixvim.extraPackages = [ pkgs.pylint pkgs.ruff ];
-
   programs.nixvim.plugins.dap.configurations.python = [{
     name = "Launch Django DAP";
     type = "python";

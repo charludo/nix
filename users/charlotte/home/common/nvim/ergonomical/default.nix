@@ -7,7 +7,6 @@
     ./guess-indent.nix
     ./indent-blankline.nix
     ./neogen.nix
-    ./projectmgr.nix
     ./visual-multi.nix
     ./which-key.nix
   ];

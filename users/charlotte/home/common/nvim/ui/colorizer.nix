@@ -13,7 +13,6 @@
       names = true;
       rgb_fn = true;
       tailwind = true;
-      sass.enable = true;
     };
   };
 }
