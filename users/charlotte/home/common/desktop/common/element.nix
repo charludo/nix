@@ -15,8 +15,8 @@ in
                     "name": "Nix",
                     "is_dark": true,
                     "colors": {
-                        "accent-color": "${colors.base09}",
-                        "accent": "${colors.base09}",
+                        "accent-color": "${colors.base0B}",
+                        "accent": "${colors.base0B}",
                         "primary-color": "${colors.base0D}",
                         "warning-color": "${colors.base08}d9",
                         "alert": "${colors.base07}",

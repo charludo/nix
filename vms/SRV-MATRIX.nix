@@ -1,6 +1,6 @@
 { config, pkgs, inputs, ... }:
 let
-  inherit (inputs.private-settings) domains gsv;
+  inherit (inputs.private-settings) domains;
 in
 {
   imports = [ ./_common.nix ];
@@ -14,31 +14,56 @@ in
     hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
 
     networking.nameservers = [ "192.168.30.13" ];
-    networking.openPorts.tcp = [ config.services.matrix-conduit.settings.global.port ];
+    networking.openPorts.tcp = config.services.conduwuit.settings.global.port;
   };
 
-  services.matrix-conduit = {
+  sops.secrets.turn = {
+    sopsFile = ../hosts/gsv/gsv-secrets.sops.yaml;
+    owner = config.services.conduwuit.user;
+  };
+
+  services.conduwuit = {
     enable = true;
-    settings.global = {
+    package = inputs.conduwuit.outputs.packages."x86_64-linux".default;
+    settings.global = rec {
+      allow_check_for_updates = false;
+      allow_encryption = true;
       allow_registration = false;
-      server_name = "matrix.${domains.home}";
       allow_federation = false;
-      address = "0.0.0.0";
-      database_backend = "rocksdb";
+      trusted_servers = [ ];
+
+      server_name = "matrix.${domains.home}";
+      address = [ "0.0.0.0" ];
+      port = [ 6167 ];
 
       turn_uris = [
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
       ];
-      turn_secret = gsv.turnSecret;
+      turn_secret_file = config.sops.secrets.turn.path;
 
-      enable_lightning_bolt = false;
-      max_request_size = 200000000; # 200MB
+      new_user_displayname_suffix = "";
+      max_request_size = 1000000000; # 1GB
+
+      well_known = {
+        client = "https://${server_name}";
+        server = "${server_name}:443";
+      };
     };
   };
 
   enableNasBackup = true;
-  environment.systemPackages = [ pkgs.rsync ];
+  environment.systemPackages =
+    let
+      restore-conduwuit = pkgs.writeShellApplication {
+        name = "restore-conduwuit";
+        runtimeInputs = [ pkgs.rsync ];
+        text = ''
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.conduwuit.user}:${config.services.conduwuit.group} /media/Backup/matrix/ ${config.services.conduwuit.settings.global.database_path}
+        '';
+      };
+    in
+    [ restore-conduwuit pkgs.rsync ];
   systemd = {
     timers."matrix-backup-daily" = {
       wantedBy = [ "timers.target" ];
@@ -50,7 +75,7 @@ in
     };
     services."matrix-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.matrix-conduit.settings.global.database_path} /media/Backup/matrix
+        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.conduwuit.settings.global.database_path} /media/Backup/matrix
       '';
       serviceConfig = {
         Type = "oneshot";

@@ -65,6 +65,7 @@ creation_rules:
     key_groups:
       - age:
           - *gsv
+          - *matrix
           - *charlotte
   - path_regex: vms/secrets/wastebin-secrets.sops.ya?ml$
     key_groups:
