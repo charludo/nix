@@ -45,7 +45,17 @@
   enableNasBackup = true;
   users.users.git.extraGroups = [ "nas" ];
 
-  environment.systemPackages = [ pkgs.rsync ];
+  environment.systemPackages =
+    let
+      restore-forgejo = pkgs.writeShellApplication {
+        name = "restore-forgejo";
+        runtimeInputs = [ pkgs.rsync ];
+        text = ''
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.forgejo.user}:${config.services.forgejo.group} /media/Backup/forgejo/ ${config.services.forgejo.stateDir}
+        '';
+      };
+    in
+    [ restore-forgejo pkgs.rsync ];
   systemd = {
     timers."git-backup-daily" = {
       wantedBy = [ "timers.target" ];
@@ -57,7 +67,7 @@
     };
     services."git-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.forgejo.stateDir} /media/Backup/forgejo
+        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.forgejo.stateDir}/ /media/Backup/forgejo
       '';
       serviceConfig = {
         Type = "oneshot";
