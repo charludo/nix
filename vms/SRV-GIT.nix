@@ -3,7 +3,7 @@
   imports = [ ./_common.nix ];
 
   vm = {
-    id = 3007;
+    id = 2212;
     name = "SRV-GIT";
 
     hardware.cores = 2;
@@ -20,15 +20,19 @@
 
   services.forgejo = {
     enable = true;
+    package = pkgs.forgejo;
     database.type = "postgres";
     lfs.enable = true;
     settings = {
       server = rec {
-        DOMAIN = "git.${inputs.private-settings.domains.ad}";
-        ROOT_URL = "http://${DOMAIN}/";
+        DOMAIN = "git.${inputs.private-settings.domains.home}";
+        ROOT_URL = "https://${DOMAIN}/";
         HTTP_PORT = 3000;
       };
       service.DISABLE_REGISTRATION = true;
+      repository = {
+        "signing.DEFAULT_TRUST_MODEL" = "collaboratorcommitter";
+      };
     };
   };
 
