@@ -1211,6 +1211,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_14": {
+      "locked": {
+        "lastModified": 1737062831,
+        "narHash": "sha256-Tbk1MZbtV2s5aG+iM99U8FqwxU/YNArMcWAv6clcsBc=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "5df43628fdf08d642be8ba5b3625a6c70731c19c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1718714799,
@@ -1426,12 +1442,15 @@
       }
     },
     "private-settings": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_14"
+      },
       "locked": {
-        "lastModified": 1737375131,
-        "narHash": "sha256-42Tx6odfuEWf3mnJRr/pxVhA1T7Hg560YPMlmucXjs4=",
+        "lastModified": 1737392641,
+        "narHash": "sha256-0AVthoD3Nyc9i/o29eqHDCsQ81IY08zoXtimK+mrf2U=",
         "ref": "refs/heads/main",
-        "rev": "5609fd496c001f0dffac29c08b2ec557ffa41a86",
-        "revCount": 45,
+        "rev": "852e1f2a3f855894973592f7525feb9affc38f36",
+        "revCount": 46,
         "type": "git",
         "url": "ssh://git@github.com/charludo/nix-private"
       },

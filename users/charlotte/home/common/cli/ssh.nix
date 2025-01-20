@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ private-settings, ... }:
 let
-  inherit (inputs.private-settings) gsv;
+  inherit (private-settings) gsv;
 in
 {
   imports = [

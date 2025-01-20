@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ inputs, private-settings, ... }:
 let
-  inherit (inputs.private-settings) domains loginAccounts forwards;
+  inherit (private-settings) domains loginAccounts forwards;
 in
 {
   imports = [ inputs.mailserver.nixosModule ];

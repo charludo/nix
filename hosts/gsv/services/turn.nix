@@ -1,6 +1,6 @@
-{ config, inputs, ... }:
+{ config, private-settings, ... }:
 let
-  inherit (inputs.private-settings) domains gsv;
+  inherit (private-settings) domains gsv;
 in
 {
   sops.secrets.coturn = { owner = "turnserver"; };

@@ -1,6 +1,6 @@
-{ config, pkgs, inputs, ... }:
+{ inputs, config, pkgs, private-settings, secrets, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 in
 {
   imports = [ ./_common.nix ];
@@ -18,7 +18,7 @@ in
   };
 
   sops.secrets.turn = {
-    sopsFile = ../hosts/gsv/gsv-secrets.sops.yaml;
+    sopsFile = secrets.gsv;
     owner = config.services.conduwuit.user;
   };
 

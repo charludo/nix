@@ -1,6 +1,6 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, private-settings, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 in
 {
   services.roundcube = {

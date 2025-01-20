@@ -1,6 +1,6 @@
-{ config, inputs, pkgs, ... }:
+{ config, private-settings, pkgs, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 in
 {
   imports = [ ./_common.nix ];

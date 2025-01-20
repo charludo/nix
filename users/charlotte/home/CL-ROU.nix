@@ -1,6 +1,5 @@
-{ inputs, lib, pkgs, config, ... }:
+{ inputs, lib, pkgs, config, private-settings, ... }:
 let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config; };
   inherit (inputs.nix-colors) colorschemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
@@ -31,5 +30,5 @@ in
   xdg.userDirs.extraConfig = {
     XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projekte";
   };
-  projects = inputs.private-settings.projects;
+  projects = private-settings.projects;
 }

@@ -1,4 +1,4 @@
-{ inputs, outputs, pkgs, ... }: {
+{ inputs, outputs, pkgs, private-settings, ... }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
     ./locale.nix
@@ -19,7 +19,7 @@
   users.mutableUsers = false;
 
   console.keyMap = "us-acentos";
-  networking.domain = inputs.private-settings.domains.ad;
+  networking.domain = private-settings.domains.ad;
 
   environment.systemPackages = with pkgs; [
     jq

@@ -1,6 +1,6 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, private-settings, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 
   mailAccounts = config.mailserver.loginAccounts;
   htpasswd = pkgs.writeText "radicale.users" (lib.concatStrings

@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ private-settings, pkgs, ... }:
 let
   backupDirDaily = "/media/Backup/paperless/daily/";
   backupDirMonthly = "/media/Backup/paperless/monthly/";
@@ -38,7 +38,7 @@ in
     consumptionDirIsPublic = true;
     openMPThreadingWorkaround = true;
     settings = {
-      PAPERLESS_URL = inputs.private-settings.domains.paperless;
+      PAPERLESS_URL = private-settings.domains.paperless;
       PAPERLESS_CONSUMER_IGNORE_PATTERN = [
         ".DS_STORE/*"
         "desktop.ini"

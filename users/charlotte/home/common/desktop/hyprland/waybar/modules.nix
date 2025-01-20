@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, private-settings, ... }:
 let
   curl = "${pkgs.curl}/bin/curl";
   rofi = "${pkgs.rofi-wayland}/bin/rofi";
@@ -48,7 +48,7 @@ in
   "custom/lemmy" = {
     exec = "${lemmy}";
     restart-interval = 1200;
-    on-click = "${firefox} --new-tab \"${inputs.private-settings.lemmyInstance}/inbox\"";
+    on-click = "${firefox} --new-tab \"${private-settings.lemmyInstance}/inbox\"";
   };
 
   "custom/reddit" = {

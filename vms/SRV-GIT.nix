@@ -1,4 +1,4 @@
-{ pkgs, config, inputs, ... }:
+{ pkgs, config, private-settings, ... }:
 {
   imports = [ ./_common.nix ];
 
@@ -25,7 +25,7 @@
     lfs.enable = true;
     settings = {
       server = rec {
-        DOMAIN = "git.${inputs.private-settings.domains.home}";
+        DOMAIN = "git.${private-settings.domains.home}";
         ROOT_URL = "https://${DOMAIN}/";
         HTTP_PORT = 3000;
       };

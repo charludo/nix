@@ -1,4 +1,4 @@
-{ config, inputs, ... }: {
+{ config, private-settings, ... }: {
   imports = [ ./_common.nix ];
 
   vm = {
@@ -24,7 +24,7 @@
     openFirewall = true;
 
     mediaLocation = "/media/Backup/immich";
-    settings.server.externalDomain = "https://pictures.${inputs.private-settings.domains.home}";
+    settings.server.externalDomain = "https://pictures.${private-settings.domains.home}";
 
     # https://github.com/immich-app/immich/discussions/4758#discussioncomment-7441670
     environment.UV_USE_IO_URING = "0";
@@ -42,47 +42,6 @@
       "${automount_opts},credentials=${config.sops.secrets.nas.path}";
     wantedBy = [ "multi-user.target" ];
   }];
-
-  # environment.systemPackages = [ paperless-init ];
-
-  # systemd = {
-  #   timers."paperless-backup-daily" = {
-  #     wantedBy = [ "timers.target" ];
-  #     timerConfig = {
-  #       OnCalendar = "daily";
-  #       Persistent = true;
-  #       Unit = "paperless-backup-daily.service";
-  #     };
-  #   };
-  #   timers."paperless-backup-monthly" = {
-  #     wantedBy = [ "timers.target" ];
-  #     timerConfig = {
-  #       OnCalendar = "monthly";
-  #       Persistent = true;
-  #       Unit = "paperless-backup-monthly.service";
-  #     };
-  #   };
-  #
-  #   services."paperless-backup-daily" = {
-  #     script = ''
-  #       /var/lib/paperless/paperless-manage document_exporter "${backupDirDaily}" -p -d
-  #       /var/lib/paperless/paperless-manage document_create_classifier
-  #     '';
-  #     serviceConfig = {
-  #       Type = "oneshot";
-  #       User = "root";
-  #     };
-  #   };
-  #   services."paperless-backup-monthly" = {
-  #     script = ''
-  #       /var/lib/paperless/paperless-manage document_exporter "${backupDirMonthly}" -z
-  #     '';
-  #     serviceConfig = {
-  #       Type = "oneshot";
-  #       User = "root";
-  #     };
-  #   };
-  # };
 
   system.stateVersion = "23.11";
 }

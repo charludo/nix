@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, secrets, ... }:
 let
   services = "(${lib.concatStringsSep " " (lib.mapAttrsToList (n: _: "\"openvpn-${n}.service\"") config.services.openvpn.servers)})";
   surfshark-stop = pkgs.writeShellApplication {
@@ -160,18 +160,18 @@ in
   };
 
   sops.secrets.nzbget = {
-    sopsFile = ./secrets/torrenter-secrets.sops.yaml;
+    sopsFile = secrets.torrenter;
     owner = config.services.nzbget.user;
     path = "/var/lib/nzbget/nzbget.conf";
   };
 
   sops.secrets.anime-playlist = {
-    sopsFile = ./secrets/torrenter-secrets.sops.yaml;
+    sopsFile = secrets.torrenter;
     mode = "0444";
   };
 
   sops.secrets.idagio = {
-    sopsFile = ./secrets/torrenter-secrets.sops.yaml;
+    sopsFile = secrets.torrenter;
     mode = "0444";
   };
 

@@ -1,6 +1,6 @@
-{ config, inputs, pkgs, ... }:
+{ config, pkgs, private-settings, secrets, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 in
 {
   imports = [ ./_common.nix ];
@@ -16,7 +16,7 @@ in
     networking.openPorts.tcp = [ config.services.vaultwarden.config.ROCKET_PORT ];
   };
 
-  sops.secrets.vaultwarden = { sopsFile = ./secrets/vaultwarden-secrets.sops.yaml; };
+  sops.secrets.vaultwarden = { sopsFile = secrets.vaultwarden; };
   services.vaultwarden = {
     enable = true;
     backupDir = "/media/Backup/vaultwarden";

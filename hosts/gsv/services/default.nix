@@ -1,6 +1,6 @@
-{ lib, inputs, ... }:
+{ lib, private-settings, ... }:
 let
-  inherit (inputs.private-settings) gsv contact;
+  inherit (private-settings) gsv contact;
 in
 {
   imports = [

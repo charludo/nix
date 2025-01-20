@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, config, outputs, ... }:
+{ inputs, lib, pkgs, config, outputs, secrets, ... }:
 {
   imports = [
     inputs.nix-colors.homeManagerModules.colorscheme
@@ -23,7 +23,7 @@
 
   sops = {
     age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-    defaultSopsFile = ../../user_secrets.sops.yaml;
+    defaultSopsFile = secrets.charlotte;
     defaultSopsFormat = "yaml";
 
     # Required because sops-nix doesn't know our UUID

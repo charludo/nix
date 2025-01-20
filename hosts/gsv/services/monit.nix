@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ private-settings, ... }:
 let
-  inherit (inputs.private-settings) contact monitAdminPassword;
+  inherit (private-settings) contact monitAdminPassword;
 in
 {
   imports = [ ../../common/optional/monit.nix ];

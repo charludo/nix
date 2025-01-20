@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, private-settings, ... }:
 pkgs.writeShellApplication {
   name = "waybar-lemmy";
   runtimeInputs = [ pkgs.toybox pkgs.curl pkgs.jq ];
@@ -6,7 +6,7 @@ pkgs.writeShellApplication {
     set +o pipefail
     set +o errexit
     set +o nounset
-    instance="${inputs.private-settings.lemmyInstance}"
+    instance="${private-settings.lemmyInstance}"
     username="$(cat ${config.sops.secrets."lemmy/username".path})"
     password="$(cat ${config.sops.secrets."lemmy/password".path})"
 

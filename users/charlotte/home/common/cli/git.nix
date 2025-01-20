@@ -1,4 +1,4 @@
-{ config, inputs, ... }:
+{ config, private-settings, ... }:
 {
   imports = [
     ../../../../common/git.nix
@@ -6,8 +6,8 @@
 
   home.file.".ssh/allowed_signers".text = "* ${builtins.readFile ../../../ssh.pub}";
   programs.git = {
-    userName = inputs.private-settings.git.charlotte.name;
-    userEmail = inputs.private-settings.git.charlotte.email;
+    userName = private-settings.git.charlotte.name;
+    userEmail = private-settings.git.charlotte.email;
     extraConfig = {
       safe = {
         directory = "${config.home.homeDirectory}/Documents";

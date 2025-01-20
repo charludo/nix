@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, secrets, ... }: {
   imports = [ ./_common.nix ];
 
   vm = {
@@ -13,7 +13,7 @@
     networking.openPorts.tcp = [ config.services.kavita.settings.Port ];
   };
 
-  sops.secrets.kavita-token = { sopsFile = ./secrets/kavita-secrets.sops.yaml; };
+  sops.secrets.kavita-token = { sopsFile = secrets.kavita; };
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets.kavita-token.path;

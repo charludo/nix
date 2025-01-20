@@ -1,12 +1,9 @@
-{ inputs, ... }:
-let
-  inherit (inputs.private-settings) gsv;
-in
+{ private-settings, ... }:
 {
   services.rustdesk-server = {
     enable = true;
     openFirewall = true;
-    relayIP = gsv.ip;
+    relayIP = private-settings.gsv.ip;
     extraSignalArgs = [ "-k" "_" ];
   };
 }

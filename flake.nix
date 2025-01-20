@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    # nixpkgs.url = "git+file:///home/charlotte/Projekte/nixpkgs";
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -57,18 +56,24 @@
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, private-settings, ... } @ inputs:
     let
       inherit (self) outputs;
       lib = nixpkgs.lib // home-manager.lib;
 
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      private-settings-module = {
+        config = {
+          _module.args.private-settings = private-settings;
+          _module.args.secrets = private-settings.secrets;
+        };
+      };
     in
     {
       inherit lib;
-      nixosModules = (import ./modules/nixos) // jovian.outputs.nixosModules;
-      homeManagerModules = import ./modules/home-manager;
+      nixosModules = (import ./modules/nixos) // jovian.outputs.nixosModules // private-settings-module;
+      homeManagerModules = (import ./modules/home-manager) // private-settings-module;
       overlays = import ./overlays { inherit inputs outputs; };
 
       # Available through 'nixos-rebuild --flake .#hostname'

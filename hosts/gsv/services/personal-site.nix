@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ inputs, private-settings, ... }:
 let
-  inherit (inputs.private-settings) domains;
+  inherit (private-settings) domains;
 in
 {
   services.nginx.virtualHosts = {

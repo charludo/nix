@@ -1,4 +1,4 @@
-{ pkgs, inputs, config, lib, ... }:
+{ pkgs, private-settings, config, lib, ... }:
 {
   imports = [ ./_common.nix ];
 
@@ -38,7 +38,7 @@
       white-list = true;
       enforce-whitelist = true;
     };
-    whitelist = inputs.private-settings.minecraftFriends;
+    whitelist = private-settings.minecraftFriends;
   };
 
   system.activationScripts.script.text = ''

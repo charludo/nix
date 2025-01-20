@@ -1,6 +1,6 @@
-{ config, inputs, pkgs, ... }:
+{ config, private-settings, pkgs, ... }:
 let
-  inherit (inputs.private-settings) gsv home domains;
+  inherit (private-settings) gsv home domains;
 in
 {
   environment.systemPackages = [ pkgs.dig ];

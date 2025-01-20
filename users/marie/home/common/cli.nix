@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ private-settings, ... }:
 {
   imports = [
     ../../../charlotte/home/common/cli/bat.nix
@@ -8,7 +8,7 @@
   ];
 
   programs.git = {
-    userName = inputs.private-settings.git.marie.name;
-    userEmail = inputs.private-settings.git.marie.email;
+    userName = private-settings.git.marie.name;
+    userEmail = private-settings.git.marie.email;
   };
 }

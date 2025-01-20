@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, secrets, ... }:
 let
   # These CONSTANTLY change and have different hashes depending on what server 
   # you connect to, so I'm putting a cached version on github. More work to update,
@@ -28,7 +28,7 @@ let
   openVPNConfigs = map getConfig (builtins.attrNames (builtins.readDir configFiles));
 in
 {
-  sops.secrets.openvpn = { sopsFile = ../secrets.sops.yaml; };
+  sops.secrets.openvpn = { sopsFile = secrets.general; };
   networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
   services.openvpn.servers = builtins.listToAttrs openVPNConfigs;

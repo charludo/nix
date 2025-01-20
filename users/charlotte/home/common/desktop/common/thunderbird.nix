@@ -1,4 +1,4 @@
-{ config, inputs, ... }:
+{ config, private-settings, ... }:
 
 {
   programs.thunderbird = {
@@ -33,7 +33,7 @@
     };
   };
 
-  accounts.email.accounts = inputs.private-settings.accounts;
+  accounts.email.accounts = private-settings.accounts;
 
   home.file.".thunderbird/${config.home.username}/xulstore.json" = {
     force = true;

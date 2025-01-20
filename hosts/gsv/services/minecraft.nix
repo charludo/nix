@@ -1,4 +1,4 @@
-{ config, inputs, lib, pkgs, ... }:
+{ config, private-settings, lib, pkgs, ... }:
 {
   services.minecraft-server = {
     enable = true;
@@ -27,7 +27,7 @@
       white-list = true;
       enforce-whitelist = true;
     };
-    whitelist = inputs.private-settings.minecraftFriends;
+    whitelist = private-settings.minecraftFriends;
   };
 
   system.activationScripts.script.text = ''

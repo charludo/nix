@@ -1,6 +1,6 @@
-{ inputs, outputs, lib, ... }:
+{ outputs, lib, private-settings, secrets, ... }:
 let
-  inherit (inputs.private-settings) gsv;
+  inherit (private-settings) gsv;
   hostName = "gsv";
   publicKey = builtins.readFile ../../users/charlotte/ssh.pub;
 in
@@ -19,7 +19,7 @@ in
   # Override options set in the above imports
   nix.settings.trusted-users = lib.mkForce [ "root" ];
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
-  sops.defaultSopsFile = lib.mkForce ./gsv-secrets.sops.yaml;
+  sops.defaultSopsFile = lib.mkForce secrets.gsv;
 
   # Make sure we can get on the system via ssh
   users.users."${gsv.user}".openssh.authorizedKeys.keys = [ publicKey ];

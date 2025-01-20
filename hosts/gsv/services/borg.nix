@@ -1,11 +1,11 @@
-{ config, inputs, ... }:
+{ config, private-settings, ... }:
 {
   sops.secrets.borg = { };
   services.borgbackup.jobs.remoteBackup = {
     paths = [ "/var/vmail" "/var/lib/radicale" ];
     exclude = [ "'**/node_modules'" "'**/.venv'" "'**/.cache'" ];
     doInit = false;
-    repo = "${inputs.private-settings.domains.cloudsync}:gsv";
+    repo = "${private-settings.domains.cloudsync}:gsv";
     encryption = {
       mode = "repokey";
       passCommand = "cat ${config.sops.secrets.borg.path}";

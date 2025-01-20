@@ -1,4 +1,4 @@
-{ inputs, outputs, config, lib, modulesPath, ... }:
+{ inputs, outputs, config, lib, modulesPath, secrets, ... }:
 {
   _module.args.defaultUser = "paki";
   imports = [
@@ -59,8 +59,8 @@
   services.qemuGuest.enable = true;
 
   # Overwriting parts of hosts/common/global
-  sops.defaultSopsFile = lib.mkForce ../hosts/common/secrets.sops.yaml;
-  sops.secrets.nas = lib.mkForce (lib.mkIf (config.enableNas or config.enableNasBackup) { sopsFile = ../hosts/common/secrets.sops.yaml; });
+  sops.defaultSopsFile = lib.mkForce secrets.general;
+  sops.secrets.nas = lib.mkForce (lib.mkIf (config.enableNas or config.enableNasBackup) { sopsFile = secrets.general; });
   programs.ssh = lib.mkForce {
     knownHosts = lib.filterAttrs
       (_: v: v.publicKeyFile != null)

@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, private-settings, ... }:
 {
   imports = [ ./_common.nix ];
 
@@ -27,7 +27,7 @@
   };
   services.nginx = {
     enable = true;
-    virtualHosts."pdf.${inputs.private-settings.domains.ad}" = {
+    virtualHosts."pdf.${private-settings.domains.ad}" = {
       extraConfig = ''
         client_max_body_size 512M;
       '';
