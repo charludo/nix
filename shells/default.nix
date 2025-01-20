@@ -11,6 +11,7 @@ pkgs.mkShell {
 
     openssh
     (import ./vmctl/vm-new.nix { inherit pkgs; })
+    (import ./vmctl/vm-init.nix { inherit pkgs; })
     (import ./vmctl/vm-rebuild.nix { inherit pkgs; })
   ];
 }
