@@ -10,11 +10,11 @@
         "mailnews.default_sort_type" = 18;
         "mailnews.default_news_sort_order" = 2;
         "mailnews.default_news_sort_type" = 18;
-        "browser.display.background_color" = "#${config.colorscheme.palette.base00}";
-        "browser.display.foreground_color" = "#${config.colorscheme.palette.base04}";
+        "browser.display.background_color" = "#${config.colorScheme.palette.base00}";
+        "browser.display.foreground_color" = "#${config.colorScheme.palette.base04}";
         "browser.display.document_color_use" = 2;
-        "browser.anchor_color" = "#${config.colorscheme.palette.base0D}";
-        "browser.visited_color" = "#${config.colorscheme.palette.base0E}";
+        "browser.anchor_color" = "#${config.colorScheme.palette.base0D}";
+        "browser.visited_color" = "#${config.colorScheme.palette.base0E}";
         "font.name.serif.x-western" = "${config.fontProfiles.regular.family}";
         "font.name.sans-serif.x-western" = "${config.fontProfiles.regular.family}";
         "mailnews.start_page.enabled" = false;

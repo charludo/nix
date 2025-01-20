@@ -11,25 +11,25 @@
       cursor-color = "f5e0dc";
       foreground = "cdd6f4";
       palette = [
-        "0=#${config.colorscheme.palette.base00}"
-        "1=#${config.colorscheme.palette.base01}"
-        "2=#${config.colorscheme.palette.base02}"
-        "3=#${config.colorscheme.palette.base03}"
-        "4=#${config.colorscheme.palette.base04}"
-        "5=#${config.colorscheme.palette.base05}"
-        "6=#${config.colorscheme.palette.base06}"
-        "7=#${config.colorscheme.palette.base07}"
-        "8=#${config.colorscheme.palette.base08}"
-        "9=#${config.colorscheme.palette.base09}"
-        "10=#${config.colorscheme.palette.base0A}"
-        "11=#${config.colorscheme.palette.base0B}"
-        "12=#${config.colorscheme.palette.base0C}"
-        "13=#${config.colorscheme.palette.base0D}"
-        "14=#${config.colorscheme.palette.base0E}"
-        "15=#${config.colorscheme.palette.base0F}"
+        "0=#${config.colorScheme.palette.base00}"
+        "1=#${config.colorScheme.palette.base01}"
+        "2=#${config.colorScheme.palette.base02}"
+        "3=#${config.colorScheme.palette.base03}"
+        "4=#${config.colorScheme.palette.base04}"
+        "5=#${config.colorScheme.palette.base05}"
+        "6=#${config.colorScheme.palette.base06}"
+        "7=#${config.colorScheme.palette.base07}"
+        "8=#${config.colorScheme.palette.base08}"
+        "9=#${config.colorScheme.palette.base09}"
+        "10=#${config.colorScheme.palette.base0A}"
+        "11=#${config.colorScheme.palette.base0B}"
+        "12=#${config.colorScheme.palette.base0C}"
+        "13=#${config.colorScheme.palette.base0D}"
+        "14=#${config.colorScheme.palette.base0E}"
+        "15=#${config.colorScheme.palette.base0F}"
       ];
-      selection-background = "${config.colorscheme.palette.base03}";
-      selection-foreground = "${config.colorscheme.palette.base08}";
+      selection-background = "${config.colorScheme.palette.base03}";
+      selection-foreground = "${config.colorScheme.palette.base08}";
     };
   };
 }

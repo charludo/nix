@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  palette = config.colorscheme.palette;
+  palette = config.colorScheme.palette;
   gtkCss = ''
     @define-color accent_color #${palette.base0D};
     @define-color accent_bg_color #${palette.base0D};

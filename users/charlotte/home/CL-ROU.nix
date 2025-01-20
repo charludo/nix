@@ -1,6 +1,6 @@
 { inputs, lib, pkgs, config, private-settings, ... }:
 let
-  inherit (inputs.nix-colors) colorschemes;
+  inherit (inputs.nix-colors) colorSchemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -18,12 +18,12 @@ in
   home.packages = [ pkgs.tmux ];
 
   # Use this method for built-in schemes:
-  colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
+  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 
   # Use this method for custom imported schemes:
-  # colorscheme = lib.mkDefault customSchemes.gruvchad;
+  # colorScheme = lib.mkDefault customSchemes.gruvchad;
 
-  # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
+  # All colorSchemes from here can be set: https://tinted-theming.github.io/base16-gallery/
   # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
   # Projects to manage on this machine

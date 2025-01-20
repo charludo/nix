@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, config, outputs, secrets, ... }:
 {
   imports = [
-    inputs.nix-colors.homeManagerModules.colorscheme
+    inputs.nix-colors.homeManagerModules.colorScheme
     inputs.sops-nix.homeManagerModules.sops
   ] ++ (builtins.attrValues outputs.homeModules);
 
@@ -52,10 +52,5 @@
       TERMINAL = "${pkgs.alacritty}/bin/alacritty";
     };
     language.base = "en_US.UTF-8";
-  };
-
-  home.file = {
-    ".colorscheme".text = config.colorscheme.slug;
-    ".colorscheme.json".text = builtins.toJSON config.colorscheme;
   };
 }

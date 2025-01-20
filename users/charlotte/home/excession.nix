@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, config, private-settings, ... }:
 let
   customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config private-settings; };
-  inherit (inputs.nix-colors) colorschemes;
+  inherit (inputs.nix-colors) colorSchemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -32,7 +32,7 @@ in
 
   home.packages = with pkgs; [ telegram-desktop ];
 
-  colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
+  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
   defaultWallpaper = builtins.toString ./common/desktop/backgrounds/eso.png;
   #  ------
   # | DP-2 |

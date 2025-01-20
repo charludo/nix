@@ -1,6 +1,6 @@
 { inputs, lib, ... }:
 let
-  inherit (inputs.nix-colors) colorschemes;
+  inherit (inputs.nix-colors) colorSchemes;
 in
 {
   imports = [
@@ -9,5 +9,5 @@ in
     ./common/games/eso.nix
   ];
 
-  colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
+  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 }

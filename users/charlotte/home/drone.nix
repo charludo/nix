@@ -1,7 +1,7 @@
 { inputs, lib, pkgs, config, private-settings, ... }:
 let
   customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config private-settings; };
-  inherit (inputs.nix-colors) colorschemes;
+  inherit (inputs.nix-colors) colorSchemes;
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -16,12 +16,12 @@ in
   home.packages = [ pkgs.zoom-us ];
 
   # Use this method for built-in schemes:
-  colorscheme = lib.mkDefault colorschemes.primer-dark-dimmed;
+  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 
   # Use this method for custom imported schemes:
-  # colorscheme = lib.mkDefault customSchemes.gruvchad;
+  # colorScheme = lib.mkDefault customSchemes.gruvchad;
 
-  # All colorschemes from here can be set: https://tinted-theming.github.io/base16-gallery/
+  # All colorSchemes from here can be set: https://tinted-theming.github.io/base16-gallery/
   # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
   defaultWallpaper = builtins.toString ./common/desktop/backgrounds/team-avatar.png;

@@ -10,7 +10,7 @@
     package = pkgs.waybar.overrideAttrs (oa: {
       mesonFlag = (oa.mesonFlag or [ ]) ++ [ "-Dexperimental=true" ];
     });
-    style = let inherit (config.colorscheme) palette; in /* css */ ''
+    style = let inherit (config.colorScheme) palette; in /* css */ ''
       @define-color progress  alpha(#${palette.base0E}, 0.05);
       window {
         background-color: transparent;

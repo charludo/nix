@@ -4,14 +4,14 @@ let
   rofi-theme =
     {
       "*" = {
-        bg-col = mkLiteral "#${config.colorscheme.palette.base00}";
-        bg-col-light = mkLiteral "#${config.colorscheme.palette.base00}";
-        border-col = mkLiteral "#${config.colorscheme.palette.base00}";
-        selected-col = mkLiteral "#${config.colorscheme.palette.base00}";
-        blue = mkLiteral "#${config.colorscheme.palette.base0D}";
-        fg-col = mkLiteral "#${config.colorscheme.palette.base05}";
-        fg-col2 = mkLiteral "#${config.colorscheme.palette.base08}";
-        grey = mkLiteral "#${config.colorscheme.palette.base03}";
+        bg-col = mkLiteral "#${config.colorScheme.palette.base00}";
+        bg-col-light = mkLiteral "#${config.colorScheme.palette.base00}";
+        border-col = mkLiteral "#${config.colorScheme.palette.base00}";
+        selected-col = mkLiteral "#${config.colorScheme.palette.base00}";
+        blue = mkLiteral "#${config.colorScheme.palette.base0D}";
+        fg-col = mkLiteral "#${config.colorScheme.palette.base05}";
+        fg-col2 = mkLiteral "#${config.colorScheme.palette.base08}";
+        grey = mkLiteral "#${config.colorScheme.palette.base03}";
 
         font = "${config.fontProfiles.regular.family} 13";
       };
