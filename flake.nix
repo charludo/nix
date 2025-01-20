@@ -114,126 +114,27 @@
           specialArgs = { inherit inputs outputs; };
         };
 
-        # ---
-        # VMs
-        # ---
-
-        # Graphical Remote
-        CL-NIX-1 = lib.nixosSystem {
-          modules = [ ./vms/CL-NIX-1.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-        CL-NIX-3 = lib.nixosSystem {
-          modules = [ ./vms/CL-NIX-3.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-        CL-ROU = lib.nixosSystem {
-          modules = [ ./vms/CL-ROU.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Adblocking
-        SRV-BLOCKY = lib.nixosSystem {
-          modules = [ ./vms/SRV-BLOCKY.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Paperless-NGX
-        SRV-PAPERLESS = lib.nixosSystem {
-          modules = [ ./vms/SRV-PAPERLESS.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Immich
-        SRV-IMMICH = lib.nixosSystem {
-          modules = [ ./vms/SRV-IMMICH.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Stirling PDF
-        SRV-PDF = lib.nixosSystem {
-          modules = [ ./vms/SRV-PDF.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # WasteBin (Rust PasteBin)
-        SRV-WASTEBIN = lib.nixosSystem {
-          modules = [ ./vms/SRV-WASTEBIN.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Cloud Backup
-        SRV-CLOUDSYNC = lib.nixosSystem {
-          modules = [ ./vms/SRV-CLOUDSYNC.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Forgejo Git server
-        SRV-GIT = lib.nixosSystem {
-          modules = [ ./vms/SRV-GIT.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Jellyfin Media Server
-        SRV-JELLYFIN = lib.nixosSystem {
-          modules = [ ./vms/SRV-JELLYFIN.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Audiobook Server
-        SRV-AUDIOBOOKSHELF = lib.nixosSystem {
-          modules = [ ./vms/SRV-AUDIOBOOKSHELF.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Kavita Reading Server
-        SRV-KAVITA = lib.nixosSystem {
-          modules = [ ./vms/SRV-KAVITA.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Mangas
-        SRV-SUWAYOMI = lib.nixosSystem {
-          modules = [ ./vms/SRV-SUWAYOMI.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Helper for downloading Linux ISOs
-        SRV-TORRENTER = lib.nixosSystem {
-          modules = [ ./vms/SRV-TORRENTER.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Matrix Server
-        SRV-MATRIX = lib.nixosSystem {
-          modules = [ ./vms/SRV-MATRIX.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Stateless Home automations
-        SRV-HOME = lib.nixosSystem {
-          modules = [ ./vms/SRV-HOME.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Vikunja Server
-        SRV-VIKUNJA = lib.nixosSystem {
-          modules = [ ./vms/SRV-VIKUNJA.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Vaultwarden
-        SRV-VAULTWARDEN = lib.nixosSystem {
-          modules = [ ./vms/SRV-VAULTWARDEN.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-        # Minecraft internal
-        SRV-MINECRAFT = lib.nixosSystem {
-          modules = [ ./vms/SRV-MINECRAFT.nix ];
-          specialArgs = { inherit inputs outputs; };
-        };
-      };
+      }
+      //
+      # VMs
+      builtins.listToAttrs
+        (builtins.map
+          (name:
+            {
+              inherit name;
+              value = lib.nixosSystem {
+                modules = [ ./vms/${name}.nix ];
+                specialArgs = { inherit inputs outputs; };
+              };
+            })
+          (builtins.filter
+            (name: builtins.substring 0 3 name == "SRV" || builtins.substring 0 2 name == "CL")
+            (builtins.map
+              builtins.head
+              (builtins.map
+                (lib.splitString ".")
+                (builtins.attrNames
+                  (builtins.readDir ./vms))))));
 
       # Available through 'home-manager --flake .#username@hostname'
       homeConfigurations = {
