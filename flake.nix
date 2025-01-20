@@ -73,7 +73,7 @@
     {
       inherit lib;
       nixosModules = (import ./modules/nixos) // jovian.outputs.nixosModules // private-settings-module;
-      homeManagerModules = (import ./modules/home-manager) // private-settings-module;
+      homeModules = (import ./modules/home-manager) // private-settings-module;
       overlays = import ./overlays { inherit inputs outputs; };
 
       # Available through 'nixos-rebuild --flake .#hostname'

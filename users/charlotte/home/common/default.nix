@@ -3,7 +3,7 @@
   imports = [
     inputs.nix-colors.homeManagerModules.colorscheme
     inputs.sops-nix.homeManagerModules.sops
-  ] ++ (builtins.attrValues outputs.homeManagerModules);
+  ] ++ (builtins.attrValues outputs.homeModules);
 
   nixpkgs = {
     overlays = builtins.attrValues outputs.overlays;
