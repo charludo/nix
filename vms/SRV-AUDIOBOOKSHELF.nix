@@ -19,9 +19,9 @@
     host = "0.0.0.0";
   };
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users."${config.services.audiobookshelf.user}".extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [ config.services.audiobookshelf.user ];
 
   systemd = {
     timers."audiobookshelf-backup-daily" = {
@@ -34,7 +34,7 @@
     };
     services."audiobookshelf-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.audiobookshelf.dataDir}/ /media/Backup/audiobookshelf
+        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.audiobookshelf.dataDir}/ ${config.nas.backup.location}/audiobookshelf
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -49,7 +49,7 @@
         name = "restore-audiobookshelf";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group} /media/Backup/audiobookshelf/ ${config.services.audiobookshelf.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group} ${config.nas.backup.location}/audiobookshelf/ ${config.services.audiobookshelf.dataDir}
         '';
       };
     in

@@ -9,7 +9,7 @@
   soundConfig.enable = true;
 
   users.mutableUsers = lib.mkForce true;
-  enableNasBackup = true;
+  nas.backup.enable = true;
 
   vm = {
     id = 3020;

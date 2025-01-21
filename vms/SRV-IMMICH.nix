@@ -1,4 +1,4 @@
-{ config, private-settings, ... }: {
+{ config, private-settings, secrets, ... }: {
   imports = [ ./_common.nix ];
 
   vm = {
@@ -15,6 +15,7 @@
     extraGroups = [ "nas" ];
   };
   users.groups."${config.services.immich.group}".gid = 1111;
+  sops.secrets.nas = { sopsFile = secrets.nas; };
 
   services.immich = {
     enable = true;
@@ -23,7 +24,7 @@
     port = 2283;
     openFirewall = true;
 
-    mediaLocation = "/media/Backup/immich";
+    mediaLocation = "${config.nas.backup.location}/immich";
     settings.server.externalDomain = "https://pictures.${private-settings.domains.home}";
 
     # https://github.com/immich-app/immich/discussions/4758#discussioncomment-7441670
@@ -33,7 +34,7 @@
   systemd.mounts = [{
     description = "Mount for Backup - Immich edition";
     what = "//192.168.30.11/Backup";
-    where = "/media/Backup";
+    where = "${config.nas.backup.location}";
     type = "cifs";
     options =
       let

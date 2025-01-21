@@ -28,8 +28,8 @@
   suspend.gigabyteFix = true;
   wifi.enable = true;
 
-  enableNas = true;
-  enableNasBackup = true;
+  nas.enable = true;
+  nas.backup.enable = true;
 
   environment.systemPackages = [ pkgs.ntfs3g ];
   fileSystems."/media/Media" = {

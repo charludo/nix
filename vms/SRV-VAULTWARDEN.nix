@@ -19,19 +19,20 @@ in
   sops.secrets.vaultwarden = { sopsFile = secrets.vaultwarden; };
   services.vaultwarden = {
     enable = true;
-    backupDir = "/media/Backup/vaultwarden";
+    backupDir = "${config.nas.backup.location}/vaultwarden";
     config = {
       DOMAIN = "https://passwords.${domains.home}";
       SIGNUPS_ALLOWED = false;
       ROCKET_ADDRESS = "0.0.0.0";
       ROCKET_PORT = 8222;
     };
-    # environmentFile = config.sops.secrets.vaultwarden.path;
+    # include environmentFile to enable admin backend
+    # environmentFile = config.sops.secrets.vaultwarden.path; 
   };
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users.vaultwarden.extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [ "vaultwarden" ];
 
   environment.systemPackages =
     let

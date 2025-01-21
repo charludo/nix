@@ -60,7 +60,6 @@
 
   # Overwriting parts of hosts/common
   sops.defaultSopsFile = lib.mkForce secrets.general;
-  sops.secrets.nas = lib.mkForce (lib.mkIf (config.enableNas or config.enableNasBackup) { sopsFile = secrets.general; });
   programs.ssh = lib.mkForce {
     knownHosts = lib.filterAttrs
       (_: v: v.publicKeyFile != null)

@@ -23,8 +23,8 @@
   suspend.enable = true;
   wifi.enable = true;
 
-  enableNas = true;
-  enableNasBackup = true;
+  nas.enable = true;
+  nas.backup.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

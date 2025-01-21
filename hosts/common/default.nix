@@ -2,7 +2,6 @@
   imports = [
     inputs.home-manager.nixosModules.home-manager
     ./locale.nix
-    ./nas.nix
     ./nix.nix
     ./openssh.nix
     ./sops.nix

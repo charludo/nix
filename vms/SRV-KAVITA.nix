@@ -20,9 +20,9 @@
     settings.IpAddresses = "0.0.0.0";
   };
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users."${config.services.kavita.user}".extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [ config.services.kavita.user ];
 
   systemd = {
     timers."kavita-backup-daily" = {
@@ -35,8 +35,8 @@
     };
     services."kavita-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/NAS)" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.services.kavita.dataDir}/ /media/Backup/kavita
+        [ "$(stat -f -c %T ${config.nas.location})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.services.kavita.dataDir}/ ${config.nas.backup.location}/kavita
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -51,7 +51,7 @@
         name = "kavita-init";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* /media/Backup/kavita/ ${config.services.kavita.dataDir}
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.nas.backup.location}/kavita/ ${config.services.kavita.dataDir}
         '';
       };
     in

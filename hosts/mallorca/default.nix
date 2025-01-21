@@ -8,8 +8,8 @@
       ../../users/charlotte/user.nix
     ];
 
-  enableNas = false;
-  enableNasBackup = false;
+  nas.enable = false;
+  nas.backup.enable = false;
 
   fish.enable = true;
   nicerFonts.enable = true;

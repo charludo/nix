@@ -11,7 +11,8 @@
       ../../users/charlotte/user.nix
     ];
 
-  enableNas = true;
+  nas.enable = true;
+  nas.backup.enable = true;
 
   bluetooth.enable = true;
   fish.enable = true;

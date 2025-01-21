@@ -37,7 +37,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    sops.secrets.openvpn = { sopsFile = secrets.general; };
+    sops.secrets.openvpn = { sopsFile = secrets.vpn; };
     networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
     services.openvpn.servers = builtins.listToAttrs openVPNConfigs;

@@ -142,7 +142,7 @@ in
     };
     services."suwayomi-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ /media/Backup/suwayomi
+        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ ${config.nas.backup.location}/suwayomi
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -160,7 +160,7 @@ in
     };
     services."suwayomi-sync" = {
       script = ''
-        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --inplace {}/ /media/NAS/Manga \;
+        [ "$(stat -f -c %T ${config.nas.location})" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --inplace {}/ ${config.nas.location}/Manga \;
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -178,8 +178,8 @@ in
     };
     services."readarr-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ /media/Backup/torrenter/readarr2
+        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.location}/torrenter/readarr2
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -193,23 +193,25 @@ in
       suwayomi-init = pkgs.writeShellApplication {
         name = "suwayomi-init";
         text = ''
-          [ "$(stat -f -c %T /media/Backup)" != "smb2" ] && exit 1
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Backup/suwayomi/ ${config.services.suwayomi-server.dataDir}
+          [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/suwayomi/ ${config.services.suwayomi-server.dataDir}
         '';
       };
       readarr-init = pkgs.writeShellApplication {
         name = "readarr-init";
         text = ''
-          [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Backup/torrenter/readarr2/ ${config.services.readarr.dataDir}
+          [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/torrenter/readarr2/ ${config.services.readarr.dataDir}
         '';
       };
     in
     [ surfshark-random surfshark-stop suwayomi-init readarr-init ];
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users."${config.services.suwayomi-server.user}".extraGroups = [ "nas" ];
-  users.users."${config.services.readarr.user}".extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [
+    config.services.suwayomi-server.user
+    config.services.readarr.user
+  ];
 
   system.stateVersion = "23.11";
 }

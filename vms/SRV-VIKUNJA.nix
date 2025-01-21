@@ -23,8 +23,8 @@ in
     settings.service.enableregistration = false;
   };
 
-  enableNas = true;
-  enableNasBackup = true;
+  nas.enable = true;
+  nas.backup.enable = true;
 
   systemd = {
     timers."vikunja-backup-daily" = {
@@ -37,8 +37,8 @@ in
     };
     services."vikunja-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/vikunja/ /media/Backup/vikunja
+        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/vikunja/ ${config.nas.backup.location}/vikunja
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -53,7 +53,7 @@ in
         name = "vikunja-init";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Backup/vikunja/ /var/lib/vikunja
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/vikunja/ /var/lib/vikunja
         '';
       };
     in

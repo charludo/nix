@@ -13,11 +13,11 @@
     networking.nameservers = [ ];
   };
 
-  enableNas = true;
+  nas.enable = true;
 
   sops.secrets.borg = { sopsFile = secrets.cloudsync; };
   services.borgbackup.jobs.remoteBackup = {
-    paths = [ "/media/NAS/CloudSync" ];
+    paths = [ "${config.nas.location}/CloudSync" ];
     exclude = [ "'**/node_modules'" "'**/.venv'" "'**/.cache'" ];
     doInit = false;
     repo = "${private-settings.domains.cloudsync}:pakiplace";

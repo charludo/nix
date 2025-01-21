@@ -22,9 +22,9 @@
     cacheDir = "${dataDir}/cache";
   };
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users.jellyfin.extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [ config.services.jellyfin.user ];
 
   systemd = {
     timers."jellyfin-backup-daily" = {
@@ -37,7 +37,7 @@
     };
     services."jellyfin-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T /media/Backup)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.jellyfin.dataDir}/ /media/Backup/jellyfin
+        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.jellyfin.dataDir}/ ${config.nas.backup.location}/jellyfin
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -52,7 +52,7 @@
         name = "restore-jellyfin";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.jellyfin.user}:${config.services.jellyfin.group} /media/Backup/jellyfin/ ${config.services.jellyfin.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.jellyfin.user}:${config.services.jellyfin.group} ${config.nas.backup.location}/jellyfin/ ${config.services.jellyfin.dataDir}
         '';
       };
     in

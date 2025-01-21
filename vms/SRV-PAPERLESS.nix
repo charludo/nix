@@ -1,7 +1,7 @@
-{ private-settings, pkgs, ... }:
+{ private-settings, pkgs, config, ... }:
 let
-  backupDirDaily = "/media/Backup/paperless/daily/";
-  backupDirMonthly = "/media/Backup/paperless/monthly/";
+  backupDirDaily = "${config.nas.backup.location}/paperless/daily/";
+  backupDirMonthly = "${config.nas.backup.location}/paperless/monthly/";
 
   paperless-init = pkgs.writeShellApplication {
     name = "paperless-init";
@@ -25,16 +25,16 @@ in
     networking.openPorts.udp = [ 8000 ];
   };
 
-  enableNas = true;
-  enableNasBackup = true;
-  users.users.paperless.extraGroups = [ "nas" ];
+  nas.enable = true;
+  nas.backup.enable = true;
+  nas.extraUsers = [ config.services.paperless.user ];
 
   services.paperless = {
     enable = true;
     address = "0.0.0.0";
     port = 8000;
     dataDir = "/var/lib/paperless";
-    consumptionDir = "/media/NAS/Scanner/";
+    consumptionDir = "${config.nas.location}/Scanner/";
     consumptionDirIsPublic = true;
     openMPThreadingWorkaround = true;
     settings = {

@@ -12,13 +12,13 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = [ pkgs.rsync ];
 
-    systemd.services."rsync-media-backup" = lib.mkIf config.enableNas {
+    systemd.services."rsync-media-backup" = lib.mkIf config.nas.enable {
       enable = true;
       requires = [ "media-Media.mount" "media-NAS.mount" ];
       wantedBy = [ "multi-user.target" ];
       description = "Backup Media to NAS";
       script = ''
-        [ "$(stat -f -c %T /media/NAS)" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Media /media/NAS/CloudSync
+        [ "$(stat -f -c %T ${config.nas.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /media/Media ${config.nas.location}/CloudSync
       '';
     };
 
