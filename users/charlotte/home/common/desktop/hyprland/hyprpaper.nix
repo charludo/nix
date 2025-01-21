@@ -7,7 +7,9 @@ in
     enable = true;
     settings = {
       preload = map (m: m.wallpaper) configuredMonitors ++ [ config.defaultWallpaper ];
-      wallpaper = map (m: "${m.name},${m.wallpaper}") configuredMonitors ++ [ ",${config.defaultWallpaper}" ];
+      wallpaper = map (m: "${m.name},${m.wallpaper}") configuredMonitors ++ [
+        ",${config.defaultWallpaper}"
+      ];
       splash = false;
       ipc = "off";
     };

@@ -3,7 +3,9 @@ let
   inherit (private-settings) domains gsv;
 in
 {
-  sops.secrets.coturn = { owner = "turnserver"; };
+  sops.secrets.coturn = {
+    owner = "turnserver";
+  };
   services.coturn = {
     enable = true;
     realm = "turn.${domains.blog}";
@@ -41,8 +43,10 @@ in
   networking.firewall.allowedTCPPorts = [ config.services.coturn.listening-port ];
   networking.firewall.allowedUDPPorts = [ config.services.coturn.listening-port ];
 
-  networking.firewall.allowedUDPPortRanges = [{
-    from = config.services.coturn.min-port;
-    to = config.services.coturn.max-port;
-  }];
+  networking.firewall.allowedUDPPortRanges = [
+    {
+      from = config.services.coturn.min-port;
+      to = config.services.coturn.max-port;
+    }
+  ];
 }

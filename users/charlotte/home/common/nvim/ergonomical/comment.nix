@@ -8,16 +8,23 @@
 
   programs.nixvim.keymaps = [
     {
-      mode = [ "n" "i" ];
+      mode = [
+        "n"
+        "i"
+      ];
       key = "<A-/>";
       action = "<cmd>lua require('Comment.api').locked('toggle.linewise.current')()<CR>";
-      options = { desc = "toggle single line comment"; };
+      options = {
+        desc = "toggle single line comment";
+      };
     }
     {
       mode = [ "v" ];
       key = "<A-/>";
       action = "<ESC><cmd>lua require('Comment.api').locked('toggle.linewise')(vim.fn.visualmode())<CR>";
-      options = { desc = "toggle selected lines comment"; };
+      options = {
+        desc = "toggle selected lines comment";
+      };
     }
 
   ];

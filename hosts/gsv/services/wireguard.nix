@@ -1,4 +1,9 @@
-{ config, private-settings, pkgs, ... }:
+{
+  config,
+  private-settings,
+  pkgs,
+  ...
+}:
 let
   inherit (private-settings) gsv home domains;
 in

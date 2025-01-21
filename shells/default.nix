@@ -13,5 +13,10 @@ pkgs.mkShell {
     (import ./vmctl/vm-new.nix { inherit pkgs; })
     (import ./vmctl/vm-init.nix { inherit pkgs; })
     (import ./vmctl/vm-rebuild.nix { inherit pkgs; })
+
+    # used by nix fmt
+    nixfmt-rfc-style
+    deadnix
+    ruff
   ];
 }

@@ -1,12 +1,18 @@
-{ config, pkgs, lib, private-settings, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  private-settings,
+  ...
+}:
 let
   inherit (private-settings) domains;
 
   mailAccounts = config.mailserver.loginAccounts;
-  htpasswd = pkgs.writeText "radicale.users" (lib.concatStrings
-    (lib.flip lib.mapAttrsToList mailAccounts (mail: user:
-      mail + ":" + user.hashedPassword + "\n"
-    ))
+  htpasswd = pkgs.writeText "radicale.users" (
+    lib.concatStrings (
+      lib.flip lib.mapAttrsToList mailAccounts (mail: user: mail + ":" + user.hashedPassword + "\n")
+    )
   );
 in
 {
@@ -28,11 +34,13 @@ in
 
   systemd.services.radicale.environment.PYTHONPATH =
     let
-      python = pkgs.python312.withPackages (pkgs: with pkgs; [
-        radicale_infcloud
-        pytz
-        setuptools
-      ]);
+      python = pkgs.python312.withPackages (
+        pkgs: with pkgs; [
+          radicale_infcloud
+          pytz
+          setuptools
+        ]
+      );
     in
     "${python}/${pkgs.python312.sitePackages}";
 
@@ -62,5 +70,8 @@ in
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 }

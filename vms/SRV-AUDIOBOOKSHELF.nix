@@ -53,7 +53,10 @@
         '';
       };
     in
-    [ restore-audiobookshelf pkgs.rsync ];
+    [
+      restore-audiobookshelf
+      pkgs.rsync
+    ];
 
   system.stateVersion = "23.11";
 }

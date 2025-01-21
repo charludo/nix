@@ -1,8 +1,15 @@
-{ pkgs, config, lib, ... }:
-let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
+{
+  pkgs,
+  config,
+  ...
+}:
+let
+  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
-  sops.secrets.charlotte-password = { neededForUsers = true; };
+  sops.secrets.charlotte-password = {
+    neededForUsers = true;
+  };
 
   users.users.charlotte = {
     isNormalUser = true;
@@ -10,20 +17,25 @@ in
 
     uid = 1000;
     group = "charlotte";
-    extraGroups = [
-      "wheel"
-      "video"
-      "audio"
-      "networkmanager"
-      "nas"
-    ] ++ ifTheyExist [
-      "docker"
-      "git"
-    ];
+    extraGroups =
+      [
+        "wheel"
+        "video"
+        "audio"
+        "networkmanager"
+        "nas"
+      ]
+      ++ ifTheyExist [
+        "docker"
+        "git"
+      ];
 
     openssh.authorizedKeys.keys = [ (builtins.readFile ./ssh.pub) ];
     hashedPasswordFile = config.sops.secrets.charlotte-password.path;
-    packages = with pkgs; [ home-manager git ];
+    packages = with pkgs; [
+      home-manager
+      git
+    ];
   };
 
   users.groups.charlotte.gid = 1000;
@@ -41,5 +53,8 @@ in
   ];
 
   home-manager.users.charlotte = import ./home/${config.networking.hostName}.nix;
-  environment.shells = with pkgs; [ fish bash ];
+  environment.shells = with pkgs; [
+    fish
+    bash
+  ];
 }

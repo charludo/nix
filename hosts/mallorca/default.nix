@@ -1,12 +1,11 @@
 { config, lib, ... }:
 {
   _module.args.defaultUser = "charlotte";
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common
-      ../../users/charlotte/user.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ../common
+    ../../users/charlotte/user.nix
+  ];
 
   nas.enable = false;
   nas.backup.enable = false;

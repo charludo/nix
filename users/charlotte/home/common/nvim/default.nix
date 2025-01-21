@@ -14,7 +14,10 @@
     comment = "Open NeoVim inside terminal";
     terminal = false;
     exec = "alacritty -e nvim";
-    categories = [ "Development" "Utility" ];
+    categories = [
+      "Development"
+      "Utility"
+    ];
     icon = "nvim";
     mimeType = [ "text/*" ];
   };
@@ -75,10 +78,11 @@
 
     };
 
-    extraConfigLua = /* lua */ ''
-      -- go to previous/next line with h,l,left arrow and right arrow
-      vim.opt.whichwrap:append "<>[]hl"
-    '';
+    extraConfigLua = # lua
+      ''
+        -- go to previous/next line with h,l,left arrow and right arrow
+        vim.opt.whichwrap:append "<>[]hl"
+      '';
 
     globals = {
       mapleader = " ";

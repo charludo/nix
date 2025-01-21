@@ -10,7 +10,10 @@ in
   };
 
   config = mkIf cfg.enable {
-    sops.secrets.zammad = { mode = "0444"; path = "/var/lib/zammad/secret"; };
+    sops.secrets.zammad = {
+      mode = "0444";
+      path = "/var/lib/zammad/secret";
+    };
     services.zammad = {
       enable = true;
       openPorts = true;

@@ -1,4 +1,9 @@
-{ config, private-settings, pkgs, ... }:
+{
+  config,
+  private-settings,
+  pkgs,
+  ...
+}:
 let
   inherit (private-settings) domains;
 in
@@ -57,7 +62,10 @@ in
         '';
       };
     in
-    [ vikunja-init pkgs.rsync ];
+    [
+      vikunja-init
+      pkgs.rsync
+    ];
 
   system.stateVersion = "23.11";
 }

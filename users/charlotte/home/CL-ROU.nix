@@ -1,6 +1,14 @@
-{ inputs, lib, pkgs, config, private-settings, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  config,
+  private-settings,
+  ...
+}:
 let
   inherit (inputs.nix-colors) colorSchemes;
+  # deadnix: skip
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {

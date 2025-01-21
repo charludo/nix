@@ -1,5 +1,10 @@
 # adapted from: https://github.com/pceiley/nix-config/blob/3854c687d951ee3fe48be46ff15e8e094dd8e89f/hosts/common/modules/qbittorrent.nix
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -119,7 +124,9 @@ in
     };
 
     users.groups = mkIf (cfg.group == "qbittorrent") {
-      qbittorrent = { gid = GID; };
+      qbittorrent = {
+        gid = GID;
+      };
     };
   };
 }

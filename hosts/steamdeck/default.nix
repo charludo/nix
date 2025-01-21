@@ -1,14 +1,13 @@
 { pkgs, inputs, ... }:
 {
   _module.args.defaultUser = "charlotte";
-  imports =
-    [
-      inputs.nix-flatpak.nixosModules.nix-flatpak
+  imports = [
+    inputs.nix-flatpak.nixosModules.nix-flatpak
 
-      ./hardware-configuration.nix
-      ../common
-      ../../users/charlotte/user.nix
-    ];
+    ./hardware-configuration.nix
+    ../common
+    ../../users/charlotte/user.nix
+  ];
 
   nvim.enable = true;
   plymouth.enable = true;
@@ -52,7 +51,10 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "steamdeck";
-  networking.nameservers = [ "192.168.30.13" "1.1.1.1" ];
+  networking.nameservers = [
+    "192.168.30.13"
+    "1.1.1.1"
+  ];
 
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;

@@ -1,4 +1,9 @@
-{ config, pkgs, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 let
   inherit (private-settings) domains;
 in
@@ -20,8 +25,9 @@ in
     };
     jails =
       let
-        defaultAction = ''cloudflare-token-multi[cftoken="$(cat ${config.sops.secrets.fail2ban-cf-token.path})", cfzone="$(cat ${config.sops.secrets.fail2ban-cf-zone.path})", cfzone2="$(cat ${config.sops.secrets.fail2ban-cf-zone-2.path})"]
-        iptables-allports'';
+        defaultAction = ''
+          cloudflare-token-multi[cftoken="$(cat ${config.sops.secrets.fail2ban-cf-token.path})", cfzone="$(cat ${config.sops.secrets.fail2ban-cf-zone.path})", cfzone2="$(cat ${config.sops.secrets.fail2ban-cf-zone-2.path})"]
+                  iptables-allports'';
       in
       {
         # Misc
@@ -147,10 +153,12 @@ in
   };
   environment.etc = {
     # Defines a filter that detects URL probing by reading the Nginx access log
-    "fail2ban/filter.d/nginx-url-probe.local".text = pkgs.lib.mkDefault (pkgs.lib.mkAfter ''
-      [Definition]
-      failregex = ^<HOST>.*(GET /(wp-|admin|boaform|phpmyadmin|\.env|\.git)|\.(dll|so|cfm|asp)|(\?|&)(=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000|=PHPE9568F36-D428-11d2-A769-00AA001ACF42|=PHPE9568F35-D428-11d2-A769-00AA001ACF42|=PHPE9568F34-D428-11d2-A769-00AA001ACF42)|\\x[0-9a-zA-Z]{2})
-    '');
+    "fail2ban/filter.d/nginx-url-probe.local".text = pkgs.lib.mkDefault (
+      pkgs.lib.mkAfter ''
+        [Definition]
+        failregex = ^<HOST>.*(GET /(wp-|admin|boaform|phpmyadmin|\.env|\.git)|\.(dll|so|cfm|asp)|(\?|&)(=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000|=PHPE9568F36-D428-11d2-A769-00AA001ACF42|=PHPE9568F35-D428-11d2-A769-00AA001ACF42|=PHPE9568F34-D428-11d2-A769-00AA001ACF42)|\\x[0-9a-zA-Z]{2})
+      ''
+    );
     "fail2ban/filter.d/nginx-bruteforce.conf".text = ''
       [Definition]
       failregex = ^<HOST>.*GET.*(matrix/server|\.php|admin|wp\-).* HTTP/\d.\d\" 404.*$
@@ -166,25 +174,26 @@ in
     '';
 
     # Action to ban IP from 2 cloudflare zones
-    "fail2ban/action.d/cloudflare-token-multi.conf".text = /* bash */ ''
-      [Definition]
-      actionban = curl -s -X POST "<_cf_api_url_2>" \
-                    <_cf_api_prms> \
-                    --data '{"mode":"<cfmode>","configuration":{"target":"<cftarget>","value":"<ip>"},"notes":"<notes>"}' && \
-                  curl -s -X POST "<_cf_api_url>" \
-                    <_cf_api_prms> \
-                    --data '{"mode":"<cfmode>","configuration":{"target":"<cftarget>","value":"<ip>"},"notes":"<notes>"}'
+    "fail2ban/action.d/cloudflare-token-multi.conf".text = # bash
+      ''
+        [Definition]
+        actionban = curl -s -X POST "<_cf_api_url_2>" \
+                      <_cf_api_prms> \
+                      --data '{"mode":"<cfmode>","configuration":{"target":"<cftarget>","value":"<ip>"},"notes":"<notes>"}' && \
+                    curl -s -X POST "<_cf_api_url>" \
+                      <_cf_api_prms> \
+                      --data '{"mode":"<cfmode>","configuration":{"target":"<cftarget>","value":"<ip>"},"notes":"<notes>"}'
 
 
-      _cf_api_url = https://api.cloudflare.com/client/v4/zones/<cfzone>/firewall/access_rules/rules
-      _cf_api_url_2 = https://api.cloudflare.com/client/v4/zones/<cfzone2>/firewall/access_rules/rules
-      _cf_api_prms = -H "Authorization: Bearer <cftoken>" -H "Content-Type: application/json"
+        _cf_api_url = https://api.cloudflare.com/client/v4/zones/<cfzone>/firewall/access_rules/rules
+        _cf_api_url_2 = https://api.cloudflare.com/client/v4/zones/<cfzone2>/firewall/access_rules/rules
+        _cf_api_prms = -H "Authorization: Bearer <cftoken>" -H "Content-Type: application/json"
 
-      [Init]
-      cftarget = ip
-      cfmode = block
-      notes = Fail2Ban <name>
-    '';
+        [Init]
+        cftarget = ip
+        cfmode = block
+        notes = Fail2Ban <name>
+      '';
   };
 
   # Helper for getting nicely formatted fail2ban summary
@@ -192,7 +201,11 @@ in
     let
       fail2ban-summary = pkgs.writeShellApplication {
         name = "fail2ban-summary";
-        runtimeInputs = with pkgs; [ fail2ban gnused jq ];
+        runtimeInputs = with pkgs; [
+          fail2ban
+          gnused
+          jq
+        ];
         text = ''
           fail2ban-client banned | sed "s/'/\"/g" | jq -r '.[] | keys[] as $jail | "\(.[$jail] | length) banned IPs in \($jail)"'
         '';

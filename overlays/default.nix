@@ -1,8 +1,12 @@
+# deadnix: skip
 { outputs, inputs }:
 let
-  addPatches = pkg: patches: pkg.overrideAttrs (oldAttrs: {
-    patches = (oldAttrs.patches or [ ]) ++ patches;
-  });
+  # deadnix: skip
+  addPatches =
+    pkg: patches:
+    pkg.overrideAttrs (oldAttrs: {
+      patches = (oldAttrs.patches or [ ]) ++ patches;
+    });
 in
 {
   # Third party overlays
@@ -12,15 +16,14 @@ in
   # 'inputs.${flake}.packages.${pkgs.system}' or
   # 'inputs.${flake}.legacyPackages.${pkgs.system}'
   flake-inputs = final: _: {
-    inputs = builtins.mapAttrs
-      (_: flake:
-        let
-          legacyPackages = ((flake.legacyPackages or { }).${final.system} or { });
-          packages = ((flake.packages or { }).${final.system} or { });
-        in
-        if legacyPackages != { } then legacyPackages else packages
-      )
-      inputs;
+    inputs = builtins.mapAttrs (
+      _: flake:
+      let
+        legacyPackages = ((flake.legacyPackages or { }).${final.system} or { });
+        packages = ((flake.packages or { }).${final.system} or { });
+      in
+      if legacyPackages != { } then legacyPackages else packages
+    ) inputs;
   };
 
   # Adds my custom packages
@@ -30,6 +33,7 @@ in
   # };
 
   # Modifies existing packages
+  # deadnix: skip
   modifications = final: prev: {
     rofi-emoji = prev.rofi-emoji-wayland;
     # rofi-emoji = prev.rofi-emoji.override { rofi-unwrapped = prev.rofi-wayland-unwrapped; };

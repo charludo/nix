@@ -1,4 +1,10 @@
-{ config, private-settings, lib, pkgs, ... }:
+{
+  config,
+  private-settings,
+  lib,
+  pkgs,
+  ...
+}:
 {
   services.minecraft-server = {
     enable = true;
@@ -34,7 +40,9 @@
     ln -sf ${./pickaxe.png} ${config.services.minecraft-server.dataDir}/server-icon.png
   '';
 
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "minecraft-server"
-  ];
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "minecraft-server"
+    ];
 }

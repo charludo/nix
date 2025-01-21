@@ -1,4 +1,8 @@
-{ config, lib, inputs, ... }:
+{
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 let

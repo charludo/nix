@@ -4,6 +4,9 @@
     enable = true;
     openFirewall = true;
     relayIP = private-settings.gsv.ip;
-    extraSignalArgs = [ "-k" "_" ];
+    extraSignalArgs = [
+      "-k"
+      "_"
+    ];
   };
 }

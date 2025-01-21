@@ -1,4 +1,10 @@
-{ config, private-settings, secrets, ... }: {
+{
+  config,
+  private-settings,
+  secrets,
+  ...
+}:
+{
   imports = [ ./_common.nix ];
 
   vm = {
@@ -15,7 +21,9 @@
     extraGroups = [ "nas" ];
   };
   users.groups."${config.services.immich.group}".gid = 1111;
-  sops.secrets.nas = { sopsFile = secrets.nas; };
+  sops.secrets.nas = {
+    sopsFile = secrets.nas;
+  };
 
   services.immich = {
     enable = true;
@@ -31,18 +39,20 @@
     environment.UV_USE_IO_URING = "0";
   };
 
-  systemd.mounts = [{
-    description = "Mount for Backup - Immich edition";
-    what = "//192.168.30.11/Backup";
-    where = "${config.nas.backup.location}";
-    type = "cifs";
-    options =
-      let
-        automount_opts = "uid=1111,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-      in
-      "${automount_opts},credentials=${config.sops.secrets.nas.path}";
-    wantedBy = [ "multi-user.target" ];
-  }];
+  systemd.mounts = [
+    {
+      description = "Mount for Backup - Immich edition";
+      what = "//192.168.30.11/Backup";
+      where = "${config.nas.backup.location}";
+      type = "cifs";
+      options =
+        let
+          automount_opts = "uid=1111,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+        in
+        "${automount_opts},credentials=${config.sops.secrets.nas.path}";
+      wantedBy = [ "multi-user.target" ];
+    }
+  ];
 
   system.stateVersion = "23.11";
 }

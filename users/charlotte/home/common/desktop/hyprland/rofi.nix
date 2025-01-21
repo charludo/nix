@@ -1,140 +1,143 @@
 { config, pkgs, ... }:
 let
   inherit (config.lib.formats.rasi) mkLiteral;
-  rofi-theme =
-    {
-      "*" = {
-        bg-col = mkLiteral "#${config.colorScheme.palette.base00}";
-        bg-col-light = mkLiteral "#${config.colorScheme.palette.base00}";
-        border-col = mkLiteral "#${config.colorScheme.palette.base00}";
-        selected-col = mkLiteral "#${config.colorScheme.palette.base00}";
-        blue = mkLiteral "#${config.colorScheme.palette.base0D}";
-        fg-col = mkLiteral "#${config.colorScheme.palette.base05}";
-        fg-col2 = mkLiteral "#${config.colorScheme.palette.base08}";
-        grey = mkLiteral "#${config.colorScheme.palette.base03}";
+  rofi-theme = {
+    "*" = {
+      bg-col = mkLiteral "#${config.colorScheme.palette.base00}";
+      bg-col-light = mkLiteral "#${config.colorScheme.palette.base00}";
+      border-col = mkLiteral "#${config.colorScheme.palette.base00}";
+      selected-col = mkLiteral "#${config.colorScheme.palette.base00}";
+      blue = mkLiteral "#${config.colorScheme.palette.base0D}";
+      fg-col = mkLiteral "#${config.colorScheme.palette.base05}";
+      fg-col2 = mkLiteral "#${config.colorScheme.palette.base08}";
+      grey = mkLiteral "#${config.colorScheme.palette.base03}";
 
-        font = "${config.fontProfiles.regular.family} 13";
-      };
-
-      element-text = {
-        background-color = mkLiteral "inherit";
-        text-color = mkLiteral "inherit";
-      };
-
-      element-icon = {
-        background-color = mkLiteral "inherit";
-        text-color = mkLiteral "inherit";
-      };
-
-      mode-switcher = {
-        background-color = mkLiteral "inherit";
-        text-color = mkLiteral "inherit";
-      };
-
-      window = {
-        background-color = mkLiteral "rgba(0, 0, 0, 25%)";
-        border = 0;
-        fullscreen = true;
-        #width = mkLiteral "100%";
-        #height = mkLiteral "100%";
-        # padding = mkLiteral "32.5% 32.5%";
-        padding = mkLiteral "calc(50% - 200px) calc(50% - 360px)";
-      };
-
-      mainbox = {
-        border = 3;
-        border-color = mkLiteral "@border-col";
-        background-color = mkLiteral "@bg-col";
-        border-radius = 15;
-      };
-
-      inputbar = {
-        children = mkLiteral "[ prompt,entry ]";
-        background-color = mkLiteral "@bg-col";
-        border-radius = 5;
-        padding = 2;
-      };
-
-      prompt = {
-        background-color = mkLiteral "@blue";
-        padding = 6;
-        text-color = mkLiteral "@bg-col";
-        border-radius = 10;
-        margin = mkLiteral "20px 0px 0px 20px";
-      };
-
-      textbox-prompt-colon = {
-        expand = false;
-      };
-
-      entry = {
-        padding = 6;
-        margin = mkLiteral "20px 0px 0px 10px";
-        text-color = mkLiteral "@fg-col";
-        background-color = mkLiteral "@bg-col";
-      };
-
-      listview = {
-        border = mkLiteral "0px 0px 0px";
-        padding = mkLiteral "6px 0px 0px";
-        margin = mkLiteral "10px 0px 0px 20px";
-        columns = 2;
-        lines = 6;
-        background-color = mkLiteral "@bg-col";
-      };
-
-      element = {
-        padding = 5;
-        background-color = mkLiteral "@bg-col";
-        text-color = mkLiteral "@fg-col";
-      };
-
-      element-icon = {
-        size = mkLiteral "25px";
-      };
-
-      "element selected" = {
-        background-color = mkLiteral "@selected-col";
-        text-color = mkLiteral "@fg-col2";
-      };
-
-      mode-switcher = {
-        spacing = 0;
-      };
-
-      button = {
-        padding = 10;
-        background-color = mkLiteral "@bg-col-light";
-        text-color = mkLiteral "@grey";
-        vertical-align = mkLiteral "0.5";
-        horizontal-align = mkLiteral "0.5";
-        border = mkLiteral "0px 0px 4px 0px";
-      };
-
-      "button selected" = {
-        background-color = mkLiteral "@bg-col";
-        text-color = mkLiteral "@blue";
-        border-color = mkLiteral "@blue";
-      };
-
-      message = {
-        background-color = mkLiteral "@bg-col-light";
-        margin = 2;
-        padding = 2;
-        border-radius = 5;
-      };
-
-      textbox = {
-        padding = 6;
-        margin = mkLiteral "20px 0px 0px 20px";
-        text-color = mkLiteral "@blue";
-        background-color = mkLiteral "@bg-col-light";
-      };
+      font = "${config.fontProfiles.regular.family} 13";
     };
+
+    element-text = {
+      background-color = mkLiteral "inherit";
+      text-color = mkLiteral "inherit";
+    };
+
+    element-icon = {
+      background-color = mkLiteral "inherit";
+      text-color = mkLiteral "inherit";
+    };
+
+    mode-switcher = {
+      background-color = mkLiteral "inherit";
+      text-color = mkLiteral "inherit";
+    };
+
+    window = {
+      background-color = mkLiteral "rgba(0, 0, 0, 25%)";
+      border = 0;
+      fullscreen = true;
+      #width = mkLiteral "100%";
+      #height = mkLiteral "100%";
+      # padding = mkLiteral "32.5% 32.5%";
+      padding = mkLiteral "calc(50% - 200px) calc(50% - 360px)";
+    };
+
+    mainbox = {
+      border = 3;
+      border-color = mkLiteral "@border-col";
+      background-color = mkLiteral "@bg-col";
+      border-radius = 15;
+    };
+
+    inputbar = {
+      children = mkLiteral "[ prompt,entry ]";
+      background-color = mkLiteral "@bg-col";
+      border-radius = 5;
+      padding = 2;
+    };
+
+    prompt = {
+      background-color = mkLiteral "@blue";
+      padding = 6;
+      text-color = mkLiteral "@bg-col";
+      border-radius = 10;
+      margin = mkLiteral "20px 0px 0px 20px";
+    };
+
+    textbox-prompt-colon = {
+      expand = false;
+    };
+
+    entry = {
+      padding = 6;
+      margin = mkLiteral "20px 0px 0px 10px";
+      text-color = mkLiteral "@fg-col";
+      background-color = mkLiteral "@bg-col";
+    };
+
+    listview = {
+      border = mkLiteral "0px 0px 0px";
+      padding = mkLiteral "6px 0px 0px";
+      margin = mkLiteral "10px 0px 0px 20px";
+      columns = 2;
+      lines = 6;
+      background-color = mkLiteral "@bg-col";
+    };
+
+    element = {
+      padding = 5;
+      background-color = mkLiteral "@bg-col";
+      text-color = mkLiteral "@fg-col";
+    };
+
+    element-icon = {
+      size = mkLiteral "25px";
+    };
+
+    "element selected" = {
+      background-color = mkLiteral "@selected-col";
+      text-color = mkLiteral "@fg-col2";
+    };
+
+    mode-switcher = {
+      spacing = 0;
+    };
+
+    button = {
+      padding = 10;
+      background-color = mkLiteral "@bg-col-light";
+      text-color = mkLiteral "@grey";
+      vertical-align = mkLiteral "0.5";
+      horizontal-align = mkLiteral "0.5";
+      border = mkLiteral "0px 0px 4px 0px";
+    };
+
+    "button selected" = {
+      background-color = mkLiteral "@bg-col";
+      text-color = mkLiteral "@blue";
+      border-color = mkLiteral "@blue";
+    };
+
+    message = {
+      background-color = mkLiteral "@bg-col-light";
+      margin = 2;
+      padding = 2;
+      border-radius = 5;
+    };
+
+    textbox = {
+      padding = 6;
+      margin = mkLiteral "20px 0px 0px 20px";
+      text-color = mkLiteral "@blue";
+      background-color = mkLiteral "@bg-col-light";
+    };
+  };
 
   rofi-cliphist = pkgs.writeShellApplication {
     name = "rofi-cliphist";
-    runtimeInputs = [ pkgs.cliphist pkgs.wl-clipboard pkgs.gawk ];
+    runtimeInputs = [
+      pkgs.cliphist
+      pkgs.wl-clipboard
+      pkgs.gawk
+    ];
     text = ''
       set +o pipefail
       set +o errexit
@@ -239,7 +242,10 @@ let
   };
   rofi-screencapture = pkgs.writeShellApplication {
     name = "rofi-screencapture";
-    runtimeInputs = [ pkgs.wf-recorder pkgs.slurp ];
+    runtimeInputs = [
+      pkgs.wf-recorder
+      pkgs.slurp
+    ];
     text = ''
       set +o nounset
 
@@ -321,34 +327,35 @@ let
   rofi-projects = pkgs.writeShellApplication {
     name = "rofi-projects";
     runtimeInputs = [ pkgs.hyprshot ];
-    text = /* bash */ ''
-      set +o nounset
+    text = # bash
+      ''
+        set +o nounset
 
-      all=(${builtins.concatStringsSep " " (map (entry: entry.name) config.projects)})
+        all=(${builtins.concatStringsSep " " (map (entry: entry.name) config.projects)})
 
-      echo -e "\0no-custom\x1ftrue"
-      echo -e "\0markup-rows\x1ftrue"
+        echo -e "\0no-custom\x1ftrue"
+        echo -e "\0markup-rows\x1ftrue"
 
-      if [ -z "$1" ]
-      then
-          for entry in "''${all[@]}"
-          do
-              echo -e "''${entry}"
-          done
-      else
-          for entry in "''${all[@]}"
-          do
-              if [ "$1" = "''${entry}" ]
-              then
-                  # shellcheck disable=SC1065
-                  coproc ( ${config.home.sessionVariables.TERMINAL} --working-directory "${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/''${entry}" -e direnv exec . nvim)
-                  exit 0
-              fi
-          done
-          echo "Invalid selection: $1" >&2
-          exit 1
-      fi
-    '';
+        if [ -z "$1" ]
+        then
+            for entry in "''${all[@]}"
+            do
+                echo -e "''${entry}"
+            done
+        else
+            for entry in "''${all[@]}"
+            do
+                if [ "$1" = "''${entry}" ]
+                then
+                    # shellcheck disable=SC1065
+                    coproc ( ${config.home.sessionVariables.TERMINAL} --working-directory "${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/''${entry}" -e direnv exec . nvim)
+                    exit 0
+                fi
+            done
+            echo "Invalid selection: $1" >&2
+            exit 1
+        fi
+      '';
   };
 in
 {
@@ -370,7 +377,10 @@ in
     package = pkgs.rofi-wayland;
     font = "${config.fontProfiles.regular.family} 13";
     location = "center";
-    plugins = [ pkgs.rofi-power-menu pkgs.rofi-emoji ];
+    plugins = [
+      pkgs.rofi-power-menu
+      pkgs.rofi-emoji
+    ];
     terminal = "${config.home.sessionVariables.TERMINAL}";
     theme = rofi-theme;
     extraConfig = {

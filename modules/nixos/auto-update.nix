@@ -1,4 +1,9 @@
-{ config, lib, private-settings, ... }:
+{
+  config,
+  lib,
+  private-settings,
+  ...
+}:
 
 with lib;
 let

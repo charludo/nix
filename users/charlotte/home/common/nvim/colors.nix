@@ -6,18 +6,31 @@ let
   min = x: y: if x < y then x else y;
   decToHex =
     let
-      intToHex = [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "a" "b" "c" "d" "e" "f" ];
-      toHex' = q: a:
-        if q > 0
-        then
-          (toHex'
-            (q / 16)
-            ((builtins.elemAt intToHex (lib.mod q 16)) + a))
-        else a;
+      intToHex = [
+        "0"
+        "1"
+        "2"
+        "3"
+        "4"
+        "5"
+        "6"
+        "7"
+        "8"
+        "9"
+        "a"
+        "b"
+        "c"
+        "d"
+        "e"
+        "f"
+      ];
+      toHex' =
+        q: a: if q > 0 then (toHex' (q / 16) ((builtins.elemAt intToHex (lib.mod q 16)) + a)) else a;
     in
     v: toHex' v "";
 
-  rgbToHex = rgb:
+  rgbToHex =
+    rgb:
     let
       hexList = builtins.map decToHex rgb;
       hexColor = builtins.concatStringsSep "" hexList;
@@ -26,16 +39,19 @@ let
 
   pow =
     let
-      pow' = base: exponent: value:
-        if exponent == 0
-        then 1
-        else if exponent <= 1
-        then value
-        else (pow' base (exponent - 1) (value * base));
+      pow' =
+        base: exponent: value:
+        if exponent == 0 then
+          1
+        else if exponent <= 1 then
+          value
+        else
+          (pow' base (exponent - 1) (value * base));
     in
     base: exponent: pow' base exponent base;
 
-  hexToDec = v:
+  hexToDec =
+    v:
     let
       hexToInt = {
         "0" = 0;
@@ -58,21 +74,23 @@ let
       chars = lib.stringToCharacters v;
       charsLen = lib.length chars;
     in
-    lib.foldl
-      (a: v: a + v)
-      0
-      (lib.imap0
-        (k: v: hexToInt."${lib.toLower v}" * (pow 16 (charsLen - k - 1)))
-        chars);
+    lib.foldl (a: v: a + v) 0 (
+      lib.imap0 (k: v: hexToInt."${lib.toLower v}" * (pow 16 (charsLen - k - 1))) chars
+    );
 
-  hexToRGB = color:
+  hexToRGB =
+    color:
     let
-      hexList = [ (builtins.substring 0 2 color) (builtins.substring 2 2 color) (builtins.substring 4 2 color) ];
+      hexList = [
+        (builtins.substring 0 2 color)
+        (builtins.substring 2 2 color)
+        (builtins.substring 4 2 color)
+      ];
     in
     map hexToDec hexList;
 
-
-  darken = color: percentage:
+  darken =
+    color: percentage:
     let
       factor = 1.0 - (percentage / 100.0);
       rgb = hexToRGB color;
@@ -113,4 +131,5 @@ in
   lightbg = "#${palette.base01}";
   pmenu_bg = "#${darken palette.base0C (-6)}";
   folder_bg = "#${darken palette.base0D 12}";
-} // builtins.mapAttrs (name: value: "#" + value) palette
+}
+// builtins.mapAttrs (_name: value: "#" + value) palette

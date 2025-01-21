@@ -1,8 +1,14 @@
-{ config, lib, pkgs, secrets, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  secrets,
+  ...
+}:
 
 with lib;
 let
-  # These CONSTANTLY change and have different hashes depending on what server 
+  # These CONSTANTLY change and have different hashes depending on what server
   # you connect to, so I'm putting a cached version on github. More work to update,
   # but whatever...
   configFiles = pkgs.stdenv.mkDerivation {
@@ -12,7 +18,10 @@ let
       sha256 = "sha256-dIjNXy2UQ0nAVrp3guy2xDLu1gUvqYBXK9EnG7C3y68=";
     };
     phases = [ "installPhase" ];
-    buildInputs = [ pkgs.unzip pkgs.rename ];
+    buildInputs = [
+      pkgs.unzip
+      pkgs.rename
+    ];
     installPhase = ''
       unzip $src 
       find . -type f ! -name '*_udp.ovpn' -delete
@@ -25,11 +34,17 @@ let
 
   getConfig = filePath: {
     name = "${builtins.substring 0 (builtins.stringLength filePath - 5) filePath}";
-    value = { config = '' config ${configFiles}/${filePath} ''; autoStart = false; updateResolvConf = true; };
+    value = {
+      config = ''config ${configFiles}/${filePath} '';
+      autoStart = false;
+      updateResolvConf = true;
+    };
   };
   openVPNConfigs = map getConfig (builtins.attrNames (builtins.readDir configFiles));
 
-  services = "(${lib.concatStringsSep " " (lib.map (config: "\"openvpn-${config.name}.service\"") openVPNConfigs)})";
+  services = "(${
+    lib.concatStringsSep " " (lib.map (config: "\"openvpn-${config.name}.service\"") openVPNConfigs)
+  })";
   surfshark-stop = pkgs.writeShellApplication {
     name = "surfshark-stop";
     text = ''
@@ -84,11 +99,16 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     ({
-      sops.secrets.openvpn = { sopsFile = secrets.vpn; };
+      sops.secrets.openvpn = {
+        sopsFile = secrets.vpn;
+      };
       networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
       services.openvpn.servers = builtins.listToAttrs openVPNConfigs;
-      environment.systemPackages = [ surfshark-random surfshark-stop ];
+      environment.systemPackages = [
+        surfshark-random
+        surfshark-stop
+      ];
     })
 
     (mkIf cfg.alwaysOn {
@@ -137,47 +157,51 @@ in
     })
 
     (mkIf cfg.iptables.enable {
-      networking.firewall.extraCommands = ''
-        iptables -A INPUT -s localhost -j ACCEPT
-        iptables -A OUTPUT -d localhost -j ACCEPT
-        iptables -A INPUT -i lo -j ACCEPT
-        iptables -A OUTPUT -o lo -j ACCEPT
+      networking.firewall.extraCommands =
+        ''
+          iptables -A INPUT -s localhost -j ACCEPT
+          iptables -A OUTPUT -d localhost -j ACCEPT
+          iptables -A INPUT -i lo -j ACCEPT
+          iptables -A OUTPUT -o lo -j ACCEPT
 
-        iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
-        iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
+          iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
+          iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
 
-        iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
-        iptables -A INPUT -p udp --sport 1194 -j ACCEPT
-        iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
-        iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+          iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
+          iptables -A INPUT -p udp --sport 1194 -j ACCEPT
+          iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+          iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 
-        iptables -A OUTPUT -o tun0 -j ACCEPT
+          iptables -A OUTPUT -o tun0 -j ACCEPT
 
-      ''
-      + lib.concatStringsSep ""
-        (map
-          (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${user}".gid} -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
-          '')
-          cfg.iptables.enforceForUsers)
-      + lib.concatStringsSep ""
-        (map
-          (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${user}".gid} -d 127.0.0.1 ! -o tun0 -j ACCEPT
-          '')
-          cfg.iptables.enforceForUsers)
-      + lib.concatStringsSep ""
-        (map
-          (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${user}".gid} ! -o tun0 -j REJECT
-          '')
-          cfg.iptables.enforceForUsers)
-      + ''
+        ''
+        + lib.concatStringsSep "" (
+          map (user: ''
+            iptables -A OUTPUT -m owner --gid-owner ${
+              builtins.toString config.users.groups."${user}".gid
+            } -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
+          '') cfg.iptables.enforceForUsers
+        )
+        + lib.concatStringsSep "" (
+          map (user: ''
+            iptables -A OUTPUT -m owner --gid-owner ${
+              builtins.toString config.users.groups."${user}".gid
+            } -d 127.0.0.1 ! -o tun0 -j ACCEPT
+          '') cfg.iptables.enforceForUsers
+        )
+        + lib.concatStringsSep "" (
+          map (user: ''
+            iptables -A OUTPUT -m owner --gid-owner ${
+              builtins.toString config.users.groups."${user}".gid
+            } ! -o tun0 -j REJECT
+          '') cfg.iptables.enforceForUsers
+        )
+        + ''
 
-        iptables -P INPUT DROP
-        iptables -P FORWARD DROP
-        iptables -P OUTPUT DROP
-      '';
+          iptables -P INPUT DROP
+          iptables -P FORWARD DROP
+          iptables -P OUTPUT DROP
+        '';
     })
   ]);
 }

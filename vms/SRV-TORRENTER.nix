@@ -1,4 +1,11 @@
-{ config, pkgs, lib, inputs, secrets, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  secrets,
+  ...
+}:
 let
   restore-torrenter = pkgs.writeShellApplication {
     name = "restore-torrenter";
@@ -15,7 +22,11 @@ let
   };
   get-anime-music = pkgs.writeShellApplication {
     name = "get-anime-music";
-    runtimeInputs = [ pkgs.yt-dlp pkgs.coreutils pkgs.ffmpeg ];
+    runtimeInputs = [
+      pkgs.yt-dlp
+      pkgs.coreutils
+      pkgs.ffmpeg
+    ];
     text = ''
       url="$(cat ${config.sops.secrets.anime-playlist.path})"
       target="${config.nas.location}/Musik/Anime"
@@ -63,11 +74,13 @@ in
   };
 
   networking.firewall.interfaces.ens18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
-  networking.interfaces.ens18.ipv4.routes = [{
-    address = "192.168.0.0";
-    prefixLength = 16;
-    via = config.vm.networking.gateway;
-  }];
+  networking.interfaces.ens18.ipv4.routes = [
+    {
+      address = "192.168.0.0";
+      prefixLength = 16;
+      via = config.vm.networking.gateway;
+    }
+  ];
 
   services = {
     sonarr.enable = true;
@@ -102,7 +115,7 @@ in
 
   # NZBGet scripts require python
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       nzbget = prev.nzbget.overrideAttrs (old: {
         buildInputs = old.buildInputs ++ [ pkgs.python311 ];
       });
@@ -146,13 +159,31 @@ in
 
   systemd = {
     # Ensure qbittorrent/nzbget only start AFTER a VPN connection has been established, and the NAS is mounted for *arr
-    services.nzbget.bindsTo = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
-    services.nzbget.after = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
-    services.nzbget.partOf = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
+    services.nzbget.bindsTo = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
+    services.nzbget.after = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
+    services.nzbget.partOf = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
     services.nzbget.path = [ pkgs.python311 ];
-    services.qbittorrent.bindsTo = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
-    services.qbittorrent.after = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
-    services.qbittorrent.partOf = [ "sys-devices-virtual-net-tun0.device" "media-NAS.mount" ];
+    services.qbittorrent.bindsTo = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
+    services.qbittorrent.after = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
+    services.qbittorrent.partOf = [
+      "sys-devices-virtual-net-tun0.device"
+      "media-NAS.mount"
+    ];
     services.sonarr.after = [ "media-NAS.mount" ];
     services.radarr.after = [ "media-NAS.mount" ];
     services.lidarr.after = [ "media-NAS.mount" ];
@@ -206,4 +237,3 @@ in
 
   system.stateVersion = "23.11";
 }
-

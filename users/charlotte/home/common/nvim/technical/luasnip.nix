@@ -1,5 +1,6 @@
 # shamelessly copied from: https://github.com/redyf/Neve/blob/main/config/snippets/luasnip.nix
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   programs.nixvim.plugins.luasnip = {
     enable = true;
     settings = {

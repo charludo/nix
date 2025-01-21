@@ -46,8 +46,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    musnix = { url = "github:musnix/musnix"; };
-    conduwuit = { url = "github:girlbossceo/conduwuit"; };
+    musnix = {
+      url = "github:musnix/musnix";
+    };
+    conduwuit = {
+      url = "github:girlbossceo/conduwuit";
+    };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
@@ -57,7 +61,16 @@
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, private-settings, musnix, ... } @ inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      jovian,
+      private-settings,
+      musnix,
+      ...
+    }@inputs:
     let
       inherit (self) outputs;
       lib = nixpkgs.lib // home-manager.lib;
@@ -73,73 +86,73 @@
     in
     {
       inherit lib;
-      nixosModules = (import ./modules/nixos)
+      nixosModules =
+        (import ./modules/nixos)
         // jovian.outputs.nixosModules
         // musnix.nixosModules
         // private-settings-module;
-      homeModules = (import ./modules/home-manager)
-        // private-settings-module;
+      homeModules = (import ./modules/home-manager) // private-settings-module;
       overlays = import ./overlays { inherit inputs outputs; };
 
       # Available through 'nixos-rebuild --flake .#hostname'
-      nixosConfigurations = {
-        # Desktop
-        hub = lib.nixosSystem {
-          modules = [ ./hosts/hub ];
-          specialArgs = { inherit inputs outputs; };
-        };
+      nixosConfigurations =
+        {
+          # Desktop
+          hub = lib.nixosSystem {
+            modules = [ ./hosts/hub ];
+            specialArgs = { inherit inputs outputs; };
+          };
 
-        # Laptop
-        drone = lib.nixosSystem {
-          modules = [ ./hosts/drone ];
-          specialArgs = { inherit inputs outputs; };
-        };
+          # Laptop
+          drone = lib.nixosSystem {
+            modules = [ ./hosts/drone ];
+            specialArgs = { inherit inputs outputs; };
+          };
 
-        # Laptop Mallorca
-        mallorca = lib.nixosSystem {
-          modules = [ ./hosts/mallorca ];
-          specialArgs = { inherit inputs outputs; };
-        };
+          # Laptop Mallorca
+          mallorca = lib.nixosSystem {
+            modules = [ ./hosts/mallorca ];
+            specialArgs = { inherit inputs outputs; };
+          };
 
-        # Gaming
-        excession = lib.nixosSystem {
-          modules = [ ./hosts/excession ];
-          specialArgs = { inherit inputs outputs; };
-        };
+          # Gaming
+          excession = lib.nixosSystem {
+            modules = [ ./hosts/excession ];
+            specialArgs = { inherit inputs outputs; };
+          };
 
-        # Gaming Mk II
-        steamdeck = lib.nixosSystem {
-          modules = [ ./hosts/steamdeck ];
-          specialArgs = { inherit inputs outputs; };
-        };
+          # Gaming Mk II
+          steamdeck = lib.nixosSystem {
+            modules = [ ./hosts/steamdeck ];
+            specialArgs = { inherit inputs outputs; };
+          };
 
-        # nixos-rebuild switch --flake ".#gsv" --target-host gsv
-        gsv = lib.nixosSystem {
-          modules = [ ./hosts/gsv ];
-          specialArgs = { inherit inputs outputs; };
-        };
-
-      }
-      //
-      # VMs
-      builtins.listToAttrs
-        (builtins.map
-          (name:
-            {
+          # nixos-rebuild switch --flake ".#gsv" --target-host gsv
+          gsv = lib.nixosSystem {
+            modules = [ ./hosts/gsv ];
+            specialArgs = { inherit inputs outputs; };
+          };
+        }
+        //
+        # VMs
+        builtins.listToAttrs (
+          builtins.map
+            (name: {
               inherit name;
               value = lib.nixosSystem {
                 modules = [ ./vms/${name}.nix ];
                 specialArgs = { inherit inputs outputs; };
               };
             })
-          (builtins.filter
-            (name: builtins.substring 0 3 name == "SRV" || builtins.substring 0 2 name == "CL")
-            (builtins.map
-              builtins.head
-              (builtins.map
-                (lib.splitString ".")
-                (builtins.attrNames
-                  (builtins.readDir ./vms))))));
+            (
+              builtins.filter (name: builtins.substring 0 3 name == "SRV" || builtins.substring 0 2 name == "CL")
+                (
+                  builtins.map builtins.head (
+                    builtins.map (lib.splitString ".") (builtins.attrNames (builtins.readDir ./vms))
+                  )
+                )
+            )
+        );
 
       # Available through 'home-manager --flake .#username@hostname'
       homeConfigurations = {
@@ -175,5 +188,7 @@
         remux = (import ./shells/remux { inherit pkgs lib; });
         default = (import ./shells { inherit pkgs; });
       };
+
+      formatter.${system} = pkgs.treefmt;
     };
 }

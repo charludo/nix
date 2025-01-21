@@ -8,10 +8,20 @@ in
   };
 
   programs.nixvim.highlight = {
-    WhichKey = { fg = colors.blue; };
-    WhichKeySeparator = { fg = colors.light_grey; };
-    WhichKeyDesc = { fg = colors.red; };
-    WhichKeyGroup = { fg = colors.green; };
-    WhichKeyValue = { fg = colors.green; };
+    WhichKey = {
+      fg = colors.blue;
+    };
+    WhichKeySeparator = {
+      fg = colors.light_grey;
+    };
+    WhichKeyDesc = {
+      fg = colors.red;
+    };
+    WhichKeyGroup = {
+      fg = colors.green;
+    };
+    WhichKeyValue = {
+      fg = colors.green;
+    };
   };
 }

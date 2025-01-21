@@ -16,8 +16,16 @@
     networking.prefixLength = 24;
     networking.nameservers = [ ];
 
-    networking.openPorts.tcp = [ 53 443 853 ];
-    networking.openPorts.udp = [ 53 443 853 ];
+    networking.openPorts.tcp = [
+      53
+      443
+      853
+    ];
+    networking.openPorts.udp = [
+      53
+      443
+      853
+    ];
   };
 
   blocky.enable = true;

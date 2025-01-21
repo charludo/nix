@@ -1,7 +1,10 @@
 { pkgs, ... }:
 pkgs.writeShellApplication {
   name = "waybar-playerctl";
-  runtimeInputs = [ pkgs.playerctl pkgs.bc ];
+  runtimeInputs = [
+    pkgs.playerctl
+    pkgs.bc
+  ];
   text = ''
     set +o pipefail
     set +o errexit

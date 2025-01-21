@@ -1,4 +1,9 @@
-{ config, private-settings, secrets, ... }:
+{
+  config,
+  private-settings,
+  secrets,
+  ...
+}:
 {
   imports = [ ./_common.nix ];
 
@@ -15,17 +20,25 @@
 
   nas.enable = true;
 
-  sops.secrets.borg = { sopsFile = secrets.cloudsync; };
+  sops.secrets.borg = {
+    sopsFile = secrets.cloudsync;
+  };
   services.borgbackup.jobs.remoteBackup = {
     paths = [ "${config.nas.location}/CloudSync" ];
-    exclude = [ "'**/node_modules'" "'**/.venv'" "'**/.cache'" ];
+    exclude = [
+      "'**/node_modules'"
+      "'**/.venv'"
+      "'**/.cache'"
+    ];
     doInit = false;
     repo = "${private-settings.domains.cloudsync}:pakiplace";
     encryption = {
       mode = "repokey";
       passCommand = "cat ${config.sops.secrets.borg.path}";
     };
-    environment = { BORG_RSH = "ssh -p 23 -i /etc/ssh/ssh_host_ed25519_key"; };
+    environment = {
+      BORG_RSH = "ssh -p 23 -i /etc/ssh/ssh_host_ed25519_key";
+    };
     compression = "auto,lzma";
     startAt = "03:15";
   };

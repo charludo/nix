@@ -1,4 +1,9 @@
-{ config, private-settings, secrets, ... }:
+{
+  config,
+  private-settings,
+  secrets,
+  ...
+}:
 {
   imports = [ ./_common.nix ];
 
@@ -14,7 +19,9 @@
     networking.openPorts.udp = [ 8080 ];
   };
 
-  sops.secrets.wastebin = { sopsFile = secrets.wastebin; };
+  sops.secrets.wastebin = {
+    sopsFile = secrets.wastebin;
+  };
   services.wastebin = {
     enable = true;
     secretFile = config.sops.secrets.wastebin.path;

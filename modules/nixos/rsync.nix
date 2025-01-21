@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -14,7 +19,10 @@ in
 
     systemd.services."rsync-media-backup" = lib.mkIf config.nas.enable {
       enable = true;
-      requires = [ "media-Media.mount" "media-NAS.mount" ];
+      requires = [
+        "media-Media.mount"
+        "media-NAS.mount"
+      ];
       wantedBy = [ "multi-user.target" ];
       description = "Backup Media to NAS";
       script = ''

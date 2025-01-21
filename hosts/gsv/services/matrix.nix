@@ -36,6 +36,8 @@ in
     '';
   };
 
-  networking.firewall.allowedTCPPorts = [ 443 8448 ];
+  networking.firewall.allowedTCPPorts = [
+    443
+    8448
+  ];
 }
-

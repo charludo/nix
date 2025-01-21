@@ -14,7 +14,7 @@
         "nil" = {
           "formatting" = {
             "command" = [
-              "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt"
+              "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
             ];
           };
         };
@@ -23,5 +23,8 @@
       "editor.formatOnSave" = true;
     };
   };
-  home.packages = [ pkgs.nil pkgs.nixpkgs-fmt ];
+  home.packages = [
+    pkgs.nil
+    pkgs.nixfmt-rfc-style
+  ];
 }

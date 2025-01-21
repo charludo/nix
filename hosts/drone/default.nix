@@ -1,12 +1,11 @@
 { config, ... }:
 {
   _module.args.defaultUser = "charlotte";
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common
-      ../../users/charlotte/user.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+    ../common
+    ../../users/charlotte/user.nix
+  ];
 
   bluetooth.enable = true;
   fish.enable = true;
@@ -28,11 +27,15 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.initrd.luks.devices."luks-13ca6c92-72b0-41a7-be52-defd57bab492".device = "/dev/disk/by-uuid/13ca6c92-72b0-41a7-be52-defd57bab492";
+  boot.initrd.luks.devices."luks-13ca6c92-72b0-41a7-be52-defd57bab492".device =
+    "/dev/disk/by-uuid/13ca6c92-72b0-41a7-be52-defd57bab492";
 
   networking.networkmanager.enable = true;
   networking.hostName = "drone";
-  networking.nameservers = [ "192.168.30.13" "1.1.1.1" ];
+  networking.nameservers = [
+    "192.168.30.13"
+    "1.1.1.1"
+  ];
 
   networking.firewall.allowedUDPPorts = [ 51865 ];
   networking.firewall.checkReversePath = "loose";

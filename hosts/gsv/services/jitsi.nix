@@ -29,7 +29,10 @@ in
         ];
         iceTransportPolicy = "relay";
       };
-      desktopSharingFrameRate = { min = 5; max = 15; };
+      desktopSharingFrameRate = {
+        min = 5;
+        max = 15;
+      };
       constraints.video.height = {
         ideal = 1080;
         max = 1920;
@@ -48,7 +51,8 @@ in
   services.jitsi-videobridge = {
     enable = true;
     openFirewall = true;
-    config.videobridge.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES = "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}";
+    config.videobridge.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES =
+      "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}";
   };
 
   services.prosody = {
@@ -60,7 +64,9 @@ in
     '';
   };
 
-  sops.secrets.coturn-env = { owner = "prosody"; };
+  sops.secrets.coturn-env = {
+    owner = "prosody";
+  };
   systemd.services.prosody.serviceConfig.EnvironmentFile = config.sops.secrets.coturn-env.path;
 
   nixpkgs.config.permittedInsecurePackages = [

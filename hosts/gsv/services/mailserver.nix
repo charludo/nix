@@ -8,7 +8,10 @@ in
   mailserver = {
     enable = true;
     fqdn = "mail.${domains.personal}";
-    domains = [ domains.personal domains.blog ];
+    domains = [
+      domains.personal
+      domains.blog
+    ];
     messageSizeLimit = 209715200;
     certificateScheme = "acme";
     fullTextSearch = {

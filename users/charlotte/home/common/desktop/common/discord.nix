@@ -16,7 +16,10 @@
     type = "Application";
     terminal = false;
     exec = "webcord";
-    categories = [ "Network" "InstantMessaging" ];
+    categories = [
+      "Network"
+      "InstantMessaging"
+    ];
     icon = "discord";
   };
 }

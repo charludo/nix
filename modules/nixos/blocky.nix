@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -19,7 +24,10 @@ in
         ];
         bootstrapDns = {
           upstream = "https://one.one.one.one/dns-query";
-          ips = [ "1.1.1.1" "1.0.0.1" ];
+          ips = [
+            "1.1.1.1"
+            "1.0.0.1"
+          ];
         };
         blocking = {
           blackLists = {
@@ -64,14 +72,18 @@ in
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
             ];
             allowed = [
-              (pkgs.writeText "custom-whitelist.txt"
-                ''
-                  *.awin1.com
-                '')
+              (pkgs.writeText "custom-whitelist.txt" ''
+                *.awin1.com
+              '')
             ];
           };
           clientGroupsBlock = {
-            default = [ "ads" "tracking" "malicious" "crypto" ];
+            default = [
+              "ads"
+              "tracking"
+              "malicious"
+              "crypto"
+            ];
           };
         };
       };

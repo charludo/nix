@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -109,18 +114,21 @@
           };
         };
 
-        monitor = map
-          (m:
+        monitor =
+          map (
+            m:
             let
-              resolution = "${toString m.width}x${toString m.height}"; #@${toString m.refreshRate}";
+              resolution = "${toString m.width}x${toString m.height}"; # @${toString m.refreshRate}";
               position = "${toString m.x}x${toString m.y}";
             in
             "${m.name},${if m.enabled then "${resolution},${position},1" else "disable"}"
+          ) (config.monitors)
+          ++ [ ",preferred,auto,auto" ];
+        workspace = lib.lists.flatten (
+          map (m: map (w: "${w},monitor:${m.name}") m.workspaces) (
+            lib.filter (m: m.enabled && m.workspaces != null) config.monitors
           )
-          (config.monitors) ++ [ ",preferred,auto,auto" ];
-        workspace = lib.lists.flatten (map
-          (m: map (w: "${w},monitor:${m.name}") m.workspaces)
-          (lib.filter (m: m.enabled && m.workspaces != null) config.monitors));
+        );
 
         exec = [
           "systemctl --user import-environment"
@@ -137,10 +145,21 @@
 
         bind =
           let
-            workspaces = [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" ];
+            workspaces = [
+              "0"
+              "1"
+              "2"
+              "3"
+              "4"
+              "5"
+              "6"
+              "7"
+              "8"
+              "9"
+            ];
             terminal = config.home.sessionVariables.TERMINAL;
 
-            rofi = "${pkgs.rofi-wayland.override {plugins = [pkgs.rofi-emoji];}}/bin/rofi";
+            rofi = "${pkgs.rofi-wayland.override { plugins = [ pkgs.rofi-emoji ]; }}/bin/rofi";
             rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
@@ -198,38 +217,35 @@
             ",XF86AudioMute,exec,${pactl} set-sink-mute @DEFAULT_SINK@ toggle"
             "SHIFT,XF86AudioMute,exec,${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"
             ",XF86AudioMicMute,exec,${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"
-          ] ++
+          ]
+          ++
 
-          (lib.optionals config.services.playerctld.enable [
-            # Media control
-            ",XF86AudioNext,exec,${playerctl} next"
-            ",XF86AudioPrev,exec,${playerctl} previous"
-            ",XF86AudioPlay,exec,${playerctl} play-pause"
-            ",XF86AudioStop,exec,${playerctl} stop"
-            "ALT,XF86AudioNext,exec,${playerctld} shift"
-            "ALT,XF86AudioPrev,exec,${playerctld} unshift"
-            "ALT,XF86AudioPlay,exec,systemctl --user restart playerctld"
-          ]) ++
+            (lib.optionals config.services.playerctld.enable [
+              # Media control
+              ",XF86AudioNext,exec,${playerctl} next"
+              ",XF86AudioPrev,exec,${playerctl} previous"
+              ",XF86AudioPlay,exec,${playerctl} play-pause"
+              ",XF86AudioStop,exec,${playerctl} stop"
+              "ALT,XF86AudioNext,exec,${playerctld} shift"
+              "ALT,XF86AudioPrev,exec,${playerctld} unshift"
+              "ALT,XF86AudioPlay,exec,systemctl --user restart playerctld"
+            ])
+          ++
 
-          # Movement
-          [
-            "${mainMod},apostrophe,workspace,previous"
-            "${mainMod},s,togglespecialworkspace,magic"
-            "${shiftMod},s,movetoworkspacesilent,special:magic"
+            # Movement
+            [
+              "${mainMod},apostrophe,workspace,previous"
+              "${mainMod},s,togglespecialworkspace,magic"
+              "${shiftMod},s,movetoworkspacesilent,special:magic"
 
-            "${shiftMod},left,movewindow,l"
-            "${shiftMod},right,movewindow,r"
-            "${shiftMod},up,movewindow,u"
-            "${shiftMod},down,movewindow,d"
-          ] ++
-          (map
-            (n: "${mainMod},${n},workspace,${n}")
-            workspaces) ++
-          (map
-            (n: "${shiftMod},${n},movetoworkspacesilent,${n}")
-            workspaces);
+              "${shiftMod},left,movewindow,l"
+              "${shiftMod},right,movewindow,r"
+              "${shiftMod},up,movewindow,u"
+              "${shiftMod},down,movewindow,d"
+            ]
+          ++ (map (n: "${mainMod},${n},workspace,${n}") workspaces)
+          ++ (map (n: "${shiftMod},${n},movetoworkspacesilent,${n}") workspaces);
       };
-    extraConfig = ''
-    '';
+    extraConfig = '''';
   };
 }

@@ -1,21 +1,32 @@
-{ inputs, pkgs, config, ... }:
-let ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
+let
+  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
   users.users.marie = {
     isNormalUser = true;
     shell = pkgs.bash;
     initialPassword = "";
-    extraGroups = [
-      "wheel"
-      "networkmanager"
-      "nas"
-    ] ++ ifTheyExist [
-      "docker"
-      "git"
-    ];
+    extraGroups =
+      [
+        "wheel"
+        "networkmanager"
+        "nas"
+      ]
+      ++ ifTheyExist [
+        "docker"
+        "git"
+      ];
 
-    openssh.authorizedKeys.keys = [ (builtins.readFile ../charlotte/ssh.pub) (builtins.readFile ./ssh.pub) ];
+    openssh.authorizedKeys.keys = [
+      (builtins.readFile ../charlotte/ssh.pub)
+      (builtins.readFile ./ssh.pub)
+    ];
     packages = with pkgs; [
       git
       dig

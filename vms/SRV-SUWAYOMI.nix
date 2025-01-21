@@ -25,11 +25,13 @@
     };
   };
 
-  networking.interfaces.ens18.ipv4.routes = [{
-    address = "192.168.0.0";
-    prefixLength = 16;
-    via = config.vm.networking.gateway;
-  }];
+  networking.interfaces.ens18.ipv4.routes = [
+    {
+      address = "192.168.0.0";
+      prefixLength = 16;
+      via = config.vm.networking.gateway;
+    }
+  ];
 
   services.suwayomi-server = {
     enable = true;
@@ -127,7 +129,10 @@
         '';
       };
     in
-    [ suwayomi-init readarr-init ];
+    [
+      suwayomi-init
+      readarr-init
+    ];
 
   nas.enable = true;
   nas.backup.enable = true;

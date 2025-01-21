@@ -56,7 +56,10 @@
         '';
       };
     in
-    [ restore-jellyfin pkgs.rsync ];
+    [
+      restore-jellyfin
+      pkgs.rsync
+    ];
 
   system.stateVersion = "23.11";
 }

@@ -5,7 +5,10 @@
     comment = "Application for managing and playing games on Steam";
     terminal = false;
     exec = "steam -bigpicture %U";
-    categories = [ "Network" "Game" ];
+    categories = [
+      "Network"
+      "Game"
+    ];
     icon = "steam";
   };
 }

@@ -45,9 +45,9 @@ in
           url = "https://www.cloudflare.com/ips-v4";
           sha256 = "sha256:0ywy9sg7spafi3gm9q5wb59lbiq0swvf0q3iazl0maq1pj1nsb7h";
         };
-        setRealIpFromConfig =
-          lib.concatMapStrings (ip: "set_real_ip_from ${ip};\n")
-            (lib.strings.splitString "\n" (builtins.readFile "${cloudflareIPs}"));
+        setRealIpFromConfig = lib.concatMapStrings (ip: "set_real_ip_from ${ip};\n") (
+          lib.strings.splitString "\n" (builtins.readFile "${cloudflareIPs}")
+        );
       in
       ''
         ${setRealIpFromConfig}

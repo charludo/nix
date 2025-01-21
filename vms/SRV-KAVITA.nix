@@ -1,4 +1,10 @@
-{ config, pkgs, secrets, ... }: {
+{
+  config,
+  pkgs,
+  secrets,
+  ...
+}:
+{
   imports = [ ./_common.nix ];
 
   vm = {
@@ -13,7 +19,9 @@
     networking.openPorts.tcp = [ config.services.kavita.settings.Port ];
   };
 
-  sops.secrets.kavita-token = { sopsFile = secrets.kavita; };
+  sops.secrets.kavita-token = {
+    sopsFile = secrets.kavita;
+  };
   services.kavita = {
     enable = true;
     tokenKeyFile = config.sops.secrets.kavita-token.path;
@@ -55,7 +63,10 @@
         '';
       };
     in
-    [ kavita-init pkgs.rsync ];
+    [
+      kavita-init
+      pkgs.rsync
+    ];
 
   system.stateVersion = "23.11";
 }

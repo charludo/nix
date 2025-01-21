@@ -1,11 +1,19 @@
-{ inputs, pkgs, config, ... }:
+{
+  inputs,
+  pkgs,
+  config,
+  ...
+}:
 let
   reShade = inputs.eso-reshade.files;
   esoHome = "${config.home.homeDirectory}/.steam/steam/steamapps/common/Zenimax Online/The Elder Scrolls Online/game/client/";
   ttcHome = "${config.home.homeDirectory}/.steam/steam/steamapps/compatdata/306130/pfx/drive_c/users/steamuser/Documents/Elder Scrolls Online/live/AddOns/TamrielTradeCentre";
   ttc-update = pkgs.writeShellApplication {
     name = "ttc-update";
-    runtimeInputs = with pkgs; [ curl unzip ];
+    runtimeInputs = with pkgs; [
+      curl
+      unzip
+    ];
     text = ''
       curl -o "${ttcHome}/PriceTable.zip" 'https://eu.tamrieltradecentre.com/pc/download/PriceTable'
       unzip -o "${ttcHome}/PriceTable.zip" -d "${ttcHome}/"

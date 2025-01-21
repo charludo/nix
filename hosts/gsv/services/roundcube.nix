@@ -1,4 +1,9 @@
-{ config, pkgs, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 let
   inherit (private-settings) domains;
 in
@@ -7,7 +12,10 @@ in
     enable = true;
     hostName = "mail.${domains.personal}";
     configureNginx = true;
-    dicts = with pkgs.aspellDicts; [ de en ];
+    dicts = with pkgs.aspellDicts; [
+      de
+      en
+    ];
     extraConfig = ''
       $config['smtp_server'] = "tls://${config.mailserver.fqdn}";
       $config['smtp_user'] = "%u";

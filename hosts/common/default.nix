@@ -1,4 +1,11 @@
-{ inputs, outputs, pkgs, private-settings, ... }: {
+{
+  inputs,
+  outputs,
+  pkgs,
+  private-settings,
+  ...
+}:
+{
   imports = [
     inputs.home-manager.nixosModules.home-manager
     ./locale.nix

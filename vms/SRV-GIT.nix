@@ -1,4 +1,9 @@
-{ pkgs, config, private-settings, ... }:
+{
+  pkgs,
+  config,
+  private-settings,
+  ...
+}:
 {
   imports = [ ./_common.nix ];
 
@@ -42,7 +47,8 @@
       extraConfig = ''
         client_max_body_size 512M;
       '';
-      locations."/".proxyPass = "http://localhost:${toString config.services.forgejo.settings.server.HTTP_PORT}";
+      locations."/".proxyPass =
+        "http://localhost:${toString config.services.forgejo.settings.server.HTTP_PORT}";
     };
   };
 
@@ -59,7 +65,10 @@
         '';
       };
     in
-    [ restore-forgejo pkgs.rsync ];
+    [
+      restore-forgejo
+      pkgs.rsync
+    ];
   systemd = {
     timers."git-backup-daily" = {
       wantedBy = [ "timers.target" ];

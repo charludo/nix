@@ -1,14 +1,13 @@
 { pkgs, inputs, ... }:
 {
   _module.args.defaultUser = "charlotte";
-  imports =
-    [
-      ./hardware-configuration.nix
-      ../common
-      ../../users/charlotte/user.nix
+  imports = [
+    ./hardware-configuration.nix
+    ../common
+    ../../users/charlotte/user.nix
 
-      inputs.nixos-hardware.nixosModules.gigabyte-b550
-    ];
+    inputs.nixos-hardware.nixosModules.gigabyte-b550
+  ];
 
   bluetooth.enable = true;
   # eid.enable = true;
@@ -62,8 +61,14 @@
     useOSProber = true;
   };
 
-  boot.initrd.kernelModules = [ "amdgpu" "usb_storage" ];
-  boot.kernelParams = [ "video=DP-2:2560x1440@59.91" "video=DP-3:2560x1440@59.91" ];
+  boot.initrd.kernelModules = [
+    "amdgpu"
+    "usb_storage"
+  ];
+  boot.kernelParams = [
+    "video=DP-2:2560x1440@59.91"
+    "video=DP-3:2560x1440@59.91"
+  ];
 
   networking.networkmanager.enable = true;
   networking.hostName = "hub";
@@ -71,7 +76,10 @@
 
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
-  hardware.graphics.extraPackages = [ pkgs.amdvlk pkgs.rocmPackages.clr.icd ];
+  hardware.graphics.extraPackages = [
+    pkgs.amdvlk
+    pkgs.rocmPackages.clr.icd
+  ];
 
   system.stateVersion = "23.11";
 }

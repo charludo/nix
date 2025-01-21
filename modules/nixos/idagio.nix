@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -6,53 +11,55 @@ let
   cfg = config.services.idagio;
   UID = 9417;
   GID = 9417;
-  idagio-web = pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python312Packages.flask ]; }/* python */ ''
-    from flask import Flask, request, render_template_string
-    import os
-    import threading
+  idagio-web =
+    pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python312Packages.flask ]; } # python
+      ''
+        from flask import Flask, request, render_template_string
+        import os
+        import threading
 
 
-    app = Flask(__name__)
+        app = Flask(__name__)
 
 
-    def run_command(args):
-        os.system(
-            f"${cfg.package}/bin/idagio {args}"
-        )
+        def run_command(args):
+            os.system(
+                f"${cfg.package}/bin/idagio {args}"
+            )
 
 
-    @app.route('/', methods=['GET', 'POST'])
-    def index():
-        message = ""
-        if request.method == 'POST':
-            input_value = request.form['idagio_url']
-            url, _, _ = input_value.replace("/de/", "/").partition("?")
-            config = "${cfg.configLocation}"
-            threading.Thread(
-                target=run_command,
-                args=(f"-c {config} -u {url}",)
-            ).start()
-            message = f"{url} is now downloading."
+        @app.route('/', methods=['GET', 'POST'])
+        def index():
+            message = ""
+            if request.method == 'POST':
+                input_value = request.form['idagio_url']
+                url, _, _ = input_value.replace("/de/", "/").partition("?")
+                config = "${cfg.configLocation}"
+                threading.Thread(
+                    target=run_command,
+                    args=(f"-c {config} -u {url}",)
+                ).start()
+                message = f"{url} is now downloading."
 
-        return render_template_string(''''
-            <div style="
-              display: flex; justify-content: center; align-items: center;
-              height: 100vh; text-align: center;
-              flex-direction: column;
-            ">
-                <form method="POST" style="display: inline-block;">
-                    <label for="idagio_url">Idagio URL:</label>
-                    <input type="text" id="idagio_url" name="idagio_url">
-                    <input type="submit" value="Submit">
-                </form>
-                <p style="display: inline-block">%s</p>
-            </div>
-        '''' % message)
+            return render_template_string(''''
+                <div style="
+                  display: flex; justify-content: center; align-items: center;
+                  height: 100vh; text-align: center;
+                  flex-direction: column;
+                ">
+                    <form method="POST" style="display: inline-block;">
+                        <label for="idagio_url">Idagio URL:</label>
+                        <input type="text" id="idagio_url" name="idagio_url">
+                        <input type="submit" value="Submit">
+                    </form>
+                    <p style="display: inline-block">%s</p>
+                </div>
+            '''' % message)
 
 
-    if __name__ == '__main__':
-        app.run(host='${cfg.host}', port=${builtins.toString cfg.port})
-  '';
+        if __name__ == '__main__':
+            app.run(host='${cfg.host}', port=${builtins.toString cfg.port})
+      '';
 in
 {
   options.services.idagio = {
@@ -140,7 +147,9 @@ in
     };
 
     users.groups = mkIf (cfg.group == "idagio") {
-      idagio = { gid = GID; };
+      idagio = {
+        gid = GID;
+      };
     };
   };
 }

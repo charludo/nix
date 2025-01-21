@@ -1,4 +1,10 @@
-{ outputs, lib, private-settings, secrets, ... }:
+{
+  outputs,
+  lib,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) gsv;
   hostName = "gsv";
@@ -33,14 +39,20 @@ in
     useDHCP = false;
     enableIPv6 = false;
     interfaces.${gsv.interface}.ipv4.addresses = [
-      { address = gsv.ip; prefixLength = gsv.prefixLength; }
+      {
+        address = gsv.ip;
+        prefixLength = gsv.prefixLength;
+      }
     ];
     defaultGateway = {
       address = gsv.gateway;
       interface = gsv.interface;
     };
     firewall = {
-      allowedTCPPorts = [ 80 443 ];
+      allowedTCPPorts = [
+        80
+        443
+      ];
     };
   };
 
@@ -56,15 +68,26 @@ in
     enable = true;
     copyKernels = true;
     mirroredBoots = [
-      { path = "/boot-1"; devices = [ "/dev/disk/by-id/${gsv.nvme0n1}" ]; }
-      { path = "/boot-2"; devices = [ "/dev/disk/by-id/${gsv.nvme1n1}" ]; }
-      { path = "/boot-3"; devices = [ "/dev/disk/by-id/${gsv.nvme2n1}" ]; }
+      {
+        path = "/boot-1";
+        devices = [ "/dev/disk/by-id/${gsv.nvme0n1}" ];
+      }
+      {
+        path = "/boot-2";
+        devices = [ "/dev/disk/by-id/${gsv.nvme1n1}" ];
+      }
+      {
+        path = "/boot-3";
+        devices = [ "/dev/disk/by-id/${gsv.nvme2n1}" ];
+      }
     ];
   };
 
   # Start an SSH server in initrd via which we can unlock the drives
   boot.initrd.availableKernelModules = [ gsv.interfaceDriver ];
-  boot.kernelParams = [ "ip=${gsv.ip}::${gsv.gateway}:${gsv.netmask}:${hostName}-initrd:${gsv.interface}:off:${builtins.head gsv.dns}" ];
+  boot.kernelParams = [
+    "ip=${gsv.ip}::${gsv.gateway}:${gsv.netmask}:${hostName}-initrd:${gsv.interface}:off:${builtins.head gsv.dns}"
+  ];
   boot.initrd.network = {
     enable = true;
     ssh = {
@@ -92,4 +115,3 @@ in
 
   system.stateVersion = "23.11";
 }
-

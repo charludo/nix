@@ -1,7 +1,11 @@
 { pkgs, ... }:
 pkgs.writeShellApplication {
   name = "add-user";
-  runtimeInputs = with pkgs; [ age sops ssh-to-age ];
+  runtimeInputs = with pkgs; [
+    age
+    sops
+    ssh-to-age
+  ];
   text = ''
     set +o nounset
     if [ -z "$1" ]; then

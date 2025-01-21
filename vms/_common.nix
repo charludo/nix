@@ -1,4 +1,12 @@
-{ inputs, outputs, config, lib, modulesPath, secrets, ... }:
+{
+  inputs,
+  outputs,
+  config,
+  lib,
+  modulesPath,
+  secrets,
+  ...
+}:
 {
   _module.args.defaultUser = "paki";
   imports = [
@@ -22,7 +30,9 @@
     name = config.vm.name;
     additionalSpace = config.vm.hardware.storage;
     bootSize = lib.mkDefault "256M";
-    net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${builtins.substring 0 2 (toString config.vm.id)},firewall=1";
+    net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${
+      builtins.substring 0 2 (toString config.vm.id)
+    },firewall=1";
   };
   proxmox.cloudInit.enable = false;
   proxmox.partitionTableType = lib.mkDefault "efi";
@@ -38,10 +48,12 @@
   networking = {
     hostName = config.vm.name;
     interfaces = {
-      ens18.ipv4.addresses = [{
-        address = config.vm.networking.address;
-        prefixLength = config.vm.networking.prefixLength;
-      }];
+      ens18.ipv4.addresses = [
+        {
+          address = config.vm.networking.address;
+          prefixLength = config.vm.networking.prefixLength;
+        }
+      ];
     };
     defaultGateway = config.vm.networking.gateway;
     nameservers = config.vm.networking.nameservers;
@@ -61,18 +73,28 @@
   # Overwriting parts of hosts/common
   sops.defaultSopsFile = lib.mkForce secrets.general;
   programs.ssh = lib.mkForce {
-    knownHosts = lib.filterAttrs
-      (_: v: v.publicKeyFile != null)
-      (builtins.mapAttrs
-        (name: _: {
-          publicKeyFile = (if (lib.pathExists ./keys/ssh_host_${name}_ed25519_key.pub) then ./keys/ssh_host_${name}_ed25519_key.pub else null);
-          extraHostNames = (lib.optional (name == config.vm.name) "localhost");
-        })
-        outputs.nixosConfigurations);
+    knownHosts = lib.filterAttrs (_: v: v.publicKeyFile != null) (
+      builtins.mapAttrs (name: _: {
+        publicKeyFile = (
+          if (lib.pathExists ./keys/ssh_host_${name}_ed25519_key.pub) then
+            ./keys/ssh_host_${name}_ed25519_key.pub
+          else
+            null
+        );
+        extraHostNames = (lib.optional (name == config.vm.name) "localhost");
+      }) outputs.nixosConfigurations
+    );
   };
 
   # Hardware config is always identical
-  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+  boot.initrd.availableKernelModules = [
+    "ata_piix"
+    "uhci_hcd"
+    "virtio_pci"
+    "virtio_scsi"
+    "sd_mod"
+    "sr_mod"
+  ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
@@ -84,8 +106,10 @@
   fileSystems."/boot" = lib.mkForce {
     device = "/dev/disk/by-uuid/12CE-A600";
     fsType = "vfat";
-    options = [ "fmask=0022" "dmask=0022" ];
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
   swapDevices = [ ];
 }
-

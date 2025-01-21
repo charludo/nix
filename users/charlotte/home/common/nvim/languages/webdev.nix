@@ -43,5 +43,10 @@
 
     php = [ "php-cs-fixer" ];
   };
-  programs.nixvim.extraPackages = with pkgs; [ djlint prettierd eslint_d php83Packages.php-cs-fixer ];
+  programs.nixvim.extraPackages = with pkgs; [
+    djlint
+    prettierd
+    eslint_d
+    php83Packages.php-cs-fixer
+  ];
 }

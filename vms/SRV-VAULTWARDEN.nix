@@ -1,4 +1,10 @@
-{ config, pkgs, private-settings, secrets, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) domains;
 in
@@ -16,7 +22,9 @@ in
     networking.openPorts.tcp = [ config.services.vaultwarden.config.ROCKET_PORT ];
   };
 
-  sops.secrets.vaultwarden = { sopsFile = secrets.vaultwarden; };
+  sops.secrets.vaultwarden = {
+    sopsFile = secrets.vaultwarden;
+  };
   services.vaultwarden = {
     enable = true;
     backupDir = "${config.nas.backup.location}/vaultwarden";
@@ -27,7 +35,7 @@ in
       ROCKET_PORT = 8222;
     };
     # include environmentFile to enable admin backend
-    # environmentFile = config.sops.secrets.vaultwarden.path; 
+    # environmentFile = config.sops.secrets.vaultwarden.path;
   };
 
   nas.enable = true;
@@ -44,7 +52,10 @@ in
         '';
       };
     in
-    [ vaultwarden-init pkgs.rsync ];
+    [
+      vaultwarden-init
+      pkgs.rsync
+    ];
 
   system.stateVersion = "24.11";
 }

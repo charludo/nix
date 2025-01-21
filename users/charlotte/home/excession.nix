@@ -1,7 +1,17 @@
-{ inputs, lib, pkgs, config, private-settings, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  config,
+  private-settings,
+  ...
+}:
 let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config private-settings; };
+  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix {
+    inherit pkgs config private-settings;
+  };
   inherit (inputs.nix-colors) colorSchemes;
+  # deadnix: skip
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -47,7 +57,13 @@ in
       height = 1440;
       x = 0;
       y = 0;
-      workspaces = [ "1" "3" "5" "7" "9" ];
+      workspaces = [
+        "1"
+        "3"
+        "5"
+        "7"
+        "9"
+      ];
     }
     {
       name = "DP-3";
@@ -55,7 +71,13 @@ in
       height = 1440;
       x = 0;
       y = 1440;
-      workspaces = [ "2" "4" "6" "8" "10" ];
+      workspaces = [
+        "2"
+        "4"
+        "6"
+        "8"
+        "10"
+      ];
       primary = true;
     }
   ];
@@ -153,13 +175,21 @@ in
   };
 
   # Projects to manage on this machine
-  projects = [{ name = "nix"; repo = "git@github.com:charludo/nix"; enableDirenv = false; }];
+  projects = [
+    {
+      name = "nix";
+      repo = "git@github.com:charludo/nix";
+      enableDirenv = false;
+    }
+  ];
 
   # XDG dirs are (partly) symlinks to an external drive
   xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
   home.file = {
-    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
-    "${config.xdg.userDirs.documents}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
+    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
+    "${config.xdg.userDirs.documents}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
     "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
     "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
     "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";

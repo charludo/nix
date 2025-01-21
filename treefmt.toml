@@ -1,0 +1,15 @@
+excludes = ["*.pub", "*.png", "*.lock", "*.md", "*toml", ".gitignore"]
+
+[formatter.nixfmt-rfc-style]
+command = "nixfmt"
+includes = ["*.nix"]
+
+[formatter.deadnix]
+command = "deadnix"
+options = ["-f"]
+includes = ["*.nix"]
+
+[formatter.ruff]
+command = "sh"
+options = ["-c", "ruff check \"$@\" && ruff format \"$@\"", "--"]
+includes = ["*.py", "*.pyi"]

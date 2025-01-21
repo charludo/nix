@@ -1,7 +1,11 @@
 { pkgs, ... }:
 pkgs.writeShellApplication {
   name = "waybar-wireguard";
-  runtimeInputs = [ pkgs.networkmanager pkgs.gawk pkgs.gnugrep ];
+  runtimeInputs = [
+    pkgs.networkmanager
+    pkgs.gawk
+    pkgs.gnugrep
+  ];
   text = ''
     set +o pipefail
     CONN="hoehle"
@@ -30,4 +34,4 @@ pkgs.writeShellApplication {
         exit 1
     fi
   '';
-} 
+}

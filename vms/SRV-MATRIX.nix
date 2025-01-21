@@ -1,4 +1,11 @@
-{ inputs, config, pkgs, private-settings, secrets, ... }:
+{
+  inputs,
+  config,
+  pkgs,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) domains;
 in
@@ -63,7 +70,10 @@ in
         '';
       };
     in
-    [ restore-conduwuit pkgs.rsync ];
+    [
+      restore-conduwuit
+      pkgs.rsync
+    ];
   systemd = {
     timers."matrix-backup-daily" = {
       wantedBy = [ "timers.target" ];

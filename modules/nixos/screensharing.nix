@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -6,7 +11,9 @@ let
 in
 {
   options.screensharing = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable everything necessary to get screensharing working under wayland");
+    enable = lib.mkEnableOption (
+      lib.mdDoc "enable everything necessary to get screensharing working under wayland"
+    );
   };
 
   config = mkIf cfg.enable {

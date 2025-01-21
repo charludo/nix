@@ -1,7 +1,17 @@
-{ inputs, lib, pkgs, config, private-settings, ... }:
+{
+  inputs,
+  lib,
+  pkgs,
+  config,
+  private-settings,
+  ...
+}:
 let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix { inherit pkgs config private-settings; };
+  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix {
+    inherit pkgs config private-settings;
+  };
   inherit (inputs.nix-colors) colorSchemes;
+  # deadnix: skip
   customSchemes = import ./common/desktop/common/customColorSchemes.nix;
 in
 {
@@ -28,14 +38,16 @@ in
   #  -------
   # | eDP-1 |
   #  -------
-  monitors = [{
-    name = "eDP-1";
-    width = 1920;
-    height = 1080;
-    x = 0;
-    y = 0;
-    primary = true;
-  }];
+  monitors = [
+    {
+      name = "eDP-1";
+      width = 1920;
+      height = 1080;
+      x = 0;
+      y = 0;
+      primary = true;
+    }
+  ];
 
   # Configure waybar for this devices monitor setup
   programs.waybar.settings = {

@@ -1,4 +1,10 @@
-{ config, lib, pkgs, secrets, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  secrets,
+  ...
+}:
 
 with lib;
 
@@ -31,7 +37,9 @@ in
   };
 
   config = mkIf (cfg.enable || cfg.backup.enable) {
-    sops.secrets.nas = { sopsFile = secrets.nas; };
+    sops.secrets.nas = {
+      sopsFile = secrets.nas;
+    };
     users.groups.nas.gid = 1111;
 
     environment.systemPackages = [ pkgs.cifs-utils ];
@@ -41,7 +49,9 @@ in
       "d ${mountRoot} 0755 root nas -"
     ];
 
-    users.users = genAttrs cfg.extraUsers (user: { extraGroups = [ "nas" ]; });
+    users.users = genAttrs cfg.extraUsers (_user: {
+      extraGroups = [ "nas" ];
+    });
 
     systemd.mounts = [
       (mkIf cfg.enable {

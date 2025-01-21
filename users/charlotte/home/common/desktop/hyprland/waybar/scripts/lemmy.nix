@@ -1,7 +1,16 @@
-{ config, pkgs, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 pkgs.writeShellApplication {
   name = "waybar-lemmy";
-  runtimeInputs = [ pkgs.toybox pkgs.curl pkgs.jq ];
+  runtimeInputs = [
+    pkgs.toybox
+    pkgs.curl
+    pkgs.jq
+  ];
   text = ''
     set +o pipefail
     set +o errexit

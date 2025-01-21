@@ -1,4 +1,9 @@
-{ config, lib, secrets, ... }:
+{
+  config,
+  lib,
+  secrets,
+  ...
+}:
 
 with lib;
 let
@@ -10,27 +15,37 @@ in
   };
 
   config = mkIf cfg.enable {
-    sops.secrets.unicornis_alicornii = { sopsFile = secrets.wifi; };
+    sops.secrets.unicornis_alicornii = {
+      sopsFile = secrets.wifi;
+    };
     environment.etc."NetworkManager/system-connections/Unicornis Alicornii.nmconnection" = {
       source = "${config.sops.secrets.unicornis_alicornii.path}";
     };
 
-    sops.secrets.unicornis_caputii = { sopsFile = secrets.wifi; };
+    sops.secrets.unicornis_caputii = {
+      sopsFile = secrets.wifi;
+    };
     environment.etc."NetworkManager/system-connections/Unicornis Caputii.nmconnection" = {
       source = "${config.sops.secrets.unicornis_caputii.path}";
     };
 
-    sops.secrets.vicugna_pacos = { sopsFile = secrets.wifi; };
+    sops.secrets.vicugna_pacos = {
+      sopsFile = secrets.wifi;
+    };
     environment.etc."NetworkManager/system-connections/Vicugna Pacos.nmconnection" = {
       source = "${config.sops.secrets.vicugna_pacos.path}";
     };
 
-    sops.secrets.charlotte_hotspot = { sopsFile = secrets.wifi; };
+    sops.secrets.charlotte_hotspot = {
+      sopsFile = secrets.wifi;
+    };
     environment.etc."NetworkManager/system-connections/Charlotte.nmconnection" = {
       source = "${config.sops.secrets.charlotte_hotspot.path}";
     };
 
-    sops.secrets.eduroam = { sopsFile = secrets.wifi; };
+    sops.secrets.eduroam = {
+      sopsFile = secrets.wifi;
+    };
     environment.etc."NetworkManager/system-connections/eduroam.nmconnection" = {
       source = "${config.sops.secrets.eduroam.path}";
     };

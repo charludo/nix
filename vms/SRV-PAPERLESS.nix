@@ -1,4 +1,9 @@
-{ private-settings, pkgs, config, ... }:
+{
+  private-settings,
+  pkgs,
+  config,
+  ...
+}:
 let
   backupDirDaily = "${config.nas.backup.location}/paperless/daily/";
   backupDirMonthly = "${config.nas.backup.location}/paperless/monthly/";
@@ -55,7 +60,12 @@ in
   services.postgresql = {
     enable = true;
     ensureDatabases = [ "paperless" ];
-    ensureUsers = [{ name = "paperless"; ensureDBOwnership = true; }];
+    ensureUsers = [
+      {
+        name = "paperless";
+        ensureDBOwnership = true;
+      }
+    ];
     authentication = ''
       #type database  DBuser  auth-method
       local all       all     trust

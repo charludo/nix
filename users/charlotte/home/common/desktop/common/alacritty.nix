@@ -90,8 +90,14 @@
           white = "#${config.colorScheme.palette.base05}";
         };
         indexed_colors = [
-          { index = 16; color = "#${config.colorScheme.palette.base09}"; }
-          { index = 17; color = "#${config.colorScheme.palette.base06}"; }
+          {
+            index = 16;
+            color = "#${config.colorScheme.palette.base09}";
+          }
+          {
+            index = 17;
+            color = "#${config.colorScheme.palette.base06}";
+          }
         ];
       };
     };

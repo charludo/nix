@@ -43,7 +43,10 @@ let
   };
 in
 {
-  home.packages = with pkgs; [ darktable exiftool ];
+  home.packages = with pkgs; [
+    darktable
+    exiftool
+  ];
 
   xdg.desktopEntries."org.darktable.darktable" = {
     name = "Darktable";
@@ -52,7 +55,10 @@ in
     terminal = false;
     exec = "darktable --configdir \"${darktableLocation}\" --library \"${dbLocation}\" %U";
     startupNotify = true;
-    categories = [ "Graphics" "Photography" ];
+    categories = [
+      "Graphics"
+      "Photography"
+    ];
     icon = "darktable";
     mimeType = [
       "application/x-darktable"
@@ -98,9 +104,18 @@ in
   home.file."${darktableLocation}/user.css".source = "${additionalFiles}/user.css";
   home.file."${darktableLocation}/luarc".source = "${additionalFiles}/luarc";
   home.file."${darktableLocation}/lua".source = "${additionalFiles}/lua";
-  home.file."${darktableLocation}/luts" = { source = "${additionalFiles}/luts"; recursive = true; };
-  home.file."${darktableLocation}/icons" = { source = "${additionalFiles}/icons"; recursive = true; };
-  home.file."${darktableLocation}/stylesToImport" = { source = "${additionalFiles}/stylesToImport"; recursive = true; };
+  home.file."${darktableLocation}/luts" = {
+    source = "${additionalFiles}/luts";
+    recursive = true;
+  };
+  home.file."${darktableLocation}/icons" = {
+    source = "${additionalFiles}/icons";
+    recursive = true;
+  };
+  home.file."${darktableLocation}/stylesToImport" = {
+    source = "${additionalFiles}/stylesToImport";
+    recursive = true;
+  };
 
   home.file."${darktableLocation}/darktablerc" = {
     force = true;
@@ -981,37 +996,38 @@ in
     '';
   };
 
-  home.file."${darktableLocation}/customPreset.dtpreset".text = /* xml */ ''
-    <?xml version="1.0" encoding="UTF-8"?>
-    <darktable_preset version="1.0">
-    	<preset>
-    		<name>workflow: custom</name>
-    		<description></description>
-    		<operation>modulegroups</operation>
-    		<op_params>gz02eJxdUdF1wzAIXCUbpBlJlk4W78nCRdjty2OkLtCVOkWxnaSv/hI64LiDm739fH3fzAyfM/dFcH0GltCYOmbhTBVW0boNVINaL0FmNIsltIY60SdExuGqmGZI0K07cmWJLIKoxO06CqUDHEINLWJrGCv777LSIBtkPmiiuGU+CikuAh9HKy4vUWeGyE0ldHUXmWVycY+ZZlF4ttALZbVcad4deF2lsagNoVM0U27A+xLqawEWVHh5Wi3hDsHEq1ec7FqinJcOp9xYdiozT8RFVmxBxYra98SB+eJSoT+b3robOmzZeWnH/+7t3SZuHIvwBHPSlcJ5FTvXYV0RS6Poki2GB7gL/n/Rwjq7F1e431agvMTyvK7zIeeN7vHYwJIg3UYJaQmK1NIWU7OVxgZVP48TsdAdvxtNA+8=</op_params>
-    		<op_version>1</op_version>
-    		<enabled>1</enabled>
-    		<autoapply>1</autoapply>
-    		<model>%</model>
-    		<maker>%</maker>
-    		<lens>%</lens>
-    		<iso_min>0,000000</iso_min>
-    		<iso_max>340282346638528859811704183484516925440,000000</iso_max>
-    		<exposure_min>0,000000</exposure_min>
-    		<exposure_max>340282346638528859811704183484516925440,000000</exposure_max>
-    		<aperture_min>0,000000</aperture_min>
-    		<aperture_max>340282346638528859811704183484516925440,000000</aperture_max>
-    		<focal_length_min>0</focal_length_min>
-    		<focal_length_max>1000</focal_length_max>
-    		<blendop_params></blendop_params>
-    		<blendop_version>0</blendop_version>
-    		<multi_priority>0</multi_priority>
-    		<multi_name>(null)</multi_name>
-    		<multi_name_hand_edited>0</multi_name_hand_edited>
-    		<filter>0</filter>
-    		<def>0</def>
-    		<format>0</format>
-    	</preset>
-    </darktable_preset>
-  '';
+  home.file."${darktableLocation}/customPreset.dtpreset".text = # xml
+    ''
+      <?xml version="1.0" encoding="UTF-8"?>
+      <darktable_preset version="1.0">
+      	<preset>
+      		<name>workflow: custom</name>
+      		<description></description>
+      		<operation>modulegroups</operation>
+      		<op_params>gz02eJxdUdF1wzAIXCUbpBlJlk4W78nCRdjty2OkLtCVOkWxnaSv/hI64LiDm739fH3fzAyfM/dFcH0GltCYOmbhTBVW0boNVINaL0FmNIsltIY60SdExuGqmGZI0K07cmWJLIKoxO06CqUDHEINLWJrGCv777LSIBtkPmiiuGU+CikuAh9HKy4vUWeGyE0ldHUXmWVycY+ZZlF4ttALZbVcad4deF2lsagNoVM0U27A+xLqawEWVHh5Wi3hDsHEq1ec7FqinJcOp9xYdiozT8RFVmxBxYra98SB+eJSoT+b3robOmzZeWnH/+7t3SZuHIvwBHPSlcJ5FTvXYV0RS6Poki2GB7gL/n/Rwjq7F1e431agvMTyvK7zIeeN7vHYwJIg3UYJaQmK1NIWU7OVxgZVP48TsdAdvxtNA+8=</op_params>
+      		<op_version>1</op_version>
+      		<enabled>1</enabled>
+      		<autoapply>1</autoapply>
+      		<model>%</model>
+      		<maker>%</maker>
+      		<lens>%</lens>
+      		<iso_min>0,000000</iso_min>
+      		<iso_max>340282346638528859811704183484516925440,000000</iso_max>
+      		<exposure_min>0,000000</exposure_min>
+      		<exposure_max>340282346638528859811704183484516925440,000000</exposure_max>
+      		<aperture_min>0,000000</aperture_min>
+      		<aperture_max>340282346638528859811704183484516925440,000000</aperture_max>
+      		<focal_length_min>0</focal_length_min>
+      		<focal_length_max>1000</focal_length_max>
+      		<blendop_params></blendop_params>
+      		<blendop_version>0</blendop_version>
+      		<multi_priority>0</multi_priority>
+      		<multi_name>(null)</multi_name>
+      		<multi_name_hand_edited>0</multi_name_hand_edited>
+      		<filter>0</filter>
+      		<def>0</def>
+      		<format>0</format>
+      	</preset>
+      </darktable_preset>
+    '';
 }

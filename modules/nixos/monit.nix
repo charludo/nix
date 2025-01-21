@@ -1,15 +1,28 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   zfs-check = pkgs.writeShellApplication {
     name = "zfs-check";
-    runtimeInputs = with pkgs; [ zfs gnugrep ];
+    runtimeInputs = with pkgs; [
+      zfs
+      gnugrep
+    ];
     text = ''
       zpool status | grep -B 5 -A 5 -E -i '(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED|corrupt|cannot|unrecover)'
     '';
   };
   smartd-check = pkgs.writeShellApplication {
     name = "smartd-check";
-    runtimeInputs = with pkgs; [ gawk gnugrep util-linux smartmontools ];
+    runtimeInputs = with pkgs; [
+      gawk
+      gnugrep
+      util-linux
+      smartmontools
+    ];
     text = ''
       check_disk_health() {
           local disk=$1
@@ -50,7 +63,12 @@ let
       done
 
       # shellcheck disable=SC1091
-      source "${if builtins.hasAttr "telegram-bot" config.sops.secrets then config.sops.secrets.telegram-bot.path else ""}"
+      source "${
+        if builtins.hasAttr "telegram-bot" config.sops.secrets then
+          config.sops.secrets.telegram-bot.path
+        else
+          ""
+      }"
 
       if [ -z "$TOKEN" ]; then exit 1; fi
       if [ -z "$CHATID" ]; then exit 1; fi
@@ -81,9 +99,11 @@ let
       default = configBlock;
     };
   };
-  enabledMonitOptions = (lib.filterAttrs (name: option: option ? enable && option.enable == true) config.monitConfig);
+  enabledMonitOptions = (
+    lib.filterAttrs (_name: option: option ? enable && option.enable == true) config.monitConfig
+  );
   monitConfigBlocks = lib.concatStringsSep "\n\n" (
-    lib.mapAttrsToList (name: option: option.config) enabledMonitOptions
+    lib.mapAttrsToList (_name: option: option.config) enabledMonitOptions
   );
   cfg = config.monitConfig;
 in
@@ -205,4 +225,3 @@ in
     };
   };
 }
-

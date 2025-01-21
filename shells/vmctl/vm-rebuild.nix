@@ -1,7 +1,10 @@
 { pkgs, ... }:
 pkgs.writeShellApplication {
   name = "vm-rebuild";
-  runtimeInputs = with pkgs; [ openssh ssh-to-age ];
+  runtimeInputs = with pkgs; [
+    openssh
+    ssh-to-age
+  ];
   text = ''
      set +o nounset
      set +o errexit

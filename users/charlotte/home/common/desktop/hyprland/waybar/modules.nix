@@ -1,4 +1,9 @@
-{ config, pkgs, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 let
   curl = "${pkgs.curl}/bin/curl";
   rofi = "${pkgs.rofi-wayland}/bin/rofi";
@@ -65,7 +70,13 @@ in
       critical = 15;
     };
     format = "{capacity}% {icon} ";
-    format-icons = [ "" "" "" "" "" ];
+    format-icons = [
+      ""
+      ""
+      ""
+      ""
+      ""
+    ];
     max-length = 25;
   };
 
@@ -201,7 +212,11 @@ in
       phone = "";
       portable = "";
       car = "";
-      default = [ "" "" "" ];
+      default = [
+        ""
+        ""
+        ""
+      ];
     };
     on-click = "${pavucontrol}";
   };
