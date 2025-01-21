@@ -1,10 +1,16 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  secrets,
+  ...
+}:
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
   sops.secrets.paki-password = {
     neededForUsers = true;
+    sopsFile = secrets.paki;
   };
 
   users.users.paki = {

@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  secrets,
   ...
 }:
 let
@@ -9,6 +10,7 @@ in
 {
   sops.secrets.charlotte-password = {
     neededForUsers = true;
+    sopsFile = secrets.charlotte;
   };
 
   users.users.charlotte = {
