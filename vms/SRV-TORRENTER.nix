@@ -1,26 +1,5 @@
 { config, pkgs, lib, inputs, secrets, ... }:
 let
-  services = "(${lib.concatStringsSep " " (lib.mapAttrsToList (n: _: "\"openvpn-${n}.service\"") config.services.openvpn.servers)})";
-  surfshark-stop = pkgs.writeShellApplication {
-    name = "surfshark-stop";
-    text = ''
-      services=${services}
-      for service in "''${services[@]}"; do
-          systemctl stop "$service"
-      done
-    '';
-  };
-  surfshark-random = pkgs.writeShellApplication {
-    name = "surfshark-random";
-    runtimeInputs = [ surfshark-stop ];
-    text = ''
-      systemctl daemon-reload
-      ${surfshark-stop}/bin/surfshark-stop
-      services=${services}
-      random_service=$(printf "%s\n" "''${services[@]}" | shuf -n1)
-      systemctl start "$random_service"
-    '';
-  };
   restore-torrenter = pkgs.writeShellApplication {
     name = "restore-torrenter";
     runtimeInputs = [ pkgs.rsync ];
@@ -70,38 +49,20 @@ in
     networking.nameservers = [ "1.1.1.1" ];
   };
 
-  surfshark.enable = true;
-
-  networking.firewall = {
-    interfaces.ens18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
-    extraCommands = ''
-      iptables -A INPUT -s localhost -j ACCEPT
-      iptables -A OUTPUT -d localhost -j ACCEPT
-      iptables -A INPUT -i lo -j ACCEPT
-      iptables -A OUTPUT -o lo -j ACCEPT
-
-      iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
-      iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
-
-      iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
-      iptables -A INPUT -p udp --sport 1194 -j ACCEPT
-      iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
-      iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-
-      iptables -A OUTPUT -o tun0 -j ACCEPT
-
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.nzbget.user}".gid} -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.qbittorrent.user}".gid} -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.nzbget.user}".gid} -d 127.0.0.1 ! -o tun0 -j ACCEPT
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.qbittorrent.user}".gid} -d 127.0.0.1 ! -o tun0 -j ACCEPT
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.nzbget.user}".gid} ! -o tun0 -j REJECT
-      iptables -A OUTPUT -m owner --gid-owner ${builtins.toString config.users.groups."${config.services.qbittorrent.user}".gid} ! -o tun0 -j REJECT
-
-      iptables -P INPUT DROP
-      iptables -P FORWARD DROP
-      iptables -P OUTPUT DROP
-    '';
+  surfshark = {
+    enable = true;
+    alwaysOn = true;
+    hopWeekly = true;
+    iptables = {
+      enable = true;
+      enforceForUsers = [
+        config.services.nzbget.user
+        config.services.qbittorrent.user
+      ];
+    };
   };
+
+  networking.firewall.interfaces.ens18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
   networking.interfaces.ens18.ipv4.routes = [{
     address = "192.168.0.0";
     prefixLength = 16;
@@ -179,8 +140,6 @@ in
   environment.systemPackages = [
     restore-torrenter
     get-anime-music
-    surfshark-random
-    surfshark-stop
 
     (import ../shells/remux/remux.nix { inherit pkgs lib; })
   ];
@@ -212,47 +171,6 @@ in
     services."anime-music-hourly" = {
       script = ''
         ${get-anime-music}/bin/get-anime-music
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-
-    timers."surfshark-hop-weekly" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "Sun 03:00";
-        Persistent = true;
-        Unit = "surfshark-hop-weekly.service";
-      };
-    };
-    services."surfshark-hop-weekly" = {
-      script = ''
-        systemctl reboot
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-
-    timers."surfshark-ensure-minutely" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "minutely";
-        Persistent = true;
-        Unit = "surfshark-ensure.service";
-      };
-    };
-    services."surfshark-ensure" = {
-      script = ''
-        if ${pkgs.iproute2}/bin/ip a show tun0 &> /dev/null;
-        then
-        exit 0
-        else
-        ${surfshark-random}/bin/surfshark-random
-        fi
       '';
       serviceConfig = {
         Type = "oneshot";
