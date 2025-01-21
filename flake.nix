@@ -48,6 +48,7 @@
 
     musnix = { url = "github:musnix/musnix"; };
     conduwuit = { url = "github:girlbossceo/conduwuit"; };
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     personal-site.url = "git+ssh://git@github.com/charludo/personal-site";

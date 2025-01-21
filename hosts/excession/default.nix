@@ -26,6 +26,8 @@
       ../common/optional/wifi.nix
 
       ../../users/charlotte/user.nix
+
+      inputs.nixos-hardware.nixosModules.gigabyte-b550
     ];
 
   enableNas = true;
