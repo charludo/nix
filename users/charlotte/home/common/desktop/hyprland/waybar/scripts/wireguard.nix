@@ -7,6 +7,7 @@ pkgs.writeShellApplication {
     pkgs.gnugrep
   ];
   text = ''
+    set +o errexit
     set +o pipefail
     CONN="hoehle"
     ACTIVE=0;
@@ -26,9 +27,9 @@ pkgs.writeShellApplication {
         fi
     elif [[ $1 == "--switch" ]]; then
         if [ "$ACTIVE" -eq "0" ]; then
-            nmcli c up ''$CONN
+            systemctl start "wireguard-''$CONN.service"
         else
-            nmcli c down ''$CONN
+            systemctl stop "wireguard-''$CONN.service"
         fi
     else
         exit 1

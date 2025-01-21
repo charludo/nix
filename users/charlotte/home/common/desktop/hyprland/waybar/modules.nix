@@ -189,7 +189,7 @@ in
 
   "custom/wireguard" = {
     exec = "${wireguard}";
-    on-click = "${wireguard} --switch";
+    on-click = "pkexec ${wireguard} --switch";
     restart-interval = 5;
   };
 

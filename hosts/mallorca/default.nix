@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  lib,
+  private-settings,
+  secrets,
+  ...
+}:
 {
   _module.args.defaultUser = "charlotte";
   imports = [
@@ -32,11 +37,16 @@
   networking.hostName = "mallorca";
   networking.nameservers = [ "1.1.1.1" ];
 
-  networking.firewall.allowedUDPPorts = [ 51865 ];
-  networking.firewall.checkReversePath = "loose";
-  sops.secrets.wireguard-mallorca = { };
-  environment.etc."NetworkManager/system-connections/hoehle.nmconnection" = {
-    source = "${config.sops.secrets.wireguard-mallorca.path}";
+  wireguard = {
+    enable = true;
+    autoStart = true;
+    interface = "hoehle";
+    port = 51865;
+    ip = "192.168.150.12/32";
+    secrets = {
+      secretsFile = secrets.drone;
+      remotePublicKey = private-settings.wireguard.publicKeys.drone;
+    };
   };
 
   hardware.graphics.enable = true;

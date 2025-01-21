@@ -27,5 +27,6 @@
   suspend = import ./suspend.nix;
   vm = import ./vm.nix;
   wifi = import ./wifi.nix;
+  wireguard = import ./wireguard.nix;
   zammad = import ./zammad.nix;
 }

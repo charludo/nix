@@ -1462,11 +1462,11 @@
         "nixpkgs": "nixpkgs_14"
       },
       "locked": {
-        "lastModified": 1737470162,
-        "narHash": "sha256-5eLsd9wQxfFvdbnaltJbZRAX7S7GXPUWjGnaPOwM1/M=",
+        "lastModified": 1737475968,
+        "narHash": "sha256-DNzpGdYczPuF6IWj9jnEjiVHKttJyxi3pYvCtAydpsA=",
         "ref": "refs/heads/main",
-        "rev": "9d84d282b03da2f48019130367f6211b98092461",
-        "revCount": 48,
+        "rev": "b8f317f8f04d2b6acf1f3a36e7ebf2e7ca4728b9",
+        "revCount": 49,
         "type": "git",
         "url": "ssh://git@github.com/charludo/nix-private"
       },
