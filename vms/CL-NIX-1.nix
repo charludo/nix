@@ -3,13 +3,10 @@
   _module.args.defaultUser = "marie";
   imports = [
     ./_common.nix
-
-    ../hosts/common/optional/dconf.nix
-    ../hosts/common/optional/pipewire.nix
-    ../hosts/common/optional/vmify.nix
-
     ../users/marie/user.nix
   ];
+
+  soundConfig.enable = true;
 
   users.mutableUsers = lib.mkForce true;
   enableNasBackup = true;

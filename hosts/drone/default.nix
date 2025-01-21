@@ -4,26 +4,24 @@
   imports =
     [
       ./hardware-configuration.nix
-
-      ../common/global
-
-      ../common/optional/bluetooth.nix
-      ../common/optional/cups.nix
-      ../common/optional/dconf.nix
-      ../common/optional/fish.nix
-      ../common/optional/fontconfig.nix
-      ../common/optional/greetd.nix
-      ../common/optional/gvfs.nix
-      ../common/optional/musnix.nix
-      ../common/optional/nvim.nix
-      ../common/optional/pipewire.nix
-      ../common/optional/screensharing.nix
-      ../common/optional/surfshark.nix
-      ../common/optional/suspend.nix
-      ../common/optional/wifi.nix
-
+      ../common
       ../../users/charlotte/user.nix
     ];
+
+  bluetooth.enable = true;
+  fish.enable = true;
+  greetd.enable = true;
+  gvfs.enable = true;
+  musnix.enable = true;
+  nicerFonts.enable = true;
+  nvim.enable = true;
+  printers.enable = true;
+  soundConfig.enable = true;
+  soundConfig.enableCombinedAdapter = true;
+  screensharing.enable = true;
+  surfshark.enable = true;
+  suspend.enable = true;
+  wifi.enable = true;
 
   enableNas = true;
   enableNasBackup = true;

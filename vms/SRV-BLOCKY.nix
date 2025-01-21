@@ -1,7 +1,6 @@
 {
   imports = [
     ./_common.nix
-    ../hosts/common/optional/blocky.nix
   ];
 
   vm = {
@@ -21,6 +20,7 @@
     networking.openPorts.udp = [ 53 443 853 ];
   };
 
+  blocky.enable = true;
   services.blocky = {
     settings = {
       ports.dns = 53;

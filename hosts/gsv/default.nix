@@ -8,10 +8,10 @@ in
   imports = [
     ./hardware-configuration.nix
 
-    ../common/global/locale.nix
-    ../common/global/nix.nix
-    ../common/global/openssh.nix
-    ../common/global/sops.nix
+    ../common/locale.nix
+    ../common/nix.nix
+    ../common/openssh.nix
+    ../common/sops.nix
 
     ./services
   ] ++ (builtins.attrValues outputs.nixosModules);

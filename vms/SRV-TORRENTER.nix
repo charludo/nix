@@ -52,7 +52,6 @@ in
 {
   imports = [
     ./_common.nix
-    ../hosts/common/optional/surfshark.nix
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -70,6 +69,8 @@ in
 
     networking.nameservers = [ "1.1.1.1" ];
   };
+
+  surfshark.enable = true;
 
   networking.firewall = {
     interfaces.ens18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface

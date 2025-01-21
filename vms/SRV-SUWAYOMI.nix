@@ -25,7 +25,6 @@ in
 {
   imports = [
     ./_common.nix
-    ../hosts/common/optional/surfshark.nix
   ];
 
   vm = {
@@ -38,6 +37,8 @@ in
 
     networking.nameservers = [ "1.1.1.1" ];
   };
+
+  surfshark.enable = true;
 
   networking.firewall = {
     extraCommands = ''

@@ -6,9 +6,7 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     (modulesPath + "/virtualisation/proxmox-image.nix")
 
-    ../hosts/common/global
-    ../hosts/common/optional/nvim.nix
-
+    ../hosts/common
     ../users/paki/user.nix
   ];
 
@@ -35,6 +33,8 @@
   };
   virtualisation.diskSize = "auto";
 
+  nvim.enable = true;
+
   networking = {
     hostName = config.vm.name;
     interfaces = {
@@ -58,7 +58,7 @@
   nixpkgs.hostPlatform = "x86_64-linux";
   services.qemuGuest.enable = true;
 
-  # Overwriting parts of hosts/common/global
+  # Overwriting parts of hosts/common
   sops.defaultSopsFile = lib.mkForce secrets.general;
   sops.secrets.nas = lib.mkForce (lib.mkIf (config.enableNas or config.enableNasBackup) { sopsFile = secrets.general; });
   programs.ssh = lib.mkForce {

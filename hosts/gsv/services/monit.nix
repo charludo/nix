@@ -3,10 +3,10 @@ let
   inherit (private-settings) contact monitAdminPassword;
 in
 {
-  imports = [ ../../common/optional/monit.nix ];
-
   services.smartd.enable = true;
   monitConfig = {
+    enable = true;
+
     alertAddress = contact.monitoring;
     adminPassword = monitAdminPassword;
     adminInterface.enable = true;

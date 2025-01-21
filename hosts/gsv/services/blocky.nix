@@ -1,5 +1,5 @@
 {
-  imports = [ ../../common/optional/blocky.nix ];
+  blocky.enable = true;
 
   networking.firewall = {
     allowedTCPPorts = [ 53 ];

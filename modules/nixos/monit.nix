@@ -191,6 +191,9 @@ in
     extraConfig = mkMonitOption "";
   };
   config = lib.mkIf cfg.enable {
+    monitConfig.system.enable = lib.mkDefault true;
+    monitConfig.filesystem.enable = lib.mkDefault true;
+
     services.monit = {
       enable = true;
       config = ''

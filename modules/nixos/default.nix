@@ -1,7 +1,31 @@
 {
+  auto-update = import ./auto-update.nix;
+  blocky = import ./blocky.nix;
+  bluetooth = import ./bluetooth.nix;
+  docker = import ./docker.nix;
+  eid = import ./eid.nix;
+  fish = import ./fish.nix;
+  greetd = import ./greetd.nix;
+  gvfs = import ./gvfs.nix;
   idagio = import ./idagio.nix;
-  nas = import ./nas.nix;
+  keyring = import ./keyring.nix;
+  ld = import ./ld.nix;
   monit = import ./monit.nix;
+  musnix = import ./musnix.nix;
+  nas = import ./nas.nix;
+  nicer-fonts = import ./nicer-fonts.nix;
+  nvim = import ./nvim.nix;
+  onlykey = import ./onlykey.nix;
+  plymouth = import ./plymouth.nix;
+  printers = import ./printers.nix;
   qbittorrent = import ./qbittorrent.nix;
+  rsync = import ./rsync.nix;
+  screensharing = import ./screensharing.nix;
+  sound = import ./sound.nix;
+  steam-firewall = import ./steam-firewall.nix;
+  surfshark = import ./surfshark.nix;
+  suspend = import ./suspend.nix;
   vm = import ./vm.nix;
+  wifi = import ./wifi.nix;
+  zammad = import ./zammad.nix;
 }

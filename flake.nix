@@ -57,7 +57,7 @@
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, private-settings, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-generators, jovian, private-settings, musnix, ... } @ inputs:
     let
       inherit (self) outputs;
       lib = nixpkgs.lib // home-manager.lib;
@@ -73,8 +73,12 @@
     in
     {
       inherit lib;
-      nixosModules = (import ./modules/nixos) // jovian.outputs.nixosModules // private-settings-module;
-      homeModules = (import ./modules/home-manager) // private-settings-module;
+      nixosModules = (import ./modules/nixos)
+        // jovian.outputs.nixosModules
+        // musnix.nixosModules
+        // private-settings-module;
+      homeModules = (import ./modules/home-manager)
+        // private-settings-module;
       overlays = import ./overlays { inherit inputs outputs; };
 
       # Available through 'nixos-rebuild --flake .#hostname'

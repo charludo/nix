@@ -4,26 +4,24 @@
   imports =
     [
       ./hardware-configuration.nix
-
-      ../common/global
-
-      ../common/optional/dconf.nix
-      ../common/optional/fish.nix
-      ../common/optional/fontconfig.nix
-      ../common/optional/greetd.nix
-      ../common/optional/gvfs.nix
-      ../common/optional/nvim.nix
-      ../common/optional/pipewire.nix
-      ../common/optional/plymouth.nix
-      ../common/optional/screensharing.nix
-      ../common/optional/surfshark.nix
-      ../common/optional/suspend.nix
-
+      ../common
       ../../users/charlotte/user.nix
     ];
 
   enableNas = false;
   enableNasBackup = false;
+
+  fish.enable = true;
+  nicerFonts.enable = true;
+  greetd.enable = true;
+  gvfs.enable = true;
+  nvim.enable = true;
+  plymouth.enable = true;
+  plymouth.theme = "red_loader";
+  soundConfig.enable = true;
+  screensharing.enable = true;
+  surfshark.enable = true;
+  suspend.enable = true;
 
   console.keyMap = lib.mkForce "es";
   time.timeZone = "Europe/Madrid";

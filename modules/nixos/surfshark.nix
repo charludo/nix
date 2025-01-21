@@ -1,4 +1,6 @@
-{ config, pkgs, secrets, ... }:
+{ config, lib, pkgs, secrets, ... }:
+
+with lib;
 let
   # These CONSTANTLY change and have different hashes depending on what server 
   # you connect to, so I'm putting a cached version on github. More work to update,
@@ -26,10 +28,18 @@ let
     value = { config = '' config ${configFiles}/${filePath} ''; autoStart = false; updateResolvConf = true; };
   };
   openVPNConfigs = map getConfig (builtins.attrNames (builtins.readDir configFiles));
+
+  cfg = config.surfshark;
 in
 {
-  sops.secrets.openvpn = { sopsFile = secrets.general; };
-  networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
+  options.surfshark = {
+    enable = lib.mkEnableOption (lib.mdDoc "enable surfshark VPN");
+  };
 
-  services.openvpn.servers = builtins.listToAttrs openVPNConfigs;
+  config = mkIf cfg.enable {
+    sops.secrets.openvpn = { sopsFile = secrets.general; };
+    networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
+
+    services.openvpn.servers = builtins.listToAttrs openVPNConfigs;
+  };
 }

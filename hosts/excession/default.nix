@@ -1,36 +1,32 @@
-{ pkgs, inputs, outputs, ... }:
+{ pkgs, inputs, ... }:
 {
   _module.args.defaultUser = "charlotte";
   imports =
     [
       inputs.nix-flatpak.nixosModules.nix-flatpak
+      inputs.nixos-hardware.nixosModules.gigabyte-b550
 
       ./hardware-configuration.nix
-      ../common/optional/vmify.nix
-
-      ../common/global
-
-      ../common/optional/bluetooth.nix
-      ../common/optional/cups.nix
-      ../common/optional/dconf.nix
-      ../common/optional/fish.nix
-      ../common/optional/fontconfig.nix
-      ../common/optional/greetd.nix
-      ../common/optional/gvfs.nix
-      ../common/optional/nvim.nix
-      ../common/optional/pipewire.nix
-      ../common/optional/screensharing.nix
-      ../common/optional/steam-firewall.nix
-      ../common/optional/surfshark.nix
-      ../common/optional/suspend.nix
-      ../common/optional/wifi.nix
-
+      ../common
       ../../users/charlotte/user.nix
-
-      inputs.nixos-hardware.nixosModules.gigabyte-b550
     ];
 
   enableNas = true;
+
+  bluetooth.enable = true;
+  fish.enable = true;
+  greetd.enable = true;
+  gvfs.enable = true;
+  nicerFonts.enable = true;
+  nvim.enable = true;
+  printers.enable = true;
+  screensharing.enable = true;
+  soundConfig.enable = true;
+  steamOpenFirewall.enable = true;
+  surfshark.enable = true;
+  suspend.enable = true;
+  suspend.gigabyteFix = true;
+  wifi.enable = true;
 
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";

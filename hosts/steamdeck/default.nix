@@ -6,15 +6,15 @@
       inputs.nix-flatpak.nixosModules.nix-flatpak
 
       ./hardware-configuration.nix
-
-      ../common/global
-      ../common/optional/nvim.nix
-      ../common/optional/plymouth.nix
-      ../common/optional/steam-firewall.nix
-      ../common/optional/wifi.nix
-
+      ../common
       ../../users/charlotte/user.nix
     ];
+
+  nvim.enable = true;
+  plymouth.enable = true;
+  plymouth.theme = "dark_planet";
+  steamOpenFirewall.enable = true;
+  wifi.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

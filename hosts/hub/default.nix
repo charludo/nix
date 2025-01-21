@@ -4,30 +4,29 @@
   imports =
     [
       ./hardware-configuration.nix
-
-      ../common/global
-
-      ../common/optional/bluetooth.nix
-      ../common/optional/cups.nix
-      ../common/optional/dconf.nix
-      # ../common/optional/eid.nix
-      ../common/optional/fish.nix
-      ../common/optional/fontconfig.nix
-      ../common/optional/greetd.nix
-      ../common/optional/gvfs.nix
-      ../common/optional/ld.nix
-      ../common/optional/nvim.nix
-      ../common/optional/pipewire.nix
-      ../common/optional/rsync.nix
-      ../common/optional/screensharing.nix
-      ../common/optional/surfshark.nix
-      ../common/optional/suspend.nix
-      ../common/optional/wifi.nix
-
+      ../common
       ../../users/charlotte/user.nix
 
       inputs.nixos-hardware.nixosModules.gigabyte-b550
     ];
+
+  bluetooth.enable = true;
+  # eid.enable = true;
+  fish.enable = true;
+  greetd.enable = true;
+  gvfs.enable = true;
+  ld.enable = true;
+  nicerFonts.enable = true;
+  nvim.enable = true;
+  # onlykey.enable = true;
+  printers.enable = true;
+  rsync.enable = true;
+  screensharing.enable = true;
+  soundConfig.enable = true;
+  surfshark.enable = true;
+  suspend.enable = true;
+  suspend.gigabyteFix = true;
+  wifi.enable = true;
 
   enableNas = true;
   enableNasBackup = true;
