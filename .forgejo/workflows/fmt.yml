@@ -1,0 +1,17 @@
+name: Check formatting
+run-name: ${{ forgejo.actor }} is checking the code formatting
+on: [push]
+jobs:
+  ensure-formatting:
+    runs-on: nix
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Check nixfmt formatting
+        run: nixfmt -c */**
+      - name: Check for dead code
+        run: deadnix -f
+      - name: Check ruff linting
+        run: ruff check
+      - name: Check ruff formatting
+        run: ruff format --check

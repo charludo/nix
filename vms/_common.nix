@@ -33,11 +33,11 @@
     net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${
       builtins.substring 0 2 (toString config.vm.id)
     },firewall=1";
+    agent = true;
   };
   proxmox.cloudInit.enable = false;
   proxmox.partitionTableType = lib.mkDefault "efi";
   proxmox.qemuExtraConf = {
-    agent = 1;
     ide2 = lib.mkForce "none,media=cdrom";
     kvm = 1;
   };

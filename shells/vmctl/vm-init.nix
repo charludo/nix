@@ -54,7 +54,7 @@ pkgs.writeShellApplication {
     fi
 
     echo "Waiting for $host to reboot..."
-    sleep 15
+    sleep 25
 
     echo "Reconnecting to $host..."
     ssh "$host"
