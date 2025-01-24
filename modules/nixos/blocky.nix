@@ -19,6 +19,7 @@ in
     services.blocky = {
       enable = true;
       settings = {
+        ports.dns = 53;
         upstreams.groups.default = [
           "https://one.one.one.one/dns-query"
         ];

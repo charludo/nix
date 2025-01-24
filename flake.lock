@@ -1421,11 +1421,11 @@
         "utils": "utils_5"
       },
       "locked": {
-        "lastModified": 1737192670,
-        "narHash": "sha256-Cgizr+6EpnuxCnDdtCQmM1Sr0uKicD8fX+VHbMnLeQM=",
+        "lastModified": 1737569341,
+        "narHash": "sha256-BSohpFIu8hcjtUf7+6Xro1eFZHEh+e3x2BLwRLRWmyg=",
         "ref": "refs/heads/main",
-        "rev": "a0a5ac6b65f8268930a170b7db9a44071f9afdb4",
-        "revCount": 6,
+        "rev": "8891b951f28f95d8bbc3731cd3e0fecf5c71331d",
+        "revCount": 7,
         "type": "git",
         "url": "ssh://git@github.com/charludo/personal-site"
       },
