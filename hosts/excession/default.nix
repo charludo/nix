@@ -27,6 +27,7 @@
   suspend.enable = true;
   suspend.gigabyteFix = true;
   wifi.enable = true;
+  programs.dconf.enable = true;
 
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";

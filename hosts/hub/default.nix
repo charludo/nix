@@ -26,6 +26,7 @@
   suspend.enable = true;
   suspend.gigabyteFix = true;
   wifi.enable = true;
+  programs.dconf.enable = true;
 
   nas.enable = true;
   nas.backup.enable = true;

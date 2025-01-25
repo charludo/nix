@@ -26,6 +26,7 @@
   screensharing.enable = true;
   surfshark.enable = true;
   suspend.enable = true;
+  programs.dconf.enable = true;
 
   console.keyMap = lib.mkForce "es";
   time.timeZone = "Europe/Madrid";

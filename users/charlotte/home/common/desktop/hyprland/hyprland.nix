@@ -166,8 +166,6 @@
             clipboard = "${rofi} -modi \"emoji,clipboard:rofi-cliphist\" -show emoji -show-icons";
             rbw = "rbw-unlock && ${rofi-rbw} --target password --prompt \"   Vaultwarden   \"";
             screenshots = "${rofi} -modi \"screenshot:rofi-screenshot,screencapture:rofi-screencapture\" -show screenshot";
-
-            # Not in 23.11 yet!
             hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
 
             pactl = "${pkgs.pulseaudio}/bin/pactl";
@@ -180,6 +178,7 @@
             "${mainMod},q,killactive"
             "${shiftMod},q,exec,${pkgs.hyprland}/bin/hyprctl kill"
             "${mainMod},l,exec,${hyprlock}"
+            "${shiftMod},l,exec,${pkgs.systemd}/bin/systemctl suspend"
 
             "${mainMod},Tab,cyclenext"
             "${mainMod},Tab,bringactivetotop"
