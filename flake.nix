@@ -88,6 +88,9 @@
       inherit lib;
       nixosModules =
         (import ./modules/nixos)
+        // {
+          backup = import ./modules/backup;
+        }
         // jovian.outputs.nixosModules
         // musnix.nixosModules
         // private-settings-module;

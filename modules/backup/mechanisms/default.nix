@@ -3,7 +3,11 @@
 with lib;
 
 {
-  config.backup.mkBackupMechanism =
+  imports = [
+    ./rsync.nix
+  ];
+
+  config.lib.backup.mkBackupMechanism =
     mechanismConfig: with mechanismConfig; {
       enable = mkEnableOption "enable the ${name} backup mechanism";
 
@@ -20,7 +24,7 @@ with lib;
       precedence = mkOption {
         type = types.int;
         default = 0;
-        description = mkDoc ''
+        description = ''
           An integer value signifying the precedence, or "priority", of a backup mechanism.
           The lowest precedence backup not failing its `restoreCondition` check will be used to restore a backup.
         '';
@@ -35,7 +39,7 @@ with lib;
       backupScript = mkOption {
         type = types.functionTo types.str;
         default = backupScript;
-        description = mkDoc ''
+        description = ''
           A nix expression which generates the bash script used to create ${name} backups.
           Receives a single argument of type set, where each set contains a `dataDir` key and a `backupDir` key,
           derived from the services for which backups are enabled.
@@ -48,7 +52,7 @@ with lib;
       restoreScript = mkOption {
         type = types.functionTo types.str;
         default = restoreScript;
-        description = mkDoc ''
+        description = ''
           A nix expression which generates the bash script used to restore ${name} backups.
           Receives a single argument of type set, where each set contains a `dataDir` key and a `backupDir` key, as well as the user and group for that service,
           derived from the services for which backups (and, by extension, restores) are enabled.
@@ -61,7 +65,7 @@ with lib;
       backupCondition = mkOption {
         type = types.nullOr types.str;
         default = backupCondition;
-        description = mkDoc ''
+        description = ''
           A bash expression which, if it returns a non-zero exit code, prevents ${name} backups from being created.
         '';
         example = ''
@@ -72,7 +76,7 @@ with lib;
       restoreCondition = mkOption {
         type = types.nullOr types.str;
         default = restoreCondition;
-        description = mkDoc ''
+        description = ''
           A bash expression which, if it returns a non-zero exit code, prevents ${name} backups from being restored.
         '';
         example = ''

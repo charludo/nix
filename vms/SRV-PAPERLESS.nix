@@ -73,6 +73,10 @@ in
   };
 
   environment.systemPackages = [ paperless-init ];
+  services.backup.enable = true;
+  services.backup.autoEnable = true;
+  services.backup.mechanisms.rsync.enable = true;
+  services.backup.mechanisms.rsync.backupRootDir = "/media/Backup";
 
   systemd = {
     timers."paperless-backup-daily" = {

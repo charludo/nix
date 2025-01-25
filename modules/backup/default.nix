@@ -91,6 +91,11 @@ let
   cfg = config.services.backup;
 in
 {
+  imports = [
+    ./services
+    ./mechanisms
+  ];
+
   options.services.backup = {
     enable = mkEnableOption (mdDoc "backup & restore");
 
@@ -103,9 +108,9 @@ in
     };
 
     notifyScript = mkOption {
-      type = fypes.nullOr types.str;
+      type = types.nullOr types.str;
       default = null;
-      description = mkDoc ''
+      description = ''
         A bash script to run on failure of a backup procedure
       '';
     };

@@ -6,6 +6,10 @@ let
   cfg = config.services.backup;
 in
 {
+  imports = [
+    ./paperless.nix
+  ];
+
   config.lib.backup.mkBackupOption =
     serviceConfig: with serviceConfig; {
       enable = mkEnableOption "enable backups for ${name}" // rec {
@@ -17,7 +21,7 @@ in
       mechanisms = mkOption {
         type = types.nullOr (types.listOf types.str);
         default = null;
-        description = mkDoc ''
+        description = ''
           Only create backups of ${name} for the specified backup mechanisms.
           If `null`, enable all configured mechanisms.
         '';

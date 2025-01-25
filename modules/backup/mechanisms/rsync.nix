@@ -9,7 +9,7 @@ let
   cfg = config.services.backup.mechanisms.rsync;
 in
 {
-  option.services.backup.mechanisms.rsync =
+  options.services.backup.mechanisms.rsync =
     config.lib.backup.mkBackupMechanism rec {
       name = "rsync";
       startAt = "daily";
