@@ -44,6 +44,11 @@ in
     ./_common.nix
   ];
 
+  backup.enable = true;
+  backup.autoEnable = true;
+  backup.mechanisms.rsync.enable = true;
+  backup.mechanisms.rsync.backupRootDir = "/media/Backup";
+
   nixpkgs.config.permittedInsecurePackages = [
     "dotnet-sdk-6.0.428"
     "aspnetcore-runtime-6.0.36"

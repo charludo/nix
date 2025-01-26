@@ -7,7 +7,22 @@ let
 in
 {
   imports = [
+    ./audiobookshelf.nix
+    ./bazarr.nix
+    ./conduwuit.nix
+    ./jellyfin.nix
+    ./kavita.nix
+    ./lidarr.nix
+    ./minecraft-server.nix
+    ./nzbget.nix
     ./paperless.nix
+    ./prowlarr.nix
+    ./qbittorrent.nix
+    ./radarr.nix
+    ./readarr.nix
+    ./sonarr.nix
+    ./suwayomi-server.nix
+    ./vikunja.nix
   ];
 
   config.lib.backup.mkBackupOption =
