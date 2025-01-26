@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.services.backup;
+  cfg = config.backup;
 in
 {
   imports = [

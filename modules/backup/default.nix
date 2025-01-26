@@ -3,20 +3,18 @@
 with lib;
 
 let
-  servicesWithBackup = filterAttrs (_: service: hasAttr "backup" service) config.services;
-  allBackups = mapAttrs (_: service: service.backup) servicesWithBackup;
   serviceConfigsForMechanism =
     mechanism:
     filterAttrs (
       _: service:
       service.enable
       && (isNull mechanism || isNull service.mechanisms || builtins.elem mechanism service.mechanisms)
-    ) allBackups;
+    ) cfg.services;
 
-  createService = mechanism: service: {
-    "backup-${mechanism.name}-${service.name}" = {
-      description = "${mechanism.name} backup job for ${service.name}";
-      partOf = [ "backup-${mechanism.name}.service" ];
+  createService = mechanismName: mechanism: serviceName: service: {
+    "backup-${mechanismName}-${serviceName}" = {
+      description = "${mechanismName} backup job for ${serviceName}";
+      partOf = [ "backup-${mechanismName}.service" ];
 
       path = mechanism.extraPackages;
       startPre = service.preBackup;
@@ -34,9 +32,9 @@ let
     };
   };
 
-  createMechanismService = mechanism: {
-    "backup-${mechanism.name}" = {
-      description = "${mechanism.name} backup job";
+  createMechanismService = mechanismName: mechanism: {
+    "backup-${mechanismName}" = {
+      description = "${mechanismName} backup job";
 
       startAt = mechanism.startAt;
       startPre = mechanism.backupCondition;
@@ -88,7 +86,7 @@ let
         '';
     };
 
-  cfg = config.services.backup;
+  cfg = config.backup;
 in
 {
   imports = [
@@ -96,7 +94,7 @@ in
     ./mechanisms
   ];
 
-  options.services.backup = {
+  options.backup = {
     enable = mkEnableOption (mdDoc "backup & restore");
 
     autoEnable = mkOption {
@@ -114,15 +112,29 @@ in
         A bash script to run on failure of a backup procedure
       '';
     };
+
+    temp = mkOption { internal = true; };
   };
 
   config = mkIf cfg.enable {
-    systemd.services = mapAttrs (
-      _: mechanism:
-      mapAttrs (_: service: (createService mechanism service)) (serviceConfigsForMechanism mechanism.name)
-      // (createMechanismService mechanism)
+    # systemd.services = listToAttrs (
+    # map (
+    # name: mechanism:
+    # mapAttrs (_: service: (createService mechanism service)) (serviceConfigsForMechanism name)
+    # // (createMechanismService mechanism)
+    # ) (attrsToList cfg.mechanisms)
+    # );
+
+    backup.temp = mapAttrs (
+      mechanismName: mechanism:
+      (
+        mapAttrs (serviceName: service: (createService mechanismName mechanism serviceName service)) (
+          serviceConfigsForMechanism mechanismName
+        )
+        // (createMechanismService mechanismName mechanism)
+      )
     ) cfg.mechanisms;
 
-    environment.systemPackages = map createRestoreScript (serviceConfigsForMechanism null);
+    # environment.systemPackages = map createRestoreScript (serviceConfigsForMechanism null);
   };
 }

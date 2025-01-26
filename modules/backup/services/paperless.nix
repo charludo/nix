@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  options.services.paperless.backup = config.lib.backup.mkBackupOption rec {
+  options.backup.services.paperless = config.lib.backup.mkBackupOption rec {
     name = "paperless";
     serviceEnabled = config.services.paperless.enable;
     dataDir = config.services.paperless.dataDir;

@@ -6,10 +6,10 @@
 }:
 with lib;
 let
-  cfg = config.services.backup.mechanisms.rsync;
+  cfg = config.backup.mechanisms.rsync;
 in
 {
-  options.services.backup.mechanisms.rsync =
+  options.backup.mechanisms.rsync =
     config.lib.backup.mkBackupMechanism rec {
       name = "rsync";
       startAt = "daily";
@@ -23,7 +23,7 @@ in
       '';
 
       backupCondition = ''
-        "$(stat -f -c %T /path/to/NAS)" == "smb2"
+        [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ] || exit 1
       '';
       restoreCondition = backupCondition;
     }
