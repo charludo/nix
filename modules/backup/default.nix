@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -17,9 +22,9 @@ let
       partOf = [ "backup-${mechanismName}.service" ];
 
       path = mechanism.extraPackages;
-      startPre = service.preBackup;
+      preStart = service.preBackup;
       script = mechanism.backupScript service;
-      startPost = service.postBackup;
+      postStop = service.postBackup;
 
       serviceConfig = {
         User = cfg.user;
@@ -37,7 +42,7 @@ let
       description = "${mechanismName} backup job";
 
       startAt = mechanism.startAt;
-      startPre = mechanism.backupCondition;
+      preStart = mechanism.backupCondition;
 
       serviceConfig = {
         User = cfg.user;
@@ -54,32 +59,34 @@ let
   };
 
   createRestoreScript =
+    serviceName: service:
     let
       usedMechanisms = sort (p: q: p.precedence < q.precedence) (
-        filter (mechanism: (isNull servic.mechanisms || elem mechanism.name service.mechanisms)) (
-          attrsToList cfg.mechanisms
+        filter (mechanism: (isNull service.mechanisms || elem mechanism.name service.mechanisms)) (
+          builtins.attrValues cfg.mechanisms
         )
       );
     in
-    service:
     pkgs.writeShellApplication {
-      name = "restore-${service.name}";
+      name = "restore-${serviceName}";
       runtimeInputs = builtins.concatLists (map (mechanism: mechanism.extraPackages) usedMechanisms);
       text = # bash
         ''
           ${service.preRestore}
 
           CODE=1
-          ${map (mechanism: ''
-            if [ $CODE == 1 ] && [ ${mechanism.restoreCondition} ];
-              ${mechanism.restoreScript service}
-              CODE=0
-            fi
-          '') usedMechanisms}
+          ${builtins.toString (
+            map (mechanism: ''
+              if [ $CODE == 1 ] && ${mechanism.restoreCondition};
+                ${mechanism.restoreScript service}
+                CODE=0
+              fi
+            '') usedMechanisms
+          )}
 
           ${service.postRestore}
 
-          if [ $CODE==1 ];
+          if [ $CODE == 1 ];
             echo "No backups could be restored!"
             exit 1
           fi
@@ -112,29 +119,23 @@ in
         A bash script to run on failure of a backup procedure
       '';
     };
-
-    temp = mkOption { internal = true; };
   };
 
   config = mkIf cfg.enable {
-    # systemd.services = listToAttrs (
-    # map (
-    # name: mechanism:
-    # mapAttrs (_: service: (createService mechanism service)) (serviceConfigsForMechanism name)
-    # // (createMechanismService mechanism)
-    # ) (attrsToList cfg.mechanisms)
-    # );
-
-    backup.temp = mapAttrs (
+    systemd.services = concatMapAttrs (
       mechanismName: mechanism:
       (
-        mapAttrs (serviceName: service: (createService mechanismName mechanism serviceName service)) (
+        concatMapAttrs (serviceName: service: (createService mechanismName mechanism serviceName service)) (
           serviceConfigsForMechanism mechanismName
         )
         // (createMechanismService mechanismName mechanism)
       )
     ) cfg.mechanisms;
 
-    # environment.systemPackages = map createRestoreScript (serviceConfigsForMechanism null);
+    environment.systemPackages = builtins.attrValues (
+      mapAttrs (serviceName: service: createRestoreScript serviceName service) (
+        serviceConfigsForMechanism null
+      )
+    );
   };
 }

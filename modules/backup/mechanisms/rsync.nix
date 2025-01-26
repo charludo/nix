@@ -23,7 +23,7 @@ in
       '';
 
       backupCondition = ''
-        [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ] || exit 1
+        [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ]
       '';
       restoreCondition = backupCondition;
     }

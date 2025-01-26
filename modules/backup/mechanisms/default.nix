@@ -69,7 +69,7 @@ with lib;
           A bash expression which, if it returns a non-zero exit code, prevents ${name} backups from being created.
         '';
         example = ''
-          [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ] || exit 1
+          [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ]
         '';
       };
 
@@ -80,7 +80,7 @@ with lib;
           A bash expression which, if it returns a non-zero exit code, prevents ${name} backups from being restored.
         '';
         example = ''
-          [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ] || exit 1
+          [ "$(stat -f -c %T /path/to/NAS)" = "smb2" ]
         '';
       };
     };
