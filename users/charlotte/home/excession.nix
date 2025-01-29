@@ -41,6 +41,7 @@ in
   ];
 
   home.packages = with pkgs; [ telegram-desktop ];
+  home.hostname = "excession";
 
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
   defaultWallpaper = builtins.toString ./common/desktop/backgrounds/eso.png;
@@ -197,4 +198,10 @@ in
 
   # Otherwise way too big on hub
   programs.alacritty.settings.font.size = lib.mkForce 13;
+
+  programs.fish.interactiveShellInit = # fish
+    ''
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../zakalwe_age.pub}"
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
+    '';
 }

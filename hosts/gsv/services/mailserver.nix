@@ -1,10 +1,8 @@
-{ inputs, private-settings, ... }:
+{ private-settings, ... }:
 let
   inherit (private-settings) domains loginAccounts forwards;
 in
 {
-  imports = [ inputs.mailserver.nixosModule ];
-
   mailserver = {
     enable = true;
     fqdn = "mail.${domains.personal}";

@@ -46,7 +46,10 @@ in
         "LogLevel" = "quiet";
       };
       "*" = {
-        identityFile = "~/.ssh/id_ed25519";
+        identityFile = [
+          "~/.ssh/id_yubikey"
+          "~/.ssh/id_ed25519"
+        ];
         identitiesOnly = true;
       };
     } // vms;

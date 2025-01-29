@@ -25,7 +25,7 @@ let
     installPhase = ''
       unzip $src 
       find . -type f ! -name '*_udp.ovpn' -delete
-      find . -type f -exec sed -i "s+auth-user-pass+auth-user-pass \"${config.sops.secrets.openvpn.path}\"+" {} +
+      find . -type f -exec sed -i "s+auth-user-pass+auth-user-pass \"${config.age.secrets.openvpn.path}\"+" {} +
       rename 's/prod.surfshark.com_udp.//' *
       mkdir -p $out
       mv * $out
@@ -99,9 +99,7 @@ in
 
   config = mkIf cfg.enable (mkMerge [
     ({
-      sops.secrets.openvpn = {
-        sopsFile = secrets.vpn;
-      };
+      age.secrets.openvpn.rekeyFile = secrets.vpn;
       networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
       services.openvpn.servers = builtins.listToAttrs openVPNConfigs;

@@ -128,6 +128,50 @@ in
             icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = [ "@ns" ];
           };
+          "Noogle" = {
+            urls = [
+              {
+                template = "https://noogle.dev/q";
+                params = [
+                  {
+                    name = "q";
+                    value = "{searchTerms}";
+                  }
+                  {
+                    name = "term";
+                    value = "{searchTerms}";
+                  }
+                ];
+              }
+            ];
+            icon = "${pkgs.fetchurl {
+              url = "https://noogle.dev/favicon.ico";
+              sha256 = "sha256-K4rS0zRVqPc2/DqOv48L3qiEitTA20iigzvQ+c13WTI=";
+            }}";
+            definedAliases = [ "@noo" ];
+          };
+          "GitHub" = {
+            urls = [
+              {
+                template = "https://github.com/search";
+                params = [
+                  {
+                    name = "q";
+                    value = "{searchTerms}";
+                  }
+                  {
+                    name = "type";
+                    value = "code";
+                  }
+                ];
+              }
+            ];
+            icon = "${pkgs.fetchurl {
+              url = "https://github.com/favicon.ico";
+              sha256 = "sha256-LuQyN9GWEAIQ8Xhue3O1fNFA9gE8Byxw29/9npvGlfg=";
+            }}";
+            definedAliases = [ "@gh" ];
+          };
           "Bing".metaData.hidden = true;
           "DuckDuckGo".metaData.hidden = true;
           "eBay".metaData.hidden = true;

@@ -1,9 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
-    inputs.nix-flatpak.nixosModules.nix-flatpak
-
     ./hardware-configuration.nix
     ../common
     ../../users/charlotte/user.nix

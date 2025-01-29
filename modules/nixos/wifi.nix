@@ -15,39 +15,29 @@ in
   };
 
   config = mkIf cfg.enable {
-    sops.secrets.unicornis_alicornii = {
-      sopsFile = secrets.wifi;
-    };
+    age.secrets.unicornis_alicornii.rekeyFile = secrets.wifi-unicornis-alicornii;
     environment.etc."NetworkManager/system-connections/Unicornis Alicornii.nmconnection" = {
-      source = "${config.sops.secrets.unicornis_alicornii.path}";
+      source = "${config.age.secrets.unicornis_alicornii.path}";
     };
 
-    sops.secrets.unicornis_caputii = {
-      sopsFile = secrets.wifi;
-    };
+    age.secrets.unicornis_caputii.rekeyFile = secrets.wifi-unicornis-caputii;
     environment.etc."NetworkManager/system-connections/Unicornis Caputii.nmconnection" = {
-      source = "${config.sops.secrets.unicornis_caputii.path}";
+      source = "${config.age.secrets.unicornis_caputii.path}";
     };
 
-    sops.secrets.vicugna_pacos = {
-      sopsFile = secrets.wifi;
-    };
+    age.secrets.vicugna_pacos.rekeyFile = secrets.wifi-vicugna-pacos;
     environment.etc."NetworkManager/system-connections/Vicugna Pacos.nmconnection" = {
-      source = "${config.sops.secrets.vicugna_pacos.path}";
+      source = "${config.age.secrets.vicugna_pacos.path}";
     };
 
-    sops.secrets.charlotte_hotspot = {
-      sopsFile = secrets.wifi;
-    };
+    age.secrets.charlotte_hotspot.rekeyFile = secrets.wifi-charlotte-hotspot;
     environment.etc."NetworkManager/system-connections/Charlotte.nmconnection" = {
-      source = "${config.sops.secrets.charlotte_hotspot.path}";
+      source = "${config.age.secrets.charlotte_hotspot.path}";
     };
 
-    sops.secrets.eduroam = {
-      sopsFile = secrets.wifi;
-    };
+    age.secrets.eduroam.rekeyFile = secrets.wifi-eduroam;
     environment.etc."NetworkManager/system-connections/eduroam.nmconnection" = {
-      source = "${config.sops.secrets.eduroam.path}";
+      source = "${config.age.secrets.eduroam.path}";
     };
     environment.etc."NetworkManager/eduroam.pem" = {
       text = ''

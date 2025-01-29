@@ -5,8 +5,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2208;
     name = "SRV-KAVITA";
@@ -19,12 +17,11 @@
     networking.openPorts.tcp = [ config.services.kavita.settings.Port ];
   };
 
-  sops.secrets.kavita-token = {
-    sopsFile = secrets.kavita;
-  };
+  age.secrets.kavita-token.rekeyFile = secrets.kavita-token;
+
   services.kavita = {
     enable = true;
-    tokenKeyFile = config.sops.secrets.kavita-token.path;
+    tokenKeyFile = config.age.secrets.kavita-token.path;
     settings.IpAddresses = "0.0.0.0";
   };
 

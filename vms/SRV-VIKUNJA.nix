@@ -8,8 +8,6 @@ let
   inherit (private-settings) domains;
 in
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2209;
     name = "SRV-VIKUNJA";

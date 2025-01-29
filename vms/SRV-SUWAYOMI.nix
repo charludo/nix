@@ -1,9 +1,5 @@
 { pkgs, config, ... }:
 {
-  imports = [
-    ./_common.nix
-  ];
-
   vm = {
     id = 2102;
     name = "SRV-SUWAYOMI";

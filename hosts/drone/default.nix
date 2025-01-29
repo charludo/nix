@@ -1,17 +1,16 @@
 { private-settings, secrets, ... }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
     ./hardware-configuration.nix
     ../common
     ../../users/charlotte/user.nix
   ];
 
+  age.enable = true;
   bluetooth.enable = true;
   fish.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
-  musnix.enable = true;
   nicerFonts.enable = true;
   nvim.enable = true;
   printers.enable = true;
@@ -44,8 +43,23 @@
     port = 51865;
     ip = "192.168.150.12/32";
     secrets = {
-      secretsFile = secrets.drone;
+      secretsFilePrivate = secrets.drone-wg-private;
+      secretsFilePreshared = secrets.drone-wg-preshared;
       remotePublicKey = private-settings.wireguard.publicKeys.drone;
+    };
+  };
+
+  musnix = {
+    alsaSeq.enable = false;
+
+    rtcqs.enable = true;
+    kernel.realtime = true;
+
+    rtirq = {
+      resetAll = 1;
+      prioLow = 0;
+      enable = true;
+      nameList = "rtc0 snd";
     };
   };
 

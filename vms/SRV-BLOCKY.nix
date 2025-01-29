@@ -1,8 +1,4 @@
 {
-  imports = [
-    ./_common.nix
-  ];
-
   vm = {
     id = 3002;
     name = "SRV-BLOCKY";
