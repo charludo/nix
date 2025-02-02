@@ -1,4 +1,9 @@
-{ config, private-settings, ... }:
+{
+  config,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) domains gsv;
 in
@@ -64,10 +69,11 @@ in
     '';
   };
 
-  sops.secrets.coturn-env = {
+  age.secrets.coturn-env = {
+    rekeyFile = secrets.gsv-coturn-env;
     owner = "prosody";
   };
-  systemd.services.prosody.serviceConfig.EnvironmentFile = config.sops.secrets.coturn-env.path;
+  systemd.services.prosody.serviceConfig.EnvironmentFile = config.age.secrets.coturn-env.path;
 
   nixpkgs.config.permittedInsecurePackages = [
     "jitsi-meet-1.0.8043"

@@ -9,8 +9,6 @@ let
   inherit (private-settings) domains;
 in
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2210;
     name = "SRV-VAULTWARDEN";
@@ -22,9 +20,8 @@ in
     networking.openPorts.tcp = [ config.services.vaultwarden.config.ROCKET_PORT ];
   };
 
-  sops.secrets.vaultwarden = {
-    sopsFile = secrets.vaultwarden;
-  };
+  age.secrets.vaultwarden.rekeyFile = secrets.vaultwarden-admin-token;
+
   services.vaultwarden = {
     enable = true;
     backupDir = "${config.nas.backup.location}/vaultwarden";
@@ -35,7 +32,7 @@ in
       ROCKET_PORT = 8222;
     };
     # include environmentFile to enable admin backend
-    # environmentFile = config.sops.secrets.vaultwarden.path;
+    # environmentFile = config.age.secrets.vaultwarden.path;
   };
 
   nas.enable = true;

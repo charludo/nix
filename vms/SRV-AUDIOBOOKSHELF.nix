@@ -1,7 +1,5 @@
 { pkgs, config, ... }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2207;
     name = "SRV-AUDIOBOOKSHELF";

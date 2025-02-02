@@ -23,6 +23,8 @@ in
     ./common/desktop/hyprland
   ];
 
+  home.hostname = "hub";
+
   # Use this method for built-in schemes:
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 
@@ -168,4 +170,10 @@ in
 
   # Otherwise way to big on hub
   programs.alacritty.settings.font.size = lib.mkForce 13;
+
+  programs.fish.interactiveShellInit = # fish
+    ''
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../zakalwe_age.pub}"
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
+    '';
 }

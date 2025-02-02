@@ -11,7 +11,12 @@ let
 in
 {
   options.greetd = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable greetd");
+    enable = mkEnableOption "enable greetd";
+    defaultUser = mkOption {
+      type = types.str;
+      default = "charlotte";
+      description = "default user to be logged in";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -20,7 +25,7 @@ in
       settings = {
         initial_session = {
           command = "Hyprland";
-          user = config._module.args.defaultUser;
+          user = cfg.defaultUser;
         };
         default_session = {
           command = "${pkgs.greetd.tuigreet}/bin/tuigreet -r --remember-user-session --asterisks --cmd \"Hyprland\"";

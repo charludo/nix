@@ -74,8 +74,6 @@ let
       '';
 in
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2401;
     name = "SRV-HOME";

@@ -8,12 +8,10 @@ pkgs.writeShellApplication {
   ];
   text = ''
     set +o pipefail
-    URL="https://www.reddit.com/message/unread/.json?feed=$(cat ${
-      config.sops.secrets."reddit/token".path
-    })&user=$(cat ${config.sops.secrets."reddit/username".path})"
-    USERAGENT="polybar-scripts/notification-reddit:v1.0 u/$(cat ${
-      config.sops.secrets."reddit/username".path
-    })"
+    # shellcheck disable=SC2086
+    URL="https://www.reddit.com/message/unread/.json?feed=$(cat ${config.age.secrets.reddit-token.path})&user=$(cat ${config.age.secrets.reddit-username.path})"
+    # shellcheck disable=SC2086
+    USERAGENT="polybar-scripts/notification-reddit:v1.0 u/$(cat ${config.age.secrets.reddit-username.path})"
     notifications=$(curl -sf --user-agent "$USERAGENT" "$URL" | jq '.["data"]["children"] | length')
 
     if [ -n "$notifications" ] && [ "$notifications" -gt 0 ]; then

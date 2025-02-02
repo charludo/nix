@@ -24,6 +24,7 @@ in
   ];
 
   home.packages = [ pkgs.tmux ];
+  home.hostname = "CL-ROU";
 
   # Use this method for built-in schemes:
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;

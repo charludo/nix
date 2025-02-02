@@ -64,8 +64,8 @@ let
 
       # shellcheck disable=SC1091
       source "${
-        if builtins.hasAttr "telegram-bot" config.sops.secrets then
-          config.sops.secrets.telegram-bot.path
+        if builtins.hasAttr "telegram-bot" config.age.secrets then
+          config.age.secrets.telegram-bot.path
         else
           ""
       }"

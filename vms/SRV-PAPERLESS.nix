@@ -16,8 +16,6 @@ let
   };
 in
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2203;
     name = "SRV-PAPERLESS";

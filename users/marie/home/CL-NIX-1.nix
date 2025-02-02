@@ -5,4 +5,6 @@
     ./common/desktop.nix
     ./common/vscode.nix
   ];
+
+  home.hostname = "CL-NIX";
 }

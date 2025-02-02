@@ -6,8 +6,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2211;
     name = "SRV-MINECRAFT";

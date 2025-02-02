@@ -1,18 +1,11 @@
 {
-  inputs,
   lib,
   pkgs,
   config,
   outputs,
-  secrets,
   ...
 }:
 {
-  imports = [
-    inputs.nix-colors.homeManagerModules.colorScheme
-    inputs.sops-nix.homeManagerModules.sops
-  ] ++ (builtins.attrValues outputs.homeModules);
-
   nixpkgs = {
     overlays = builtins.attrValues outputs.overlays;
     config = {
@@ -32,26 +25,10 @@
     };
   };
 
-  sops = {
-    age.keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
-    defaultSopsFile = secrets.charlotte;
-    defaultSopsFormat = "yaml";
+  age.enable = true;
+  services.yubikey-notify.enable = true;
 
-    # Required because sops-nix doesn't know our UUID
-    defaultSymlinkPath = "/run/user/1000/secrets";
-    defaultSecretsMountPoint = "/run/user/1000/secrets.d";
-  };
-
-  # Required to restart sops-nix after changing the home-manager configuration
-  home.activation.setupEtc = config.lib.dag.entryAfter [ "writeBoundary" ] ''
-    /run/current-system/sw/bin/systemctl start --user sops-nix
-  '';
-  sops.secrets.placeholder = { };
-
-  programs = {
-    home-manager.enable = true;
-  };
-
+  programs.home-manager.enable = true;
   home = {
     username = lib.mkDefault "charlotte";
     homeDirectory = lib.mkDefault "/home/${config.home.username}";

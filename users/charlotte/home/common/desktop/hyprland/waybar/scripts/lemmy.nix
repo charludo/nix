@@ -16,8 +16,10 @@ pkgs.writeShellApplication {
     set +o errexit
     set +o nounset
     instance="${private-settings.lemmyInstance}"
-    username="$(cat ${config.sops.secrets."lemmy/username".path})"
-    password="$(cat ${config.sops.secrets."lemmy/password".path})"
+    # shellcheck disable=SC2086
+    username="$(cat ${config.age.secrets.lemmy-username.path})"
+    # shellcheck disable=SC2086
+    password="$(cat ${config.age.secrets.lemmy-password.path})"
 
     API="api/v3"
     set +H

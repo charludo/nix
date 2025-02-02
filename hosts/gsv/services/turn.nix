@@ -1,9 +1,15 @@
-{ config, private-settings, ... }:
+{
+  config,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) domains gsv;
 in
 {
-  sops.secrets.coturn = {
+  age.secrets.coturn = {
+    rekeyFile = secrets.gsv-coturn;
     owner = "turnserver";
   };
   services.coturn = {
@@ -23,7 +29,7 @@ in
     secure-stun = true;
     lt-cred-mech = true;
     use-auth-secret = true;
-    static-auth-secret-file = config.sops.secrets.coturn.path;
+    static-auth-secret-file = config.age.secrets.coturn.path;
 
     no-dtls = true;
     no-tls = true;

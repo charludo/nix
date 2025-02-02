@@ -2,15 +2,16 @@
   config,
   pkgs,
   private-settings,
+  secrets,
   ...
 }:
 let
   inherit (private-settings) domains;
 in
 {
-  sops.secrets.fail2ban-cf-token = { };
-  sops.secrets.fail2ban-cf-zone = { };
-  sops.secrets.fail2ban-cf-zone-2 = { };
+  age.secrets.fail2ban-cf-token.rekeyFile = secrets.gsv-fail2ban-cf-token;
+  age.secrets.fail2ban-cf-zone.rekeyFile = secrets.gsv-fail2ban-cf-zone;
+  age.secrets.fail2ban-cf-zone-2.rekeyFile = secrets.gsv-fail2ban-cf-zone-2;
   services.fail2ban = {
     extraPackages = [ pkgs.curl ];
     enable = true;
@@ -26,7 +27,7 @@ in
     jails =
       let
         defaultAction = ''
-          cloudflare-token-multi[cftoken="$(cat ${config.sops.secrets.fail2ban-cf-token.path})", cfzone="$(cat ${config.sops.secrets.fail2ban-cf-zone.path})", cfzone2="$(cat ${config.sops.secrets.fail2ban-cf-zone-2.path})"]
+          cloudflare-token-multi[cftoken="$(cat ${config.age.secrets.fail2ban-cf-token.path})", cfzone="$(cat ${config.age.secrets.fail2ban-cf-zone.path})", cfzone2="$(cat ${config.age.secrets.fail2ban-cf-zone-2.path})"]
                   iptables-allports'';
       in
       {
