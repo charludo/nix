@@ -1,14 +1,12 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
     ./hardware-configuration.nix
     ../common
     ../../users/charlotte/user.nix
-
-    inputs.nixos-hardware.nixosModules.gigabyte-b550
   ];
 
+  age.enable = true;
   bluetooth.enable = true;
   # eid.enable = true;
   fish.enable = true;
@@ -21,6 +19,7 @@
   printers.enable = true;
   rsync.enable = true;
   screensharing.enable = true;
+  snow.enable = true;
   soundConfig.enable = true;
   surfshark.enable = true;
   suspend.enable = true;

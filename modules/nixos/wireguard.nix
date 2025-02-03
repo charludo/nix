@@ -41,9 +41,14 @@ in
       description = "the ip the endpoint will have in the tunneled network, in CIDR notation";
     };
 
-    secrets.secretsFile = mkOption {
+    secrets.secretsFilePrivate = mkOption {
       type = types.path;
       description = "wireguard secrets file";
+    };
+
+    secrets.secretsFilePreshared = mkOption {
+      type = types.path;
+      description = "wireguard preshared file";
     };
 
     secrets.remotePublicKey = mkOption {
@@ -58,12 +63,8 @@ in
       checkReversePath = "loose";
     };
 
-    sops.secrets.wg-private = {
-      sopsFile = cfg.secrets.secretsFile;
-    };
-    sops.secrets.wg-preshared = {
-      sopsFile = cfg.secrets.secretsFile;
-    };
+    age.secrets.wg-private.rekeyFile = cfg.secrets.secretsFilePrivate;
+    age.secrets.wg-preshared.rekeyFile = cfg.secrets.secretsFilePreshared;
 
     networking.wireguard.interfaces = {
       ${cfg.interface} = {
@@ -71,7 +72,7 @@ in
         listenPort = cfg.port;
         mtu = 1420;
 
-        privateKeyFile = config.sops.secrets.wg-private.path;
+        privateKeyFile = config.age.secrets.wg-private.path;
 
         peers = [
           {
@@ -79,7 +80,7 @@ in
             publicKey = cfg.secrets.remotePublicKey;
             allowedIPs = [ cfg.allowedIPs ];
             persistentKeepalive = 25;
-            presharedKeyFile = config.sops.secrets.wg-preshared.path;
+            presharedKeyFile = config.age.secrets.wg-preshared.path;
           }
         ];
       };

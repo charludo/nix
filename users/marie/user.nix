@@ -1,5 +1,4 @@
 {
-  inputs,
   pkgs,
   config,
   ...
@@ -24,6 +23,9 @@ in
       ];
 
     openssh.authorizedKeys.keys = [
+      (builtins.readFile ../charlotte/zakalwe_ssh.pub)
+      (builtins.readFile ../charlotte/perostek_ssh.pub)
+      (builtins.readFile ../charlotte/diziet_ssh.pub)
       (builtins.readFile ../charlotte/ssh.pub)
       (builtins.readFile ./ssh.pub)
     ];
@@ -41,8 +43,7 @@ in
   };
   users.groups.marie.gid = 1000;
 
-  home-manager.sharedModules = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
-  home-manager.users.marie = import ./home/CL-NIX.nix;
+  home-manager.users.marie = import ./home/${config.networking.hostName}.nix;
 
   environment.shells = with pkgs; [ bash ];
 }

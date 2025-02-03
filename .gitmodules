@@ -1,0 +1,4 @@
+[submodule "private-settings"]
+	path = private-settings
+	url = ../nix-private/
+	branch = main

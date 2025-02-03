@@ -41,8 +41,6 @@ in
 # large parts of this have been copied from:
 # https://git.clan.lol/clan/clan-infra/src/branch/main/modules/web01/gitea/actions-runner.nix
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2213;
     name = "SRV-GITEA-ACTIONS";
@@ -181,9 +179,8 @@ in
     };
   };
 
-  sops.secrets.registration-token = {
-    sopsFile = secrets.gitea-actions;
-  };
+  age.secrets.registration-token.rekeyFile = secrets.gitea-actions-registration-token;
+
   services.gitea-actions-runner = {
     package = pkgs.forgejo-actions-runner;
     instances = {
@@ -191,7 +188,7 @@ in
         enable = true;
         name = "nix-runner";
         url = "https://git.${private-settings.domains.home}";
-        tokenFile = config.sops.secrets.registration-token.path;
+        tokenFile = config.age.secrets.registration-token.path;
         labels = [ "nix:docker://gitea-runner-nix" ];
         settings = {
           container.options = "-e NIX_BUILD_SHELL=/bin/bash -e NIX_PATH=nixpkgs=${inputs.nixpkgs.outPath} -e PAGER=cat -e PATH=/bin -e SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt -v /nix:/nix -v ${storeDeps}/bin:/bin -v ${storeDeps}/etc/ssl:/etc/ssl --user nixuser";
@@ -207,7 +204,7 @@ in
         enable = true;
         name = "general-runner";
         url = "https://git.${private-settings.domains.home}";
-        tokenFile = config.sops.secrets.registration-token.path;
+        tokenFile = config.age.secrets.registration-token.path;
         labels = [
           "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest"
           "python:docker://cimg/python"

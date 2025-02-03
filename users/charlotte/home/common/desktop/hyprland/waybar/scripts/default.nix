@@ -2,6 +2,7 @@
   pkgs,
   config,
   private-settings,
+  secrets,
   ...
 }:
 {
@@ -23,9 +24,9 @@
     })
   ];
 
-  sops.secrets."lemmy/username" = { };
-  sops.secrets."lemmy/password" = { };
-  sops.secrets."reddit/username" = { };
-  sops.secrets."reddit/token" = { };
-  sops.secrets.waybar-mail = { };
+  age.secrets.lemmy-username.rekeyFile = secrets.charlotte-lemmy-username;
+  age.secrets.lemmy-password.rekeyFile = secrets.charlotte-lemmy-password;
+  age.secrets.reddit-username.rekeyFile = secrets.charlotte-reddit-username;
+  age.secrets.reddit-token.rekeyFile = secrets.charlotte-reddit-token;
+  age.secrets.waybar-mail.rekeyFile = secrets.charlotte-waybar-mail;
 }

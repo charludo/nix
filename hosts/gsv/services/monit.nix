@@ -1,4 +1,4 @@
-{ private-settings, ... }:
+{ private-settings, secrets, ... }:
 let
   inherit (private-settings) contact monitAdminPassword;
 in
@@ -21,5 +21,5 @@ in
   };
 
   # activate telegram notifications
-  sops.secrets.telegram-bot = { };
+  age.secrets.telegram-bot.rekeyFile = secrets.monit-telegram-bot;
 }

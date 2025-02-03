@@ -1,5 +1,6 @@
 {
   outputs,
+  pkgs,
   lib,
   config,
   ...
@@ -35,8 +36,19 @@ in
     );
   };
 
-  security.pam.sshAgentAuth = {
-    enable = true;
-    authorizedKeysFiles = [ "/etc/ssh/authorized_keys.d/%u" ];
+  security.pam = {
+    sshAgentAuth = {
+      enable = true;
+      authorizedKeysFiles = [ "/etc/ssh/authorized_keys.d/%u" ];
+    };
+
+    services.sudo.rules.auth.rssh = {
+      order = config.rules.auth.ssh_agent_order - 1;
+      control = "sufficient";
+      modulePath = "${pkgs.pam_rssh}/lib/libpam_rssh.so";
+      settings.authorized_key_command = pkgs.writeShellScript "get-authorized-keys" ''
+        cat "/etc/ssh/authorized_keys.d/$1"
+      '';
+    };
   };
 }

@@ -6,8 +6,6 @@
   ...
 }:
 {
-  imports = (builtins.attrValues outputs.homeModules);
-
   nixpkgs = {
     overlays = builtins.attrValues outputs.overlays;
     config = {
@@ -27,7 +25,16 @@
     };
   };
 
+  age.enable = true;
   programs.home-manager.enable = true;
+
+  programs.bash = {
+    enable = true;
+    sessionVariables = {
+      AGENIX_REKEY_PRIMARY_IDENTITY = "${builtins.readFile ../../ssh.pub}";
+      AGENIX_REKEY_PRIMARY_IDENTITY_ONLY = true;
+    };
+  };
 
   home = {
     username = lib.mkDefault "marie";

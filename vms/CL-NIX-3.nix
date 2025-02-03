@@ -1,10 +1,33 @@
-{ lib, pkgs, ... }:
 {
-  _module.args.defaultUser = "marie";
+  lib,
+  pkgs,
+  inputs,
+  outputs,
+  private-settings,
+  secrets,
+  ...
+}:
+{
   imports = [
-    ./_common.nix
+    inputs.home-manager.nixosModules.home-manager
     ../users/marie/user.nix
   ];
+
+  home-manager.users.marie.imports = [
+    inputs.agenix.homeManagerModules.default
+    inputs.agenix-rekey.homeManagerModules.default
+    inputs.nix-colors.homeManagerModules.colorScheme
+    inputs.nixvim.homeManagerModules.nixvim
+    inputs.plasma-manager.homeManagerModules.plasma-manager
+  ] ++ (builtins.attrValues outputs.homeModules);
+  home-manager.extraSpecialArgs = {
+    inherit
+      inputs
+      outputs
+      private-settings
+      secrets
+      ;
+  };
 
   soundConfig.enable = true;
 

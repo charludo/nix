@@ -5,8 +5,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 3012;
     name = "SRV-CLOUDSYNC";
@@ -20,9 +18,8 @@
 
   nas.enable = true;
 
-  sops.secrets.borg = {
-    sopsFile = secrets.cloudsync;
-  };
+  age.secrets.borg.rekeyFile = secrets.cloudsync-borg;
+
   services.borgbackup.jobs.remoteBackup = {
     paths = [ "${config.nas.location}/CloudSync" ];
     exclude = [
@@ -34,7 +31,7 @@
     repo = "${private-settings.domains.cloudsync}:pakiplace";
     encryption = {
       mode = "repokey";
-      passCommand = "cat ${config.sops.secrets.borg.path}";
+      passCommand = "cat ${config.age.secrets.borg.path}";
     };
     environment = {
       BORG_RSH = "ssh -p 23 -i /etc/ssh/ssh_host_ed25519_key";

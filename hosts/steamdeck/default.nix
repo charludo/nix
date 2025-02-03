@@ -1,14 +1,11 @@
-{ pkgs, inputs, ... }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
-    inputs.nix-flatpak.nixosModules.nix-flatpak
-
     ./hardware-configuration.nix
     ../common
     ../../users/charlotte/user.nix
   ];
 
+  fish.enable = true;
   nvim.enable = true;
   plymouth.enable = true;
   plymouth.theme = "dark_planet";
@@ -46,8 +43,6 @@
       ];
     }
   ];
-  programs.fish.enable = true;
-  users.defaultUserShell = pkgs.fish;
 
   networking.networkmanager.enable = true;
   networking.hostName = "steamdeck";

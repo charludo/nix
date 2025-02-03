@@ -1,8 +1,6 @@
 {
-  outputs,
   lib,
   private-settings,
-  secrets,
   ...
 }:
 let
@@ -13,28 +11,24 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-
-    ../common/locale.nix
-    ../common/nix.nix
-    ../common/openssh.nix
-    ../common/sops.nix
-
+    ../common
     ./services
-  ] ++ (builtins.attrValues outputs.nixosModules);
+  ];
 
   # Override options set in the above imports
   nix.settings.trusted-users = lib.mkForce [ "root" ];
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
-  sops.defaultSopsFile = lib.mkForce secrets.gsv;
 
   # Make sure we can get on the system via ssh
   users.users."${gsv.user}".openssh.authorizedKeys.keys = [ publicKey ];
   services.openssh.ports = [ gsv.port ];
-  console.keyMap = "us-acentos";
+
+  snow.targetHost = "root@${gsv.ip}";
 
   # Networking config
   networking = {
     hostName = hostName;
+    domain = null;
     hostId = gsv.hostId;
     useDHCP = false;
     enableIPv6 = false;

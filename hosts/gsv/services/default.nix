@@ -1,4 +1,9 @@
-{ lib, private-settings, ... }:
+{
+  lib,
+  private-settings,
+  secrets,
+  ...
+}:
 let
   inherit (private-settings) gsv contact;
 in
@@ -22,7 +27,7 @@ in
   ];
 
   # SSL certificate
-  sops.secrets.cloudflare = { };
+  age.secrets.cloudflare.rekeyFile = secrets.gsv-cloudflare;
   security.acme = {
     acceptTerms = true;
     defaults = {

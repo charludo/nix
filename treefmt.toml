@@ -1,4 +1,5 @@
-excludes = ["*.pub", "*.png", "*.lock", "*.md", "*toml", ".gitignore", "*.yml"]
+excludes = ["*.pub", "*.png", "*.lock", "*.md", "*toml", "private-settings", ".git*", "*.yml"]
+
 
 [formatter.nixfmt-rfc-style]
 command = "nixfmt"

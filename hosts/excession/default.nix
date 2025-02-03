@@ -1,10 +1,6 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
-    inputs.nix-flatpak.nixosModules.nix-flatpak
-    inputs.nixos-hardware.nixosModules.gigabyte-b550
-
     ./hardware-configuration.nix
     ../common
     ../../users/charlotte/user.nix
@@ -13,6 +9,7 @@
   nas.enable = true;
   nas.backup.enable = true;
 
+  age.enable = true;
   bluetooth.enable = true;
   fish.enable = true;
   greetd.enable = true;

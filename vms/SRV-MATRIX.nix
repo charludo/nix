@@ -10,8 +10,6 @@ let
   inherit (private-settings) domains;
 in
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2206;
     name = "SRV-MATRIX";
@@ -24,8 +22,8 @@ in
     networking.openPorts.tcp = config.services.conduwuit.settings.global.port;
   };
 
-  sops.secrets.turn = {
-    sopsFile = secrets.gsv;
+  age.secrets.turn = {
+    rekeyFile = secrets.gsv-turn;
     owner = config.services.conduwuit.user;
   };
 
@@ -47,7 +45,7 @@ in
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
         "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
       ];
-      turn_secret_file = config.sops.secrets.turn.path;
+      turn_secret_file = config.age.secrets.turn.path;
 
       new_user_displayname_suffix = "";
       max_request_size = 1000000000; # 1GB

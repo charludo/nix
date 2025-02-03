@@ -5,8 +5,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2205;
     name = "SRV-IMMICH";
@@ -21,9 +19,7 @@
     extraGroups = [ "nas" ];
   };
   users.groups."${config.services.immich.group}".gid = 1111;
-  sops.secrets.nas = {
-    sopsFile = secrets.nas;
-  };
+  age.secrets.nas.rekeyFile = secrets.nas;
 
   services.immich = {
     enable = true;
@@ -49,7 +45,7 @@
         let
           automount_opts = "uid=1111,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
         in
-        "${automount_opts},credentials=${config.sops.secrets.nas.path}";
+        "${automount_opts},credentials=${config.age.secrets.nas.path}";
       wantedBy = [ "multi-user.target" ];
     }
   ];

@@ -1,7 +1,5 @@
 { pkgs, private-settings, ... }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2202;
     name = "SRV-PDF";

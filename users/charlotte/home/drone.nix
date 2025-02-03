@@ -24,6 +24,7 @@ in
   ];
 
   home.packages = [ pkgs.zoom-us ];
+  home.hostname = "drone";
 
   # Use this method for built-in schemes:
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
@@ -92,4 +93,10 @@ in
 
   # Projects to manage on this machine
   projects = private-settings.projects;
+
+  programs.fish.interactiveShellInit = # fish
+    ''
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../perostek_age.pub}"
+      set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
+    '';
 }

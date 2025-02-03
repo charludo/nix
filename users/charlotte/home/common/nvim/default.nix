@@ -1,7 +1,6 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 {
   imports = [
-    inputs.nixvim.homeManagerModules.nixvim
     ./ergonomical
     ./languages
     ./technical

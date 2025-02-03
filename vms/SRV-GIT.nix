@@ -5,8 +5,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2212;
     name = "SRV-GIT";

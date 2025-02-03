@@ -2,6 +2,7 @@
   config,
   pkgs,
   private-settings,
+  secrets,
   ...
 }:
 let
@@ -9,7 +10,8 @@ let
     name = "pinentry-fake";
     runtimeInputs = [ pkgs.bat ];
     text = ''
-      echo "D $(cat ${config.sops.secrets."bitwarden/pass".path})"
+      # shellcheck disable=SC2086
+      echo "D $(cat ${config.age.secrets.bitwarden-pass.path})"
       echo "OK"
     '';
   };
@@ -22,7 +24,8 @@ let
     ];
     text = ''
       rbw config set pinentry "pinentry-fake"
-      rbw config set email "$(cat ${config.sops.secrets."bitwarden/mail".path})"
+      # shellcheck disable=SC2086
+      rbw config set email "$(cat ${config.age.secrets.bitwarden-mail.path})"
       rbw config set base_url "https://passwords.${private-settings.domains.home}"
       rbw unlock
     '';
@@ -37,6 +40,6 @@ in
     rbw-unlock
   ];
 
-  sops.secrets."bitwarden/mail" = { };
-  sops.secrets."bitwarden/pass" = { };
+  age.secrets.bitwarden-mail.rekeyFile = secrets.charlotte-bitwarden-mail;
+  age.secrets.bitwarden-pass.rekeyFile = secrets.charlotte-bitwarden-pass;
 }

@@ -28,7 +28,7 @@ let
       pkgs.ffmpeg
     ];
     text = ''
-      url="$(cat ${config.sops.secrets.anime-playlist.path})"
+      url="$(cat ${config.age.secrets.anime-playlist.path})"
       target="${config.nas.location}/Musik/Anime"
 
       yt-dlp --verbose --cookies "''${target}/cookies.txt" \
@@ -40,10 +40,6 @@ let
   };
 in
 {
-  imports = [
-    ./_common.nix
-  ];
-
   nixpkgs.config.permittedInsecurePackages = [
     "dotnet-sdk-6.0.428"
     "aspnetcore-runtime-6.0.36"
@@ -109,7 +105,7 @@ in
     idagio.enable = true;
     idagio.openFirewall = true;
     idagio.host = config.vm.networking.address;
-    idagio.configLocation = config.sops.secrets.idagio.path;
+    idagio.configLocation = config.age.secrets.idagio.path;
     idagio.package = inputs.idagio.packages.x86_64-linux.default;
   };
 
@@ -134,19 +130,19 @@ in
     config.services.nzbget.user
   ];
 
-  sops.secrets.nzbget = {
-    sopsFile = secrets.torrenter;
+  age.secrets.nzbget = {
+    rekeyFile = secrets.torrenter-nzbget;
     owner = config.services.nzbget.user;
     path = "/var/lib/nzbget/nzbget.conf";
   };
 
-  sops.secrets.anime-playlist = {
-    sopsFile = secrets.torrenter;
+  age.secrets.anime-playlist = {
+    rekeyFile = secrets.torrenter-anime-playlist;
     mode = "0444";
   };
 
-  sops.secrets.idagio = {
-    sopsFile = secrets.torrenter;
+  age.secrets.idagio = {
+    rekeyFile = secrets.torrenter-idagio;
     mode = "0444";
   };
 

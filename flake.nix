@@ -4,10 +4,18 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-    home-manager.url = "github:nix-community/home-manager";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixvim = {
       url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -16,10 +24,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nix-colors.url = "github:misterio77/nix-colors";
+    mailserver = {
+      url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    sops-nix = {
-      url = "github:mic92/sops-nix";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    agenix-rekey = {
+      url = "github:oddlama/agenix-rekey";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -29,32 +44,17 @@
       inputs.home-manager.follows = "home-manager";
     };
 
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-colors.url = "github:misterio77/nix-colors";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.4.1";
-
-    mailserver = {
-      url = "gitlab:simple-nixos-mailserver/nixos-mailserver";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    musnix = {
-      url = "github:musnix/musnix";
-    };
-    conduwuit = {
-      url = "github:girlbossceo/conduwuit";
-    };
+    musnix.url = "github:musnix/musnix";
+    conduwuit.url = "github:girlbossceo/conduwuit";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    private-settings.url = "git+ssh://git@github.com/charludo/nix-private";
     personal-site.url = "git+ssh://git@github.com/charludo/personal-site";
     blog-site.url = "git+ssh://git@github.com/charludo/barely-website";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
@@ -65,10 +65,18 @@
     {
       self,
       nixpkgs,
+      agenix,
+      agenix-rekey,
       home-manager,
       jovian,
-      private-settings,
+      mailserver,
       musnix,
+      nix-colors,
+      nix-flatpak,
+      nixos-generators,
+      nixos-hardware,
+      nixvim,
+      plasma-manager,
       ...
     }@inputs:
     let
@@ -77,71 +85,111 @@
 
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      private-settings-module = {
-        config = {
-          _module.args.private-settings = private-settings;
-          _module.args.secrets = private-settings.secrets;
-        };
-      };
+
+      private-settings = import ./private-settings/settings.nix { inherit lib; };
+      secrets = import ./private-settings/secrets.nix { inherit lib; };
     in
     {
       inherit lib;
-      nixosModules =
-        (import ./modules/nixos)
-        // jovian.outputs.nixosModules
-        // musnix.nixosModules
-        // private-settings-module;
-      homeModules = (import ./modules/home-manager) // private-settings-module;
+      nixosModules.common = import ./modules/nixos;
+      homeModules.common = import ./modules/home-manager;
       overlays = import ./overlays { inherit inputs outputs; };
 
-      # Available through 'nixos-rebuild --flake .#hostname'
       nixosConfigurations =
-        {
-          # Desktop
-          hub = lib.nixosSystem {
-            modules = [ ./hosts/hub ];
-            specialArgs = { inherit inputs outputs; };
-          };
+        let
+          homeModulesForOsConfig = [
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.extraSpecialArgs = {
+                inherit
+                  inputs
+                  outputs
+                  private-settings
+                  secrets
+                  ;
+              };
+              home-manager.sharedModules = [
+                self.homeModules.common
+                {
+                  imports = [
+                    agenix.homeManagerModules.default
+                    agenix-rekey.homeManagerModules.default
+                    nix-colors.homeManagerModules.colorScheme
+                    nixvim.homeManagerModules.nixvim
+                    plasma-manager.homeManagerModules.plasma-manager
+                  ];
+                }
+              ] ++ (builtins.attrValues self.homeModules);
+            }
+          ];
 
-          # Laptop
-          drone = lib.nixosSystem {
-            modules = [ ./hosts/drone ];
-            specialArgs = { inherit inputs outputs; };
+          mkOsConfig = hostname: enableHomeManager: extraModules: {
+            name = hostname;
+            value = lib.nixosSystem {
+              modules =
+                [
+                  self.nixosModules.common
+                  agenix.nixosModules.default
+                  agenix-rekey.nixosModules.default
+                ]
+                ++ (builtins.attrValues self.nixosModules)
+                ++ [ ./hosts/${hostname} ]
+                ++ lib.optionals enableHomeManager homeModulesForOsConfig
+                ++ extraModules;
+              specialArgs = {
+                inherit
+                  inputs
+                  outputs
+                  private-settings
+                  secrets
+                  ;
+              };
+            };
           };
+        in
+        lib.listToAttrs [
+          (mkOsConfig "hub" true [ nixos-hardware.nixosModules.gigabyte-b550 ])
+          (mkOsConfig "excession" true [
+            nixos-hardware.nixosModules.gigabyte-b550
+            nix-flatpak.nixosModules.nix-flatpak
+          ])
 
-          # Laptop Mallorca
-          mallorca = lib.nixosSystem {
-            modules = [ ./hosts/mallorca ];
-            specialArgs = { inherit inputs outputs; };
-          };
+          (mkOsConfig "drone" true [ musnix.nixosModules.default ])
+          (mkOsConfig "mallorca" true [ ])
+          (mkOsConfig "steamdeck" true [
+            nix-flatpak.nixosModules.nix-flatpak
+            jovian.outputs.nixosModules.default
+          ])
 
-          # Gaming
-          excession = lib.nixosSystem {
-            modules = [ ./hosts/excession ];
-            specialArgs = { inherit inputs outputs; };
-          };
-
-          # Gaming Mk II
-          steamdeck = lib.nixosSystem {
-            modules = [ ./hosts/steamdeck ];
-            specialArgs = { inherit inputs outputs; };
-          };
-
-          # nixos-rebuild switch --flake ".#gsv" --target-host gsv
-          gsv = lib.nixosSystem {
-            modules = [ ./hosts/gsv ];
-            specialArgs = { inherit inputs outputs; };
-          };
-        }
-        //
-        # VMs
-        builtins.listToAttrs (
+          (mkOsConfig "gsv" true [ mailserver.nixosModules.mailserver ])
+        ]
+        // builtins.listToAttrs (
           builtins.map
             (name: {
               inherit name;
               value = lib.nixosSystem {
-                modules = [ ./vms/${name}.nix ];
-                specialArgs = { inherit inputs outputs; };
+                modules = [
+                  self.nixosModules.common
+                  agenix.nixosModules.default
+                  agenix-rekey.nixosModules.default
+
+                  nixos-generators.nixosModules.all-formats
+                  "${nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
+                  "${nixpkgs}/nixos/modules/virtualisation/proxmox-image.nix"
+
+                  ./vms/${name}.nix
+                  ./modules/vms
+                  ./hosts/common
+                  ./users/paki/user.nix
+                ] ++ (builtins.attrValues self.nixosModules);
+                specialArgs = {
+                  inherit
+                    inputs
+                    outputs
+                    private-settings
+                    secrets
+                    ;
+                };
               };
             })
             (
@@ -154,34 +202,46 @@
             )
         );
 
-      # Available through 'home-manager --flake .#username@hostname'
-      homeConfigurations = {
-        "charlotte@hub" = lib.homeManagerConfiguration {
-          modules = [ ./users/charlotte/home/hub.nix ];
-          pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit inputs outputs; };
-        };
+      homeConfigurations =
+        let
+          mkHomeConfig = username: hostname: extraModules: {
+            name = "${username}@${hostname}";
+            value = lib.homeManagerConfiguration {
+              modules =
+                [
+                  self.homeModules.common
+                  agenix.homeManagerModules.default
+                  agenix-rekey.homeManagerModules.default
+                  nix-colors.homeManagerModules.colorScheme
+                  nixvim.homeManagerModules.nixvim
+                ]
+                ++ (builtins.attrValues self.homeModules)
+                ++ [ ./users/${username}/home/${hostname}.nix ]
+                ++ extraModules;
+              pkgs = nixpkgs.legacyPackages.${system};
+              extraSpecialArgs = {
+                inherit
+                  inputs
+                  outputs
+                  private-settings
+                  secrets
+                  ;
+              };
+            };
+          };
+        in
+        lib.listToAttrs [
+          (mkHomeConfig "charlotte" "hub" [ ])
+          (mkHomeConfig "charlotte" "excession" [ ])
 
-        "charlotte@drone" = lib.homeManagerConfiguration {
-          modules = [ ./users/charlotte/home/drone.nix ];
-          pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit inputs outputs; };
-        };
+          (mkHomeConfig "charlotte" "drone" [ ])
+          (mkHomeConfig "charlotte" "mallorca" [ ])
 
-        "charlotte@excession" = lib.homeManagerConfiguration {
-          modules = [ ./users/charlotte/home/excession.nix ];
-          pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit inputs outputs; };
-        };
+          (mkHomeConfig "charlotte" "CL-ROU" [ ])
+          (mkHomeConfig "marie" "CL-NIX-1" [ plasma-manager.homeManagerModules.plasma-manager ])
+          (mkHomeConfig "marie" "CL-NIX-3" [ plasma-manager.homeManagerModules.plasma-manager ])
+        ];
 
-        "charlotte@mallorca" = lib.homeManagerConfiguration {
-          modules = [ ./users/charlotte/home/mallorca.nix ];
-          pkgs = nixpkgs.legacyPackages.${system};
-          extraSpecialArgs = { inherit inputs outputs; };
-        };
-      };
-
-      # Available through 'nix develop ".#shellname"'
       devShells.${system} = {
         keyctl = (import ./shells/keyctl { inherit pkgs; });
         vmctl = (import ./shells/vmctl { inherit pkgs; });
@@ -190,5 +250,12 @@
       };
 
       formatter.${system} = pkgs.treefmt;
+
+      agenix-rekey = agenix-rekey.configure {
+        userFlake = self;
+        nixosConfigurations = self.nixosConfigurations;
+        homeConfigurations = self.homeConfigurations;
+        collectHomeManagerConfigurations = true;
+      };
     };
 }

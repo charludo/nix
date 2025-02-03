@@ -18,7 +18,8 @@
     port = 51867;
     ip = "192.168.42.2/30";
     secrets = {
-      secretsFile = secrets.gsv;
+      secretsFilePrivate = secrets.gsv-wg-private;
+      secretsFilePreshared = secrets.gsv-wg-preshared;
       remotePublicKey = private-settings.wireguard.publicKeys.gsv;
     };
   };

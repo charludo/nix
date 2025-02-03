@@ -5,8 +5,6 @@
   ...
 }:
 {
-  imports = [ ./_common.nix ];
-
   vm = {
     id = 2204;
     name = "SRV-WASTEBIN";
@@ -19,12 +17,11 @@
     networking.openPorts.udp = [ 8080 ];
   };
 
-  sops.secrets.wastebin = {
-    sopsFile = secrets.wastebin;
-  };
+  age.secrets.wastebin.rekeyFile = secrets.wastebin;
+
   services.wastebin = {
     enable = true;
-    secretFile = config.sops.secrets.wastebin.path;
+    secretFile = config.age.secrets.wastebin.path;
     settings = {
       WASTEBIN_BASE_URL = private-settings.domains.wastebin;
       WASTEBIN_ADDRESS_PORT = "0.0.0.0:8080";

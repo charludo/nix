@@ -19,6 +19,8 @@
         "font.name.sans-serif.x-western" = "${config.fontProfiles.regular.family}";
         "mailnews.start_page.enabled" = false;
         "mail.spam.markAsReadOnSpam" = true;
+        "mail.openpgp.allow_external_gnupg" = true;
+        "mail.openpgp.fetch_pubkeys_from_gnupg" = true;
         "mailnews.default_news_view_flags" = 0;
         "mailnews.default_view_flags" = 0;
         "toolkit.legacyUserProfileCustomizations.stylesheets" = false; # disables the userChorme below, since it's currently not in use

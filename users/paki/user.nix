@@ -8,10 +8,7 @@ let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
-  sops.secrets.paki-password = {
-    neededForUsers = true;
-    sopsFile = secrets.paki;
-  };
+  age.secrets.paki-password.rekeyFile = secrets.paki-password;
 
   users.users.paki = {
     isNormalUser = true;
@@ -27,8 +24,11 @@ in
         "git"
       ];
 
-    hashedPasswordFile = config.sops.secrets.paki-password.path;
+    hashedPasswordFile = config.age.secrets.paki-password.path;
     openssh.authorizedKeys.keys = [
+      (builtins.readFile ../charlotte/zakalwe_ssh.pub)
+      (builtins.readFile ../charlotte/perostek_ssh.pub)
+      (builtins.readFile ../charlotte/diziet_ssh.pub)
       (builtins.readFile ../charlotte/ssh.pub)
       (builtins.readFile ../marie/ssh.pub)
     ];

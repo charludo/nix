@@ -5,7 +5,6 @@
   ...
 }:
 {
-  _module.args.defaultUser = "charlotte";
   imports = [
     ./hardware-configuration.nix
     ../common
@@ -15,10 +14,11 @@
   nas.enable = false;
   nas.backup.enable = false;
 
+  age.enable = true;
   fish.enable = true;
-  nicerFonts.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
+  nicerFonts.enable = true;
   nvim.enable = true;
   plymouth.enable = true;
   plymouth.theme = "red_loader";
@@ -45,7 +45,8 @@
     port = 51865;
     ip = "192.168.150.12/32";
     secrets = {
-      secretsFile = secrets.drone;
+      secretsFilePrivate = secrets.drone-wg-private;
+      secretsFilePreshared = secrets.drone-wg-preshared;
       remotePublicKey = private-settings.wireguard.publicKeys.drone;
     };
   };

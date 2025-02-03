@@ -23,6 +23,8 @@ in
     ./common/desktop/hyprland
   ];
 
+  home.hostname = "mallorca";
+
   # Use this method for built-in schemes:
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
 

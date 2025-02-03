@@ -10,4 +10,5 @@ in
   ];
 
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
+  home.hostname = "steamdeck";
 }

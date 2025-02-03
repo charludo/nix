@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  secrets,
+  ...
+}:
 
 with lib;
 let
@@ -10,14 +15,15 @@ in
   };
 
   config = mkIf cfg.enable {
-    sops.secrets.zammad = {
+    age.secrets.zammad = {
+      rekeyFile = secrets.zammad;
       mode = "0444";
       path = "/var/lib/zammad/secret";
     };
     services.zammad = {
       enable = true;
       openPorts = true;
-      secretKeyBaseFile = config.sops.secrets.zammad.path;
+      secretKeyBaseFile = config.age.secrets.zammad.path;
     };
   };
 }

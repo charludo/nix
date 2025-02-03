@@ -5,7 +5,7 @@ pkgs.writers.writePython3Bin "waybar-mail" { libraries = [ ]; } # python
     import configparser
 
     accounts = configparser.RawConfigParser()
-    accounts.read("${config.sops.secrets.waybar-mail.path}")
+    accounts.read("${config.age.secrets.waybar-mail.path}")
     strFormatted = ""
 
 
