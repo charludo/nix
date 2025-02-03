@@ -51,7 +51,7 @@ in
 
     hardware.cores = 4;
     hardware.memory = 24576;
-    hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
+    hardware.storage = "128G";
 
     networking.nameservers = [ "1.1.1.1" ];
   };

@@ -33,12 +33,16 @@ in
         hostname = "192.168.30.15";
         user = "root";
       };
+      proxmox2 = {
+        hostname = "192.168.30.16";
+        user = "root";
+      };
       home-assistant = {
         hostname = "192.168.10.27";
         user = "root";
       };
 
-      "* !proxmox !home-assistant !gsv !gsv-boot" = {
+      "* !proxmox !proxmox2 !home-assistant !gsv !gsv-boot" = {
         user = "paki";
       };
       "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames vms)}".extraOptions = {

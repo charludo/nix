@@ -37,10 +37,12 @@
 
     networking.openPorts.tcp = [ 8000 ];
     networking.openPorts.udp = [ 8000 ];
+    runOnSecondHost = true;
   };
 
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
+  snow.enable = true;
 
   system.stateVersion = "23.11";
 }

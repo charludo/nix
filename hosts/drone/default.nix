@@ -17,6 +17,7 @@
   soundConfig.enable = true;
   soundConfig.enableCombinedAdapter = true;
   screensharing.enable = true;
+  snow.enable = true;
   surfshark.enable = true;
   suspend.enable = true;
   wifi.enable = true;

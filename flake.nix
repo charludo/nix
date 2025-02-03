@@ -14,6 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    snow = {
+      url = "git+ssh://git@github.com/charludo/snow";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -77,6 +82,7 @@
       nixos-hardware,
       nixvim,
       plasma-manager,
+      snow,
       ...
     }@inputs:
     let
@@ -131,6 +137,7 @@
                   self.nixosModules.common
                   agenix.nixosModules.default
                   agenix-rekey.nixosModules.default
+                  snow.nixosModules.default
                 ]
                 ++ (builtins.attrValues self.nixosModules)
                 ++ [ ./hosts/${hostname} ]
@@ -172,6 +179,7 @@
                   self.nixosModules.common
                   agenix.nixosModules.default
                   agenix-rekey.nixosModules.default
+                  snow.nixosModules.default
 
                   nixos-generators.nixosModules.all-formats
                   "${nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
@@ -243,8 +251,6 @@
         ];
 
       devShells.${system} = {
-        keyctl = (import ./shells/keyctl { inherit pkgs; });
-        vmctl = (import ./shells/vmctl { inherit pkgs; });
         remux = (import ./shells/remux { inherit pkgs lib; });
         default = (import ./shells { inherit pkgs; });
       };

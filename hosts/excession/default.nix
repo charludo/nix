@@ -18,6 +18,7 @@
   nvim.enable = true;
   printers.enable = true;
   screensharing.enable = true;
+  snow.enable = true;
   soundConfig.enable = true;
   steamOpenFirewall.enable = true;
   surfshark.enable = true;

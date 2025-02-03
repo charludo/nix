@@ -16,7 +16,7 @@
       in
       # css
       ''
-        @define-color progress  alpha(#${palette.base0E}, 0.05);
+        @define-color progress  alpha(#${palette.base0E}, 0.1);
         window {
           background-color: transparent;
         }

@@ -1757,17 +1757,17 @@
         "utils": "utils_6"
       },
       "locked": {
-        "lastModified": 1738587910,
-        "narHash": "sha256-v2mt6wDhhXAASOmDQtv+gvN4SkC0JRqnXrn6T/70dAQ=",
+        "lastModified": 1739265406,
+        "narHash": "sha256-ZWWaAlwMqVz9iEuXRBiYqjCjkoFp4UDcdc0j1cWkNWY=",
         "ref": "refs/heads/main",
-        "rev": "854691357a6b365ca66f576e5dd950898983cb73",
+        "rev": "78c029c5634d608bfae7279fd7bd7730defbd21f",
         "revCount": 1,
         "type": "git",
-        "url": "file:///home/charlotte/Projekte/snow"
+        "url": "ssh://git@github.com/charludo/snow"
       },
       "original": {
         "type": "git",
-        "url": "file:///home/charlotte/Projekte/snow"
+        "url": "ssh://git@github.com/charludo/snow"
       }
     },
     "systems": {

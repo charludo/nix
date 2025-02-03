@@ -26,6 +26,11 @@ in
       storage = lib.mkOption { type = lib.types.str; };
     };
 
+    runOnSecondHost = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+    };
+
     networking = {
       address = lib.mkOption {
         type = lib.types.str;
@@ -74,7 +79,7 @@ in
       memory = config.vm.hardware.memory;
       bios = lib.mkDefault "ovmf";
       name = config.vm.name;
-      additionalSpace = config.vm.hardware.storage;
+      additionalSpace = "1G";
       bootSize = lib.mkDefault "256M";
       net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${
         builtins.substring 0 2 (toString config.vm.id)
@@ -90,6 +95,22 @@ in
     virtualisation.diskSize = "auto";
 
     nvim.enable = true;
+
+    snow = {
+      tags = [ "vm" ] ++ (lib.optionals (!config.nas.backup.enable) [ "stateless" ]);
+      useRemoteSudo = lib.mkDefault true;
+      buildOnTarget = lib.mkDefault false;
+      targetHost = lib.mkDefault "paki@${config.vm.networking.address}";
+      buildHost = lib.mkDefault null;
+
+      vm = {
+        id = cfg.id;
+        ip = cfg.networking.address;
+        proxmoxHost = lib.mkDefault (if cfg.runOnSecondHost then "proxmox2" else "proxmox");
+        proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
+        resizeDiskBy = cfg.hardware.storage;
+      };
+    };
 
     networking = {
       hostName = config.vm.name;

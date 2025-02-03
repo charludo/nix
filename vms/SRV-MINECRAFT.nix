@@ -12,7 +12,8 @@
 
     hardware.cores = 4;
     hardware.memory = 8192;
-    hardware.storage = "2G"; # expand to 64G
+    hardware.storage = "64G";
+    runOnSecondHost = true;
   };
 
   services.minecraft-server = {

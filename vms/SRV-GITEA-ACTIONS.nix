@@ -48,6 +48,7 @@ in
     hardware.cores = 4;
     hardware.memory = 16384;
     hardware.storage = "16G";
+    runOnSecondHost = true;
   };
 
   users.users.nixuser = {
@@ -208,7 +209,7 @@ in
         labels = [
           "ubuntu-latest:docker://gitea/runner-images:ubuntu-latest"
           "python:docker://cimg/python"
-          "rust:docker://cimg/rust"
+          "rust:docker://rust"
         ];
       };
     };

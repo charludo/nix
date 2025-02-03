@@ -6,7 +6,7 @@
 
     hardware.cores = 4;
     hardware.memory = 8192;
-    hardware.storage = "16G";
+    hardware.storage = "32G";
 
     networking.nameservers = [ "1.1.1.1" ];
   };

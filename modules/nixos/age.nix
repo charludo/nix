@@ -20,7 +20,17 @@ in
     age.rekey = {
       hostPubkey = lib.mkDefault (
         if (lib.hasAttr "networking" config) then
-          (if lib.pathExists hostPath then hostPath else vmPath)
+          (
+            if lib.pathExists hostPath then
+              hostPath
+            else
+              (
+                if lib.pathExists vmPath then
+                  vmPath
+                else
+                  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN8hb7uYM6Nwlshdc9n7YmnDSyXkOK2CqbizvA1Gr4rO dummy"
+              )
+          )
         else
           userPath
       );

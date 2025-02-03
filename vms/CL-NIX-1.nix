@@ -33,6 +33,7 @@
 
   users.mutableUsers = lib.mkForce true;
   nas.backup.enable = true;
+  snow.enable = true;
 
   vm = {
     id = 3020;
@@ -40,7 +41,7 @@
 
     hardware.cores = 4;
     hardware.memory = 4096;
-    hardware.storage = "8G";
+    hardware.storage = "64G";
   };
 
   services.xserver.enable = true;

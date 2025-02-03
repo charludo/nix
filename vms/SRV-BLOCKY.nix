@@ -5,7 +5,7 @@
 
     hardware.cores = 1;
     hardware.memory = 1024;
-    hardware.storage = "2G";
+    hardware.storage = "8G";
 
     networking.address = "192.168.30.13";
     networking.gateway = "192.168.30.1";

@@ -2,6 +2,7 @@
   config,
   private-settings,
   secrets,
+  lib,
   ...
 }:
 {
@@ -20,6 +21,7 @@
   };
   users.groups."${config.services.immich.group}".gid = 1111;
   age.secrets.nas.rekeyFile = secrets.nas;
+  snow.tags = lib.mkForce [ "vm" ];
 
   services.immich = {
     enable = true;

@@ -6,9 +6,10 @@
 
     hardware.cores = 4;
     hardware.memory = 16384;
-    hardware.storage = "32G";
+    hardware.storage = "64G";
 
     networking.nameservers = [ "1.1.1.1" ];
+    runOnSecondHost = true;
   };
 
   services.jellyfin = rec {

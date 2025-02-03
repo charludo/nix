@@ -16,7 +16,7 @@ in
 
     hardware.cores = 2;
     hardware.memory = 8192;
-    hardware.storage = "4G"; # expand to 128G - not enough ram to do so directly lol
+    hardware.storage = "128G";
 
     networking.nameservers = [ "192.168.30.13" ];
     networking.openPorts.tcp = config.services.conduwuit.settings.global.port;
