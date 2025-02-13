@@ -4,9 +4,6 @@
   secrets,
   ...
 }:
-let
-  inherit (private-settings) gsv contact;
-in
 {
   imports = [
     ./blocky.nix
@@ -20,6 +17,7 @@ in
     ./monit.nix
     ./personal-site.nix
     ./radicale.nix
+    ./rmfakecloud.nix
     ./roundcube.nix
     # ./rustdesk.nix
     ./turn.nix
@@ -31,9 +29,9 @@ in
   security.acme = {
     acceptTerms = true;
     defaults = {
-      email = contact.acme;
+      email = private-settings.contact.acme;
       dnsProvider = "cloudflare";
-      dnsResolver = gsv.dnsResolver;
+      dnsResolver = "1.1.1.1:53";
     };
   };
 

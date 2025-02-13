@@ -7,7 +7,7 @@ in
     package = firefox;
     enable = true;
     profiles.charlotte = {
-      extensions = with pkgs.inputs.firefox-addons; [
+      extensions.packages = with pkgs.inputs.firefox-addons; [
         # bitwarden
         facebook-container
         sponsorblock

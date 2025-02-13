@@ -40,6 +40,7 @@
     runOnSecondHost = true;
   };
 
+  ld.enable = true;
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
   snow.enable = true;

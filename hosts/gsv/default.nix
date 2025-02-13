@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   private-settings,
   ...
 }:
@@ -49,6 +50,12 @@ in
       ];
     };
   };
+
+  # Debugging tools
+  environment.systemPackages = [
+    pkgs.dig
+    pkgs.openssl
+  ];
 
   # Boot partition is mirrored over all ZFS mirrors
   fileSystems."/boot-1".options = [ "nofail" ];

@@ -53,7 +53,7 @@
   programs.firefox = {
     enable = true;
     profiles.marie = {
-      extensions = with pkgs.inputs.firefox-addons; [
+      extensions.packages = with pkgs.inputs.firefox-addons; [
         facebook-container
         sponsorblock
         ublock-origin
