@@ -20,24 +20,25 @@ in
         texthl = "DapLogPoint";
       };
     };
-    extensions = {
-      dap-python = {
-        enable = true;
-      };
-      dap-ui = {
-        enable = true;
-        floating.mappings = {
-          close = [
-            "<ESC>"
-            "q"
-          ];
-        };
-      };
-      dap-virtual-text = {
-        enable = true;
+    configurations = { };
+  };
+
+  programs.nixvim.plugins = {
+    dap-python = {
+      enable = true;
+    };
+    dap-ui = {
+      enable = true;
+      settings.floating.mappings = {
+        close = [
+          "<ESC>"
+          "q"
+        ];
       };
     };
-    configurations = { };
+    dap-virtual-text = {
+      enable = true;
+    };
   };
 
   programs.nixvim.keymaps = [

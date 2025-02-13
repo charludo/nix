@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, private-settings, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -26,6 +26,8 @@
   suspend.gigabyteFix = true;
   wifi.enable = true;
   programs.dconf.enable = true;
+
+  age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.zakalwe.sudoFile;
 
   nas.enable = true;
   nas.backup.enable = true;

@@ -17,7 +17,6 @@
   soundConfig.enable = true;
   soundConfig.enableCombinedAdapter = true;
   screensharing.enable = true;
-  snow.enable = true;
   surfshark.enable = true;
   suspend.enable = true;
   wifi.enable = true;
@@ -37,6 +36,8 @@
     "192.168.30.13"
     "1.1.1.1"
   ];
+
+  age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.perostek.sudoFile;
 
   wireguard = {
     enable = true;
@@ -62,6 +63,12 @@
       enable = true;
       nameList = "rtc0 snd";
     };
+  };
+
+  snow = {
+    enable = true;
+    useRemoteSudo = true;
+    buildOnTarget = false;
   };
 
   hardware.graphics.enable = true;

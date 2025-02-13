@@ -11,7 +11,6 @@ let
 in
 {
   age.secrets.charlotte-password.rekeyFile = secrets.charlotte-password;
-  age.secrets.yubikey-sudo.rekeyFile = secrets.yubikey-sudo;
   age.secrets.yubikey-diziet-ssh.rekeyFile = secrets.yubikey-diziet-ssh;
   age.secrets.yubikey-perostek-ssh.rekeyFile = secrets.yubikey-perostek-ssh;
   age.secrets.yubikey-zakalwe-ssh.rekeyFile = secrets.yubikey-zakalwe-ssh;

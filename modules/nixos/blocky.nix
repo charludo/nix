@@ -87,6 +87,25 @@ in
             ];
           };
         };
+        # customDNS = {
+        #   filterUnmappedTypes = true;
+        #   rewrite = builtins.listToAttrs (
+        #     map
+        #       (k: {
+        #         name = "notes.${private-settings.domains.personal}";
+        #         value = k;
+        #       })
+        #       [
+        #         "hwr-production-dot-remarkable-production.appspot.com"
+        #         "service-manager-production-dot-remarkable-production.appspot.com"
+        #         "local.appspot.com"
+        #         "my.remarkable.com"
+        #         "ping.remarkable.com"
+        #         "internal.cloud.remarkable.com"
+        #         "mystupidtest.de"
+        #       ]
+        #   );
+        # };
       };
     };
   };

@@ -21,8 +21,8 @@
   };
 
   iconsProfile = {
-    package = pkgs.oranchelo-icon-theme;
-    name = "Oranchelo";
+    package = pkgs.tela-icon-theme;
+    name = "Tela";
   };
 
   home.packages = [

@@ -1,11 +1,5 @@
+{ private-settings, secrets, ... }:
 {
-  private-settings,
-  secrets,
-  pkgs,
-  ...
-}:
-{
-  environment.systemPackages = [ pkgs.dig ];
   networking.nat.enable = true;
   networking.nat.externalInterface = private-settings.gsv.interface;
   networking.nat.internalInterfaces = [ "wg0" ];
@@ -23,4 +17,11 @@
       remotePublicKey = private-settings.wireguard.publicKeys.gsv;
     };
   };
+  # networking.interfaces.${private-settings.gsv.interface}.ipv4.routes = [
+  #   {
+  #     address = "192.168.0.0";
+  #     prefixLength = 16;
+  #     via = private-settings.gsv.gateway;
+  #   }
+  # ];
 }
