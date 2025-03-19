@@ -375,6 +375,6 @@ if __name__ == "__main__":
 
     path = get_file()
     remove_unwanted_tracks(path)
-    convert_subtitles(path)
+    # convert_subtitles(path)
     # convert_unsupported_audio(path)
     check_video_audio_present(path)
