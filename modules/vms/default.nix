@@ -97,7 +97,10 @@ in
     nvim.enable = true;
 
     snow = {
-      tags = [ "vm" ] ++ (lib.optionals (!config.nas.backup.enable) [ "stateless" ]);
+      tags =
+        [ "vm" ]
+        ++ (lib.optionals (!config.nas.backup.enable) [ "stateless" ])
+        ++ (lib.optionals (builtins.substring 0 2 config.networking.hostName == "CL") [ "client-vm" ]);
       useRemoteSudo = lib.mkDefault true;
       buildOnTarget = lib.mkDefault false;
       targetHost = lib.mkDefault "paki@${config.vm.networking.address}";
