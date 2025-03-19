@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   private-settings,
   ...
 }:
@@ -83,6 +84,13 @@ in
             presharedKeyFile = config.age.secrets.wg-preshared.path;
           }
         ];
+
+        preSetup = optional (cfg.allowedIPs == "0.0.0.0/0") ''
+          ${pkgs.iproute2}/bin/ip route add $(${pkgs.dig}/bin/dig +short ${private-settings.domains.vpn}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+        '';
+        postShutdown = optional (cfg.allowedIPs == "0.0.0.0/0") ''
+          ${pkgs.iproute2}/bin/ip route del $(${pkgs.dig}/bin/dig +short ${private-settings.domains.vpn}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+        '';
       };
     };
 
