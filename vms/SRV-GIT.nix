@@ -32,6 +32,14 @@
         ROOT_URL = "https://${DOMAIN}/";
         HTTP_PORT = 3000;
       };
+      cors = {
+        ENABLED = true;
+        ALLOW_DOMAIN = builtins.concatStringsSep ", " [
+          "https://*.${private-settings.domains.home}"
+          "https://*.${private-settings.domains.personal}"
+          "https://*.${private-settings.domains.blog}"
+        ];
+      };
       service.DISABLE_REGISTRATION = true;
       repository = {
         "signing.DEFAULT_TRUST_MODEL" = "collaboratorcommitter";
