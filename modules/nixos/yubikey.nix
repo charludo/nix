@@ -11,7 +11,7 @@ let
 
   yubikey-up =
     let
-      applicableKeys = filterAttrs (_: id: id.serial != null) cfg.identities;
+      applicableKeys = filterAttrs (_: id: id.serial != null && id.keyType == "ssh") cfg.identities;
       yubikeyPublics = concatStringsSep " " (
         mapAttrsToList (
           _: id: "[${builtins.toString id.publicKeyFile}]=\"${builtins.toString id.serial}\""
@@ -19,7 +19,7 @@ let
       );
       yubikeyPrivates = concatStringsSep " " (
         mapAttrsToList (
-          _: id: "[${builtins.toString id.publicKeyFile}]=\"${builtins.toString id.serial}\""
+          _: id: "[${builtins.toString id.privateKeyFile}]=\"${builtins.toString id.serial}\""
         ) applicableKeys
       );
     in
@@ -58,8 +58,12 @@ let
           exit 0
         fi
 
-        ln -sf "$private_file" "${cfg.sshDir}/id_yubikey"
-        ln -sf "$public_file" "${cfg.sshDir}/id_yubikey.pub"
+        cp "$private_file" "${cfg.sshDir}/id_yubikey"
+        cp "$public_file" "${cfg.sshDir}/id_yubikey.pub"
+
+        chmod 600 "${cfg.sshDir}/id_yubikey"
+        chown "$(stat -c "%U:%G" ${cfg.sshDir})" "${cfg.sshDir}/id_yubikey"
+        chown "$(stat -c "%U:%G" ${cfg.sshDir})" "${cfg.sshDir}/id_yubikey.pub"
       '';
     };
   yubikey-down = pkgs.writeShellApplication {
@@ -80,7 +84,7 @@ in
     identities = mkOption {
       internal = true;
       description = ''
-        A set od identities. See user.users.<name>.identities
+        A set of identities. See user.users.<name>.identities
       '';
     };
 
