@@ -13,7 +13,7 @@ pkgs.writeShellApplication {
     # Function to get player status, title, and progress
     get_player_info() {
         status=$(playerctl -p "$PLAYER" status 2>/dev/null)
-        if [ -z "$status" ]; then
+        if [[ "$status" != "Playing" && "$status" != "Paused" ]]; then
             echo ""
             return
         fi

@@ -6,7 +6,7 @@
   # The actual bars are configured in the host-specific files.
   programs.waybar = {
     enable = true;
-    systemd.enable = false;
+    systemd.enable = true;
     package = pkgs.waybar.overrideAttrs (oa: {
       mesonFlag = (oa.mesonFlag or [ ]) ++ [ "-Dexperimental=true" ];
     });
