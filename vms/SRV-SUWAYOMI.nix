@@ -1,4 +1,9 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  inputs,
+  ...
+}:
 {
   vm = {
     id = 2102;
@@ -35,14 +40,22 @@
 
     dataDir = "/var/lib/suwayomi-server";
 
-    settings.server.extensionRepos = [
-      "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
-      "https://raw.githubusercontent.com/ThePBone/tachiyomi-extensions-revived/repo/index.min.json"
-    ];
+    settings.server = {
+      extensionRepos = [
+        "https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json"
+        "https://raw.githubusercontent.com/ThePBone/tachiyomi-extensions-revived/repo/index.min.json"
+      ];
+      downloadAsCbz = true;
+      flareSolverrEnabled = true;
+      autoDownloadNewChapters = true;
+    };
   };
   users.groups.${config.services.suwayomi-server.user}.gid = 995;
 
-  services.flaresolverr.enable = false; # https://github.com/NixOS/nixpkgs/issues/332776
+  # https://github.com/NixOS/nixpkgs/issues/332776
+  imports = [ inputs.nur.modules.nixos.default ];
+  services.flaresolverr.enable = true;
+  services.flaresolverr.package = pkgs.nur.repos.xddxdd.flaresolverr-21hsmw;
 
   services.readarr = {
     enable = true;
