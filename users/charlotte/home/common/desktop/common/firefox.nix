@@ -128,6 +128,24 @@ in
             icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
             definedAliases = [ "@ns" ];
           };
+          "Nixpkgs Issues" = {
+            urls = [
+              {
+                template = "https://github.com/NixOS/nixpkgs/issues";
+                params = [
+                  {
+                    name = "q";
+                    value = "is:issue {searchTerms}";
+                  }
+                ];
+              }
+            ];
+            icon = "${pkgs.fetchurl {
+              url = "https://github.com/favicon.ico";
+              sha256 = "sha256-LuQyN9GWEAIQ8Xhue3O1fNFA9gE8Byxw29/9npvGlfg=";
+            }}";
+            definedAliases = [ "@ni" ];
+          };
           "Noogle" = {
             urls = [
               {
