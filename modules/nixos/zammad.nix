@@ -23,7 +23,9 @@ in
     services.zammad = {
       enable = true;
       openPorts = true;
+      database.port = 5433;
       secretKeyBaseFile = config.age.secrets.zammad.path;
     };
+    services.postgresql.settings.port = 5433;
   };
 }
