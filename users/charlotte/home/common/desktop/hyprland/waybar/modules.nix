@@ -7,7 +7,7 @@
 let
   curl = "${pkgs.curl}/bin/curl";
   rofi = "${pkgs.rofi-wayland}/bin/rofi";
-  firefox = "${pkgs.firefox}/bin/firefox";
+  librewolf = "${pkgs.librewolf}/bin/librewolf";
   thunderbird = "${pkgs.thunderbird}/bin/thunderbird";
   pavucontrol = "${pkgs.pavucontrol}/bin/pavucontrol";
 
@@ -53,13 +53,13 @@ in
   "custom/lemmy" = {
     exec = "${lemmy}";
     restart-interval = 1200;
-    on-click = "${firefox} --new-tab \"${private-settings.lemmyInstance}/inbox\"";
+    on-click = "${librewolf} --new-tab \"${private-settings.lemmyInstance}/inbox\"";
   };
 
   "custom/reddit" = {
     exec = "${reddit}";
     restart-interval = 1200;
-    on-click = "${firefox} --new-tab \"https://www.reddit.com/notifications/\"";
+    on-click = "${librewolf} --new-tab \"https://www.reddit.com/notifications/\"";
   };
 
   battery = {

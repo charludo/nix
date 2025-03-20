@@ -17,13 +17,5 @@ in
   config = mkIf cfg.enable {
     services.pcscd.enable = true;
     environment.systemPackages = [ pkgs.eid-mw ];
-
-    nixpkgs.overlays = [
-      (_final: prev: {
-        firefox = prev.firefox.overrideAttrs (old: {
-          pkcs11Modules = old.pkcs11Modules ++ [ pkgs.eid-mw ];
-        });
-      })
-    ];
   };
 }

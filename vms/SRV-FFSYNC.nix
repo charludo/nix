@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  private-settings,
   secrets,
   ...
 }:
@@ -11,7 +12,7 @@
 
     hardware.cores = 2;
     hardware.memory = 2048;
-    hardware.storage = "8G";
+    hardware.storage = "16G";
 
     runOnSecondHost = true;
     networking.openPorts.tcp = [ config.services.firefox-syncserver.settings.port ];
@@ -22,12 +23,13 @@
   services.firefox-syncserver = {
     enable = true;
     secrets = config.age.secrets.ffsync.path;
-    settings.hostname = "localhost";
+    settings.host = "0.0.0.0";
 
     singleNode = {
       enable = true;
-      hostname = "0.0.0.0";
       capacity = 2;
+      hostname = "0.0.0.0";
+      url = "https://ffsync.${private-settings.domains.home}";
     };
   };
 
