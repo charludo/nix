@@ -109,7 +109,7 @@
       inherit lib;
       nixosModules.common = import ./modules/nixos;
       homeModules.common = import ./modules/home-manager;
-      overlays = import ./overlays { inherit inputs outputs; };
+      overlays = import ./overlays { inherit inputs; };
 
       nixosConfigurations =
         let

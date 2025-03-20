@@ -367,7 +367,7 @@ in
 
     pkgs.cliphist
     pkgs.rofi-rbw
-    pkgs.rofi-emoji
+    pkgs.rofi-emoji-wayland
     pkgs.rofi-systemd
     pkgs.rofi-power-menu
   ];
@@ -379,7 +379,7 @@ in
     location = "center";
     plugins = [
       pkgs.rofi-power-menu
-      pkgs.rofi-emoji
+      pkgs.rofi-emoji-wayland
     ];
     terminal = "${config.home.sessionVariables.TERMINAL}";
     theme = rofi-theme;

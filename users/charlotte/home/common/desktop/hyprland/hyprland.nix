@@ -157,7 +157,7 @@
             ];
             terminal = config.home.sessionVariables.TERMINAL;
 
-            rofi = "${pkgs.rofi-wayland.override { plugins = [ pkgs.rofi-emoji ]; }}/bin/rofi";
+            rofi = "${pkgs.rofi-wayland.override { plugins = [ pkgs.rofi-emoji-wayland ]; }}/bin/rofi";
             rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
