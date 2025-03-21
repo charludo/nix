@@ -60,7 +60,7 @@
       ];
       search = {
         force = true;
-        default = "Google";
+        default = "google";
         engines = {
           "Kagi" = {
             urls = [
@@ -92,7 +92,7 @@
           };
           "Bing".metaData.hidden = true;
           "DuckDuckGo".metaData.hidden = true;
-          "Google".metaData.alias = "@g";
+          "google".metaData.alias = "@g";
         };
       };
       bookmarks = { };
