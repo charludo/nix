@@ -1,8 +1,9 @@
 {
   config,
+  lib,
+  pkgs,
   private-settings,
   secrets,
-  lib,
   ...
 }:
 {
@@ -20,7 +21,6 @@
     extraGroups = [ "nas" ];
   };
   users.groups."${config.services.immich.group}".gid = 1111;
-  age.secrets.nas.rekeyFile = secrets.nas;
   snow.tags = lib.mkForce [ "vm" ];
 
   services.immich = {
@@ -37,6 +37,7 @@
     environment.UV_USE_IO_URING = "0";
   };
 
+  age.secrets.nas.rekeyFile = secrets.nas;
   systemd.mounts = [
     {
       description = "Mount for Backup - Immich edition";
@@ -51,6 +52,8 @@
       wantedBy = [ "multi-user.target" ];
     }
   ];
+  environment.systemPackages = [ pkgs.cifs-utils ];
+  boot.supportedFilesystems = [ "cifs" ];
 
   system.stateVersion = "23.11";
 }
