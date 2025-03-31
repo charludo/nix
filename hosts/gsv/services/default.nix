@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   private-settings,
   secrets,
@@ -32,6 +33,7 @@
       email = private-settings.contact.acme;
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
+      environmentFile = config.age.secrets.cloudflare.path;
     };
   };
 
