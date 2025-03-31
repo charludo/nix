@@ -7,6 +7,7 @@
   ];
 
   age.enable = true;
+  # androidUtils.enable = true;
   bluetooth.enable = true;
   # eid.enable = true;
   fish.enable = true;

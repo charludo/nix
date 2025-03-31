@@ -2,6 +2,7 @@
   imports = [
     ./age.nix
     ./agenix.nix
+    ./android-utils.nix
     ./auto-update.nix
     ./blocky.nix
     ./bluetooth.nix
