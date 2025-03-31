@@ -8,6 +8,7 @@
     ./bluetooth.nix
     ./docker.nix
     ./eid.nix
+    ./fail2ban.nix
     ./fish.nix
     ./greetd.nix
     ./gvfs.nix
