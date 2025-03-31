@@ -28,9 +28,22 @@ in
         stereo = true;
         opusMaxAverageBitrate = 510000;
       };
+      useStunTurn = true;
       p2p = {
+        useStunTurn = true;
         stunServers = [
-          { urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"; }
+          {
+            urls = "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp";
+          }
+          {
+            urls = "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp";
+          }
+          {
+            urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp";
+          }
+          {
+            urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp";
+          }
         ];
         iceTransportPolicy = "relay";
       };
@@ -44,20 +57,24 @@ in
         min = 240;
       };
       maxFullResolutionParticipants = -1;
+      disableThirdPartyRequests = true;
     };
 
     interfaceConfig = {
       APP_NAME = "Jitsi Meet @ ${domains.blog}";
       JITSI_WATERMARK_LINK = "https://jitsi.${domains.blog}";
       SHOW_JITSI_WATERMARK = false;
+      MOBILE_DOWNLOAD_LINK_ANDROID = "https://f-droid.org/en/packages/org.jitsi.meet/";
     };
   };
 
   services.jitsi-videobridge = {
     enable = true;
     openFirewall = true;
-    config.videobridge.ice.harvest.STUN_MAPPING_HARVESTER_ADDRESSES =
-      "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}";
+    nat.harvesterAddresses = [
+      "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"
+    ];
+    # config.videobridge.cc.assumed-bandwidth-limit = "1000 Mbps";
   };
 
   services.prosody = {
