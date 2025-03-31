@@ -20,24 +20,6 @@ let
     '';
     # ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} ${config.nas.backup.location}/torrenter/bazarr/ /var/lib/bazarr
   };
-  get-anime-music = pkgs.writeShellApplication {
-    name = "get-anime-music";
-    runtimeInputs = [
-      pkgs.yt-dlp
-      pkgs.coreutils
-      pkgs.ffmpeg
-    ];
-    text = ''
-      url="$(cat ${config.age.secrets.anime-playlist.path})"
-      target="${config.nas.location}/Musik/Anime"
-
-      yt-dlp --verbose --cookies "''${target}/cookies.txt" \
-      --yes-playlist --format "bestaudio" -o "''${target}/%(title)s.%(ext)s" \
-      --extract-audio --audio-format "best" --audio-quality 192K \
-      --add-metadata --postprocessor-args "-metadata artist=Anime\ Playlist -metadata album=Anime\ Playlist -metadata genre=Soundtrack -metadata album_artist=Various\ Artists -metadata synopsis=''' -metadata description='''" \
-      --download-archive "''${target}/archive.txt" "$url"
-    '';
-  };
 in
 {
   nixpkgs.config.permittedInsecurePackages = [
@@ -136,11 +118,6 @@ in
     path = "/var/lib/nzbget/nzbget.conf";
   };
 
-  age.secrets.anime-playlist = {
-    rekeyFile = secrets.torrenter-anime-playlist;
-    mode = "0444";
-  };
-
   age.secrets.idagio = {
     rekeyFile = secrets.torrenter-idagio;
     mode = "0444";
@@ -148,7 +125,6 @@ in
 
   environment.systemPackages = [
     restore-torrenter
-    get-anime-music
 
     (import ../shells/remux/remux.nix { inherit pkgs lib; })
   ];
@@ -186,24 +162,6 @@ in
     services.readarr.after = [ "media-NAS.mount" ];
     # services.bazarr.after = [ "media-NAS.mount" ];
     services.prowlarr.after = [ "media-NAS.mount" ];
-
-    timers."anime-music-hourly" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "hourly";
-        Persistent = true;
-        Unit = "anime-music-hourly.service";
-      };
-    };
-    services."anime-music-hourly" = {
-      script = ''
-        ${get-anime-music}/bin/get-anime-music
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
 
     timers."torrenter-backup-daily" = {
       wantedBy = [ "timers.target" ];

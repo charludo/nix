@@ -34,6 +34,11 @@ in
       default = [ ];
     };
 
+    extraServices = mkOption {
+      type = types.listOf (types.str);
+      description = "additional services who should be allowed to use the NAS. Useful for dynamicUser services.";
+      default = [ ];
+    };
   };
 
   config = mkIf (cfg.enable || cfg.backup.enable) {
@@ -49,6 +54,10 @@ in
 
     users.users = genAttrs cfg.extraUsers (_user: {
       extraGroups = [ "nas" ];
+    });
+
+    systemd.services = genAttrs cfg.extraServices (_user: {
+      serviceConfig.SupplementaryGroups = [ "nas" ];
     });
 
     systemd.mounts = [
