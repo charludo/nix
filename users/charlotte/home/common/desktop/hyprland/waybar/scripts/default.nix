@@ -22,6 +22,10 @@
       inherit config;
       inherit pkgs;
     })
+    (import ./calendar.nix {
+      inherit config;
+      inherit pkgs;
+    })
   ];
 
   age.secrets.lemmy-username.rekeyFile = secrets.charlotte-lemmy-username;
@@ -29,4 +33,5 @@
   age.secrets.reddit-username.rekeyFile = secrets.charlotte-reddit-username;
   age.secrets.reddit-token.rekeyFile = secrets.charlotte-reddit-token;
   age.secrets.waybar-mail.rekeyFile = secrets.charlotte-waybar-mail;
+  age.secrets.waybar-calendar-personal.rekeyFile = secrets.charlotte-waybar-calendar-personal;
 }

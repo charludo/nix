@@ -48,6 +48,7 @@
         #custom-wireguard,
         #custom-playerctl,
         #custom-mail,
+        #custom-calendar,
         #custom-lemmy,
         #custom-reddit,
         #custom-updates {

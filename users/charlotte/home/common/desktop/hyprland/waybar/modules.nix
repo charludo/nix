@@ -17,6 +17,7 @@ let
   reddit = "waybar-reddit";
   lemmy = "waybar-lemmy";
   mail = "waybar-mail";
+  calendar = "waybar-calendar";
 in
 {
   clock = {
@@ -48,6 +49,12 @@ in
     exec = "${mail}";
     restart-interval = 300;
     on-click = "${thunderbird}";
+  };
+
+  "custom/calendar" = {
+    exec = "${calendar}";
+    restart-interval = 300;
+    on-click = "${thunderbird} --calendar";
   };
 
   "custom/lemmy" = {

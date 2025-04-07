@@ -63,6 +63,7 @@ in
       modules-left = [
         "custom/power"
         "clock"
+        "custom/calendar"
         "custom/weather"
         "pulseaudio/slider"
         "custom/playerctl"

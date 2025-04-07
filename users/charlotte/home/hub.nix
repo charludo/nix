@@ -83,6 +83,7 @@ in
       output = [ "DP-2" ];
       modules-left = [
         "clock"
+        "custom/calendar"
         "custom/weather"
       ];
       modules-center = [ "hyprland/workspaces" ];
