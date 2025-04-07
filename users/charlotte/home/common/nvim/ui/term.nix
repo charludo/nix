@@ -55,14 +55,22 @@ in
         end
       end
 
-      local function chadterm_create_float(buffer, float_opts)
+      local function chadterm_calc_float_opts(float_opts)
         local opts = vim.tbl_deep_extend("force", config.float, float_opts or {})
+        local min_width = 120
+        local min_padding = 1
+        local min_feasible_width = math.min(min_width, vim.o.columns - 2 * min_padding)
 
-        opts.width = math.ceil(opts.width * vim.o.columns)
+        opts.width = math.max(min_feasible_width, math.ceil(opts.width * vim.o.columns))
         opts.height = math.ceil(opts.height * vim.o.lines)
         opts.row = math.ceil(opts.row * vim.o.lines)
-        opts.col = math.ceil(opts.col * vim.o.columns)
+        opts.col = 0.5 * (vim.o.columns - opts.width)
 
+        return opts
+      end
+
+      local function chadterm_create_float(buffer, float_opts)
+        local opts = chadterm_calc_float_opts(float_opts)
         vim.api.nvim_open_win(buffer, true, opts)
       end
 
@@ -172,6 +180,18 @@ in
         callback = function(args)
           vim.api.nvim_input("<CR>")
           chadterm_save_term_info(args.buf, nil)
+        end,
+      })
+
+      api.nvim_create_autocmd("VimResized", {
+        callback = function()
+          for _, term in pairs(g.nvchad_terms) do
+            if term and term.pos == "float" and term.win and api.nvim_win_is_valid(term.win) then
+              local float_opts = vim.tbl_deep_extend("force", config.float, term.float_opts or {})
+              local opts = chadterm_calc_float_opts(float_opts)
+              pcall(api.nvim_win_set_config, term.win, opts)
+            end
+          end
         end,
       })
     '';
