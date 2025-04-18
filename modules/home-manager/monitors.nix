@@ -28,6 +28,10 @@ in
             type = types.int;
             default = 60;
           };
+          scaling = mkOption {
+            type = types.number;
+            default = 1;
+          };
           x = mkOption {
             type = types.int;
             default = 0;
