@@ -172,6 +172,11 @@
           ])
 
           (mkOsConfig "drone" true [ musnix.nixosModules.default ])
+          (mkOsConfig "eschaton" true [
+            nixos-hardware.nixosModules.asus-battery
+            nixos-hardware.nixosModules.common-pc-ssd
+            nixos-hardware.nixosModules.common-cpu-intel
+          ])
           (mkOsConfig "mallorca" true [ ])
           (mkOsConfig "steamdeck" true [
             nix-flatpak.nixosModules.nix-flatpak
@@ -253,6 +258,7 @@
           (mkHomeConfig "charlotte" "excession" [ ])
 
           (mkHomeConfig "charlotte" "drone" [ ])
+          (mkHomeConfig "charlotte" "eschaton" [ ])
           (mkHomeConfig "charlotte" "mallorca" [ ])
 
           (mkHomeConfig "charlotte" "CL-ROU" [ ])

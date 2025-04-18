@@ -35,7 +35,7 @@
 
     defaultCacheTtl = 60;
     maxCacheTtl = 120;
-    pinentryPackage = pkgs.pinentry-rofi;
+    pinentry.package = pkgs.pinentry-rofi;
     extraConfig = ''
       ttyname $GPG_TTY
     '';
