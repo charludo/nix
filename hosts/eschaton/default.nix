@@ -1,0 +1,91 @@
+{
+  pkgs,
+  private-settings,
+  secrets,
+  ...
+}:
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../common
+    ../../users/charlotte/user.nix
+  ];
+
+  age.enable = true;
+  bluetooth.enable = true;
+  fish.enable = true;
+  greetd.enable = true;
+  gvfs.enable = true;
+  ld.enable = true;
+  nicerFonts.enable = true;
+  nvim.enable = true;
+  printers.enable = true;
+  soundConfig.enable = true;
+  soundConfig.enableCombinedAdapter = true;
+  screensharing.enable = true;
+  surfshark.enable = true;
+  wifi.enable = true;
+  programs.dconf.enable = true;
+
+  suspend.enable = true;
+  suspend.powertop = true;
+  hardware.asus.battery.chargeUpto = 80;
+
+  nas.enable = true;
+  nas.backup.enable = true;
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  networking.networkmanager.enable = true;
+  networking.hostName = "eschaton";
+  networking.nameservers = [
+    "192.168.30.13"
+    "1.1.1.1"
+  ];
+
+  boot.kernelParams = [
+    "video=eDP-1:2880x1800@59.88"
+  ];
+
+  age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.perostek.sudoFile;
+
+  wireguard = {
+    enable = true;
+    interface = "hoehle";
+    port = 51865;
+    ip = "192.168.150.12/32";
+    secrets = {
+      secretsFilePrivate = secrets.drone-wg-private;
+      secretsFilePreshared = secrets.drone-wg-preshared;
+      remotePublicKey = private-settings.wireguard.publicKeys.drone;
+    };
+  };
+
+  musnix = {
+    alsaSeq.enable = false;
+
+    rtcqs.enable = true;
+    kernel.realtime = false;
+
+    rtirq = {
+      resetAll = 1;
+      prioLow = 0;
+      enable = true;
+      nameList = "rtc0 snd";
+    };
+  };
+
+  snow = {
+    enable = true;
+    useRemoteSudo = true;
+    buildOnTarget = false;
+  };
+
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [ vpl-gpu-rt ];
+  };
+
+  system.stateVersion = "23.11";
+}
