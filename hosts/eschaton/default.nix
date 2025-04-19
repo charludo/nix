@@ -30,6 +30,7 @@
   suspend.enable = true;
   suspend.powertop = true;
   hardware.asus.battery.chargeUpto = 80;
+  powerManagement.cpuFreqGovernor = "balanced";
 
   nas.enable = true;
   nas.backup.enable = true;
@@ -46,7 +47,9 @@
 
   boot.kernelParams = [
     "video=eDP-1:2880x1800@59.88"
+    "i915.enable_psr=0"
   ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.perostek.sudoFile;
 
@@ -62,19 +65,19 @@
     };
   };
 
-  musnix = {
-    alsaSeq.enable = false;
-
-    rtcqs.enable = true;
-    kernel.realtime = false;
-
-    rtirq = {
-      resetAll = 1;
-      prioLow = 0;
-      enable = true;
-      nameList = "rtc0 snd";
-    };
-  };
+  # musnix = {
+  #   alsaSeq.enable = false;
+  #
+  #   rtcqs.enable = true;
+  #   kernel.realtime = false;
+  #
+  #   rtirq = {
+  #     resetAll = 1;
+  #     prioLow = 0;
+  #     enable = true;
+  #     nameList = "rtc0 snd";
+  #   };
+  # };
 
   snow = {
     enable = true;
@@ -84,8 +87,19 @@
 
   hardware.graphics = {
     enable = true;
-    extraPackages = with pkgs; [ vpl-gpu-rt ];
+    extraPackages = with pkgs; [
+      vpl-gpu-rt
+      # libvdpau-va-gl
+      # intel-media-driver
+      intel-compute-runtime
+    ];
+    # extraPackages32 = with pkgs.pkgsi686linux; [ intel-vaapi-driver ];
   };
+
+  # environment.sessionVariables = {
+  # LIBVA_DRIVER_NAME = "iHD";
+  # NIXOS_OZONE_WL = "1";
+  # };
 
   system.stateVersion = "23.11";
 }

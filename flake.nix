@@ -173,7 +173,7 @@
 
           (mkOsConfig "drone" true [ musnix.nixosModules.default ])
           (mkOsConfig "eschaton" true [
-            musnix.nixosModules.default
+            # musnix.nixosModules.default
             nixos-hardware.nixosModules.asus-battery
             nixos-hardware.nixosModules.common-pc-ssd
             nixos-hardware.nixosModules.common-cpu-intel
