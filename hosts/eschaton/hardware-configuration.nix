@@ -18,21 +18,25 @@
     "thunderbolt"
     "vmd"
     "nvme"
+    "uas"
+    "sd_mod"
+    "usbcore"
+    "usb_storage"
   ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/2388e149-a0c0-4674-93ee-40eecb9f3514";
+    device = "/dev/disk/by-uuid/42712ba1-2937-4410-b2c2-4e4212d3279d";
     fsType = "ext4";
   };
 
-  boot.initrd.luks.devices."luks-74953403-1a65-49eb-a7fa-958bd0a56132".device =
-    "/dev/disk/by-uuid/74953403-1a65-49eb-a7fa-958bd0a56132";
+  boot.initrd.luks.devices."luks-f48d1995-e7a7-43ff-ac31-f9b3b13e72a6".device =
+    "/dev/disk/by-uuid/f48d1995-e7a7-43ff-ac31-f9b3b13e72a6";
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/7BEC-FE0A";
+    device = "/dev/disk/by-uuid/C2E5-1D34";
     fsType = "vfat";
     options = [
       "fmask=0077"
@@ -41,7 +45,7 @@
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/a558f458-2866-41cf-9887-7040112b83ef"; }
+    { device = "/dev/disk/by-uuid/f7b5b467-2fa3-47d3-b471-4bd8357f8d18"; }
   ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

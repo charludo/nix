@@ -69,7 +69,7 @@ in
       modules-right = [
         "bluetooth"
         "custom/wireguard"
-        "network#laptop"
+        "network#eschaton"
         "disk#home"
         "cpu"
         "memory"
