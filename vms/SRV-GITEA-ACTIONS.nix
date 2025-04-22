@@ -14,6 +14,7 @@ let
         pkgs.coreutils
         pkgs.findutils
         pkgs.gnugrep
+        pkgs.gnused
         pkgs.gawk
         pkgs.git
         pkgs.nix
@@ -22,6 +23,8 @@ let
         pkgs.nodejs
         pkgs.gnutar
         pkgs.gzip
+        pkgs.lftp
+        pkgs.openssh
 
         pkgs.nixfmt-rfc-style
         pkgs.deadnix
