@@ -28,6 +28,7 @@
     ./screensharing.nix
     ./snow.nix
     ./sound.nix
+    ./static-hosting.nix
     ./steam-firewall.nix
     ./surfshark.nix
     ./suspend.nix

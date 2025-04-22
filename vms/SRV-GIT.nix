@@ -13,8 +13,8 @@
     hardware.memory = 2048;
     hardware.storage = "16G";
 
-    networking.openPorts.tcp = [ 80 ];
-    networking.openPorts.udp = [ 80 ];
+    networking.openPorts.tcp = [ config.services.forgejo.settings.server.HTTP_PORT ];
+    networking.openPorts.udp = [ config.services.forgejo.settings.server.HTTP_PORT ];
   };
 
   users.users.git.group = "git";
@@ -47,21 +47,11 @@
     };
   };
 
-  services.nginx = {
-    enable = true;
-    virtualHosts.${config.services.forgejo.settings.server.DOMAIN} = {
-      extraConfig = ''
-        client_max_body_size 512M;
-      '';
-      locations."/".proxyPass =
-        "http://localhost:${toString config.services.forgejo.settings.server.HTTP_PORT}";
-    };
-  };
-
   nas.backup.enable = true;
   nas.extraUsers = [ config.services.forgejo.user ];
 
   fail2ban.enable = true;
+  fail2ban.doNotBan = [ "192.168.0.0/16" ];
 
   environment.systemPackages =
     let
