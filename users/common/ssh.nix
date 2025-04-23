@@ -55,6 +55,10 @@ in
           "~/.ssh/id_ed25519"
         ];
         identitiesOnly = true;
+        setEnv = {
+          TERM = "xterm-256color";
+          COLORTERM = "truecolor";
+        };
       };
     } // vms;
   };
