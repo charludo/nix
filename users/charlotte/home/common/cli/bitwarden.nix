@@ -11,7 +11,7 @@ let
     runtimeInputs = [ pkgs.bat ];
     text = ''
       # shellcheck disable=SC2086
-      echo "D $(cat ${config.age.secrets.bitwarden-pass.path})"
+      echo "D $(gpg --quiet --decrypt ${config.age.secrets.bitwarden-pass.path} 2>/dev/null)"
       echo "OK"
     '';
   };
