@@ -31,7 +31,7 @@ in
           location = "Home";
           description = "Brother HL-L2375DW";
           deviceUri = "ipp://192.168.24.205";
-          model = "drv:///brlaser.drv/brl2375w.ppd";
+          model = "drv:///brlaser.drv/brl2375d.ppd";
           ppdOptions = {
             PageSize = "A4";
             Duplex = "DuplexNoTumble";
