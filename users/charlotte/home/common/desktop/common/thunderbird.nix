@@ -29,6 +29,7 @@
           "{\"default-theme@mozilla.org\":\"2115b3dd-e066-41ea-844d-2c5019d120d9\",\"{a62ef8ec-5fdc-40c2-873c-223b8a6925cc}\":\"ac20100e-09a8-418a-8a8d-53387f57cc59\"}";
         "extensions.webextensions.ExtensionStorageIDB.migrated.{a62ef8ec-5fdc-40c2-873c-223b8a6925cc}" =
           true;
+        "spellchecker.dictionary" = "en-US,de-DE";
       };
       userChrome = # css
         ''
