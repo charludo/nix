@@ -43,7 +43,7 @@ in
   home.hostname = "excession";
 
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
-  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/eso.png;
+  defaultWallpaper = ./common/desktop/backgrounds/eso.png;
   #  ------
   # | DP-2 |
   #  ------

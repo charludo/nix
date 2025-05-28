@@ -37,7 +37,7 @@ in
   # All colorSchemes from here can be set: https://tinted-theming.github.io/base16-gallery/
   # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
 
-  defaultWallpaper = builtins.toString ./common/desktop/backgrounds/river.png;
+  defaultWallpaper = ./common/desktop/backgrounds/river.png;
   #  -------
   # | eDP-1 |
   #  -------
