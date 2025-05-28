@@ -1,7 +1,4 @@
-{ config, lib, ... }:
-let
-  colors = import ../colors.nix { inherit config lib; };
-in
+{ config, ... }:
 {
   programs.nixvim.plugins.which-key = {
     enable = true;
@@ -9,19 +6,19 @@ in
 
   programs.nixvim.highlight = {
     WhichKey = {
-      fg = colors.blue;
+      fg = config.nixvim.palette.blue;
     };
     WhichKeySeparator = {
-      fg = colors.light_grey;
+      fg = config.nixvim.palette.light_grey;
     };
     WhichKeyDesc = {
-      fg = colors.red;
+      fg = config.nixvim.palette.red;
     };
     WhichKeyGroup = {
-      fg = colors.green;
+      fg = config.nixvim.palette.green;
     };
     WhichKeyValue = {
-      fg = colors.green;
+      fg = config.nixvim.palette.green;
     };
   };
 }

@@ -1,7 +1,7 @@
 # shamelessly stolen from: https://github.com/redyf/Neve/blob/main/config/dap/dap.nix
-{ config, lib, ... }:
+{ config, ... }:
 let
-  colors = import ../colors.nix { inherit config lib; };
+  colors = config.nixvim.palette;
 in
 {
   programs.nixvim.plugins.dap = {

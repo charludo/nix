@@ -1,7 +1,4 @@
-{ config, lib, ... }:
-let
-  colors = import ../colors.nix { inherit config lib; };
-in
+{ config, ... }:
 {
   programs.nixvim.plugins.indent-blankline = {
     enable = true;
@@ -32,20 +29,20 @@ in
 
   programs.nixvim.highlight = {
     IblChar = {
-      fg = colors.line;
+      fg = config.nixvim.palette.line;
     };
     IblScopeChar = {
-      fg = colors.grey;
+      fg = config.nixvim.palette.grey;
     };
     "@ibl.scope.underline.1" = {
-      bg = colors.black2;
+      bg = config.nixvim.palette.black2;
       underline = false;
       cterm = null;
     };
   };
   programs.nixvim.highlightOverride = {
     "@ibl.scope.underline.1" = {
-      bg = colors.black2;
+      bg = config.nixvim.palette.black2;
       underline = false;
       cterm = null;
     };

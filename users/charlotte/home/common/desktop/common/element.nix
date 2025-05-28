@@ -5,7 +5,7 @@
   ...
 }:
 let
-  colors = import ../../nvim/colors.nix { inherit config lib; };
+  colors = lib.colors.extendPalette config.colorScheme.palette;
 in
 {
   home.packages = with pkgs; [

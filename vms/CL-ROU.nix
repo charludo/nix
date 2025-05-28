@@ -12,12 +12,15 @@
     ../users/charlotte/user.nix
   ];
 
-  home-manager.users.charlotte.imports = [
-    inputs.agenix.homeManagerModules.default
-    inputs.agenix-rekey.homeManagerModules.default
-    inputs.nix-colors.homeManagerModules.colorScheme
-    inputs.nixvim.homeManagerModules.nixvim
-  ] ++ (builtins.attrValues outputs.homeModules);
+  home-manager.users.charlotte.imports =
+    [
+      inputs.agenix.homeManagerModules.default
+      inputs.agenix-rekey.homeManagerModules.default
+      inputs.nix-colors.homeManagerModules.colorScheme
+      inputs.nixvim.homeManagerModules.nixvim
+    ]
+    ++ (builtins.attrValues outputs.homeModules)
+    ++ (builtins.attrValues outputs.nixvimModules);
   home-manager.extraSpecialArgs = {
     inherit
       inputs
@@ -43,6 +46,7 @@
   ld.enable = true;
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
+  yubikey.enable = false;
   snow.enable = true;
 
   system.stateVersion = "23.11";

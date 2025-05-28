@@ -5,10 +5,11 @@ in
 {
   imports = [
     ./common
-    ./common/nvim
     ./common/games/eso.nix
   ];
 
   colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
   home.hostname = "steamdeck";
+
+  nixvim.enable = true;
 }
