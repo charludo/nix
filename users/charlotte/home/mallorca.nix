@@ -18,7 +18,6 @@ in
   imports = [
     ./common
     ./common/cli
-    ./common/nvim
     ./common/desktop/common
     ./common/desktop/hyprland
   ];
@@ -98,4 +97,10 @@ in
 
   # Projects to manage on this machine
   projects = private-settings.projects;
+
+  nixvim.enable = true;
+  nixvim.languages = {
+    python.enable = true;
+    webdev.enable = true;
+  };
 }

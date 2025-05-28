@@ -1,7 +1,5 @@
-{ config, lib, ... }:
-let
-  palette = config.colorScheme.palette;
-
+{ lib, ... }:
+rec {
   max = x: y: if x > y then x else y;
   min = x: y: if x < y then x else y;
   decToHex =
@@ -97,39 +95,42 @@ let
       newRGB = map (x: max 0 (min 255 (builtins.floor (factor * x)))) rgb;
     in
     rgbToHex newRGB;
-in
-{
-  white = "#${palette.base07}";
-  black = "#${palette.base00}";
-  darkest_black = "#${darken palette.base00 18}";
-  darker_black = "#${darken palette.base00 12}";
-  black2 = "#${darken palette.base00 (-18)}";
-  one_bg = "#${palette.base02}";
-  one_bg2 = "#${palette.base02}";
-  one_bg3 = "#${palette.base03}";
-  grey = "#${darken palette.base00 (-80)}";
-  grey_fg = "#${darken palette.base00 (-120)}";
-  grey_fg2 = "#${darken palette.base00 (-140)}";
-  light_grey = "#${darken palette.base02 (-18)}";
-  red = "#${palette.base08}";
-  baby_pink = "#${darken palette.base0E 6}";
-  pink = "#${palette.base0E}";
-  line = "#${darken palette.base00 (-30)}";
-  green = "#${darken palette.base0B (-12)}";
-  vibrant_green = "#${palette.base0B}";
-  dark_blue = "#${darken palette.base0D (18)}";
-  nord_blue = "#${darken palette.base0D (-12)}";
-  blue = "#${palette.base0D}";
-  yellow = "#${palette.base0A}";
-  sun = "#${darken palette.base0A 6}";
-  purple = "#${darken palette.base0E 12}";
-  dark_purple = "#${darken palette.base0E 18}";
-  teal = "#${darken palette.base0C 6}";
-  orange = "#${palette.base09}";
-  cyan = "#${palette.base0C}";
-  statusline_bg = "#${darken palette.base01 6}";
-  lightbg = "#${palette.base01}";
-  pmenu_bg = "#${darken palette.base0C (-6)}";
-  folder_bg = "#${darken palette.base0D 12}";
+
+  extendPalette =
+    palette:
+    {
+      white = "#${palette.base07}";
+      black = "#${palette.base00}";
+      darkest_black = "#${darken palette.base00 18}";
+      darker_black = "#${darken palette.base00 12}";
+      black2 = "#${darken palette.base00 (-18)}";
+      one_bg = "#${palette.base02}";
+      one_bg2 = "#${palette.base02}";
+      one_bg3 = "#${palette.base03}";
+      grey = "#${darken palette.base00 (-80)}";
+      grey_fg = "#${darken palette.base00 (-120)}";
+      grey_fg2 = "#${darken palette.base00 (-140)}";
+      light_grey = "#${darken palette.base02 (-18)}";
+      red = "#${palette.base08}";
+      baby_pink = "#${darken palette.base0E 6}";
+      pink = "#${palette.base0E}";
+      line = "#${darken palette.base00 (-30)}";
+      green = "#${darken palette.base0B (-12)}";
+      vibrant_green = "#${palette.base0B}";
+      dark_blue = "#${darken palette.base0D (18)}";
+      nord_blue = "#${darken palette.base0D (-12)}";
+      blue = "#${palette.base0D}";
+      yellow = "#${palette.base0A}";
+      sun = "#${darken palette.base0A 6}";
+      purple = "#${darken palette.base0E 12}";
+      dark_purple = "#${darken palette.base0E 18}";
+      teal = "#${darken palette.base0C 6}";
+      orange = "#${palette.base09}";
+      cyan = "#${palette.base0C}";
+      statusline_bg = "#${darken palette.base01 6}";
+      lightbg = "#${palette.base01}";
+      pmenu_bg = "#${darken palette.base0C (-6)}";
+      folder_bg = "#${darken palette.base0D 12}";
+    }
+    // builtins.mapAttrs (_name: value: "#" + value) palette;
 }
-// builtins.mapAttrs (_name: value: "#" + value) palette

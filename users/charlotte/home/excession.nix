@@ -18,7 +18,6 @@ in
   imports = [
     ./common
     ./common/games
-    ./common/nvim
     ./common/desktop/hyprland
     ./common/cli/bitwarden.nix
     ./common/cli/direnv.nix
@@ -184,6 +183,8 @@ in
       enableDirenv = false;
     }
   ];
+
+  nixvim.enable = true;
 
   # XDG dirs are (partly) symlinks to an external drive
   xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";

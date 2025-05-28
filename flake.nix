@@ -97,7 +97,8 @@
     }@inputs:
     let
       inherit (self) outputs;
-      lib = nixpkgs.lib // home-manager.lib;
+      mkLib = nixpkgs: nixpkgs.lib.extend (self: _: import ./lib { lib = self; } // home-manager.lib);
+      lib = mkLib inputs.nixpkgs;
 
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -109,6 +110,7 @@
       inherit lib;
       nixosModules.common = import ./modules/nixos;
       homeModules.common = import ./modules/home-manager;
+      nixvimModules.common = import ./modules/nixvim;
       overlays = import ./overlays { inherit inputs; };
 
       nixosConfigurations =
@@ -120,22 +122,26 @@
                 inherit
                   inputs
                   outputs
+                  lib
                   private-settings
                   secrets
                   ;
               };
-              home-manager.sharedModules = [
-                self.homeModules.common
-                {
-                  imports = [
-                    agenix.homeManagerModules.default
-                    agenix-rekey.homeManagerModules.default
-                    nix-colors.homeManagerModules.colorScheme
-                    nixvim.homeManagerModules.nixvim
-                    plasma-manager.homeManagerModules.plasma-manager
-                  ];
-                }
-              ] ++ (builtins.attrValues self.homeModules);
+              home-manager.sharedModules =
+                [
+                  self.homeModules.common
+                  {
+                    imports = [
+                      agenix.homeManagerModules.default
+                      agenix-rekey.homeManagerModules.default
+                      nix-colors.homeManagerModules.colorScheme
+                      nixvim.homeManagerModules.nixvim
+                      plasma-manager.homeManagerModules.plasma-manager
+                    ];
+                  }
+                ]
+                ++ (builtins.attrValues self.homeModules)
+                ++ (builtins.attrValues self.nixvimModules);
             }
           ];
 
@@ -155,6 +161,7 @@
                 ++ extraModules;
               specialArgs = {
                 inherit
+                  lib
                   inputs
                   outputs
                   private-settings
@@ -207,6 +214,7 @@
                 ] ++ (builtins.attrValues self.nixosModules);
                 specialArgs = {
                   inherit
+                    lib
                     inputs
                     outputs
                     private-settings
@@ -233,6 +241,7 @@
               modules =
                 [
                   self.homeModules.common
+                  self.nixvimModules.common
                   agenix.homeManagerModules.default
                   agenix-rekey.homeManagerModules.default
                   nix-colors.homeManagerModules.colorScheme
@@ -244,6 +253,7 @@
               pkgs = nixpkgs.legacyPackages.${system};
               extraSpecialArgs = {
                 inherit
+                  lib
                   inputs
                   outputs
                   private-settings

@@ -1,7 +1,4 @@
-{ config, lib, ... }:
-let
-  colors = import ../colors.nix { inherit config lib; };
-in
+{ config, ... }:
 {
   programs.nixvim.plugins = {
     fugitive.enable = true;
@@ -43,83 +40,83 @@ in
 
   programs.nixvim.highlight = {
     diffOldFile = {
-      fg = colors.baby_pink;
+      fg = config.nixvim.palette.baby_pink;
     };
     diffNewFile = {
-      fg = colors.blue;
+      fg = config.nixvim.palette.blue;
     };
     DiffAdd = {
-      fg = colors.blue;
+      fg = config.nixvim.palette.blue;
     };
     DiffAdded = {
-      fg = colors.green;
+      fg = config.nixvim.palette.green;
     };
     DiffChange = {
-      fg = colors.light_grey;
+      fg = config.nixvim.palette.light_grey;
     };
     DiffChangeDelete = {
-      fg = colors.red;
+      fg = config.nixvim.palette.red;
     };
     DiffModified = {
-      fg = colors.orange;
+      fg = config.nixvim.palette.orange;
     };
     DiffDelete = {
-      fg = colors.red;
+      fg = config.nixvim.palette.red;
     };
     DiffRemoved = {
-      fg = colors.red;
+      fg = config.nixvim.palette.red;
     };
     DiffText = {
-      fg = colors.white;
-      bg = colors.black2;
+      fg = config.nixvim.palette.white;
+      bg = config.nixvim.palette.black2;
     };
     gitcommitOverflow = {
-      fg = colors.base08;
+      fg = config.nixvim.palette.base08;
     };
     gitcommitSummary = {
-      fg = colors.base0B;
+      fg = config.nixvim.palette.base0B;
     };
     gitcommitComment = {
-      fg = colors.base03;
+      fg = config.nixvim.palette.base03;
     };
     gitcommitUntracked = {
-      fg = colors.base03;
+      fg = config.nixvim.palette.base03;
     };
     gitcommitDiscarded = {
-      fg = colors.base03;
+      fg = config.nixvim.palette.base03;
     };
     gitcommitSelected = {
-      fg = colors.base03;
+      fg = config.nixvim.palette.base03;
     };
     gitcommitHeader = {
-      fg = colors.base0E;
+      fg = config.nixvim.palette.base0E;
     };
     gitcommitSelectedType = {
-      fg = colors.base0D;
+      fg = config.nixvim.palette.base0D;
     };
     gitcommitUnmergedType = {
-      fg = colors.base0D;
+      fg = config.nixvim.palette.base0D;
     };
     gitcommitDiscardedType = {
-      fg = colors.base0D;
+      fg = config.nixvim.palette.base0D;
     };
     gitcommitBranch = {
-      fg = colors.base09;
+      fg = config.nixvim.palette.base09;
       bold = true;
     };
     gitcommitUntrackedFile = {
-      fg = colors.base0A;
+      fg = config.nixvim.palette.base0A;
     };
     gitcommitUnmergedFile = {
-      fg = colors.base08;
+      fg = config.nixvim.palette.base08;
       bold = true;
     };
     gitcommitDiscardedFile = {
-      fg = colors.base08;
+      fg = config.nixvim.palette.base08;
       bold = true;
     };
     gitcommitSelectedFile = {
-      fg = colors.base0B;
+      fg = config.nixvim.palette.base0B;
       bold = true;
     };
   };

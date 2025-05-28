@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
-  colors = import ../colors.nix { inherit config lib; };
+  colors = config.nixvim.palette;
 in
 {
   programs.nixvim.plugins.telescope = {

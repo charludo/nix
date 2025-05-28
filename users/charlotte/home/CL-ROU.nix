@@ -20,7 +20,6 @@ in
     ./common/cli/fzf.nix
     ./common/cli/gh.nix
     ./common/cli/git.nix
-    ./common/nvim
   ];
 
   home.packages = [ pkgs.tmux ];
@@ -40,4 +39,12 @@ in
     XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projekte";
   };
   projects = private-settings.projects;
+
+  nixvim.enable = true;
+  nixvim.addDesktopEntry = false;
+  nixvim.languages = {
+    python.enable = true;
+    rust.enable = true;
+    webdev.enable = true;
+  };
 }

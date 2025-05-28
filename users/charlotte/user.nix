@@ -89,7 +89,7 @@ in
   };
 
   yubikey = {
-    enable = true;
+    enable = lib.mkDefault true;
     identities = config.users.users.charlotte.identities;
     sshDir = "${config.users.users.charlotte.home}/.ssh";
     sudoAuthFile = config.age.secrets.yubikey-sudo.path;

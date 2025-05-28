@@ -18,7 +18,6 @@ in
   imports = [
     ./common
     ./common/cli
-    ./common/nvim
     ./common/desktop/common
     ./common/desktop/hyprland
   ];
@@ -156,6 +155,18 @@ in
 
   # Projects to manage on this machine
   projects = private-settings.projects;
+
+  nixvim.enable = true;
+  nixvim.languages = {
+    c.enable = false;
+    godot.enable = false;
+    haskell.enable = false;
+    latex.enable = false;
+
+    python.enable = true;
+    rust.enable = true;
+    webdev.enable = true;
+  };
 
   # XDG dirs are (partly) symlinks to an external drive
   xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
