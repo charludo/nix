@@ -100,6 +100,7 @@ in
 
   nixvim.enable = true;
   nixvim.languages = {
+    go.enable = true;
     python.enable = true;
     rust.enable = true;
     webdev.enable = true;
