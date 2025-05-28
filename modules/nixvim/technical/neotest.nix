@@ -33,8 +33,6 @@ in
         watch = "w";
       };
     };
-    adapters.python.enable = true;
-    adapters.rust.enable = true;
   };
 
   programs.nixvim.keymaps = [

@@ -19,6 +19,9 @@ in
       python = [ "ruff" ];
     };
 
+    programs.nixvim.plugins.neotest.adapters.python.enable = true;
+
+    programs.nixvim.plugins.dap-python.enable = true;
     programs.nixvim.plugins.dap.configurations.python = [
       {
         name = "Launch Django DAP";

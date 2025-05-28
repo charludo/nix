@@ -29,6 +29,7 @@ in
     ];
 
     programs.nixvim.plugins.crates.enable = true;
+    programs.nixvim.plugins.neotest.adapters.rust.enable = true;
 
     programs.nixvim.keymaps = [
       {

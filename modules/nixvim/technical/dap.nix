@@ -24,9 +24,6 @@ in
   };
 
   programs.nixvim.plugins = {
-    dap-python = {
-      enable = true;
-    };
     dap-ui = {
       enable = true;
       settings.floating.mappings = {

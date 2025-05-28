@@ -163,6 +163,7 @@ in
     haskell.enable = false;
     latex.enable = false;
 
+    go.enable = true;
     python.enable = true;
     rust.enable = true;
     webdev.enable = true;

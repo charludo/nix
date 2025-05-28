@@ -2,6 +2,7 @@
 {
   imports = [
     ./c.nix
+    ./go.nix
     ./godot.nix
     ./haskell.nix
     ./latex.nix
