@@ -1,4 +1,9 @@
-{ config, private-settings, ... }:
+{
+  config,
+  lib,
+  private-settings,
+  ...
+}:
 
 {
   programs.thunderbird = {
@@ -40,7 +45,7 @@
     };
   };
 
-  accounts.email.accounts = private-settings.accounts;
+  accounts.email.accounts = lib.mkDefault private-settings.accounts;
 
   home.file.".thunderbird/${config.home.username}/xulstore.json" = {
     force = true;
