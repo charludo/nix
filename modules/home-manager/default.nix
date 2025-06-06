@@ -2,8 +2,9 @@
   imports = [
     ./cursor.nix
     ./fonts.nix
-    ./icons.nix
     ./hostname.nix
+    ./icons.nix
+    ./k9s.nix
     ./monitors.nix
     ./projects.nix
     ./wallpaper.nix
