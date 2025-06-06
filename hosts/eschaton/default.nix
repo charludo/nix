@@ -15,6 +15,7 @@
   bluetooth.enable = true;
   docker.enable = true;
   fish.enable = true;
+  graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
   ld.enable = true;
