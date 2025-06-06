@@ -13,6 +13,7 @@
 
   age.enable = true;
   bluetooth.enable = true;
+  docker.enable = true;
   fish.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
