@@ -130,6 +130,10 @@
           )
         );
 
+        xwayland = {
+          force_zero_scaling = true;
+        };
+
         exec = [
           "systemctl --user import-environment"
           "hyprctl setcursor ${config.cursorProfile.name} ${toString config.cursorProfile.size}"
