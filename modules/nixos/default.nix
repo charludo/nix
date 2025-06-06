@@ -10,6 +10,7 @@
     ./eid.nix
     ./fail2ban.nix
     ./fish.nix
+    ./graphical-fixes.nix
     ./greetd.nix
     ./gvfs.nix
     ./idagio.nix
