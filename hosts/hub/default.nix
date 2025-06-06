@@ -9,6 +9,7 @@
   age.enable = true;
   # androidUtils.enable = true;
   bluetooth.enable = true;
+  docker.enable = true;
   # eid.enable = true;
   fish.enable = true;
   greetd.enable = true;
@@ -33,7 +34,10 @@
   nas.enable = true;
   nas.backup.enable = true;
 
-  environment.systemPackages = [ pkgs.ntfs3g ];
+  environment.systemPackages = [
+    pkgs.ntfs3g
+    pkgs.tailscale
+  ];
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";
     fsType = "ntfs-3g";
