@@ -111,4 +111,6 @@ in
       set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../perostek_age.pub}"
       set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
     '';
+
+  accounts.email.accounts = private-settings.accountsWork;
 }
