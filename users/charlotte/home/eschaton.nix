@@ -26,6 +26,8 @@ in
     zoom-us
     teams-for-linux
   ];
+  k9s.enable = true;
+
   home.hostname = "eschaton";
 
   # Use this method for built-in schemes:
