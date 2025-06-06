@@ -22,6 +22,8 @@ in
     ./common/desktop/hyprland
   ];
 
+  k9s.enable = true;
+
   home.hostname = "hub";
 
   # Use this method for built-in schemes:
