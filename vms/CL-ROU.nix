@@ -40,7 +40,6 @@
 
     networking.openPorts.tcp = [ 8000 ];
     networking.openPorts.udp = [ 8000 ];
-    runOnSecondHost = true;
   };
 
   ld.enable = true;
