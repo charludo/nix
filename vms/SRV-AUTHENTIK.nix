@@ -15,7 +15,6 @@
     hardware.memory = 2048;
     hardware.storage = "8G";
 
-    runOnSecondHost = true;
     networking.openPorts.tcp = [
       9443
       9000

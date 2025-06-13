@@ -12,7 +12,6 @@
     hardware.memory = 4096;
     hardware.storage = "16G";
 
-    runOnSecondHost = true;
     networking.openPorts.tcp = [ 80 ];
     networking.openPorts.udp = [ 80 ];
   };

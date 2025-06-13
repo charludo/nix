@@ -11,15 +11,18 @@ let
   vms = toLowercaseKeys (
     lib.filterAttrs (_: v: v.hostname != null) (
       builtins.mapAttrs (name: _: {
-        hostname = (
-          if (lib.pathExists ../../vms/keys/ssh_host_${name}_ed25519_key.pub) then
-            ((builtins.head
-              outputs.nixosConfigurations.${name}.config.networking.interfaces.ens18.ipv4.addresses
-            ).address
-            )
+        hostname =
+          if lib.pathExists ../../vms/keys/ssh_host_${name}_ed25519_key.pub then
+            let
+              interfaces = outputs.nixosConfigurations.${name}.config.networking.interfaces;
+              iface = lib.findFirst (i: interfaces ? ${i}) null [
+                "ens18"
+                "enp6s18"
+              ];
+            in
+            if iface != null then (builtins.head interfaces.${iface}.ipv4.addresses).address else null
           else
-            null
-        );
+            null;
       }) outputs.nixosConfigurations
     )
   );
@@ -29,6 +32,10 @@ in
     enable = true;
     addKeysToAgent = "yes";
     matchBlocks = {
+      proxmox-gpu = {
+        hostname = "192.168.30.14";
+        user = "root";
+      };
       proxmox = {
         hostname = "192.168.30.15";
         user = "root";
@@ -42,7 +49,7 @@ in
         user = "root";
       };
 
-      "* !proxmox !proxmox2 !home-assistant !gsv !gsv-boot" = {
+      "* !proxmox !proxmox2 !proxmox-gpu !home-assistant !gsv !gsv-boot" = {
         user = "paki";
       };
       "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames vms)}".extraOptions = {

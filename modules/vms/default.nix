@@ -6,6 +6,36 @@
 }:
 let
   cfg = config.vm;
+
+  baseConfig = {
+    scsihw = lib.mkDefault "virtio-scsi-single";
+    virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
+    boot = "order=virtio0";
+    ostype = "l26";
+    cores = config.vm.hardware.cores;
+    memory = config.vm.hardware.memory;
+    bios = "ovmf";
+    name = config.vm.name;
+    additionalSpace = "1G";
+    bootSize = "256M";
+    net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
+      builtins.substring 0 2 (toString config.vm.id)
+    },firewall=1";
+    agent = true;
+  };
+
+  gpuConfig = {
+    scsihw = "virtio-scsi-pci";
+    virtio0 = "vm_datastore_local_gpu:vm-${builtins.toString config.vm.id}-disk-0";
+  };
+
+  gpuExtraConfig = {
+    cpu = "host";
+    balloon = "1";
+    machine = "q35";
+    hostpci0 = "0000:00:02,pcie=1";
+  };
+
 in
 {
   options.vm = {
@@ -26,7 +56,7 @@ in
       storage = lib.mkOption { type = lib.types.str; };
     };
 
-    runOnSecondHost = lib.mkOption {
+    requiresGPU = lib.mkOption {
       type = lib.types.bool;
       default = false;
     };
@@ -70,28 +100,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    proxmox.qemuConf = {
-      boot = lib.mkDefault "order=virtio0";
-      scsihw = lib.mkDefault "virtio-scsi-single";
-      virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
-      ostype = lib.mkDefault "l26";
-      cores = config.vm.hardware.cores;
-      memory = config.vm.hardware.memory;
-      bios = lib.mkDefault "ovmf";
-      name = config.vm.name;
-      additionalSpace = "1G";
-      bootSize = lib.mkDefault "256M";
-      net0 = lib.mkDefault "virtio=00:00:00:00:00:00,bridge=VLAN${
-        builtins.substring 0 2 (toString config.vm.id)
-      },firewall=1";
-      agent = true;
-    };
+    proxmox.qemuConf = if cfg.requiresGPU then lib.recursiveUpdate baseConfig gpuConfig else baseConfig;
     proxmox.cloudInit.enable = false;
     proxmox.partitionTableType = lib.mkDefault "efi";
-    proxmox.qemuExtraConf = {
-      ide2 = lib.mkForce "none,media=cdrom";
-      kvm = 1;
-    };
+    proxmox.qemuExtraConf = lib.mkMerge [
+      {
+        ide2 = lib.mkForce "none,media=cdrom";
+        kvm = 1;
+      }
+      (lib.mkIf cfg.requiresGPU gpuExtraConfig)
+    ];
     virtualisation.diskSize = "auto";
 
     nvim.enable = true;
@@ -109,7 +127,7 @@ in
       vm = {
         id = cfg.id;
         ip = cfg.networking.address;
-        proxmoxHost = lib.mkDefault (if cfg.runOnSecondHost then "proxmox2" else "proxmox");
+        proxmoxHost = lib.mkDefault (if cfg.requiresGPU then "proxmox-gpu" else "proxmox");
         proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
         resizeDiskBy = cfg.hardware.storage;
       };
@@ -118,7 +136,7 @@ in
     networking = {
       hostName = config.vm.name;
       interfaces = {
-        ens18.ipv4.addresses = [
+        "${if cfg.requiresGPU then "enp6s18" else "ens18"}".ipv4.addresses = [
           {
             address = config.vm.networking.address;
             prefixLength = config.vm.networking.prefixLength;
