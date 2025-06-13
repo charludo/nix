@@ -9,7 +9,7 @@
     hardware.storage = "64G";
 
     networking.nameservers = [ "1.1.1.1" ];
-    runOnSecondHost = true;
+    requiresGPU = true;
   };
 
   services.jellyfin = rec {
@@ -24,6 +24,36 @@
   nas.enable = true;
   nas.backup.enable = true;
   nas.extraUsers = [ config.services.jellyfin.user ];
+
+  users.users."${config.services.jellyfin.user}".extraGroups = [
+    "render"
+    "video"
+    "input"
+  ];
+  nixpkgs.config.packageOverrides = pkgs: {
+    vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+  };
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-ocl
+      intel-media-driver
+      intel-vaapi-driver
+      vaapiVdpau
+      libvdpau-va-gl
+      intel-compute-runtime
+      vpl-gpu-rt
+    ];
+  };
+  hardware.firmware = [ pkgs.linux-firmware ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.blacklistedKernelModules = [ "i915" ];
+  boot.kernelParams = [
+    "i915.enable_guc=2"
+    "module_blacklist=i915"
+    "xe.force_probe=7d51"
+    "i915.force_probe=!7d51"
+  ];
 
   systemd = {
     timers."jellyfin-backup-daily" = {

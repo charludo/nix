@@ -14,7 +14,6 @@
     hardware.memory = 2048;
     hardware.storage = "16G";
 
-    runOnSecondHost = true;
     networking.openPorts.tcp = [ config.services.firefox-syncserver.settings.port ];
     networking.openPorts.udp = [ config.services.firefox-syncserver.settings.port ];
   };
