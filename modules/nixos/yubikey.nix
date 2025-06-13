@@ -146,6 +146,8 @@ in
     services.udev.packages = [ pkgs.yubikey-personalization ];
     services.yubikey-agent.enable = true;
 
+    hardware.gpgSmartcards.enable = true;
+
     security.pam = {
       sshAgentAuth.enable = true;
       u2f = {
