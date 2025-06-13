@@ -22,6 +22,7 @@ in
     ./common/desktop/hyprland
   ];
 
+  home.packages = with pkgs; [ teams-for-linux ];
   k9s.enable = true;
 
   home.hostname = "hub";
