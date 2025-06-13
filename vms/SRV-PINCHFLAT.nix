@@ -1,6 +1,5 @@
 {
   config,
-  lib,
   pkgs,
   ...
 }:
@@ -23,14 +22,7 @@
 
   nas.enable = true;
   nas.backup.enable = true;
-
-  # Not great, but needed
-  users.users.pinchflat = {
-    isSystemUser = true;
-    group = "nas";
-  };
-  systemd.services.pinchflat.serviceConfig.User = "pinchflat";
-  systemd.services.pinchflat.serviceConfig.DynamicUser = lib.mkForce false;
+  nas.extraUsers = [ config.services.pinchflat.user ];
 
   environment.systemPackages =
     let
