@@ -51,7 +51,6 @@ in
     hardware.cores = 4;
     hardware.memory = 16384;
     hardware.storage = "16G";
-    runOnSecondHost = true;
   };
 
   users.users.nixuser = {
