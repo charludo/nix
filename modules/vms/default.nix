@@ -173,6 +173,12 @@ in
       );
     };
 
+    nix.gc = {
+      automatic = true;
+      dates = "monthly";
+      options = "-d";
+    };
+
     # Hardware config is always identical
     boot.initrd.availableKernelModules = [
       "ata_piix"
