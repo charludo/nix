@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  private-settings,
   secrets,
   ...
 }:
@@ -13,7 +14,7 @@
     hardware.memory = 8192;
     hardware.storage = "16G";
 
-    networking.nameservers = [ "1.1.1.1" ];
+    networking.nameservers = private-settings.upstreamDNS;
     networking.openPorts.tcp = [ config.services.kavita.settings.Port ];
   };
 

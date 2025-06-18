@@ -45,8 +45,7 @@
   networking.hostName = "eschaton";
   networking.nameservers = [
     "192.168.30.13"
-    "1.1.1.1"
-  ];
+  ] ++ private-settings.upstreamDNS;
 
   boot.kernelParams = [
     "video=eDP-1:2880x1800@59.88"
