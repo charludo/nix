@@ -36,8 +36,7 @@
   networking.hostName = "drone";
   networking.nameservers = [
     "192.168.30.13"
-    "1.1.1.1"
-  ];
+  ] ++ private-settings.upstreamDNS;
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.perostek.sudoFile;
 

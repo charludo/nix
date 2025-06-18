@@ -38,7 +38,7 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "mallorca";
-  networking.nameservers = [ "1.1.1.1" ];
+  networking.nameservers = private-settings.upstreamDNS;
 
   wireguard = {
     enable = true;

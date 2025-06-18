@@ -3,6 +3,7 @@
   pkgs,
   lib,
   inputs,
+  private-settings,
   secrets,
   ...
 }:
@@ -35,7 +36,7 @@ in
     hardware.memory = 24576;
     hardware.storage = "128G";
 
-    networking.nameservers = [ "1.1.1.1" ];
+    networking.nameservers = private-settings.upstreamDNS;
   };
 
   surfshark = {
