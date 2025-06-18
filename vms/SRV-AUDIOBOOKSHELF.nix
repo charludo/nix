@@ -1,4 +1,9 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  private-settings,
+  ...
+}:
 {
   vm = {
     id = 2207;
@@ -8,7 +13,7 @@
     hardware.memory = 16384;
     hardware.storage = "32G";
 
-    networking.nameservers = [ "1.1.1.1" ];
+    networking.nameservers = private-settings.upstreamDNS;
   };
 
   services.audiobookshelf = {
