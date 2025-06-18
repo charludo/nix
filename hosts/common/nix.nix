@@ -20,7 +20,6 @@
         "kvm"
         "big-parallel"
       ];
-      # flake-registry = "";
     };
 
     gc = {
@@ -29,8 +28,6 @@
       options = lib.mkDefault "--delete-older-than +3";
     };
 
-    # backwards compatibility / consistency
-    # registry = lib.mapAttrs (_: value: { flake = value; }) inputs;
     nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];
   };
 }
