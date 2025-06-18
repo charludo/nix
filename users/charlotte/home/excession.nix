@@ -86,17 +86,17 @@ in
     exec = [
       "steam -bigpicture"
       "librewolf"
-      "webcord"
+      "discord"
       "jellyfinmediaplayer"
     ];
 
     windowrulev2 = [
-      "opaque, class:(steam)$"
-      "workspace 2, class:(steam),title:()"
-      "workspace 1 silent, class:(librewolf),title:()"
-      "workspace 3 silent, class:(WebCord),title:()"
-      "workspace 3 silent, class:(com.github.iwalton3.jellyfin-media-player),title:()"
-      "fullscreenstate 0, class:(com.github.iwalton3.jellyfin-media-player),title:()"
+      "opaque, class:(steam$)"
+      "workspace 2, class:steam"
+      "workspace 1 silent, class:librewolf"
+      "workspace 3 silent, class:discord"
+      "workspace 3 silent, class:com.github.iwalton3.jellyfin-media-player"
+      "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
     ];
   };
 
