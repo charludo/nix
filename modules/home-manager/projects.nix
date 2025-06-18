@@ -21,6 +21,10 @@ in
             type = types.bool;
             default = true;
           };
+          flakeURL = mkOption {
+            type = types.str;
+            default = ".";
+          };
         };
       }
     );

@@ -10,7 +10,7 @@ let
             ''${DIRENV_DISABLE:+exit}
             export DIRENV_DISABLE="1"
             if [ -f flake.nix ] && [ ${(if entry.enableDirenv then "true" else "false")} = true ]; then
-              use flake .
+              use flake ${entry.flakeURL}
             fi
             if  [ ! -d .git ] && [ -n "${entry.repo}" ]; then
               git init
