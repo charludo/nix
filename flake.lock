@@ -1900,11 +1900,11 @@
         "utils": "utils_6"
       },
       "locked": {
-        "lastModified": 1740996633,
-        "narHash": "sha256-UcMueDnBaGzRJb6E871ygunij8zsxon+wCPWGKYTMJ0=",
+        "lastModified": 1750271011,
+        "narHash": "sha256-LIOnjVyx73YfaY37dlNe0j4yeVUIyZ8Wtx7bteeP7t4=",
         "ref": "refs/heads/main",
-        "rev": "7da9b0a3a80688bb7c5e7e9f53d5569a6368b27c",
-        "revCount": 3,
+        "rev": "389b7c96b437a84c6570e49010fa8ec0c947e42f",
+        "revCount": 11,
         "type": "git",
         "url": "ssh://git@github.com/charludo/snow"
       },
