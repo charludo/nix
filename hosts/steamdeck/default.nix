@@ -1,3 +1,4 @@
+{ private-settings, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -48,8 +49,7 @@
   networking.hostName = "steamdeck";
   networking.nameservers = [
     "192.168.30.13"
-    "1.1.1.1"
-  ];
+  ] ++ private-settings.upstreamDNS;
 
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;

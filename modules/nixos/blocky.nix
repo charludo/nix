@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  private-settings,
   ...
 }:
 
@@ -25,10 +26,7 @@ in
         ];
         bootstrapDns = {
           upstream = "https://one.one.one.one/dns-query";
-          ips = [
-            "1.1.1.1"
-            "1.0.0.1"
-          ];
+          ips = private-settings.upstreamDNS;
         };
         blocking = {
           blackLists = {

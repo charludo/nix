@@ -2,6 +2,7 @@
   outputs,
   config,
   lib,
+  private-settings,
   ...
 }:
 let
@@ -83,8 +84,7 @@ in
           "192.168.30.5"
           "192.168.30.6"
           "192.168.30.13"
-          "1.1.1.1"
-        ];
+        ] ++ private-settings.upstreamDNS;
       };
       openPorts = {
         tcp = lib.mkOption {
