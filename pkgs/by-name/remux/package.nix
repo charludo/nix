@@ -11,7 +11,11 @@ pkgs.stdenv.mkDerivation {
       ]
     ))
   ];
-  nativeBuildInputs = [ pkgs.makeWrapper ];
+  nativeBuildInputs = [
+    pkgs.makeWrapper
+    pkgs.mkvtoolnix-cli
+    pkgs.ffmpeg
+  ];
 
   dontUnpack = true;
 
