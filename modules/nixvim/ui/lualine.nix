@@ -1,9 +1,9 @@
 { config, lib, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.lualine = {
+  plugins.lualine = {
     enable = true;
 
     settings.sections = {
@@ -107,7 +107,7 @@ in
     };
   };
 
-  programs.nixvim.opts = {
+  opts = {
     # would be nice...
     # cmdheight = 0;
     laststatus = 3;

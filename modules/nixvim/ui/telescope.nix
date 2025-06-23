@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.telescope = {
+  plugins.telescope = {
     enable = true;
 
     settings.defaults = {
@@ -105,7 +105,7 @@ in
     extensions.ui-select.enable = true;
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       key = "<leader>fw";
       action = "<cmd>Telescope live_grep<CR>";
@@ -180,7 +180,7 @@ in
     }
   ];
 
-  programs.nixvim.highlight = {
+  highlight = {
     TelescopePromptPrefix = {
       fg = colors.red;
       bg = colors.black2;

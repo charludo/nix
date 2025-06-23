@@ -1,3 +1,3 @@
 {
-  programs.nixvim.plugins.guess-indent.enable = true;
+  plugins.guess-indent.enable = true;
 }

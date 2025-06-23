@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
-  programs.nixvim.extraPlugins = with pkgs.vimPlugins; [ { plugin = vim-visual-multi; } ];
-  programs.nixvim.globals = {
+  extraPlugins = with pkgs.vimPlugins; [ { plugin = vim-visual-multi; } ];
+  globals = {
     VM_maps = {
       "Find Under" = "<C-d>";
       "Find Subword Under" = "<C-d>";
@@ -9,7 +9,7 @@
     VM_quit_after_leaving_insert_mode = 1;
     VM_skip_empty_lines = 1;
   };
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [ "n" ];
       key = "<A-Up>";
