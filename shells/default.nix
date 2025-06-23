@@ -1,6 +1,14 @@
-{ pkgs, ... }:
-pkgs.mkShell {
-  nativeBuildInputs = with pkgs; [
+{
+  age,
+  openssh,
+  nixfmt-rfc-style,
+  deadnix,
+  ruff,
+  mkShell,
+  ...
+}:
+mkShell {
+  nativeBuildInputs = [
     age
     openssh
 

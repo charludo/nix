@@ -102,6 +102,7 @@
 
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
+      packages = import ./pkgs { inherit pkgs lib; };
 
       private-settings = import ./private-settings/settings.nix { inherit lib; };
       secrets = import ./private-settings/secrets.nix { inherit lib; };
@@ -276,9 +277,11 @@
           (mkHomeConfig "marie" "CL-NIX-3" [ plasma-manager.homeManagerModules.plasma-manager ])
         ];
 
+      packages.${system} = packages;
+
       devShells.${system} = {
-        remux = (import ./shells/remux { inherit pkgs lib; });
-        default = (import ./shells { inherit pkgs; });
+        default = pkgs.callPackage ./shells { };
+        remux = pkgs.callPackage ./shells/remux.nix { inherit (packages) remux; };
       };
 
       formatter.${system} = pkgs.treefmt;
