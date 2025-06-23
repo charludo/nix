@@ -12,9 +12,9 @@
   ];
 
   # proper <C-S-...> selections from insert and normal modes
-  programs.nixvim.opts.keymodel = "startsel";
+  opts.keymodel = "startsel";
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     # misc
     {
       mode = [

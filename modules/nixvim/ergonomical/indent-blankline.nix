@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  programs.nixvim.plugins.indent-blankline = {
+  plugins.indent-blankline = {
     enable = true;
     settings = {
       indent = {
@@ -27,22 +27,22 @@
     };
   };
 
-  programs.nixvim.highlight = {
+  highlight = {
     IblChar = {
-      fg = config.nixvim.palette.line;
+      fg = config.palette.line;
     };
     IblScopeChar = {
-      fg = config.nixvim.palette.grey;
+      fg = config.palette.grey;
     };
     "@ibl.scope.underline.1" = {
-      bg = config.nixvim.palette.black2;
+      bg = config.palette.black2;
       underline = false;
       cterm = null;
     };
   };
-  programs.nixvim.highlightOverride = {
+  highlightOverride = {
     "@ibl.scope.underline.1" = {
-      bg = config.nixvim.palette.black2;
+      bg = config.palette.black2;
       underline = false;
       cterm = null;
     };

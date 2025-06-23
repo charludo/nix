@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.lsp = {
+  plugins.lsp = {
     enable = true;
     keymaps.lspBuf = {
       K = "hover";
@@ -14,7 +14,7 @@ in
     };
   };
 
-  programs.nixvim.highlight = {
+  highlight = {
     LspReferenceText = {
       fg = colors.darker_black;
       bg = colors.white;
@@ -113,7 +113,7 @@ in
     };
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       key = "<M-CR>";
       action = "<cmd>lua vim.lsp.buf.code_action()<CR>";
@@ -124,7 +124,7 @@ in
     }
   ];
 
-  programs.nixvim.extraConfigLua = # lua
+  extraConfigLua = # lua
     ''
       -- shamelessly copied from: https://github.com/NvChad/ui/blob/v2.5/lua/nvchad/lsp/init.lua
       local function lspSymbol(name, icon)

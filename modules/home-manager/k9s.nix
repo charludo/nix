@@ -2,7 +2,7 @@
 
 let
   cfg = config.k9s;
-  colors = config.nixvim.palette;
+  colors = lib.colors.extendPalette config.colorScheme.palette;
 in
 {
   options.k9s.enable = lib.mkEnableOption "enable themed k9s";

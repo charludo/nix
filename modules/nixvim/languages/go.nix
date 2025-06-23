@@ -5,13 +5,13 @@
   ...
 }:
 let
-  cfg = config.nixvim.languages.go;
+  cfg = config.languages.go;
 in
 {
-  options.nixvim.languages.go.enable = lib.mkEnableOption "Language config for go";
+  options.languages.go.enable = lib.mkEnableOption "Language config for go";
 
   config = lib.mkIf cfg.enable {
-    programs.nixvim.plugins.lsp.servers.gopls = {
+    plugins.lsp.servers.gopls = {
       enable = true;
       settings.gopls = {
         completeUnimported = true;
@@ -22,17 +22,17 @@ in
       };
     };
 
-    programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.go = [
+    plugins.conform-nvim.settings.formatters_by_ft.go = [
       "gofumpt"
       "goimports"
     ];
-    programs.nixvim.plugins.lint.lintersByFt.go = [ "golangcilint" ];
-    programs.nixvim.plugins.lint.linters.golangcilint.cmd = lib.getExe pkgs.golangci-lint;
+    plugins.lint.lintersByFt.go = [ "golangcilint" ];
+    plugins.lint.linters.golangcilint.cmd = lib.getExe pkgs.golangci-lint;
 
-    programs.nixvim.plugins.neotest.adapters.go.enable = true;
-    programs.nixvim.plugins.dap-go.enable = true;
+    plugins.neotest.adapters.go.enable = true;
+    plugins.dap-go.enable = true;
 
-    programs.nixvim.extraPackages = with pkgs; [
+    extraPackages = with pkgs; [
       delve
       gofumpt
     ];

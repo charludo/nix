@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.conform-nvim = {
+  plugins.conform-nvim = {
     enable = true;
     settings = {
       format_on_save = # lua
@@ -15,7 +15,7 @@
     };
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [ "n" ];
       key = "<leader>af";

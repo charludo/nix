@@ -8,7 +8,6 @@
 let
   nixosModules.common = import ../modules/nixos;
   homeModules.common = import ../modules/home-manager;
-  nixvimModules.common = import ../modules/nixvim;
 
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
@@ -26,21 +25,18 @@ rec {
           secrets
           ;
       };
-      home-manager.sharedModules =
-        [
-          homeModules.common
-          {
-            imports = [
-              inputs.agenix.homeManagerModules.default
-              inputs.agenix-rekey.homeManagerModules.default
-              inputs.nix-colors.homeManagerModules.colorScheme
-              inputs.nixvim.homeManagerModules.nixvim
-              inputs.plasma-manager.homeManagerModules.plasma-manager
-            ];
-          }
-        ]
-        ++ (builtins.attrValues homeModules)
-        ++ (builtins.attrValues nixvimModules);
+      home-manager.sharedModules = [
+        homeModules.common
+        {
+          imports = [
+            inputs.agenix.homeManagerModules.default
+            inputs.agenix-rekey.homeManagerModules.default
+            inputs.nix-colors.homeManagerModules.colorScheme
+            inputs.nixvim.homeManagerModules.nixvim
+            inputs.plasma-manager.homeManagerModules.plasma-manager
+          ];
+        }
+      ] ++ (builtins.attrValues homeModules);
     }
   ];
 
@@ -119,7 +115,6 @@ rec {
       modules =
         [
           homeModules.common
-          nixvimModules.common
           inputs.agenix.homeManagerModules.default
           inputs.agenix-rekey.homeManagerModules.default
           inputs.nix-colors.homeManagerModules.colorScheme

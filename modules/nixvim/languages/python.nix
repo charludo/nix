@@ -4,25 +4,25 @@
   ...
 }:
 let
-  cfg = config.nixvim.languages.python;
+  cfg = config.languages.python;
 in
 {
-  options.nixvim.languages.python.enable = lib.mkEnableOption "Language config for python";
+  options.languages.python.enable = lib.mkEnableOption "Language config for python";
 
   config = lib.mkIf cfg.enable {
-    programs.nixvim.plugins.lsp.servers.ruff = {
+    plugins.lsp.servers.ruff = {
       enable = true;
       filetypes = [ "python" ];
     };
 
-    programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
+    plugins.conform-nvim.settings.formatters_by_ft = {
       python = [ "ruff" ];
     };
 
-    programs.nixvim.plugins.neotest.adapters.python.enable = true;
+    plugins.neotest.adapters.python.enable = true;
 
-    programs.nixvim.plugins.dap-python.enable = true;
-    programs.nixvim.plugins.dap.configurations.python = [
+    plugins.dap-python.enable = true;
+    plugins.dap.configurations.python = [
       {
         name = "Launch Django DAP";
         type = "python";

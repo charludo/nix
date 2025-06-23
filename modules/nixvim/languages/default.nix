@@ -10,7 +10,7 @@
     ./rust.nix
     ./webdev.nix
   ];
-  programs.nixvim.plugins.lsp.servers = {
+  plugins.lsp.servers = {
     # config languages
     nil_ls.enable = true;
     lua_ls.enable = true;
@@ -23,12 +23,12 @@
     yamlls.enable = true;
   };
 
-  programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
+  plugins.conform-nvim.settings.formatters_by_ft = {
     nix = [ "nixfmt" ];
     lua = [ "stylua" ];
     sh = [ "shfmt" ];
   };
-  programs.nixvim.plugins.conform-nvim.settings.formatters.shfmt.args = [
+  plugins.conform-nvim.settings.formatters.shfmt.args = [
     "-sr"
     "-kp"
     "-i"
@@ -36,7 +36,7 @@
     "-filename"
     "$FILENAME"
   ];
-  programs.nixvim.extraPackages = with pkgs; [
+  extraPackages = with pkgs; [
     nixfmt-rfc-style
     stylua
     shfmt

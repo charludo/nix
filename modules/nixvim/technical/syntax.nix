@@ -1,14 +1,14 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.treesitter = {
+  plugins.treesitter = {
     enable = true;
     settings.highlight.enable = true;
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       key = "<leader>ts";
       action = "<cmd>TSBufToggle highlight<CR>";
@@ -19,7 +19,7 @@ in
     }
   ];
 
-  programs.nixvim.highlight = {
+  highlight = {
     Boolean = {
       fg = colors.base09;
     };

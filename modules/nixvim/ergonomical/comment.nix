@@ -1,12 +1,12 @@
 {
-  programs.nixvim.plugins.comment = {
+  plugins.comment = {
     enable = true;
     settings.mappings = false;
     settings.toggler.line = "<A-/>";
     settings.toggler.block = "<S-A-/>";
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [
         "n"

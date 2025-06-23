@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.neotest = {
+  plugins.neotest = {
     enable = true;
     settings = {
       diagnostic.severity = "hint";
@@ -35,7 +35,7 @@ in
     };
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       key = "<leader>tt";
       action = "<cmd>lua require('neotest').run.run()<CR>";
@@ -86,7 +86,7 @@ in
     }
   ];
 
-  programs.nixvim.highlight = {
+  highlight = {
     NeotestPassed = {
       fg = colors.base0B;
     };

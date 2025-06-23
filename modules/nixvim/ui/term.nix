@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.extraConfigLua = # lua
+  extraConfigLua = # lua
     ''
       -- The following is largely copied from:
       -- https://github.com/NvChad/ui/blob/af9ab0cd9e193c68c443939fa7e4b8213db5693b/lua/nvchad/term/init.lua
@@ -192,7 +192,7 @@ in
       })
     '';
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [ "n" ];
       key = "<leader>h";
@@ -244,7 +244,7 @@ in
     }
   ];
 
-  programs.nixvim.globals = {
+  globals = {
     terminal_color_0 = colors.base01;
     terminal_color_1 = colors.base08;
     terminal_color_2 = colors.base0B;

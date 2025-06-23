@@ -1,6 +1,7 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.colors;
+  palette = config.palette;
 in
 {
   imports = [
@@ -12,12 +13,12 @@ in
     ./term.nix
   ];
 
-  programs.nixvim.colorschemes.base16 = {
+  colorschemes.base16 = {
     enable = true;
-    colorscheme = builtins.mapAttrs (_name: value: "#" + value) config.colorScheme.palette;
+    colorscheme = builtins.mapAttrs (_name: value: "#" + value) colors;
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [ "n" ];
       key = "<leader>n";
@@ -36,286 +37,286 @@ in
     }
   ];
 
-  programs.nixvim.plugins.web-devicons.enable = true;
+  plugins.web-devicons.enable = true;
 
-  programs.nixvim.highlight = {
+  highlight = {
     MatchWord = {
-      bg = colors.grey;
-      fg = colors.white;
+      bg = palette.grey;
+      fg = palette.white;
     };
     Pmenu = {
-      bg = colors.one_bg;
+      bg = palette.one_bg;
     };
     PmenuSbar = {
-      bg = colors.one_bg;
+      bg = palette.one_bg;
     };
     PmenuSel = {
-      bg = colors.pmenu_bg;
-      fg = colors.black;
+      bg = palette.pmenu_bg;
+      fg = palette.black;
     };
     PmenuThumb = {
-      bg = colors.grey;
+      bg = palette.grey;
     };
     MatchParen = {
       link = "MatchWord";
     };
     Comment = {
-      fg = colors.grey_fg;
+      fg = palette.grey_fg;
       italic = false;
     };
     CursorLineNr = {
-      fg = colors.white;
+      fg = palette.white;
     };
     LineNr = {
-      fg = colors.grey;
+      fg = palette.grey;
     };
     FloatBorder = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     NormalFloat = {
-      bg = colors.darker_black;
+      bg = palette.darker_black;
     };
     NvimInternalError = {
-      fg = colors.red;
+      fg = palette.red;
     };
     WinSeparator = {
-      fg = colors.line;
+      fg = palette.line;
     };
     Normal = {
-      fg = colors.base05;
-      bg = colors.base00;
+      fg = palette.base05;
+      bg = palette.base00;
     };
     DevIconDefault = {
-      fg = colors.red;
+      fg = palette.red;
     };
     Bold = {
       bold = true;
     };
     Debug = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     Directory = {
-      fg = colors.base0D;
+      fg = palette.base0D;
     };
     Error = {
-      fg = colors.base00;
-      bg = colors.base08;
+      fg = palette.base00;
+      bg = palette.base08;
     };
     ErrorMsg = {
-      fg = colors.base08;
-      bg = colors.base00;
+      fg = palette.base08;
+      bg = palette.base00;
     };
     Exception = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     FoldColumn = {
-      fg = colors.base0C;
-      bg = colors.base01;
+      fg = palette.base0C;
+      bg = palette.base01;
     };
     Folded = {
-      fg = colors.light_grey;
-      bg = colors.black2;
+      fg = palette.light_grey;
+      bg = palette.black2;
     };
     IncSearch = {
-      fg = colors.base01;
-      bg = colors.base0A;
+      fg = palette.base01;
+      bg = palette.base0A;
     };
     Italic = {
       italic = true;
     };
     Macro = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     ModeMsg = {
-      fg = colors.base0B;
+      fg = palette.base0B;
     };
     MoreMsg = {
-      fg = colors.base0B;
+      fg = palette.base0B;
     };
     Question = {
-      fg = colors.base0D;
+      fg = palette.base0D;
     };
     Search = {
-      fg = colors.base01;
-      bg = colors.base09;
+      fg = palette.base01;
+      bg = palette.base09;
     };
     Substitute = {
-      fg = colors.base01;
-      bg = colors.base0A;
+      fg = palette.base01;
+      bg = palette.base0A;
       sp = "none";
     };
     SpecialKey = {
-      fg = colors.base03;
+      fg = palette.base03;
     };
     TooLong = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     UnderLined = {
       underline = true;
     };
     Visual = {
-      bg = colors.base02;
+      bg = palette.base02;
     };
     VisualNOS = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     WarningMsg = {
-      fg = colors.base08;
+      fg = palette.base08;
     };
     WildMenu = {
-      fg = colors.base08;
-      bg = colors.base0A;
+      fg = palette.base08;
+      bg = palette.base0A;
     };
     Title = {
-      fg = colors.base0D;
+      fg = palette.base0D;
       sp = "none";
     };
     Conceal = {
       bg = "NONE";
     };
     Cursor = {
-      fg = colors.base00;
-      bg = colors.base05;
+      fg = palette.base00;
+      bg = palette.base05;
     };
     NonText = {
-      fg = colors.base03;
+      fg = palette.base03;
     };
     SignColumn = {
-      fg = colors.base03;
+      fg = palette.base03;
       sp = "NONE";
     };
     ColorColumn = {
-      bg = colors.black2;
+      bg = palette.black2;
     };
     CursorColumn = {
-      bg = colors.base01;
+      bg = palette.base01;
       sp = "none";
     };
     CursorLine = {
-      bg = colors.black2;
+      bg = palette.black2;
     };
     QuickFixLine = {
-      bg = colors.base01;
+      bg = palette.base01;
       sp = "none";
     };
     SpellBad = {
       undercurl = true;
-      sp = colors.base08;
+      sp = palette.base08;
     };
     SpellLocal = {
       undercurl = true;
-      sp = colors.base0C;
+      sp = palette.base0C;
     };
     SpellCap = {
       undercurl = true;
-      sp = colors.base0D;
+      sp = palette.base0D;
     };
     SpellRare = {
       undercurl = true;
-      sp = colors.base0E;
+      sp = palette.base0E;
     };
     healthSuccess = {
-      bg = colors.green;
-      fg = colors.black;
+      bg = palette.green;
+      fg = palette.black;
     };
     DevIconc = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconcss = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIcondeb = {
-      fg = colors.cyan;
+      fg = palette.cyan;
     };
     DevIconDockerfile = {
-      fg = colors.cyan;
+      fg = palette.cyan;
     };
     DevIconhtml = {
-      fg = colors.baby_pink;
+      fg = palette.baby_pink;
     };
     DevIconjpeg = {
-      fg = colors.dark_purple;
+      fg = palette.dark_purple;
     };
     DevIconjpg = {
-      fg = colors.dark_purple;
+      fg = palette.dark_purple;
     };
     DevIconjs = {
-      fg = colors.sun;
+      fg = palette.sun;
     };
     DevIconkt = {
-      fg = colors.orange;
+      fg = palette.orange;
     };
     DevIconlock = {
-      fg = colors.red;
+      fg = palette.red;
     };
     DevIconlua = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconmp3 = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconmp4 = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconout = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconpng = {
-      fg = colors.dark_purple;
+      fg = palette.dark_purple;
     };
     DevIconpy = {
-      fg = colors.cyan;
+      fg = palette.cyan;
     };
     DevIcontoml = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconts = {
-      fg = colors.teal;
+      fg = palette.teal;
     };
     DevIconttf = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconrb = {
-      fg = colors.pink;
+      fg = palette.pink;
     };
     DevIconrpm = {
-      fg = colors.orange;
+      fg = palette.orange;
     };
     DevIconvue = {
-      fg = colors.vibrant_green;
+      fg = palette.vibrant_green;
     };
     DevIconwoff = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconwoff2 = {
-      fg = colors.white;
+      fg = palette.white;
     };
     DevIconxz = {
-      fg = colors.sun;
+      fg = palette.sun;
     };
     DevIconzip = {
-      fg = colors.sun;
+      fg = palette.sun;
     };
     DevIconZig = {
-      fg = colors.orange;
+      fg = palette.orange;
     };
     DevIconMd = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconTSX = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconJSX = {
-      fg = colors.blue;
+      fg = palette.blue;
     };
     DevIconSvelte = {
-      fg = colors.red;
+      fg = palette.red;
     };
     DevIconJava = {
-      fg = colors.orange;
+      fg = palette.orange;
     };
     DevIconDart = {
-      fg = colors.cyan;
+      fg = palette.cyan;
     };
   };
 }
