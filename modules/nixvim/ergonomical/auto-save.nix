@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.auto-save = {
+  plugins.auto-save = {
     enable = true;
     settings = {
       debounce_delay = 250;

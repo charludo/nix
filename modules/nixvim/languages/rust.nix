@@ -5,13 +5,13 @@
   ...
 }:
 let
-  cfg = config.nixvim.languages.rust;
+  cfg = config.languages.rust;
 in
 {
-  options.nixvim.languages.rust.enable = lib.mkEnableOption "Language config for rust";
+  options.languages.rust.enable = lib.mkEnableOption "Language config for rust";
 
   config = lib.mkIf cfg.enable {
-    programs.nixvim.plugins.lsp.servers.rust_analyzer = {
+    plugins.lsp.servers.rust_analyzer = {
       enable = true;
       installCargo = false;
       installRustc = false;
@@ -22,16 +22,16 @@ in
       settings.check.command = "clippy";
     };
 
-    programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
-    programs.nixvim.extraPackages = [
+    plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
+    extraPackages = [
       pkgs.rustfmt
       pkgs.lldb_17
     ];
 
-    programs.nixvim.plugins.crates.enable = true;
-    programs.nixvim.plugins.neotest.adapters.rust.enable = true;
+    plugins.crates.enable = true;
+    plugins.neotest.adapters.rust.enable = true;
 
-    programs.nixvim.keymaps = [
+    keymaps = [
       {
         mode = "n";
         key = "<leader>cu";
@@ -43,7 +43,7 @@ in
       }
     ];
 
-    programs.nixvim.plugins.dap.configurations.rust = [
+    plugins.dap.configurations.rust = [
       {
         name = "Launch debugger";
         type = "lldb";
@@ -62,7 +62,7 @@ in
       }
     ];
 
-    programs.nixvim.plugins.dap.adapters.executables.lldb = {
+    plugins.dap.adapters.executables.lldb = {
       command = "${pkgs.lldb_17}/bin/lldb-vscode";
     };
   };

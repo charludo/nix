@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.colorizer = {
+  plugins.colorizer = {
     enable = true;
     settings.user_default_options = {
       AARRGGBB = false;

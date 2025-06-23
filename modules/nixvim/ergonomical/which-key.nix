@@ -1,24 +1,24 @@
 { config, ... }:
 {
-  programs.nixvim.plugins.which-key = {
+  plugins.which-key = {
     enable = true;
   };
 
-  programs.nixvim.highlight = {
+  highlight = {
     WhichKey = {
-      fg = config.nixvim.palette.blue;
+      fg = config.palette.blue;
     };
     WhichKeySeparator = {
-      fg = config.nixvim.palette.light_grey;
+      fg = config.palette.light_grey;
     };
     WhichKeyDesc = {
-      fg = config.nixvim.palette.red;
+      fg = config.palette.red;
     };
     WhichKeyGroup = {
-      fg = config.nixvim.palette.green;
+      fg = config.palette.green;
     };
     WhichKeyValue = {
-      fg = config.nixvim.palette.green;
+      fg = config.palette.green;
     };
   };
 }

@@ -5,7 +5,7 @@
   ...
 }:
 let
-  cfg = config.nixvim.languages.latex;
+  cfg = config.languages.latex;
 
   tex = (
     pkgs.texlive.combine {
@@ -25,10 +25,10 @@ let
   );
 in
 {
-  options.nixvim.languages.latex.enable = lib.mkEnableOption "Language config for latex";
+  options.languages.latex.enable = lib.mkEnableOption "Language config for latex";
 
   config = lib.mkIf cfg.enable {
-    programs.nixvim.plugins.vimtex = {
+    plugins.vimtex = {
       enable = true;
       texlivePackage = tex;
       settings = {
@@ -36,16 +36,16 @@ in
         view_method = "sioyek";
       };
     };
-    programs.nixvim.opts.conceallevel = 2;
+    opts.conceallevel = 2;
 
-    programs.nixvim.plugins.lsp.servers.ltex.enable = true;
-    programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
+    plugins.lsp.servers.ltex.enable = true;
+    plugins.conform-nvim.settings.formatters_by_ft = {
       bib = [ "latexindent" ];
       plaintex = [ "latexindent" ];
       tex = [ "latexindent" ];
       quarto = [ "latexindent" ];
       context = [ "latexindent" ];
     };
-    programs.nixvim.extraPackages = [ tex ];
+    extraPackages = [ tex ];
   };
 }

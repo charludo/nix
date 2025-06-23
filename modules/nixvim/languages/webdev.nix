@@ -5,20 +5,20 @@
   ...
 }:
 let
-  cfg = config.nixvim.languages.webdev;
+  cfg = config.languages.webdev;
 in
 {
-  options.nixvim.languages.webdev.enable = lib.mkEnableOption "Language configs for webdev things";
+  options.languages.webdev.enable = lib.mkEnableOption "Language configs for webdev things";
 
   config = lib.mkIf cfg.enable {
-    programs.nixvim.plugins.lsp.servers = {
+    plugins.lsp.servers = {
       html.enable = true;
       htmx.enable = true;
       eslint.enable = true;
       phpactor.enable = true;
     };
 
-    programs.nixvim.plugins.lint.lintersByFt = {
+    plugins.lint.lintersByFt = {
       javascript = [ "eslint_d" ];
       javascriptreact = [ "eslint_d" ];
       "javascript.jsx" = [ "eslint_d" ];
@@ -29,7 +29,7 @@ in
       svelte = [ "eslint_d" ];
       astro = [ "eslint_d" ];
     };
-    programs.nixvim.plugins.conform-nvim.settings.formatters_by_ft = {
+    plugins.conform-nvim.settings.formatters_by_ft = {
       css = [ "prettierd" ];
       sass = [ "prettierd" ];
       scss = [ "prettierd" ];
@@ -54,7 +54,7 @@ in
 
       php = [ "php-cs-fixer" ];
     };
-    programs.nixvim.extraPackages = with pkgs; [
+    extraPackages = with pkgs; [
       djlint
       prettierd
       eslint_d

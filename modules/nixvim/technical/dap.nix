@@ -1,10 +1,10 @@
 # shamelessly stolen from: https://github.com/redyf/Neve/blob/main/config/dap/dap.nix
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.dap = {
+  plugins.dap = {
     enable = true;
     signs = {
       dapBreakpoint = {
@@ -23,7 +23,7 @@ in
     configurations = { };
   };
 
-  programs.nixvim.plugins = {
+  plugins = {
     dap-ui = {
       enable = true;
       settings.floating.mappings = {
@@ -38,7 +38,7 @@ in
     };
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = "n";
       key = "<leader>dB";
@@ -77,7 +77,7 @@ in
     }
   ];
 
-  programs.nixvim.extraConfigLua = # lua
+  extraConfigLua = # lua
     ''
       local dap = require "dap"
       local dapui = require "dapui"
@@ -93,7 +93,7 @@ in
       end
     '';
 
-  programs.nixvim.highlight = {
+  highlight = {
     DapBreakpoint = {
       fg = colors.red;
     };
