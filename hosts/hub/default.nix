@@ -26,6 +26,7 @@
   surfshark.enable = true;
   suspend.enable = true;
   suspend.gigabyteFix = true;
+  tailscale.enable = true;
   wifi.enable = true;
   programs.dconf.enable = true;
 
@@ -34,10 +35,7 @@
   nas.enable = true;
   nas.backup.enable = true;
 
-  environment.systemPackages = [
-    pkgs.ntfs3g
-    pkgs.tailscale
-  ];
+  environment.systemPackages = [ pkgs.ntfs3g ];
   fileSystems."/media/Media" = {
     device = "/dev/disk/by-uuid/A01C13B21C138288";
     fsType = "ntfs-3g";
