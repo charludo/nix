@@ -32,6 +32,7 @@
     ./steam-firewall.nix
     ./surfshark.nix
     ./suspend.nix
+    ./tailscale.nix
     ./wifi.nix
     ./wireguard.nix
     ./yubikey.nix

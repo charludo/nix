@@ -25,6 +25,7 @@
   soundConfig.enableCombinedAdapter = true;
   screensharing.enable = true;
   surfshark.enable = true;
+  tailscale.enable = true;
   wifi.enable = true;
   programs.dconf.enable = true;
 
