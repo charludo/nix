@@ -4,6 +4,7 @@
   pkgs,
   config,
   private-settings,
+  secrets,
   ...
 }:
 let
@@ -192,4 +193,7 @@ in
       set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../zakalwe_age.pub}"
       set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
     '';
+
+  age.secrets.netrc.rekeyFile = secrets.charlotte-netrc;
+  netrc.file = config.age.secrets.netrc.path;
 }

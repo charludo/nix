@@ -4,6 +4,7 @@
   pkgs,
   config,
   private-settings,
+  secrets,
   ...
 }:
 let
@@ -115,4 +116,7 @@ in
     '';
 
   accounts.email.accounts = private-settings.accountsWork;
+
+  age.secrets.netrc.rekeyFile = secrets.charlotte-netrc;
+  netrc.file = config.age.secrets.netrc.path;
 }
