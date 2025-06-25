@@ -9,7 +9,9 @@ let
           ''
             ''${DIRENV_DISABLE:+exit}
             export DIRENV_DISABLE="1"
-            if [ -f flake.nix ] && [ ${(if entry.enableDirenv then "true" else "false")} = true ]; then
+            if ([ -f flake.nix ] || [ ${(if entry.flakeURL != "." then "true" else "false")} = true ]) && [ ${
+              (if entry.enableDirenv then "true" else "false")
+            } = true ]; then
               use flake ${entry.flakeURL}
             fi
             if  [ ! -d .git ] && [ -n "${entry.repo}" ]; then
@@ -31,7 +33,7 @@ in
     nix-direnv.enable = true;
   };
   home.sessionVariables.DIRENV_LOG_FORMAT = "";
-  home.file = (lib.foldl addEntry { } config.projects) // {
+  home.file = (lib.foldl addEntry { } (lib.filter (p: p.writeEnvrc) config.projects)) // {
     ".config/direnv/direnv.toml".text = # toml
       ''
         [global]
