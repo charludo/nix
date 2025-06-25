@@ -6,9 +6,6 @@
   ...
 }:
 let
-  nixosModules.common = import ../modules/nixos;
-  homeModules.common = import ../modules/home-manager;
-
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
 in
@@ -26,7 +23,7 @@ rec {
           ;
       };
       home-manager.sharedModules = [
-        homeModules.common
+        outputs.homeModules.common
         {
           imports = [
             inputs.agenix.homeManagerModules.default
@@ -36,7 +33,7 @@ rec {
             inputs.plasma-manager.homeManagerModules.plasma-manager
           ];
         }
-      ] ++ (builtins.attrValues homeModules);
+      ] ++ (builtins.attrValues outputs.homeModules);
     }
   ];
 
@@ -45,12 +42,12 @@ rec {
     value = lib.nixosSystem {
       modules =
         [
-          nixosModules.common
+          outputs.nixosModules.common
           inputs.agenix.nixosModules.default
           inputs.agenix-rekey.nixosModules.default
           inputs.snow.nixosModules.default
         ]
-        ++ (builtins.attrValues nixosModules)
+        ++ (builtins.attrValues outputs.nixosModules)
         ++ [ ../hosts/${hostname} ]
         ++ lib.optionals enableHomeManager homeModulesForOsConfig
         ++ extraModules;
@@ -74,7 +71,7 @@ rec {
           inherit name;
           value = lib.nixosSystem {
             modules = [
-              nixosModules.common
+              outputs.nixosModules.common
               inputs.agenix.nixosModules.default
               inputs.agenix-rekey.nixosModules.default
               inputs.snow.nixosModules.default
@@ -87,7 +84,7 @@ rec {
               ../modules/vms
               ../hosts/common
               ../users/paki/user.nix
-            ] ++ (builtins.attrValues nixosModules);
+            ] ++ (builtins.attrValues outputs.nixosModules);
             specialArgs = {
               inherit
                 lib
@@ -114,13 +111,13 @@ rec {
     value = lib.homeManagerConfiguration {
       modules =
         [
-          homeModules.common
+          outputs.homeModules.common
           inputs.agenix.homeManagerModules.default
           inputs.agenix-rekey.homeManagerModules.default
           inputs.nix-colors.homeManagerModules.colorScheme
           inputs.nixvim.homeManagerModules.nixvim
         ]
-        ++ (builtins.attrValues homeModules)
+        ++ (builtins.attrValues outputs.homeModules)
         ++ [ ../users/${username}/home/${hostname}.nix ]
         ++ extraModules;
       inherit pkgs;
