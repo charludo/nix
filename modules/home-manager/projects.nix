@@ -25,6 +25,11 @@ in
             type = types.str;
             default = ".";
           };
+          writeEnvrc = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Do not write an .envrc file, only allow direnv for the project";
+          };
         };
       }
     );
