@@ -21,7 +21,7 @@ let
     base0E = "#e275ad";
     base0F = "#ae5622";
   };
-  colorsNoPound = builtins.mapAttrs (_name: value: builtins.substring 1 6 value) colors;
+  colorsNoPound = builtins.mapAttrs (_name: lib.removePrefix "#") colors;
 in
 nixvim.legacyPackages.x86_64-linux.makeNixvim {
   imports = [ ../../../modules/nixvim ];
