@@ -3,29 +3,59 @@
   nixvim,
 }:
 let
-  colors = {
-    base00 = "#1c2128";
-    base01 = "#373e47";
-    base02 = "#444c56";
-    base03 = "#545d68";
-    base04 = "#768390";
-    base05 = "#909dab";
-    base06 = "#adbac7";
-    base07 = "#cdd9e5";
-    base08 = "#f47067";
-    base09 = "#e0823d";
-    base0A = "#c69026";
-    base0B = "#57ab5a";
-    base0C = "#96d0ff";
-    base0D = "#539bf5";
-    base0E = "#e275ad";
-    base0F = "#ae5622";
-  };
-  colorsNoPound = builtins.mapAttrs (_name: lib.removePrefix "#") colors;
+
+  languages =
+    builtins.attrNames
+      (lib.evalModules {
+        modules = [
+          ../../../modules/nixvim
+          { config._module.check = false; }
+        ];
+      }).options.languages;
 in
-nixvim.legacyPackages.x86_64-linux.makeNixvim {
-  imports = [ ../../../modules/nixvim ];
-  colors = colorsNoPound;
-  palette = lib.colors.extendPalette colorsNoPound;
-  languages = { };
+# nvim base package, no special language support
+(import ./mkNixvim.nix { inherit lib nixvim; })
+
+# nvim.${language} package for each language defined in the nixvim module
+// lib.genAttrs languages (
+  language:
+  import ./mkNixvim.nix {
+    inherit lib nixvim;
+    languages = {
+      ${language}.enable = true;
+    };
+  }
+)
+
+# nvim.common includes support for commonly used languages
+// {
+  common = (
+    import ./mkNixvim.nix {
+      inherit lib nixvim;
+      languages = {
+        go.enable = true;
+        python.enable = true;
+        rust.enable = true;
+        webdev.enable = true;
+      };
+    }
+  );
+}
+
+# nvim.full includes support for all languages defined in the nixvim module
+# CAUTION: quite heavy due to the contained full texlive distribution
+// {
+  full = (
+    import ./mkNixvim.nix {
+      inherit lib nixvim;
+      languages = builtins.listToAttrs (
+        map (language: {
+          name = language;
+          value = {
+            enable = true;
+          };
+        }) languages
+      );
+    }
+  );
 }
