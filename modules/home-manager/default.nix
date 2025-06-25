@@ -8,6 +8,7 @@
     ./monitors.nix
     ./netrc.nix
     ./nixvim.nix
+    ./nsenter.nix
     ./projects.nix
     ./wallpaper.nix
     ./xdg-runtime-dir.nix
