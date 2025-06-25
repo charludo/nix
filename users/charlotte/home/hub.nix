@@ -196,4 +196,6 @@ in
 
   age.secrets.netrc.rekeyFile = secrets.charlotte-netrc;
   netrc.file = config.age.secrets.netrc.path;
+
+  nsenter.enable = true;
 }
