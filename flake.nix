@@ -112,6 +112,10 @@
 
       formatter.${system} = pkgs.treefmt;
 
+      nixvimModules.common = import ./modules/nixvim;
+      nixosModules.common = import ./modules/nixos;
+      homeModules.common = import ./modules/home-manager;
+
       agenix-rekey = inputs.agenix-rekey.configure {
         userFlake = self;
         nixosConfigurations = self.nixosConfigurations;
