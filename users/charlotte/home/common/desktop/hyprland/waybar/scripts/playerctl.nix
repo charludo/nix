@@ -4,6 +4,7 @@ pkgs.writeShellApplication {
   runtimeInputs = [
     pkgs.playerctl
     pkgs.bc
+    pkgs.jq
   ];
   text = ''
     set +o pipefail
@@ -21,7 +22,11 @@ pkgs.writeShellApplication {
         title=$(playerctl -p "$PLAYER" metadata --format "{{title}} ( {{duration(position)}} / {{duration(mpris:length)}} )")
         position=$(playerctl -p "$PLAYER" metadata --format "{{position}}")
         length=$(playerctl -p "$PLAYER" metadata --format "{{mpris:length}}")
-        progress=$(echo "100/$length*$position" | bc -l)
+        if [ -z "$length" ] || [ "$length" -eq 0 ] || [ "$position" -eq 0 ]; then
+            progress=0
+        else
+            progress=$(echo "100/$length*$position" | bc -l)
+        fi
         progress=''${progress%.*}
 
         if [ "$status" = "Playing" ]; then
@@ -31,7 +36,8 @@ pkgs.writeShellApplication {
         fi
 
         if [ -n "$length" ]; then
-            echo "{\"text\":\"''${status} ''${title}\",\"class\":\"progress-''${progress}\"}"
+            # shellcheck disable=SC2016,2215
+            jq -c -n -M --arg status "$status" --arg title "$title" --arg progress "$progress" '{text: ($status + " " + $title), class: ("progress-" + $progress)}'
         fi
 
     }
