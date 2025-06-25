@@ -1,9 +1,9 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.bufferline = {
+  plugins.bufferline = {
     enable = true;
     settings = {
       highlights = {
@@ -129,9 +129,9 @@ in
   };
 
   # Solves the issue of nvim-tree focusing after a buffer is deleted
-  programs.nixvim.plugins.vim-bbye.enable = true;
+  plugins.vim-bbye.enable = true;
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = "n";
       key = "<Tab>";

@@ -59,8 +59,8 @@
       system = "x86_64-linux";
 
       pkgs = nixpkgs.legacyPackages.${system};
-      packages = pkgs.callPackage ./pkgs { };
       lib = import ./lib { inherit pkgs inputs outputs; };
+      packages = pkgs.callPackage ./pkgs { inherit inputs lib; };
     in
     {
       inherit lib;

@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.nvim-autopairs = {
+  plugins.nvim-autopairs = {
     enable = true;
     settings.disabled_filetype = [
       "TelescopePrompt"
@@ -7,7 +7,7 @@
     ];
   };
 
-  programs.nixvim.extraConfigLua = # lua
+  extraConfigLua = # lua
     ''
       local cmp_autopairs = require "nvim-autopairs.completion.cmp"
       require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())

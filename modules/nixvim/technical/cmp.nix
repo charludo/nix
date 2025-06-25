@@ -1,13 +1,13 @@
 { config, ... }:
 let
-  colors = config.nixvim.palette;
+  colors = config.palette;
 in
 {
-  programs.nixvim.plugins.cmp-nvim-lsp.enable = true;
-  programs.nixvim.plugins.cmp-emoji.enable = true;
-  programs.nixvim.plugins.cmp-latex-symbols.enable = true;
+  plugins.cmp-nvim-lsp.enable = true;
+  plugins.cmp-emoji.enable = true;
+  plugins.cmp-latex-symbols.enable = true;
 
-  programs.nixvim.plugins.cmp = {
+  plugins.cmp = {
     enable = true;
     settings = {
       completion.completeopt = "menu,menuone,noselect";
@@ -207,9 +207,9 @@ in
     };
   };
 
-  programs.nixvim.opts.pumheight = 5;
+  opts.pumheight = 5;
 
-  programs.nixvim.highlight = {
+  highlight = {
     CmpItemAbbr = {
       fg = colors.white;
     };

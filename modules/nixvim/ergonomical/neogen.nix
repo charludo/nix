@@ -1,5 +1,5 @@
 {
-  programs.nixvim.plugins.neogen = {
+  plugins.neogen = {
     enable = true;
     languages = {
       python = {
@@ -10,7 +10,7 @@
     };
   };
 
-  programs.nixvim.keymaps = [
+  keymaps = [
     {
       mode = [ "n" ];
       key = "<leader>ds";
