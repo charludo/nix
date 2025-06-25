@@ -6,6 +6,7 @@
     ./icons.nix
     ./k9s.nix
     ./monitors.nix
+    ./netrc.nix
     ./nixvim.nix
     ./projects.nix
     ./wallpaper.nix
