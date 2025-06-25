@@ -13,6 +13,7 @@ let
         lib = self;
       in
       {
+        helpers = import ./helpers.nix { inherit lib; };
         colors = import ./colors.nix { inherit lib; };
         mkConfigs = import ./mkConfigs.nix {
           inherit
