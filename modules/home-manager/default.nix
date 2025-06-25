@@ -1,19 +1,4 @@
+{ lib, ... }:
 {
-  imports = [
-    ./cursor.nix
-    ./fonts.nix
-    ./hostname.nix
-    ./icons.nix
-    ./k9s.nix
-    ./monitors.nix
-    ./netrc.nix
-    ./nixvim.nix
-    ./nsenter.nix
-    ./projects.nix
-    ./wallpaper.nix
-    ./xdg-runtime-dir.nix
-    ./yubikey-notify.nix
-
-    ../nixos/age.nix
-  ];
+  imports = (lib.helpers.mkImportsNoDefault ./.) ++ [ ../nixos/age.nix ];
 }
