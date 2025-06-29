@@ -1,39 +1,24 @@
-{
-  inputs,
-  lib,
-  pkgs,
-  config,
-  private-settings,
-  ...
-}:
-let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix {
-    inherit pkgs config private-settings;
-  };
-  inherit (inputs.nix-colors) colorSchemes;
-  # deadnix: skip
-  customSchemes = import ./common/desktop/common/customColorSchemes.nix;
-in
+{ lib, private-settings, ... }:
 {
   imports = [
     ./common
-    ./common/cli
-    ./common/desktop/common
-    ./common/desktop/hyprland
+    ./common/cli.nix
+    ./common/desktop.nix
   ];
-
   home.hostname = "mallorca";
 
-  # Use this method for built-in schemes:
-  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
+  wayland.windowManager.hyprland.settings.input = lib.mkForce {
+    kb_layout = "es";
+    kb_variant = "";
+  };
 
-  # Use this method for custom imported schemes:
-  # colorScheme = lib.mkDefault customSchemes.gruvchad;
+  projects = private-settings.projects;
+  nixvim.languages = {
+    python.enable = true;
+    webdev.enable = true;
+  };
 
-  # All colorSchemes from here can be set: https://tinted-theming.github.io/base16-gallery/
-  # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
-
-  defaultWallpaper = ./common/desktop/backgrounds/team-avatar.png;
+  defaultWallpaper = ./backgrounds/team-avatar.png;
   #  -------
   # | eDP-1 |
   #  -------
@@ -48,12 +33,6 @@ in
     }
   ];
 
-  wayland.windowManager.hyprland.settings.input = lib.mkForce {
-    kb_layout = "es";
-    kb_variant = "";
-  };
-
-  # Configure waybar for this devices monitor setup
   programs.waybar.settings = {
     primary = {
       margin = "-10px 0px 10px 0px";
@@ -92,15 +71,6 @@ in
           active = "";
         };
       };
-    } // customWaybarModules;
-  };
-
-  # Projects to manage on this machine
-  projects = private-settings.projects;
-
-  nixvim.enable = true;
-  nixvim.languages = {
-    python.enable = true;
-    webdev.enable = true;
+    };
   };
 }

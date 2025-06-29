@@ -1,43 +1,64 @@
 {
-  inputs,
-  lib,
   pkgs,
   config,
   private-settings,
-  secrets,
   ...
 }:
-let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix {
-    inherit pkgs config private-settings;
-  };
-  inherit (inputs.nix-colors) colorSchemes;
-  # deadnix: skip
-  customSchemes = import ./common/desktop/common/customColorSchemes.nix;
-in
 {
   imports = [
     ./common
-    ./common/cli
-    ./common/desktop/common
-    ./common/desktop/hyprland
+    ./common/cli.nix
+    ./common/desktop.nix
+  ];
+  home.hostname = "hub";
+  agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
+
+  desktop = {
+    alacritty.fontSize = 13;
+    darktable.enable = true;
+    discord.enable = true;
+    musescore.enable = true;
+    pdfpc.enable = true;
+  };
+  cli = {
+    netrc.file = config.age.secrets.netrc.path;
+    k9s.enable = true;
+  };
+
+  home.packages = with pkgs; [
+    teams-for-linux
+    mattermost-desktop
+
+    orca-slicer
+
+    ours.nsenter
   ];
 
-  home.packages = with pkgs; [ teams-for-linux ];
-  k9s.enable = true;
+  # XDG dirs are (partly) symlinks to an external drive
+  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
+  home.file = {
+    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
+    "${config.xdg.userDirs.documents}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
+    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
+    "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
+    "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
+  };
 
-  home.hostname = "hub";
+  projects = private-settings.projects;
+  nixvim.languages = {
+    c.enable = false;
+    godot.enable = false;
+    haskell.enable = false;
+    latex.enable = false;
 
-  # Use this method for built-in schemes:
-  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
+    go.enable = true;
+    python.enable = true;
+    rust.enable = true;
+    webdev.enable = true;
+  };
 
-  # Use this method for custom imported schemes:
-  # colorScheme = lib.mkDefault customSchemes.gruvchad;
-
-  # All colorSchemes from here can be set: https://tinted-theming.github.io/base16-gallery/
-  # current favorites (apart from gruvchad): primer-dark-dimmed, tokyo-city-terminal-dark
-
-  defaultWallpaper = ./common/desktop/backgrounds/river.png;
   #  ------
   # | DP-2 |
   #  ------
@@ -72,12 +93,11 @@ in
         "8"
         "10"
       ];
-      # wallpaper = builtins.toString ./common/desktop/backgrounds/river.png;
       primary = true;
     }
   ];
+  defaultWallpaper = ./backgrounds/river.png;
 
-  # Configure waybar for this devices monitor setup
   programs.waybar.settings = {
     top = {
       margin = "15px 0px -5px 0px";
@@ -116,7 +136,7 @@ in
           "9" = [ ];
         };
       };
-    } // customWaybarModules;
+    };
 
     bottom = {
       margin = "-5px 0px 15px 0px";
@@ -154,48 +174,6 @@ in
           "10" = [ ];
         };
       };
-    } // customWaybarModules;
+    };
   };
-
-  # Projects to manage on this machine
-  projects = private-settings.projects;
-
-  nixvim.enable = true;
-  nixvim.languages = {
-    c.enable = false;
-    godot.enable = false;
-    haskell.enable = false;
-    latex.enable = false;
-
-    go.enable = true;
-    python.enable = true;
-    rust.enable = true;
-    webdev.enable = true;
-  };
-
-  # XDG dirs are (partly) symlinks to an external drive
-  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
-  home.file = {
-    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
-      config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
-    "${config.xdg.userDirs.documents}".source =
-      config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
-    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
-    "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
-    "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
-  };
-
-  # Otherwise way to big on hub
-  programs.alacritty.settings.font.size = lib.mkForce 13;
-
-  programs.fish.interactiveShellInit = # fish
-    ''
-      set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../zakalwe_age.pub}"
-      set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
-    '';
-
-  age.secrets.netrc.rekeyFile = secrets.charlotte-netrc;
-  netrc.file = config.age.secrets.netrc.path;
-
-  nsenter.enable = true;
 }

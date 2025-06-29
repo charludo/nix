@@ -1,32 +1,22 @@
 {
+  config,
   lib,
   pkgs,
-  config,
-  outputs,
   ...
 }:
 {
-  nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays;
-    config = {
-      allowUnfree = true;
-      allowUnfreePredicate = (_: true);
-    };
-  };
+  imports = [
+    ./nix.nix
+    ./theme.nix
+    ./secrets.nix
+  ];
 
-  nix = {
-    package = lib.mkDefault pkgs.nix;
-    settings = {
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
-      warn-dirty = false;
-    };
-  };
+  nixvim.enable = true;
 
   age.enable = true;
-  services.yubikey-notify.enable = true;
+  gpg.enable = lib.mkDefault true;
+  ssh.enable = lib.mkDefault true;
+  xdgProfile.enable = lib.mkDefault true;
 
   programs.home-manager.enable = true;
   home = {

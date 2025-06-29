@@ -7,7 +7,7 @@
 let
   inherit (private-settings) gsv;
   hostName = "gsv";
-  publicKey = builtins.readFile ../../users/charlotte/ssh.pub;
+  publicKey = builtins.readFile ../../users/charlotte/keys/ssh.pub;
 in
 {
   imports = [
