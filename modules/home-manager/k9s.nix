@@ -1,11 +1,11 @@
 { lib, config, ... }:
 
 let
-  cfg = config.k9s;
+  cfg = config.cli.k9s;
   colors = lib.colors.extendPalette config.colorScheme.palette;
 in
 {
-  options.k9s.enable = lib.mkEnableOption "enable themed k9s";
+  options.cli.k9s.enable = lib.mkEnableOption "enable themed k9s";
 
   config = lib.mkIf cfg.enable {
     programs.k9s = {

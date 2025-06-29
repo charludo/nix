@@ -1,49 +1,60 @@
-{
-  inputs,
-  lib,
-  pkgs,
-  config,
-  private-settings,
-  ...
-}:
-let
-  customWaybarModules = import ./common/desktop/hyprland/waybar/modules.nix {
-    inherit pkgs config private-settings;
-  };
-  inherit (inputs.nix-colors) colorSchemes;
-  # deadnix: skip
-  customSchemes = import ./common/desktop/common/customColorSchemes.nix;
-in
+{ config, ... }:
 {
   imports = [
     ./common
-    ./common/games
-    ./common/desktop/hyprland
-    ./common/cli/bitwarden.nix
-    ./common/cli/direnv.nix
-    ./common/cli/fish.nix
-    ./common/cli/git.nix
-    ./common/cli/ssh.nix
-    ./common/desktop/common/alacritty.nix
-    ./common/desktop/common/discord.nix
-    ./common/desktop/common/easyeffects.nix
-    ./common/desktop/common/element.nix
-    ./common/desktop/common/firefox.nix
-    ./common/desktop/common/gtk.nix
-    ./common/desktop/common/jellyfin.nix
-    ./common/desktop/common/mpv.nix
-    ./common/desktop/common/nemo.nix
-    ./common/desktop/common/playerctl.nix
-    ./common/desktop/common/qt.nix
-    ./common/desktop/common/theming.nix
-    ./common/desktop/common/xdg.nix
+    ./common/cli.nix
+    ./common/desktop.nix
+  ];
+  home.hostname = "excession";
+  agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
+
+  desktop = {
+    alacritty.fontSize = 13;
+    discord.enable = true;
+  };
+  games = {
+    eso.enable = true;
+    steam.enable = true;
+  };
+
+  wayland.windowManager.hyprland.settings = {
+    exec = [
+      "steam -bigpicture"
+      "librewolf"
+      "discord"
+      "jellyfinmediaplayer"
+    ];
+
+    windowrulev2 = [
+      "opaque, class:(steam$)"
+      "workspace 2, class:steam"
+      "workspace 1 silent, class:librewolf"
+      "workspace 3 silent, class:discord"
+      "workspace 3 silent, class:com.github.iwalton3.jellyfin-media-player"
+      "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
+    ];
+  };
+
+  # XDG dirs are (partly) symlinks to an external drive
+  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
+  home.file = {
+    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
+    "${config.xdg.userDirs.documents}".source =
+      config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
+    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
+    "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
+    "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
+  };
+
+  projects = [
+    {
+      name = "nix";
+      repo = "git@github.com:charludo/nix";
+      enableDirenv = false;
+    }
   ];
 
-  home.packages = with pkgs; [ telegram-desktop ];
-  home.hostname = "excession";
-
-  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
-  defaultWallpaper = ./common/desktop/backgrounds/eso.png;
   #  ------
   # | DP-2 |
   #  ------
@@ -81,26 +92,8 @@ in
       primary = true;
     }
   ];
+  defaultWallpaper = ./backgrounds/eso.png;
 
-  wayland.windowManager.hyprland.settings = {
-    exec = [
-      "steam -bigpicture"
-      "librewolf"
-      "discord"
-      "jellyfinmediaplayer"
-    ];
-
-    windowrulev2 = [
-      "opaque, class:(steam$)"
-      "workspace 2, class:steam"
-      "workspace 1 silent, class:librewolf"
-      "workspace 3 silent, class:discord"
-      "workspace 3 silent, class:com.github.iwalton3.jellyfin-media-player"
-      "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
-    ];
-  };
-
-  # Configure waybar for this devices monitor setup
   programs.waybar.settings = {
     top = {
       margin = "15px 0px -5px 0px";
@@ -139,7 +132,7 @@ in
           "9" = [ ];
         };
       };
-    } // customWaybarModules;
+    };
 
     bottom = {
       margin = "-5px 0px 15px 0px";
@@ -172,38 +165,6 @@ in
           "2" = [ ];
         };
       };
-    } // customWaybarModules;
+    };
   };
-
-  # Projects to manage on this machine
-  projects = [
-    {
-      name = "nix";
-      repo = "git@github.com:charludo/nix";
-      enableDirenv = false;
-    }
-  ];
-
-  nixvim.enable = true;
-
-  # XDG dirs are (partly) symlinks to an external drive
-  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
-  home.file = {
-    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
-      config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
-    "${config.xdg.userDirs.documents}".source =
-      config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
-    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
-    "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
-    "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
-  };
-
-  # Otherwise way too big on hub
-  programs.alacritty.settings.font.size = lib.mkForce 13;
-
-  programs.fish.interactiveShellInit = # fish
-    ''
-      set -gx AGENIX_REKEY_PRIMARY_IDENTITY "${builtins.readFile ../zakalwe_age.pub}"
-      set -gx AGENIX_REKEY_PRIMARY_IDENTITY_ONLY true
-    '';
 }

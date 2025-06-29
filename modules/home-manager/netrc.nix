@@ -1,10 +1,10 @@
 { lib, config, ... }:
 
 let
-  cfg = config.netrc;
+  cfg = config.cli.netrc;
 in
 {
-  options.netrc.file = lib.mkOption {
+  options.cli.netrc.file = lib.mkOption {
     type = lib.types.nullOr lib.types.path;
     description = "set custom netrc file";
     default = null;

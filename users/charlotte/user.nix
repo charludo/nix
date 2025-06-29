@@ -35,39 +35,39 @@ in
       ];
 
     identities = {
-      charlotte.publicKeyFile = ./ssh.pub;
+      charlotte.publicKeyFile = ./keys/ssh.pub;
 
       diziet = {
-        publicKeyFile = ./diziet_ssh.pub;
+        publicKeyFile = ./keys/diziet_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-diziet-ssh.path;
         serial = private-settings.yubikeys.diziet.serial;
       };
       diziet_age = {
-        publicKeyFile = ./diziet_age.pub;
+        publicKeyFile = ./keys/diziet_age.pub;
         privateKeyFile = private-settings.yubikeys.diziet.identityFile;
         serial = private-settings.yubikeys.diziet.serial;
         keyType = "age";
       };
 
       perostek = {
-        publicKeyFile = ./perostek_ssh.pub;
+        publicKeyFile = ./keys/perostek_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-perostek-ssh.path;
         serial = private-settings.yubikeys.perostek.serial;
       };
       perostek_age = {
-        publicKeyFile = ./perostek_age.pub;
+        publicKeyFile = ./keys/perostek_age.pub;
         privateKeyFile = private-settings.yubikeys.perostek.identityFile;
         serial = private-settings.yubikeys.perostek.serial;
         keyType = "age";
       };
 
       zakalwe = {
-        publicKeyFile = ./zakalwe_ssh.pub;
+        publicKeyFile = ./keys/zakalwe_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-zakalwe-ssh.path;
         serial = private-settings.yubikeys.zakalwe.serial;
       };
       zakalwe_age = {
-        publicKeyFile = ./zakalwe_age.pub;
+        publicKeyFile = ./keys/zakalwe_age.pub;
         privateKeyFile = private-settings.yubikeys.zakalwe.identityFile;
         serial = private-settings.yubikeys.zakalwe.serial;
         keyType = "age";

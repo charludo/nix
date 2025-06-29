@@ -9,7 +9,7 @@ let
 
   hostPath = ../../hosts/${config.networking.hostName}/ssh_host_ed25519_key.pub;
   vmPath = ../../vms/keys/ssh_host_${config.networking.hostName}_ed25519_key.pub;
-  userPath = ../../users/${config.home.username}/ssh.pub;
+  userPath = ../../users/${config.home.username}/keys/ssh.pub;
 in
 {
   options.age = {
@@ -38,23 +38,23 @@ in
       masterIdentities = [
         {
           identity = private-settings.yubikeys.zakalwe.identityFile;
-          pubkey = ../../users/charlotte/zakalwe_age.pub;
+          pubkey = ../../users/charlotte/keys/zakalwe_age.pub;
         }
         {
           identity = private-settings.yubikeys.perostek.identityFile;
-          pubkey = ../../users/charlotte/perostek_age.pub;
+          pubkey = ../../users/charlotte/keys/perostek_age.pub;
         }
         {
           identity = private-settings.yubikeys.diziet.identityFile;
-          pubkey = ../../users/charlotte/diziet_age.pub;
+          pubkey = ../../users/charlotte/keys/diziet_age.pub;
         }
         {
           identity = "/home/charlotte/.ssh/id_ed25519";
-          pubkey = ../../users/charlotte/ssh.pub;
+          pubkey = ../../users/charlotte/keys/ssh.pub;
         }
         {
           identity = "/home/marie/.ssh/id_ed25519";
-          pubkey = ../../users/marie/ssh.pub;
+          pubkey = ../../users/marie/keys/ssh.pub;
         }
       ];
       storageMode = "local";

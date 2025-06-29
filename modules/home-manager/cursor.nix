@@ -8,19 +8,16 @@ in
     enable = lib.mkEnableOption "Whether to enable icon profiles";
     name = lib.mkOption {
       type = lib.types.str;
-      default = null;
       description = "Name of the cursor theme";
       example = "Adwaita";
     };
     size = lib.mkOption {
       type = lib.types.int;
-      default = null;
       description = "Size of the cursor";
-      example = "24";
+      example = 24;
     };
     package = lib.mkOption {
       type = lib.types.package;
-      default = null;
       description = "Package for the cursor theme";
       example = "pkgs.gnome.adwaita-icon-theme";
     };
@@ -28,5 +25,22 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
+
+    home.pointerCursor = {
+      gtk.enable = true;
+      x11.enable = true;
+      name = cfg.name;
+      package = cfg.package;
+      size = cfg.size;
+    };
+
+    home.sessionVariables = {
+      XCURSOR_THEME = cfg.name;
+      XCURSOR_SIZE = cfg.size;
+    };
+
+    gtk.cursorTheme.package = cfg.package;
+    gtk.cursorTheme.name = "${cfg.name}";
+    gtk.cursorTheme.size = cfg.size;
   };
 }

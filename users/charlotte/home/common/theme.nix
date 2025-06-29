@@ -1,0 +1,37 @@
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
+{
+  colorScheme = lib.mkDefault inputs.nix-colors.colorSchemes.primer-dark-dimmed;
+
+  desktop.gtkProfile.enable = true;
+  desktop.qtProfile.enable = true;
+
+  fontProfiles = {
+    enable = true;
+    monospace = {
+      family = "GeistMono Nerd Font";
+      package = pkgs.nerd-fonts.geist-mono;
+    };
+    regular = {
+      family = "Cantarell";
+      package = pkgs.cantarell-fonts;
+    };
+  };
+
+  cursorProfile = {
+    enable = true;
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Ice";
+    size = 24;
+  };
+
+  iconsProfile = {
+    enable = true;
+    package = pkgs.tela-icon-theme;
+    name = "Tela";
+  };
+}

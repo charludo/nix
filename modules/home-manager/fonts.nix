@@ -1,4 +1,9 @@
-{ lib, config, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 
 let
   mkFontOption = kind: {
@@ -26,9 +31,14 @@ in
 
   config = lib.mkIf cfg.enable {
     fonts.fontconfig.enable = true;
+
     home.packages = [
       cfg.monospace.package
       cfg.regular.package
+      pkgs.noto-fonts-color-emoji
     ];
+
+    gtk.font.name = cfg.regular.family;
+    gtk.font.size = 11;
   };
 }

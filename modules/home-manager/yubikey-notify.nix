@@ -6,10 +6,10 @@
 }:
 with lib;
 let
-  cfg = config.services.yubikey-notify;
+  cfg = config.desktop.yubikey-notify;
 in
 {
-  options.services.yubikey-notify = {
+  options.desktop.yubikey-notify = {
     enable = mkEnableOption "notify when Yubikey is waiting for touch";
 
     package = mkOption {

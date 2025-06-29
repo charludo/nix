@@ -1,15 +1,18 @@
-{ inputs, lib, ... }:
-let
-  inherit (inputs.nix-colors) colorSchemes;
-in
 {
   imports = [
     ./common
-    ./common/games/eso.nix
   ];
-
-  colorScheme = lib.mkDefault colorSchemes.primer-dark-dimmed;
   home.hostname = "steamdeck";
 
-  nixvim.enable = true;
+  gpg.enable = false;
+  ssh.enable = false;
+  xdgProfile.enable = false;
+
+  cli = {
+    bat.enable = true;
+    fish.enable = true;
+    fzf.enable = true;
+    nix-your-shell.enable = true;
+  };
+  games.eso.enable = true;
 }

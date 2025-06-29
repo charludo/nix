@@ -23,11 +23,11 @@ in
       ];
 
     openssh.authorizedKeys.keys = [
-      (builtins.readFile ../charlotte/zakalwe_ssh.pub)
-      (builtins.readFile ../charlotte/perostek_ssh.pub)
-      (builtins.readFile ../charlotte/diziet_ssh.pub)
-      (builtins.readFile ../charlotte/ssh.pub)
-      (builtins.readFile ./ssh.pub)
+      (builtins.readFile ../charlotte/keys/zakalwe_ssh.pub)
+      (builtins.readFile ../charlotte/keys/perostek_ssh.pub)
+      (builtins.readFile ../charlotte/keys/diziet_ssh.pub)
+      (builtins.readFile ../charlotte/keys/ssh.pub)
+      (builtins.readFile ./keys/ssh.pub)
     ];
     packages = with pkgs; [
       git
