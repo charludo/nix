@@ -7,38 +7,10 @@
 }:
 let
   cfg = config.vm;
-
-  baseConfig = {
-    scsihw = lib.mkDefault "virtio-scsi-single";
-    virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
-    boot = "order=virtio0";
-    ostype = "l26";
-    cores = config.vm.hardware.cores;
-    memory = config.vm.hardware.memory;
-    bios = "ovmf";
-    name = config.vm.name;
-    additionalSpace = "1G";
-    bootSize = "256M";
-    net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
-      builtins.substring 0 2 (toString config.vm.id)
-    },firewall=1";
-    agent = true;
-  };
-
-  gpuConfig = {
-    scsihw = "virtio-scsi-pci";
-    virtio0 = "vm_datastore_local_gpu:vm-${builtins.toString config.vm.id}-disk-0";
-  };
-
-  gpuExtraConfig = {
-    cpu = "host";
-    balloon = "1";
-    machine = "q35";
-    hostpci0 = "0000:00:02,pcie=1";
-  };
-
 in
 {
+  imports = [ ./gpu.nix ];
+
   options.vm = {
     enable = lib.mkOption {
       type = lib.types.bool;
@@ -57,12 +29,11 @@ in
       storage = lib.mkOption { type = lib.types.str; };
     };
 
-    requiresGPU = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-    };
-
     networking = {
+      interface = lib.mkOption {
+        type = lib.types.str;
+        default = "ens18";
+      };
       address = lib.mkOption {
         type = lib.types.str;
         default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1${
@@ -100,16 +71,29 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    proxmox.qemuConf = if cfg.requiresGPU then lib.recursiveUpdate baseConfig gpuConfig else baseConfig;
+    proxmox.qemuConf = {
+      scsihw = lib.mkDefault "virtio-scsi-single";
+      virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
+      boot = "order=virtio0";
+      ostype = "l26";
+      cores = config.vm.hardware.cores;
+      memory = config.vm.hardware.memory;
+      bios = "ovmf";
+      name = config.vm.name;
+      additionalSpace = "1G";
+      bootSize = "256M";
+      net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
+        builtins.substring 0 2 (toString config.vm.id)
+      },firewall=1";
+      agent = true;
+    };
+
     proxmox.cloudInit.enable = false;
     proxmox.partitionTableType = lib.mkDefault "efi";
-    proxmox.qemuExtraConf = lib.mkMerge [
-      {
-        ide2 = lib.mkForce "none,media=cdrom";
-        kvm = 1;
-      }
-      (lib.mkIf cfg.requiresGPU gpuExtraConfig)
-    ];
+    proxmox.qemuExtraConf = {
+      ide2 = lib.mkForce "none,media=cdrom";
+      kvm = 1;
+    };
     virtualisation.diskSize = "auto";
 
     nvim.enable = true;
@@ -127,7 +111,7 @@ in
       vm = {
         id = cfg.id;
         ip = cfg.networking.address;
-        proxmoxHost = lib.mkDefault (if cfg.requiresGPU then "proxmox-gpu" else "proxmox");
+        proxmoxHost = lib.mkDefault "proxmox";
         proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
         resizeDiskBy = cfg.hardware.storage;
       };
@@ -135,14 +119,12 @@ in
 
     networking = {
       hostName = config.vm.name;
-      interfaces = {
-        "${if cfg.requiresGPU then "enp6s18" else "ens18"}".ipv4.addresses = [
-          {
-            address = config.vm.networking.address;
-            prefixLength = config.vm.networking.prefixLength;
-          }
-        ];
-      };
+      interfaces.${cfg.networking.interface}.ipv4.addresses = [
+        {
+          address = config.vm.networking.address;
+          prefixLength = config.vm.networking.prefixLength;
+        }
+      ];
       defaultGateway = config.vm.networking.gateway;
       nameservers = config.vm.networking.nameservers;
       firewall = {
