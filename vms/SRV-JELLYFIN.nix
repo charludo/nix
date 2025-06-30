@@ -10,11 +10,11 @@
     name = "SRV-JELLYFIN";
 
     hardware.cores = 4;
-    hardware.memory = 16384;
+    hardware.memory = 32768;
     hardware.storage = "64G";
+    hardware.gpu.enable = true;
 
     networking.nameservers = private-settings.upstreamDNS;
-    requiresGPU = true;
   };
 
   services.jellyfin = rec {
@@ -34,30 +34,6 @@
     "render"
     "video"
     "input"
-  ];
-  nixpkgs.config.packageOverrides = pkgs: {
-    vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
-  };
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      intel-ocl
-      intel-media-driver
-      intel-vaapi-driver
-      vaapiVdpau
-      libvdpau-va-gl
-      intel-compute-runtime
-      vpl-gpu-rt
-    ];
-  };
-  hardware.firmware = [ pkgs.linux-firmware ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.blacklistedKernelModules = [ "i915" ];
-  boot.kernelParams = [
-    "i915.enable_guc=2"
-    "module_blacklist=i915"
-    "xe.force_probe=7d51"
-    "i915.force_probe=!7d51"
   ];
 
   systemd = {
