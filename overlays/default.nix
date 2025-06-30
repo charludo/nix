@@ -1,4 +1,4 @@
-{ inputs }:
+{ inputs, outputs }:
 {
   # For every flake input, aliases 'pkgs.inputs.${flake}' to
   # 'inputs.${flake}.packages.${pkgs.system}' or
@@ -13,4 +13,9 @@
       if legacyPackages != { } then legacyPackages else packages
     ) inputs;
   };
+  pkgs = (
+    _: prev: {
+      ours = outputs.packages.${prev.system};
+    }
+  );
 }
