@@ -64,7 +64,7 @@
     in
     {
       inherit lib;
-      overlays = import ./overlays { inherit inputs; };
+      overlays = import ./overlays { inherit inputs outputs; };
 
       nixosConfigurations =
         builtins.listToAttrs [

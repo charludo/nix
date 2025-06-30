@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  outputs,
   ...
 }:
 
@@ -16,7 +15,7 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       description = "Package to use. Defaults to custom nixvim package provided by this flake.";
-      default = outputs.packages.${pkgs.system}.nvim;
+      default = pkgs.ours.nvim;
     };
   };
 
