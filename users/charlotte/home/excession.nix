@@ -31,7 +31,6 @@
       "workspace 1 silent, class:librewolf"
       "workspace 3 silent, class:discord"
       "workspace 3 silent, class:com.github.iwalton3.jellyfin-media-player"
-      "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
     ];
   };
 

@@ -77,6 +77,10 @@
           preserve_split = true;
         };
 
+        windowrulev2 = [
+          "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
+        ];
+
         gestures = {
           workspace_swipe = true;
           workspace_swipe_fingers = 3;
