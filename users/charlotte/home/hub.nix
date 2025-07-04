@@ -29,7 +29,9 @@
     teams-for-linux
     mattermost-desktop
 
+    anki-bin
     orca-slicer
+    bitwig-studio
 
     ours.nsenter
   ];
