@@ -12,21 +12,17 @@
     hardware.memory = 4096;
     hardware.storage = "16G";
 
-    networking.openPorts.tcp = [ 80 ];
-    networking.openPorts.udp = [ 80 ];
+    certsFor = [
+      {
+        name = "actual";
+        port = config.services.actual.settings.port;
+      }
+    ];
   };
 
   services.actual = {
     enable = true;
-    openFirewall = true;
-    settings.hostname = "localhost";
-  };
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."_" = {
-      locations."/".proxyPass = "http://localhost:${toString config.services.actual.settings.port}";
-    };
+    settings.hostname = "127.0.0.1";
   };
 
   nas.backup.enable = true;

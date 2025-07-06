@@ -2,7 +2,6 @@
   pkgs,
   config,
   inputs,
-  private-settings,
   ...
 }:
 {
@@ -14,7 +13,16 @@
     hardware.memory = 8192;
     hardware.storage = "32G";
 
-    networking.nameservers = private-settings.upstreamDNS.ips;
+    certsFor = [
+      {
+        name = "suwayomi";
+        port = config.services.suwayomi-server.settings.server.port;
+      }
+      {
+        name = "readarr";
+        port = config.services.readarr.settings.server.port;
+      }
+    ];
   };
 
   surfshark = {
