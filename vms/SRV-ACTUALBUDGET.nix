@@ -33,7 +33,7 @@
         name = "restore-actual";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown actual:actual ${config.nas.backup.location}/actual/ ${config.services.actual.settings.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown actual:actual ${config.nas.backup.stateLocation}/actual/ ${config.services.actual.settings.dataDir}
         '';
       };
     in
@@ -52,7 +52,7 @@
     };
     services."actual-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.actual.settings.dataDir}/ ${config.nas.backup.location}/actual
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.actual.settings.dataDir}/ ${config.nas.backup.stateLocation}/actual
       '';
       serviceConfig = {
         Type = "oneshot";

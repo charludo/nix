@@ -37,7 +37,7 @@
     };
     services."audiobookshelf-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.audiobookshelf.dataDir}/ ${config.nas.backup.location}/audiobookshelf
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.audiobookshelf.dataDir}/ ${config.nas.backup.stateLocation}/audiobookshelf
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -52,7 +52,7 @@
         name = "restore-audiobookshelf";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group} ${config.nas.backup.location}/audiobookshelf/ ${config.services.audiobookshelf.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group} ${config.nas.backup.stateLocation}/audiobookshelf/ ${config.services.audiobookshelf.dataDir}
         '';
       };
     in

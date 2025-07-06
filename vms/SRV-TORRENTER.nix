@@ -11,14 +11,14 @@ let
     name = "restore-torrenter";
     runtimeInputs = [ pkgs.rsync ];
     text = ''
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.sonarr.user}:${config.services.sonarr.group} ${config.nas.backup.location}/torrenter/sonarr/ ${config.services.sonarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.radarr.user}:${config.services.radarr.group} ${config.nas.backup.location}/torrenter/radarr/ ${config.services.radarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.lidarr.user}:${config.services.lidarr.group} ${config.nas.backup.location}/torrenter/lidarr/ ${config.services.lidarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.readarr.user}:${config.services.readarr.group} ${config.nas.backup.location}/torrenter/readarr/ ${config.services.readarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr ${config.nas.backup.location}/torrenter/prowlarr/ /var/lib/prowlarr
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.location}/torrenter/qbittorrent/ ${config.services.qbittorrent.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.sonarr.user}:${config.services.sonarr.group} ${config.nas.backup.stateLocation}/torrenter/sonarr/ ${config.services.sonarr.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.radarr.user}:${config.services.radarr.group} ${config.nas.backup.stateLocation}/torrenter/radarr/ ${config.services.radarr.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.lidarr.user}:${config.services.lidarr.group} ${config.nas.backup.stateLocation}/torrenter/lidarr/ ${config.services.lidarr.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.readarr.user}:${config.services.readarr.group} ${config.nas.backup.stateLocation}/torrenter/readarr/ ${config.services.readarr.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr ${config.nas.backup.stateLocation}/torrenter/prowlarr/ /var/lib/prowlarr
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.stateLocation}/torrenter/qbittorrent/ ${config.services.qbittorrent.dataDir}
     '';
-    # ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} ${config.nas.backup.location}/torrenter/bazarr/ /var/lib/bazarr
+    # ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} ${config.nas.backup.stateLocation}/torrenter/bazarr/ /var/lib/bazarr
   };
 in
 {
@@ -206,15 +206,15 @@ in
     };
     services."torrenter-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.sonarr.dataDir}/ ${config.nas.backup.location}/torrenter/sonarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.radarr.dataDir}/ ${config.nas.backup.location}/torrenter/radarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.lidarr.dataDir}/ ${config.nas.backup.location}/torrenter/lidarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.location}/torrenter/readarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ ${config.nas.backup.location}/torrenter/prowlarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.dataDir}/ ${config.nas.backup.location}/torrenter/qbittorrent
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.sonarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/sonarr
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.radarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/radarr
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.lidarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/lidarr
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/readarr
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ ${config.nas.backup.stateLocation}/torrenter/prowlarr
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/qbittorrent
       '';
-      # ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/bazarr/ ${config.nas.backup.location}/torrenter/bazarr
+      # ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/bazarr/ ${config.nas.backup.stateLocation}/torrenter/bazarr
       serviceConfig = {
         Type = "oneshot";
         User = "root";

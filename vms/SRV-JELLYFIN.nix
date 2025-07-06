@@ -47,7 +47,7 @@
     };
     services."jellyfin-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.jellyfin.dataDir}/ ${config.nas.backup.location}/jellyfin
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.jellyfin.dataDir}/ ${config.nas.backup.stateLocation}/jellyfin
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -62,7 +62,7 @@
         name = "restore-jellyfin";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.jellyfin.user}:${config.services.jellyfin.group} ${config.nas.backup.location}/jellyfin/ ${config.services.jellyfin.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.jellyfin.user}:${config.services.jellyfin.group} ${config.nas.backup.stateLocation}/jellyfin/ ${config.services.jellyfin.dataDir}
         '';
       };
     in

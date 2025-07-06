@@ -5,8 +5,8 @@
   ...
 }:
 let
-  backupDirDaily = "${config.nas.backup.location}/paperless/daily/";
-  backupDirMonthly = "${config.nas.backup.location}/paperless/monthly/";
+  backupDirDaily = "${config.nas.backup.stateLocation}/paperless/daily/";
+  backupDirMonthly = "${config.nas.backup.stateLocation}/paperless/monthly/";
 
   paperless-init = pkgs.writeShellApplication {
     name = "paperless-init";

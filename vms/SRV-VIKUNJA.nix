@@ -40,8 +40,8 @@ in
     };
     services."vikunja-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/vikunja/ ${config.nas.backup.location}/vikunja
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/vikunja/ ${config.nas.backup.stateLocation}/vikunja
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -56,7 +56,7 @@ in
         name = "vikunja-init";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/vikunja/ /var/lib/vikunja
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/vikunja/ /var/lib/vikunja
         '';
       };
     in

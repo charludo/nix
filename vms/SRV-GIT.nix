@@ -59,7 +59,7 @@
         name = "restore-forgejo";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.forgejo.user}:${config.services.forgejo.group} ${config.nas.backup.location}/forgejo/ ${config.services.forgejo.stateDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.forgejo.user}:${config.services.forgejo.group} ${config.nas.backup.stateLocation}/forgejo/ ${config.services.forgejo.stateDir}
         '';
       };
     in
@@ -78,7 +78,7 @@
     };
     services."git-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.forgejo.stateDir}/ ${config.nas.backup.location}/forgejo
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.forgejo.stateDir}/ ${config.nas.backup.stateLocation}/forgejo
       '';
       serviceConfig = {
         Type = "oneshot";
