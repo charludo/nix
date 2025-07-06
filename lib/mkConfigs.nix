@@ -66,41 +66,35 @@ rec {
   vms =
     vmPath:
     builtins.listToAttrs (
-      builtins.map
-        (name: {
-          inherit name;
-          value = lib.nixosSystem {
-            modules = [
-              outputs.nixosModules.common
-              inputs.agenix.nixosModules.default
-              inputs.agenix-rekey.nixosModules.default
-              inputs.snow.nixosModules.default
+      builtins.map (name: {
+        inherit name;
+        value = lib.nixosSystem {
+          modules = [
+            outputs.nixosModules.common
+            inputs.agenix.nixosModules.default
+            inputs.agenix-rekey.nixosModules.default
+            inputs.snow.nixosModules.default
 
-              inputs.nixos-generators.nixosModules.all-formats
-              "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
-              "${inputs.nixpkgs}/nixos/modules/virtualisation/proxmox-image.nix"
+            inputs.nixos-generators.nixosModules.all-formats
+            "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
+            "${inputs.nixpkgs}/nixos/modules/virtualisation/proxmox-image.nix"
 
-              ../vms/${name}.nix
-              ../modules/vms
-              ../hosts/common
-              ../users/paki/user.nix
-            ] ++ (builtins.attrValues outputs.nixosModules);
-            specialArgs = {
-              inherit
-                lib
-                inputs
-                outputs
-                private-settings
-                secrets
-                ;
-            };
+            ../vms/${name}.nix
+            ../modules/vms
+            ../hosts/common
+            ../users/paki/user.nix
+          ] ++ (builtins.attrValues outputs.nixosModules);
+          specialArgs = {
+            inherit
+              lib
+              inputs
+              outputs
+              private-settings
+              secrets
+              ;
           };
-        })
-        (
-          builtins.map builtins.head (
-            builtins.map (lib.splitString ".") (builtins.attrNames (builtins.readDir vmPath))
-          )
-        )
+        };
+      }) (lib.helpers.allVMNames vmPath)
     );
 
   home = username: hostname: extraModules: {
