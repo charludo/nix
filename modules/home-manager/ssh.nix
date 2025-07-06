@@ -23,7 +23,7 @@ in
           user = "root";
         };
         home-assistant = {
-          hostname = "192.168.10.27";
+          hostname = "192.168.24.27";
           user = "root";
         };
 
