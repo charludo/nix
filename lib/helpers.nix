@@ -7,7 +7,7 @@ rec {
     attrs:
     lib.listToAttrs (
       lib.mapAttrsToList (key: value: {
-        name = lib.toLower (lib.replaceStrings [ "SRV-" ] [ "" ] key);
+        name = lib.toLower (builtins.head (builtins.match "^[^-]*-(.*)" key));
         value = value;
       }) attrs
     );

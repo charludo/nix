@@ -97,12 +97,9 @@ rec {
           };
         })
         (
-          builtins.filter (name: builtins.substring 0 3 name == "SRV" || builtins.substring 0 2 name == "CL")
-            (
-              builtins.map builtins.head (
-                builtins.map (lib.splitString ".") (builtins.attrNames (builtins.readDir vmPath))
-              )
-            )
+          builtins.map builtins.head (
+            builtins.map (lib.splitString ".") (builtins.attrNames (builtins.readDir vmPath))
+          )
         )
     );
 
