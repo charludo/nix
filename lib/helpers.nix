@@ -11,7 +11,7 @@ rec {
         value = value;
       }) attrs
     );
-  allVMs = toLowercaseKeys (
+  allVMSSHConfigs = toLowercaseKeys (
     lib.filterAttrs (_: v: v.hostname != null) (
       builtins.mapAttrs (name: _: {
         hostname =
@@ -29,4 +29,14 @@ rec {
       }) outputs.nixosConfigurations
     )
   );
+
+  allVMNames =
+    path:
+    builtins.map (f: lib.removeSuffix ".nix" f) (
+      builtins.attrNames (
+        builtins.readDir (
+          builtins.filterSource (path: type: type != "directory" && baseNameOf path != ".nix") path
+        )
+      )
+    );
 }
