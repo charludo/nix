@@ -24,7 +24,7 @@ in
 
   services.vaultwarden = {
     enable = true;
-    backupDir = "${config.nas.backup.location}/vaultwarden";
+    backupDir = "${config.nas.backup.stateLocation}/vaultwarden";
     config = {
       DOMAIN = "https://passwords.${domains.home}";
       SIGNUPS_ALLOWED = false;

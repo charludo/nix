@@ -85,7 +85,7 @@
     };
     services."suwayomi-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ ${config.nas.backup.location}/suwayomi
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ ${config.nas.backup.stateLocation}/suwayomi
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -121,8 +121,8 @@
     };
     services."readarr-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.location}/torrenter/readarr2
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/readarr2
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -136,14 +136,14 @@
       suwayomi-init = pkgs.writeShellApplication {
         name = "suwayomi-init";
         text = ''
-          [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/suwayomi/ ${config.services.suwayomi-server.dataDir}
+          [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/suwayomi/ ${config.services.suwayomi-server.dataDir}
         '';
       };
       readarr-init = pkgs.writeShellApplication {
         name = "readarr-init";
         text = ''
-          [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.location}/torrenter/readarr2/ ${config.services.readarr.dataDir}
+          [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/torrenter/readarr2/ ${config.services.readarr.dataDir}
         '';
       };
     in

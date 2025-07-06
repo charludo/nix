@@ -27,6 +27,11 @@ in
       description = "mountpoint for the backup NAS";
       default = "${mountRoot}/Backup";
     };
+    backup.stateLocation = mkOption {
+      type = types.str;
+      description = "the backup NAS folder used for service state backups";
+      default = "${mountRoot}/Backup/vm_state";
+    };
 
     extraUsers = mkOption {
       type = types.listOf (types.str);

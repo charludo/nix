@@ -40,7 +40,7 @@
   services.postgresqlBackup = {
     enable = true;
     databases = config.services.postgresql.ensureDatabases;
-    location = "${config.nas.backup.location}/authentik";
+    location = "${config.nas.backup.stateLocation}/authentik";
   };
 
   system.stateVersion = "23.11";

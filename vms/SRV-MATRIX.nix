@@ -64,7 +64,7 @@ in
         name = "restore-conduwuit";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.conduwuit.user}:${config.services.conduwuit.group} ${config.nas.backup.location}/matrix/ ${config.services.conduwuit.settings.global.database_path}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.conduwuit.user}:${config.services.conduwuit.group} ${config.nas.backup.stateLocation}/matrix/ ${config.services.conduwuit.settings.global.database_path}
         '';
       };
     in
@@ -83,7 +83,7 @@ in
     };
     services."matrix-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.conduwuit.settings.global.database_path} ${config.nas.backup.location}/matrix
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.conduwuit.settings.global.database_path} ${config.nas.backup.stateLocation}/matrix
       '';
       serviceConfig = {
         Type = "oneshot";

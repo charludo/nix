@@ -36,7 +36,7 @@
         name = "restore-pinchflat";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown pinchflat:pinchflat ${config.nas.backup.location}/pinchflat/ /var/lib/pinchflat
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown pinchflat:pinchflat ${config.nas.backup.stateLocation}/pinchflat/ /var/lib/pinchflat
         '';
       };
     in
@@ -60,8 +60,8 @@
     };
     services."pinchflat-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/pinchflat/ ${config.nas.backup.location}/pinchflat
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/pinchflat/ ${config.nas.backup.stateLocation}/pinchflat
       '';
       serviceConfig = {
         Type = "oneshot";
