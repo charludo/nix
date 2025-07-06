@@ -50,6 +50,8 @@ in
       ];
     };
   };
+  security.pki.certificates = lib.mkForce [ ];
+  networking.search = lib.mkForce [ ];
 
   # Debugging tools
   environment.systemPackages = [

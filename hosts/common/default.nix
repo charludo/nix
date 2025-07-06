@@ -11,7 +11,9 @@
   users.mutableUsers = false;
 
   console.keyMap = lib.mkDefault "us-acentos";
+  security.pki.certificateFiles = [ private-settings.caIssuing1.root ];
   networking.domain = lib.mkDefault private-settings.domains.ad;
+  networking.search = [ private-settings.domains.ad ];
 
   system.activationScripts.script.text = ''
     ln -sf /run/current-system/sw/bin/bash /bin/bash

@@ -9,7 +9,10 @@ let
   cfg = config.vm;
 in
 {
-  imports = [ ./gpu.nix ];
+  imports = [
+    ./certs.nix
+    ./gpu.nix
+  ];
 
   options.vm = {
     enable = lib.mkOption {
@@ -154,6 +157,8 @@ in
         }) outputs.nixosConfigurations
       );
     };
+
+    security.pki.certificateFiles = [ private-settings.caIssuing1.root ];
 
     nix.gc = {
       automatic = true;

@@ -25,6 +25,7 @@
   };
 
   blocky.enable = true;
+  blocky.addEntriesForVMs = true;
   services.blocky = {
     settings = {
       ports.dns = 53;
