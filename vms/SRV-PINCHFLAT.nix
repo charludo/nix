@@ -11,11 +11,17 @@
     hardware.cores = 2;
     hardware.memory = 8192;
     hardware.storage = "16G";
+
+    certsFor = [
+      {
+        name = "pinchflat";
+        port = config.services.pinchflat.port;
+      }
+    ];
   };
 
   services.pinchflat = {
     enable = true;
-    openFirewall = true;
     selfhosted = true;
     mediaDir = config.nas.location;
   };

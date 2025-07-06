@@ -3,7 +3,6 @@
   pkgs,
   lib,
   inputs,
-  private-settings,
   secrets,
   ...
 }:
@@ -36,7 +35,40 @@ in
     hardware.memory = 24576;
     hardware.storage = "128G";
 
-    networking.nameservers = private-settings.upstreamDNS.ips;
+    certsFor = [
+      {
+        name = "sonarr";
+        port = config.services.sonarr.settings.server.port;
+      }
+      {
+        name = "radarr";
+        port = config.services.radarr.settings.server.port;
+      }
+      {
+        name = "lidarr";
+        port = config.services.lidarr.settings.server.port;
+      }
+      {
+        name = "readarr-audio";
+        port = config.services.readarr.settings.server.port;
+      }
+      {
+        name = "prowlarr";
+        port = config.services.prowlarr.settings.server.port;
+      }
+      {
+        name = "qbittorrent";
+        port = config.services.qbittorrent.port;
+      }
+      {
+        name = "nzbget";
+        port = 6789;
+      }
+      {
+        name = "idagio";
+        port = config.services.idagio.port;
+      }
+    ];
   };
 
   surfshark = {
