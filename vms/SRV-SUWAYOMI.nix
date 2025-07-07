@@ -14,7 +14,7 @@
     hardware.memory = 8192;
     hardware.storage = "32G";
 
-    networking.nameservers = private-settings.upstreamDNS;
+    networking.nameservers = private-settings.upstreamDNS.ips;
   };
 
   surfshark = {

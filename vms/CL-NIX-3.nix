@@ -44,7 +44,7 @@
     networking = {
       address = "192.168.130.99";
       gateway = "192.168.130.1";
-      nameservers = private-settings.upstreamDNS;
+      nameservers = private-settings.upstreamDNS.ips;
       prefixLength = 24;
     };
   };

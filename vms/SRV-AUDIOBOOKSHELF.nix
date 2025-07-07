@@ -13,7 +13,7 @@
     hardware.memory = 16384;
     hardware.storage = "32G";
 
-    networking.nameservers = private-settings.upstreamDNS;
+    networking.nameservers = private-settings.upstreamDNS.ips;
   };
 
   services.audiobookshelf = {

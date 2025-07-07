@@ -22,11 +22,11 @@ in
       settings = {
         ports.dns = 53;
         upstreams.groups.default = [
-          "https://one.one.one.one/dns-query"
+          private-settings.upstreamDNS.url
         ];
         bootstrapDns = {
-          upstream = "https://one.one.one.one/dns-query";
-          ips = private-settings.upstreamDNS;
+          upstream = private-settings.upstreamDNS.url;
+          ips = private-settings.upstreamDNS.ips;
         };
         blocking = {
           blackLists = {

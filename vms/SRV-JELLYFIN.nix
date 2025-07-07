@@ -14,7 +14,7 @@
     hardware.storage = "64G";
     hardware.gpu.enable = true;
 
-    networking.nameservers = private-settings.upstreamDNS;
+    networking.nameservers = private-settings.upstreamDNS.ips;
   };
 
   services.jellyfin = rec {
