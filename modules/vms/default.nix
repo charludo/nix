@@ -55,7 +55,7 @@ in
           "192.168.30.5"
           "192.168.30.6"
           "192.168.30.13"
-        ] ++ private-settings.upstreamDNS;
+        ] ++ private-settings.upstreamDNS.ips;
       };
       openPorts = {
         tcp = lib.mkOption {

@@ -64,7 +64,7 @@ in
   virtualisation = {
     podman.enable = true;
     containers = {
-      containersConf.settings.containers.dns_servers = private-settings.upstreamDNS;
+      containersConf.settings.containers.dns_servers = private-settings.upstreamDNS.ips;
       storage.settings = {
         storage.graphroot = "/var/lib/containers/storage";
         storage.runroot = "/run/containers/storage";
