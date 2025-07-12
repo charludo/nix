@@ -25,7 +25,7 @@ in
     plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];
     extraPackages = [
       pkgs.rustfmt
-      pkgs.lldb_17
+      pkgs.lldb_20
     ];
 
     plugins.crates.enable = true;
@@ -63,7 +63,7 @@ in
     ];
 
     plugins.dap.adapters.executables.lldb = {
-      command = "${pkgs.lldb_17}/bin/lldb-vscode";
+      command = "${pkgs.lldb_20}/bin/lldb-vscode";
     };
   };
 }

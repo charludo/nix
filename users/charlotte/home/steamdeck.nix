@@ -6,7 +6,6 @@
 
   gpg.enable = false;
   ssh.enable = false;
-  xdgProfile.enable = false;
 
   cli = {
     bat.enable = true;

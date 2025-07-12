@@ -6,6 +6,7 @@ in
   options.agenix-rekey.pubkey = lib.mkOption {
     type = lib.types.nullOr lib.types.path;
     description = "set agenix-rekey primary (and only) identity";
+    default = null;
   };
 
   config = lib.mkIf (cfg.pubkey != null) {

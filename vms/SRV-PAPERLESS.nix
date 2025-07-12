@@ -1,17 +1,18 @@
 {
-  private-settings,
-  pkgs,
   config,
+  pkgs,
+  private-settings,
+  secrets,
   ...
 }:
 let
   backupDirDaily = "${config.nas.backup.stateLocation}/paperless/daily/";
   backupDirMonthly = "${config.nas.backup.stateLocation}/paperless/monthly/";
 
-  paperless-init = pkgs.writeShellApplication {
-    name = "paperless-init";
+  restore-paperless = pkgs.writeShellApplication {
+    name = "restore-paperless";
     text = ''
-      sudo -u paperless /var/lib/paperless/paperless-manage document_importer "${backupDirDaily}"
+      sudo -u paperless /run/current-system/sw/bin/paperless-manage document_importer "${backupDirDaily}"
     '';
   };
 in
@@ -22,7 +23,7 @@ in
 
     hardware.cores = 4;
     hardware.memory = 4096;
-    hardware.storage = "16G";
+    hardware.storage = "32G";
 
     networking.openPorts.tcp = [ 8000 ];
     networking.openPorts.udp = [ 8000 ];
@@ -52,8 +53,12 @@ in
         optimize = 1;
         pdfa_image_compression = "lossless";
       };
+      PAPERLESS_ENABLE_ALLAUTH = true;
+      PAPERLESS_APPS = "allauth.socialaccount.providers.openid_connect";
     };
+    environmentFile = config.age.secrets.paperless-openid.path;
   };
+  age.secrets.paperless-openid.rekeyFile = secrets.paperless-openid;
 
   services.postgresql = {
     enable = true;
@@ -70,7 +75,7 @@ in
     '';
   };
 
-  environment.systemPackages = [ paperless-init ];
+  environment.systemPackages = [ restore-paperless ];
 
   systemd = {
     timers."paperless-backup-daily" = {
@@ -92,8 +97,8 @@ in
 
     services."paperless-backup-daily" = {
       script = ''
-        /var/lib/paperless/paperless-manage document_exporter "${backupDirDaily}" -p -d
-        /var/lib/paperless/paperless-manage document_create_classifier
+        /run/current-system/sw/bin/paperless-manage document_exporter "${backupDirDaily}" -p -d
+        /run/current-system/sw/bin/paperless-manage document_create_classifier
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -102,7 +107,7 @@ in
     };
     services."paperless-backup-monthly" = {
       script = ''
-        /var/lib/paperless/paperless-manage document_exporter "${backupDirMonthly}" -z
+        /run/current-system/sw/bin/paperless-manage document_exporter "${backupDirMonthly}" -z
       '';
       serviceConfig = {
         Type = "oneshot";

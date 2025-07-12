@@ -126,7 +126,7 @@
     extraPackages = [
       pkgs.amdvlk
       pkgs.rocmPackages.clr.icd
-      pkgs.mesa.drivers
+      pkgs.mesa
     ];
     extraPackages32 = [ pkgs.driversi686Linux.amdvlk ];
   };

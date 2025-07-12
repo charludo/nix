@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  lib,
   inputs,
   secrets,
   ...
@@ -18,7 +17,6 @@ let
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr ${config.nas.backup.stateLocation}/torrenter/prowlarr/ /var/lib/prowlarr
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.stateLocation}/torrenter/qbittorrent/ ${config.services.qbittorrent.dataDir}
     '';
-    # ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.bazarr.user}:${config.services.bazarr.group} ${config.nas.backup.stateLocation}/torrenter/bazarr/ /var/lib/bazarr
   };
 in
 {
@@ -30,6 +28,7 @@ in
   vm = {
     id = 2101;
     name = "SRV-TORRENTER";
+    runOnGPUHost = true;
 
     hardware.cores = 4;
     hardware.memory = 24576;
@@ -84,8 +83,8 @@ in
     };
   };
 
-  networking.firewall.interfaces.ens18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
-  networking.interfaces.ens18.ipv4.routes = [
+  networking.firewall.interfaces.enp6s18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
+  networking.interfaces.enp6s18.ipv4.routes = [
     {
       address = "192.168.0.0";
       prefixLength = 16;
@@ -106,9 +105,6 @@ in
     readarr.enable = true;
     readarr.openFirewall = true;
 
-    # bazarr.enable = true;
-    # bazarr.openFirewall = true;
-
     prowlarr.enable = true;
     prowlarr.openFirewall = true;
 
@@ -119,7 +115,6 @@ in
 
     idagio.enable = true;
     idagio.openFirewall = true;
-    idagio.host = config.vm.networking.address;
     idagio.configLocation = config.age.secrets.idagio.path;
     idagio.package = inputs.idagio.packages.x86_64-linux.default;
   };
@@ -140,7 +135,6 @@ in
     config.services.radarr.user
     config.services.lidarr.user
     config.services.readarr.user
-    # config.services.bazarr.user
     config.services.qbittorrent.user
     config.services.nzbget.user
   ];
@@ -158,8 +152,7 @@ in
 
   environment.systemPackages = [
     restore-torrenter
-
-    (import ../shells/remux/remux.nix { inherit pkgs lib; })
+    pkgs.ours.remux
   ];
 
   systemd = {
@@ -193,7 +186,6 @@ in
     services.radarr.after = [ "media-NAS.mount" ];
     services.lidarr.after = [ "media-NAS.mount" ];
     services.readarr.after = [ "media-NAS.mount" ];
-    # services.bazarr.after = [ "media-NAS.mount" ];
     services.prowlarr.after = [ "media-NAS.mount" ];
 
     timers."torrenter-backup-daily" = {
@@ -214,7 +206,6 @@ in
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ ${config.nas.backup.stateLocation}/torrenter/prowlarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/qbittorrent
       '';
-      # ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/bazarr/ ${config.nas.backup.stateLocation}/torrenter/bazarr
       serviceConfig = {
         Type = "oneshot";
         User = "root";

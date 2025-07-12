@@ -6,7 +6,7 @@
 
     hardware.cores = 2;
     hardware.memory = 4096;
-    hardware.storage = "4G";
+    hardware.storage = "16G";
 
     networking.openPorts.tcp = [ 80 ];
     networking.openPorts.udp = [ 80 ];

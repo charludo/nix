@@ -28,6 +28,7 @@
   screensharing.enable = true;
   surfshark.enable = true;
   suspend.enable = true;
+  yubikey.enable = false;
   programs.dconf.enable = true;
 
   console.keyMap = lib.mkForce "es";

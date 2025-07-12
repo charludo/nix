@@ -31,7 +31,7 @@
     id = 3022;
     name = "CL-ROU";
 
-    hardware.cores = 8;
+    hardware.cores = 6;
     hardware.memory = 16284;
     hardware.storage = "16G";
 
@@ -40,6 +40,7 @@
   };
 
   ld.enable = true;
+  programs.dconf.enable = true;
   programs.fish.enable = true;
   users.defaultUserShell = pkgs.fish;
   yubikey.enable = false;

@@ -12,7 +12,7 @@
     name = "SRV-AUTHENTIK";
 
     hardware.cores = 2;
-    hardware.memory = 2048;
+    hardware.memory = 4096;
     hardware.storage = "8G";
 
     networking.openPorts.tcp = [

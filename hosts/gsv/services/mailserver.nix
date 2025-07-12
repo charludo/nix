@@ -5,6 +5,7 @@ in
 {
   mailserver = {
     enable = true;
+    stateVersion = 3;
     fqdn = "mail.${domains.personal}";
     domains = [
       domains.personal
