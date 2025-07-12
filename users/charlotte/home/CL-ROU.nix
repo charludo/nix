@@ -10,7 +10,12 @@
     fish.enable = true;
     fzf.enable = true;
     gh.enable = true;
-    git.enable = true;
+    git = {
+      enable = true;
+      signingKey.pub = ../keys/ssh.pub;
+      user.name = private-settings.git.charlotte.name;
+      user.email = private-settings.git.charlotte.email;
+    };
   };
 
   home.packages = [ pkgs.tmux ];

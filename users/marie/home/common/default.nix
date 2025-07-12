@@ -19,19 +19,19 @@
   cli = {
     bat.enable = true;
     fzf.enable = true;
-    git.enable = true;
-  };
-
-  programs.git = {
-    userName = private-settings.git.marie.name;
-    userEmail = private-settings.git.marie.email;
+    git = {
+      enable = true;
+      signingKey.pub = ../../keys/ssh.pub;
+      user.name = private-settings.git.marie.name;
+      user.email = private-settings.git.marie.email;
+    };
   };
 
   programs.bash = {
     enable = true;
     sessionVariables = {
       AGENIX_REKEY_PRIMARY_IDENTITY = "${builtins.readFile ../../keys/ssh.pub}";
-      AGENIX_REKEY_PRIMARY_IDENTITY_ONLY = true;
+      AGENIX_REKEY_PRIMARY_IDENTITY_ONLY = "true";
     };
   };
 

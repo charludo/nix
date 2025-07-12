@@ -80,7 +80,7 @@ in
 
     hardware.cores = 1;
     hardware.memory = 1024;
-    hardware.storage = "4G";
+    hardware.storage = "8G";
 
     networking.openPorts.tcp = [ 80 ];
   };
