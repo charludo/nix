@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  private-settings,
   secrets,
   ...
 }:
@@ -31,7 +30,6 @@
     openFirewall = true;
 
     mediaLocation = "${config.nas.backup.stateLocation}/immich";
-    settings.server.externalDomain = "https://pictures.${private-settings.domains.home}";
 
     # https://github.com/immich-app/immich/discussions/4758#discussioncomment-7441670
     environment.UV_USE_IO_URING = "0";
@@ -42,7 +40,7 @@
     {
       description = "Mount for Backup - Immich edition";
       what = "//192.168.30.11/Backup";
-      where = "${config.nas.backup.stateLocation}";
+      where = "${config.nas.backup.location}";
       type = "cifs";
       options =
         let

@@ -12,6 +12,7 @@
   plymouth.theme = "dark_planet";
   steamOpenFirewall.enable = true;
   wifi.enable = true;
+  yubikey.enable = false;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
