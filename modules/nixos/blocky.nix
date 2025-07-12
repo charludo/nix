@@ -3,6 +3,7 @@
   lib,
   pkgs,
   private-settings,
+  outputs,
   ...
 }:
 
@@ -13,6 +14,7 @@ in
 {
   options.blocky = {
     enable = lib.mkEnableOption (lib.mdDoc "enable blocky DNS blocker");
+    addEntriesForVMs = lib.mkEnableOption "add custom DNS entries for VM services";
   };
 
   config = mkIf cfg.enable {
@@ -85,25 +87,19 @@ in
             ];
           };
         };
-        # customDNS = {
-        #   filterUnmappedTypes = true;
-        #   rewrite = builtins.listToAttrs (
-        #     map
-        #       (k: {
-        #         name = "notes.${private-settings.domains.personal}";
-        #         value = k;
-        #       })
-        #       [
-        #         "hwr-production-dot-remarkable-production.appspot.com"
-        #         "service-manager-production-dot-remarkable-production.appspot.com"
-        #         "local.appspot.com"
-        #         "my.remarkable.com"
-        #         "ping.remarkable.com"
-        #         "internal.cloud.remarkable.com"
-        #         "mystupidtest.de"
-        #       ]
-        #   );
-        # };
+        customDNS.mapping = lib.mkIf cfg.addEntriesForVMs (
+          builtins.listToAttrs (
+            lib.lists.flatten (
+              builtins.map (
+                vm:
+                builtins.map (entry: {
+                  name = "${entry.name}.${private-settings.domains.ad}";
+                  value = outputs.nixosConfigurations.${vm}.config.vm.networking.address;
+                }) outputs.nixosConfigurations.${vm}.config.vm.certsFor
+              ) (lib.helpers.allVMNames ../../vms)
+            )
+          )
+        );
       };
     };
   };

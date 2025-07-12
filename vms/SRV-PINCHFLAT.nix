@@ -11,11 +11,17 @@
     hardware.cores = 2;
     hardware.memory = 8192;
     hardware.storage = "16G";
+
+    certsFor = [
+      {
+        name = "pinchflat";
+        port = config.services.pinchflat.port;
+      }
+    ];
   };
 
   services.pinchflat = {
     enable = true;
-    openFirewall = true;
     selfhosted = true;
     mediaDir = config.nas.location;
   };
@@ -30,7 +36,7 @@
         name = "restore-pinchflat";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown pinchflat:pinchflat ${config.nas.backup.location}/pinchflat/ /var/lib/pinchflat
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown pinchflat:pinchflat ${config.nas.backup.stateLocation}/pinchflat/ /var/lib/pinchflat
         '';
       };
     in
@@ -54,8 +60,8 @@
     };
     services."pinchflat-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/pinchflat/ ${config.nas.backup.location}/pinchflat
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/pinchflat/ ${config.nas.backup.stateLocation}/pinchflat
       '';
       serviceConfig = {
         Type = "oneshot";

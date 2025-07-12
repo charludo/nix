@@ -45,7 +45,7 @@
     };
     services."anki-sync-server-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/anki-sync-server/ ${config.nas.backup.location}/anki-sync-server
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/anki-sync-server/ ${config.nas.backup.stateLocation}/anki-sync-server
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -60,7 +60,7 @@
         name = "restore-anki-sync-server";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace  ${config.nas.backup.location}/anki-sync-server/ /var/lib/anki-sync-server
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace  ${config.nas.backup.stateLocation}/anki-sync-server/ /var/lib/anki-sync-server
         '';
       };
     in

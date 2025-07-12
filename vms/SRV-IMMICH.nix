@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  private-settings,
   secrets,
   ...
 }:
@@ -30,8 +29,7 @@
     port = 2283;
     openFirewall = true;
 
-    mediaLocation = "${config.nas.backup.location}/immich";
-    settings.server.externalDomain = "https://pictures.${private-settings.domains.home}";
+    mediaLocation = "${config.nas.backup.stateLocation}/immich";
 
     # https://github.com/immich-app/immich/discussions/4758#discussioncomment-7441670
     environment.UV_USE_IO_URING = "0";

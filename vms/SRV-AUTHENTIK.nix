@@ -12,7 +12,7 @@
     name = "SRV-AUTHENTIK";
 
     hardware.cores = 2;
-    hardware.memory = 2048;
+    hardware.memory = 4096;
     hardware.storage = "8G";
 
     networking.openPorts.tcp = [
@@ -40,7 +40,7 @@
   services.postgresqlBackup = {
     enable = true;
     databases = config.services.postgresql.ensureDatabases;
-    location = "${config.nas.backup.location}/authentik";
+    location = "${config.nas.backup.stateLocation}/authentik";
   };
 
   system.stateVersion = "23.11";

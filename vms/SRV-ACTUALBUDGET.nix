@@ -12,21 +12,17 @@
     hardware.memory = 4096;
     hardware.storage = "16G";
 
-    networking.openPorts.tcp = [ 80 ];
-    networking.openPorts.udp = [ 80 ];
+    certsFor = [
+      {
+        name = "actual";
+        port = config.services.actual.settings.port;
+      }
+    ];
   };
 
   services.actual = {
     enable = true;
-    openFirewall = true;
-    settings.hostname = "localhost";
-  };
-
-  services.nginx = {
-    enable = true;
-    virtualHosts."_" = {
-      locations."/".proxyPass = "http://localhost:${toString config.services.actual.settings.port}";
-    };
+    settings.hostname = "127.0.0.1";
   };
 
   nas.backup.enable = true;
@@ -37,7 +33,7 @@
         name = "restore-actual";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown actual:actual ${config.nas.backup.location}/actual/ ${config.services.actual.settings.dataDir}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown actual:actual ${config.nas.backup.stateLocation}/actual/ ${config.services.actual.settings.dataDir}
         '';
       };
     in
@@ -56,7 +52,7 @@
     };
     services."actual-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.location})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.actual.settings.dataDir}/ ${config.nas.backup.location}/actual
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.actual.settings.dataDir}/ ${config.nas.backup.stateLocation}/actual
       '';
       serviceConfig = {
         Type = "oneshot";

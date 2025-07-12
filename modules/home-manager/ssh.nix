@@ -30,7 +30,7 @@ in
         "* !proxmox !proxmox2 !proxmox-gpu !home-assistant !gsv !gsv-boot" = {
           user = "paki";
         };
-        "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMs)}".extraOptions =
+        "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}".extraOptions =
           {
             "StrictHostKeyChecking" = "no";
             "LogLevel" = "quiet";
@@ -43,7 +43,7 @@ in
             COLORTERM = "truecolor";
           };
         };
-      } // lib.helpers.allVMs;
+      } // lib.helpers.allVMSSHConfigs;
     };
   };
 }

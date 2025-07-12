@@ -42,7 +42,7 @@
     services."kavita-backup-daily" = {
       script = ''
         [ "$(stat -f -c %T ${config.nas.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.services.kavita.dataDir}/ ${config.nas.backup.location}/kavita
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.services.kavita.dataDir}/ ${config.nas.backup.stateLocation}/kavita
       '';
       serviceConfig = {
         Type = "oneshot";
@@ -57,7 +57,7 @@
         name = "kavita-init";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.nas.backup.location}/kavita/ ${config.services.kavita.dataDir}
+          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.kavita.user}:* ${config.nas.backup.stateLocation}/kavita/ ${config.services.kavita.dataDir}
         '';
       };
     in

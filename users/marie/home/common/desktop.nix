@@ -90,8 +90,8 @@
             }}";
             definedAliases = [ "@k" ];
           };
-          "Bing".metaData.hidden = true;
-          "DuckDuckGo".metaData.hidden = true;
+          "bing".metaData.hidden = true;
+          "ddg".metaData.hidden = true;
           "google".metaData.alias = "@g";
         };
       };
