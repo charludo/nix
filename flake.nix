@@ -58,13 +58,17 @@
       inherit (self) outputs;
       system = "x86_64-linux";
 
-      pkgs = nixpkgs.legacyPackages.${system};
-      lib = import ./lib { inherit pkgs inputs outputs; };
-      packages = pkgs.callPackage ./pkgs { inherit inputs lib; };
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [
+          (import ./overlays/nixpkgs.nix { inherit inputs outputs; })
+        ];
+      };
+      inherit (pkgs) lib;
     in
     {
       inherit lib;
-      overlays = import ./overlays { inherit inputs outputs; };
+      overlays = import ./overlays/flake-inputs.nix { inherit inputs outputs; };
 
       nixosConfigurations =
         builtins.listToAttrs [
@@ -103,11 +107,11 @@
         (lib.mkConfigs.home "marie" "CL-NIX-3" [ inputs.plasma-manager.homeManagerModules.plasma-manager ])
       ];
 
-      packages.${system} = packages;
+      packages.${system} = pkgs.ours;
 
       devShells.${system} = {
         default = pkgs.callPackage ./shells { };
-        remux = pkgs.callPackage ./shells/remux.nix { inherit (packages) remux; };
+        remux = pkgs.callPackage ./shells/remux.nix { };
       };
 
       formatter.${system} = pkgs.treefmt;

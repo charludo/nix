@@ -1,9 +1,9 @@
 {
   inputs,
-  lib,
   pkgs,
 }:
 let
+  inherit (pkgs) lib;
   callPackage = lib.callPackageWith pkgs;
 in
 lib.packagesFromDirectoryRecursive {
@@ -12,7 +12,6 @@ lib.packagesFromDirectoryRecursive {
 }
 // {
   nvim = callPackage ./by-name/nvim/package.nix {
-    inherit lib;
     inherit (inputs) nixvim;
   };
 }

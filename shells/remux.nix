@@ -2,12 +2,12 @@
   mkShell,
   ffmpeg,
   mkvtoolnix-cli,
-  remux,
+  ours,
   ...
 }:
 mkShell {
   packages = [
-    remux
+    ours.remux
     ffmpeg
     mkvtoolnix-cli
   ];
