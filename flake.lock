@@ -1101,6 +1101,26 @@
         "type": "gitlab"
       }
     },
+    "mdbook": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1744174589,
+        "narHash": "sha256-lOEE1MHi/shaMB2GQ/4mR/mXe+IjXZLU9YGGAYPVpvg=",
+        "owner": "pbar1",
+        "repo": "nix-mdbook",
+        "rev": "0c8e5ab1adc7203511ccbbffe3819d8bb694e450",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pbar1",
+        "repo": "nix-mdbook",
+        "type": "github"
+      }
+    },
     "musnix": {
       "inputs": {
         "nixpkgs": "nixpkgs_10"
@@ -1826,6 +1846,7 @@
         "idagio": "idagio",
         "jovian": "jovian",
         "mailserver": "mailserver",
+        "mdbook": "mdbook",
         "musnix": "musnix",
         "nix-colors": "nix-colors",
         "nix-flatpak": "nix-flatpak",

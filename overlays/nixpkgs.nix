@@ -1,5 +1,5 @@
 { inputs, outputs }:
-final: prev: {
+_: prev: {
   ours = prev.pkgs.callPackage ../pkgs {
     inherit inputs;
     pkgs = prev.pkgs;
