@@ -1,0 +1,16 @@
+[book]
+authors = ["Charlotte Hartmann Paludo"]
+language = "en"
+multilingual = false
+src = "."
+title = "nix"
+description = "nix config for the pakihoehle"
+
+[build]
+create-missing = false
+
+[output.html]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/charludo/nix"
+edit-url-template = "https://github.com/charludo/nix/edit/main/docs/{path}"

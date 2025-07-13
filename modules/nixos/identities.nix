@@ -4,7 +4,6 @@ with lib;
 
 {
   options.users.users = mkOption {
-    description = "extension of users.users";
     type =
       with types;
       attrsOf (submodule {

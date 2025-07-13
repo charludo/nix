@@ -27,6 +27,9 @@
     agenix-rekey.url = "github:oddlama/agenix-rekey";
     agenix-rekey.inputs.nixpkgs.follows = "nixpkgs";
 
+    mdbook.url = "github:pbar1/nix-mdbook";
+    mdbook.inputs.nixpkgs.follows = "nixpkgs";
+
     authentik.url = "github:nix-community/authentik-nix";
     authentik.inputs.nixpkgs.follows = "nixpkgs";
 
