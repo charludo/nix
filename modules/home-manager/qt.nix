@@ -3,7 +3,7 @@ let
   cfg = config.desktop.qtProfile;
 in
 {
-  options.desktop.qtProfile.enable = lib.mkEnableOption "enable qt customizations";
+  options.desktop.qtProfile.enable = lib.mkEnableOption "qt customizations";
 
   config = lib.mkIf cfg.enable {
     qt = {

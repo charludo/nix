@@ -11,7 +11,7 @@ let
 in
 {
   options.fish = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable fish shell and make user default");
+    enable = lib.mkEnableOption "fish shell and make user default";
   };
 
   config = mkIf cfg.enable {

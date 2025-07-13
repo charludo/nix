@@ -8,7 +8,7 @@ let
   cfg = config.gpg;
 in
 {
-  options.gpg.enable = lib.mkEnableOption "configure gpg";
+  options.gpg.enable = lib.mkEnableOption "custom gpg";
 
   config = lib.mkIf cfg.enable {
     programs.gpg = {

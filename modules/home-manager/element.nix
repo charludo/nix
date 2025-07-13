@@ -9,7 +9,7 @@ let
   palette = lib.colors.extendPalette config.colorScheme.palette;
 in
 {
-  options.desktop.element.enable = lib.mkEnableOption "enable Element Matrix client";
+  options.desktop.element.enable = lib.mkEnableOption "Element Matrix client";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

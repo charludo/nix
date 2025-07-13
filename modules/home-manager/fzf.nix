@@ -3,7 +3,7 @@ let
   cfg = config.cli.fzf;
 in
 {
-  options.cli.fzf.enable = lib.mkEnableOption "enable fzf fuzzy file finder";
+  options.cli.fzf.enable = lib.mkEnableOption "fzf fuzzy file finder";
 
   config = lib.mkIf cfg.enable {
     programs.fzf = {

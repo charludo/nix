@@ -93,10 +93,12 @@ let
   alertTelegram = "${send-telegram}/bin/send-telegram";
 
   mkMonitOption = configBlock: {
-    enable = lib.mkEnableOption "enable this monit config";
+    enable = lib.mkEnableOption "this monit config";
     config = lib.mkOption {
       type = lib.types.str;
       default = configBlock;
+      defaultText = "[omitted]";
+      description = "[omitted]";
     };
   };
   enabledMonitOptions = (
@@ -111,7 +113,7 @@ in
   options.monitConfig = {
     enable = lib.mkEnableOption "monitoring via monit";
     adminPassword = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
       default = null;
       description = "password monit uses for the admin interface";
     };
@@ -120,6 +122,7 @@ in
       default = ''
         set daemon 120 with start delay 60
       '';
+      description = "when and how often to poll";
     };
     mailServer = lib.mkOption {
       type = lib.types.str;
@@ -127,6 +130,7 @@ in
         set mailserver
           localhost
       '';
+      description = "set the mailserver to use for notifications";
     };
     alertAddress = lib.mkOption {
       type = lib.types.str;
@@ -136,7 +140,7 @@ in
     adminInterface = mkMonitOption ''
       set httpd port 2812 and use address localhost
         allow localhost
-        allow admin:${cfg.adminPassword}
+        allow admin:${builtins.toString cfg.adminPassword}
     '';
 
     system = mkMonitOption ''

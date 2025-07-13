@@ -11,7 +11,7 @@ let
 in
 {
   options.eid = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable usage of the Belgian EID");
+    enable = lib.mkEnableOption "usage of the Belgian EID";
   };
 
   config = mkIf cfg.enable {

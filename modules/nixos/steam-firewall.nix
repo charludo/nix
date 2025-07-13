@@ -6,7 +6,7 @@ let
 in
 {
   options.steamOpenFirewall = {
-    enable = lib.mkEnableOption (lib.mdDoc "open firewall ports for steam and steam games");
+    enable = lib.mkEnableOption "open firewall ports for steam and steam games";
   };
 
   config = mkIf cfg.enable {

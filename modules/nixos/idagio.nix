@@ -63,60 +63,46 @@ let
 in
 {
   options.services.idagio = {
-    enable = mkEnableOption (lib.mdDoc "idagio downloader");
+    enable = mkEnableOption "idagio downloader";
 
     configLocation = mkOption {
       type = types.path;
-      description = lib.mdDoc ''
-        Path to the idagio downloader config file.
-      '';
+      description = "Path to the idagio downloader config file.";
     };
 
     user = mkOption {
       type = types.str;
       default = "qbittorrent";
-      description = lib.mdDoc ''
-        User account under which qBittorrent runs.
-      '';
+      description = "User account under which qBittorrent runs.";
     };
 
     group = mkOption {
       type = types.str;
       default = "qbittorrent";
-      description = lib.mdDoc ''
-        Group under which qBittorrent runs.
-      '';
+      description = "Group under which qBittorrent runs.";
     };
 
     port = mkOption {
       type = types.port;
       default = 9417;
-      description = lib.mdDoc ''
-        idagio downloader web port
-      '';
+      description = "idagio downloader web port";
     };
 
     host = mkOption {
       type = types.str;
       default = "0.0.0.0";
-      description = lib.mdDoc ''
-        idagio downloader host
-      '';
+      description = "idagio downloader host";
     };
 
     openFirewall = mkOption {
       type = types.bool;
       default = false;
-      description = lib.mdDoc ''
-        Open services.idagio.port to the outside network.
-      '';
+      description = "Open services.idagio.port to the outside network.";
     };
 
     package = mkOption {
       type = types.package;
-      description = lib.mdDoc ''
-        The idagio package to use.
-      '';
+      description = "The idagio package to use.";
     };
   };
 

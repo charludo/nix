@@ -11,7 +11,7 @@ let
 in
 {
   options.onlykey = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable onlykey support");
+    enable = lib.mkEnableOption "onlykey support";
   };
 
   config = mkIf cfg.enable {

@@ -3,7 +3,7 @@ let
   cfg = config.xdgProfile;
 in
 {
-  options.xdgProfile.enable = lib.mkEnableOption "enable XDG customizations";
+  options.xdgProfile.enable = lib.mkEnableOption "XDG customizations";
 
   config = lib.mkIf cfg.enable {
     xdg.userDirs = {

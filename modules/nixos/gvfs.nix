@@ -6,7 +6,7 @@ let
 in
 {
   options.gvfs = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable Gnome Virtual File System");
+    enable = lib.mkEnableOption "Gnome Virtual File System";
   };
 
   config = mkIf cfg.enable {

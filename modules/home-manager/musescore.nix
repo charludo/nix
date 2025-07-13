@@ -8,7 +8,7 @@ let
   cfg = config.desktop.musescore;
 in
 {
-  options.desktop.musescore.enable = lib.mkEnableOption "enable MuseScore & MuseSounds";
+  options.desktop.musescore.enable = lib.mkEnableOption "MuseScore & MuseSounds";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

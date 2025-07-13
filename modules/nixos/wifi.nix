@@ -11,7 +11,7 @@ let
 in
 {
   options.wifi = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable WiFi networks");
+    enable = lib.mkEnableOption "WiFi networks";
   };
 
   config = mkIf cfg.enable {

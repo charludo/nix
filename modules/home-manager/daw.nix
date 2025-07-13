@@ -8,7 +8,7 @@ let
   cfg = config.desktop.daw;
 in
 {
-  options.desktop.daw.enable = lib.mkEnableOption "enable DAW setup for Cello lessons";
+  options.desktop.daw.enable = lib.mkEnableOption "DAW setup for Cello lessons";
 
   config =
     let

@@ -11,7 +11,7 @@ let
 in
 {
   options.greetd = {
-    enable = mkEnableOption "enable greetd";
+    enable = mkEnableOption "greetd";
     defaultUser = mkOption {
       type = types.str;
       default = "charlotte";

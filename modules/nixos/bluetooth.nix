@@ -6,7 +6,7 @@ let
 in
 {
   options.bluetooth = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable bluetooth config, incl. for keyboard");
+    enable = lib.mkEnableOption "bluetooth config, incl. for keyboard";
   };
 
   config = mkIf cfg.enable {

@@ -6,7 +6,7 @@ let
 in
 {
   options.keyring = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable a keyring provider");
+    enable = lib.mkEnableOption "a keyring provider";
   };
 
   config = mkIf cfg.enable {

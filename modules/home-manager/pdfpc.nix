@@ -8,7 +8,7 @@ let
   cfg = config.desktop.pdfpc;
 in
 {
-  options.desktop.pdfpc.enable = lib.mkEnableOption "enable PDF Presenter's Console";
+  options.desktop.pdfpc.enable = lib.mkEnableOption "PDF Presenter's Console";
 
   config = lib.mkIf cfg.enable {
     home.packages = [ pkgs.pdfpc ];

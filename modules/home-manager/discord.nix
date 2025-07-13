@@ -8,7 +8,7 @@ let
   cfg = config.desktop.discord;
 in
 {
-  options.desktop.discord.enable = lib.mkEnableOption "enable Discord client";
+  options.desktop.discord.enable = lib.mkEnableOption "Discord client";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

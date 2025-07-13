@@ -3,7 +3,7 @@ let
   cfg = config.ssh;
 in
 {
-  options.ssh.enable = lib.mkEnableOption "enable custom SSH config";
+  options.ssh.enable = lib.mkEnableOption "custom SSH config";
 
   config = lib.mkIf cfg.enable {
     programs.ssh = {

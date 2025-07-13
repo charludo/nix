@@ -8,7 +8,7 @@ let
   cfg = config.desktop.jellyfin;
 in
 {
-  options.desktop.jellyfin.enable = lib.mkEnableOption "enable Jellyfin client";
+  options.desktop.jellyfin.enable = lib.mkEnableOption "Jellyfin client";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

@@ -6,7 +6,7 @@ let
 in
 {
   options.docker = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable docker (ugh)");
+    enable = lib.mkEnableOption "docker (ugh)";
   };
 
   config = mkIf cfg.enable {

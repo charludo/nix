@@ -13,7 +13,7 @@ let
 in
 {
   options.blocky = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable blocky DNS blocker");
+    enable = lib.mkEnableOption "blocky DNS blocker";
     addEntriesForVMs = lib.mkEnableOption "add custom DNS entries for VM services";
   };
 

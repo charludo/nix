@@ -3,13 +3,24 @@ let
   cfg = config.cli.git;
 in
 {
-  options.cli.git.enable = lib.mkEnableOption "enable and configure git";
-  options.cli.git.user.name = lib.mkOption { type = lib.types.str; };
-  options.cli.git.user.email = lib.mkOption { type = lib.types.str; };
-  options.cli.git.signingKey.pub = lib.mkOption { type = lib.types.nullOr lib.types.path; };
+  options.cli.git.enable = lib.mkEnableOption "git";
+  options.cli.git.user.name = lib.mkOption {
+    type = lib.types.str;
+    description = "git username";
+  };
+  options.cli.git.user.email = lib.mkOption {
+    type = lib.types.str;
+    description = "git email address";
+  };
+  options.cli.git.signingKey.pub = lib.mkOption {
+    type = lib.types.nullOr lib.types.path;
+    description = "path to the public key used for commit signing";
+  };
   options.cli.git.signingKey.file = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+    defaultText = lib.literalExpression ''''${config.home.homeDirectory}/.ssh/id_ed25519.pub'';
+    description = "path to the private key used for commit signing";
   };
 
   config = lib.mkIf cfg.enable {

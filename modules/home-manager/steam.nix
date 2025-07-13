@@ -3,7 +3,7 @@ let
   cfg = config.games.steam;
 in
 {
-  options.games.steam.enable = lib.mkEnableOption "enable Steam in big picture mode";
+  options.games.steam.enable = lib.mkEnableOption "Steam in big picture mode";
 
   config = lib.mkIf cfg.enable {
     xdg.desktopEntries.steam = {

@@ -11,7 +11,7 @@ let
 in
 {
   options.zammad = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable zammad (ugh)");
+    enable = lib.mkEnableOption "zammad (ugh)";
   };
 
   config = mkIf cfg.enable {

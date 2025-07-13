@@ -15,7 +15,7 @@ let
 in
 {
   options.autoUpdate = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable automatic updates");
+    enable = lib.mkEnableOption "automatic updates";
   };
 
   config = mkIf cfg.enable {

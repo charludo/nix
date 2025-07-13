@@ -10,7 +10,7 @@ let
 in
 {
   options.suspend = {
-    enable = lib.mkEnableOption (lib.mdDoc "");
+    enable = lib.mkEnableOption "custom suspend options";
 
     powertop = mkOption {
       type = types.bool;

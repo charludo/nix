@@ -13,7 +13,7 @@ let
 in
 {
   options.age = {
-    enable = lib.mkEnableOption "enable age secrets management";
+    enable = lib.mkEnableOption "age secrets management";
   };
 
   config = lib.mkIf cfg.enable {

@@ -8,7 +8,7 @@ let
   cfg = config.desktop.vscode;
 in
 {
-  options.desktop.vscode.enable = lib.mkEnableOption "enable VSCodium config";
+  options.desktop.vscode.enable = lib.mkEnableOption "VSCodium config";
 
   config = lib.mkIf cfg.enable {
     programs.vscode = {

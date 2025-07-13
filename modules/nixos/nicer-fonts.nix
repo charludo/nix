@@ -6,7 +6,7 @@ let
 in
 {
   options.nicerFonts = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable nicer font rendering on desktops");
+    enable = lib.mkEnableOption "nicer font rendering on desktops";
   };
 
   config = mkIf cfg.enable {

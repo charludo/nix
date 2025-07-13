@@ -5,7 +5,7 @@ let
   colors = lib.colors.extendPalette config.colorScheme.palette;
 in
 {
-  options.cli.k9s.enable = lib.mkEnableOption "enable themed k9s";
+  options.cli.k9s.enable = lib.mkEnableOption "themed k9s";
 
   config = lib.mkIf cfg.enable {
     programs.k9s = {

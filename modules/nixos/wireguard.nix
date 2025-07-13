@@ -12,7 +12,7 @@ let
 in
 {
   options.wireguard = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable wireguard tunnel to home <3");
+    enable = lib.mkEnableOption "wireguard tunnel to home <3";
 
     autoStart = lib.mkOption {
       type = types.bool;

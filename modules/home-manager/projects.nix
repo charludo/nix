@@ -11,30 +11,33 @@ in
         options = {
           name = mkOption {
             type = types.str;
-            example = "projectname";
+            description = "name of the folder created for this project";
           };
           repo = mkOption {
             type = types.str;
             example = "git@github.com:example/project";
-            default = "";
+            description = "URL of the remote git repo to clone";
           };
           enableDirenv = mkOption {
             type = types.bool;
             default = true;
+            description = "whether to create a .direnv file in the project directory";
           };
           flakeURL = mkOption {
             type = types.str;
             default = ".";
+            description = "where to find the flake.nix file used for this project";
           };
           writeEnvrc = mkOption {
             type = types.bool;
             default = true;
-            description = "Do not write an .envrc file, only allow direnv for the project";
+            description = "do not write an .envrc file, only allow direnv for the project";
           };
         };
       }
     );
     default = [ ];
+    description = "projects to automatically create and clone, and what direnv config to add";
   };
   config = lib.mkIf (cfg != [ ]) {
     programs.direnv = {

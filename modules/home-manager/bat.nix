@@ -3,7 +3,7 @@ let
   cfg = config.cli.bat;
 in
 {
-  options.cli.bat.enable = lib.mkEnableOption "enable bat instead of cat";
+  options.cli.bat.enable = lib.mkEnableOption "bat instead of cat";
 
   config = lib.mkIf cfg.enable {
     programs.bat = {
