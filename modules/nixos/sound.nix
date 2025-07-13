@@ -6,7 +6,7 @@ let
 in
 {
   options.soundConfig = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable sound output");
+    enable = lib.mkEnableOption "sound output";
 
     enableCombinedAdapter = mkOption {
       type = types.bool;

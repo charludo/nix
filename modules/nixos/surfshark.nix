@@ -70,7 +70,7 @@ let
 in
 {
   options.surfshark = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable surfshark VPN");
+    enable = lib.mkEnableOption "surfshark VPN";
 
     alwaysOn = mkOption {
       type = types.bool;

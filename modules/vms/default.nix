@@ -21,37 +21,63 @@ in
       description = "enable vm-specific (hardware) config. For use with proxmox";
     };
 
-    id = lib.mkOption { type = lib.types.int; };
+    id = lib.mkOption {
+      type = lib.types.int;
+      description = "id of the vm. For use with proxmox";
+    };
     name = lib.mkOption {
       type = lib.types.strMatching "^$|^[[:alnum:]]([[:alnum:]_-]{0,61}[[:alnum:]])?$";
+      description = "name of the vm. For use with proxmox";
     };
 
     hardware = {
-      cores = lib.mkOption { type = lib.types.ints.positive; };
-      memory = lib.mkOption { type = lib.types.ints.positive; };
-      storage = lib.mkOption { type = lib.types.str; };
+      cores = lib.mkOption {
+        type = lib.types.ints.positive;
+        description = "number of CPU cores of the vm. For use with proxmox";
+      };
+      memory = lib.mkOption {
+        type = lib.types.ints.positive;
+        description = "amount of memory the VM will have. For use with proxmox";
+      };
+      storage = lib.mkOption {
+        type = lib.types.str;
+        description = "disk size of the VM. For use with proxmox";
+      };
     };
 
     networking = {
       interface = lib.mkOption {
         type = lib.types.str;
         default = "ens18";
+        description = "network interface name. For use with proxmox";
       };
       address = lib.mkOption {
         type = lib.types.str;
         default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1${
           builtins.substring 2 2 (toString config.vm.id)
         }";
+        defaultText = lib.literalExpression ''
+          192.168.''${builtins.substring 0 2 (toString config.vm.id)}.1''${
+            builtins.substring 2 2 (toString config.vm.id)
+          }
+        '';
+        description = "IPv4 address computed from the VM ID";
       };
       gateway = lib.mkOption {
         type = lib.types.str;
         default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1";
+        defaultText = lib.literalExpression ''192.168.''${builtins.substring 0 2 (toString config.vm.id)}.1'';
+        description = "gateway the VM should use";
       };
       prefixLength = lib.mkOption {
         type = lib.types.int;
         default = 24;
+        description = "prefix length the VM should use";
       };
-      bridge = lib.mkOption { type = lib.types.str; };
+      bridge = lib.mkOption {
+        type = lib.types.str;
+        description = "bridge the VM should use";
+      };
       nameservers = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [
@@ -59,15 +85,24 @@ in
           "192.168.30.6"
           "192.168.30.13"
         ] ++ private-settings.upstreamDNS.ips;
+        defaultText = lib.literalExpression ''
+          [
+            "192.168.30.5"
+            "192.168.30.6"
+            "192.168.30.13"
+          ] ++ private-settings.upstreamDNS.ips'';
+        description = "DNS servers to be used by the VM";
       };
       openPorts = {
         tcp = lib.mkOption {
           type = lib.types.listOf lib.types.int;
           default = [ ];
+          description = "ports to open for TCP traffic";
         };
         udp = lib.mkOption {
           type = lib.types.listOf lib.types.int;
           default = [ ];
+          description = "ports to open for UDP traffic";
         };
       };
     };

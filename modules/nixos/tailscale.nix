@@ -11,7 +11,7 @@ let
 in
 {
   options.tailscale = {
-    enable = lib.mkEnableOption (lib.mdDoc "Whether to enable tailscale");
+    enable = lib.mkEnableOption "whether to enable tailscale";
 
     autoStart = mkOption {
       type = types.bool;

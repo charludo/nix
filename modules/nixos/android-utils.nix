@@ -6,7 +6,7 @@ let
 in
 {
   options.androidUtils = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable android utilities like adb, debloater,...");
+    enable = lib.mkEnableOption "android utilities like adb, debloater,...";
   };
 
   config = mkIf cfg.enable {

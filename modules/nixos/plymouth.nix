@@ -11,7 +11,7 @@ let
 in
 {
   options.plymouth = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable plymouth splash screen during boot");
+    enable = lib.mkEnableOption "plymouth splash screen during boot";
 
     theme = mkOption {
       type = types.str;

@@ -4,7 +4,7 @@ let
   inherit (config.colorScheme) palette;
 in
 {
-  options.desktop.sioyek.enable = lib.mkEnableOption "enable Sioyek PDF viewer";
+  options.desktop.sioyek.enable = lib.mkEnableOption "Sioyek PDF viewer";
 
   config = lib.mkIf cfg.enable {
     programs.sioyek = {

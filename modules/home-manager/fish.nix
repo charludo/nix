@@ -8,7 +8,7 @@ let
   cfg = config.cli.fish;
 in
 {
-  options.cli.fish.enable = lib.mkEnableOption "enable fish shell";
+  options.cli.fish.enable = lib.mkEnableOption "fish shell";
 
   config = lib.mkIf cfg.enable {
     programs.fish = {

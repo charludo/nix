@@ -10,10 +10,10 @@ let
 in
 {
   options.staticHosting = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable hosting of static sites");
+    enable = lib.mkEnableOption "hosting of static sites";
 
     siteConfigs = mkOption {
-      internal = true;
+      type = lib.types.anything;
       description = ''
         A list of sets representing sites to host, each consisting of:
         - a name

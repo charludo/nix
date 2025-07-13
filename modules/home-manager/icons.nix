@@ -5,7 +5,7 @@ let
 in
 {
   options.iconsProfile = {
-    enable = lib.mkEnableOption "Whether to enable icon profiles";
+    enable = lib.mkEnableOption "icon profiles";
     name = lib.mkOption {
       type = lib.types.str;
       description = "Name of the icons theme";

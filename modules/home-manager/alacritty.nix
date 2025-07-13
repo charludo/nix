@@ -4,7 +4,7 @@ let
   inherit (config.colorScheme) palette;
 in
 {
-  options.desktop.alacritty.enable = lib.mkEnableOption "enable alacritty terminal emulator";
+  options.desktop.alacritty.enable = lib.mkEnableOption "alacritty terminal emulator";
   options.desktop.alacritty.fontSize = lib.mkOption {
     type = lib.types.int;
     default = 14;

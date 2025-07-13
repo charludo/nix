@@ -9,7 +9,7 @@ let
   kernel-path = ".config/easyeffects/irs/Dolby ATMOS ((128K MP3)) 1.Default.irs";
 in
 {
-  options.desktop.easyeffects.enable = lib.mkEnableOption "enable EasyEffects";
+  options.desktop.easyeffects.enable = lib.mkEnableOption "EasyEffects";
 
   config = lib.mkIf cfg.enable {
     services.easyeffects = {

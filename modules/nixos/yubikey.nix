@@ -79,10 +79,10 @@ let
 in
 {
   options.yubikey = {
-    enable = mkEnableOption "enable yubikey-based services and authentication";
+    enable = mkEnableOption "yubikey-based services and authentication";
 
     identities = mkOption {
-      internal = true;
+      type = lib.types.anything;
       description = ''
         A set of identities. See user.users.<name>.identities
       '';

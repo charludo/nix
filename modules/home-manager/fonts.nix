@@ -24,7 +24,7 @@ let
 in
 {
   options.fontProfiles = {
-    enable = lib.mkEnableOption "Whether to enable font profiles";
+    enable = lib.mkEnableOption "font profiles";
     monospace = mkFontOption "monospace";
     regular = mkFontOption "regular";
   };

@@ -12,11 +12,12 @@ let
 in
 {
   options.ld = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable dynamic linking of libraries");
+    enable = lib.mkEnableOption "dynamic linking of libraries";
 
     additionalPackages = mkOption {
       type = types.listOf (types.path);
       default = [ pkgs.ruff ];
+      defaultText = lib.literalExpression ''[ pkgs.ruff ]'';
       description = "add additional packages for which to enable dynamic linking";
     };
 

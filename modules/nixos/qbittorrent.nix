@@ -15,12 +15,12 @@ let
 in
 {
   options.services.qbittorrent = {
-    enable = mkEnableOption (lib.mdDoc "qBittorrent headless");
+    enable = mkEnableOption "qBittorrent headless";
 
     dataDir = mkOption {
       type = types.path;
       default = "/var/lib/qbittorrent";
-      description = lib.mdDoc ''
+      description = ''
         The directory where qBittorrent stores its data files.
       '';
     };
@@ -28,7 +28,7 @@ in
     user = mkOption {
       type = types.str;
       default = "qbittorrent";
-      description = lib.mdDoc ''
+      description = ''
         User account under which qBittorrent runs.
       '';
     };
@@ -36,7 +36,7 @@ in
     group = mkOption {
       type = types.str;
       default = "qbittorrent";
-      description = lib.mdDoc ''
+      description = ''
         Group under which qBittorrent runs.
       '';
     };
@@ -44,7 +44,7 @@ in
     port = mkOption {
       type = types.port;
       default = 8112;
-      description = lib.mdDoc ''
+      description = ''
         qBittorrent web UI port.
       '';
     };
@@ -52,7 +52,7 @@ in
     openFirewall = mkOption {
       type = types.bool;
       default = false;
-      description = lib.mdDoc ''
+      description = ''
         Open services.qBittorrent.port to the outside network.
       '';
     };
@@ -61,7 +61,7 @@ in
       type = types.package;
       default = pkgs.qbittorrent-nox;
       defaultText = literalExpression "pkgs.qbittorrent-nox";
-      description = lib.mdDoc ''
+      description = ''
         The qbittorrent package to use.
       '';
     };

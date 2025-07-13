@@ -11,7 +11,7 @@ let
 in
 {
   options.rsync = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable hourly backups to the NAS");
+    enable = lib.mkEnableOption "hourly backups to the NAS";
   };
 
   config = mkIf cfg.enable {

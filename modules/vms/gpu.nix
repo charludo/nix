@@ -8,7 +8,7 @@ let
   cfg = config.vm;
 in
 {
-  options.vm.hardware.gpu.enable = lib.mkEnableOption "enable Intel GPU support for VMs";
+  options.vm.hardware.gpu.enable = lib.mkEnableOption "Intel GPU support for VMs";
   options.vm.runOnGPUHost = lib.mkEnableOption "run on GPU host, but do not require GPU passthrough";
 
   config = lib.mkMerge [

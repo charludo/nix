@@ -8,7 +8,7 @@ let
   cfg = config.desktop.nemo;
 in
 {
-  options.desktop.nemo.enable = lib.mkEnableOption "enable Nemo file manager";
+  options.desktop.nemo.enable = lib.mkEnableOption "Nemo file manager";
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [

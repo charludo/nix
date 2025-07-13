@@ -14,14 +14,14 @@ let
 in
 {
   options.nas = {
-    enable = mkEnableOption (mdDoc "enable NAS");
+    enable = mkEnableOption "NAS";
     location = mkOption {
       type = types.str;
       description = "mountpoint for the NAS";
       default = "${mountRoot}/NAS";
     };
 
-    backup.enable = mkEnableOption (mdDoc "enable NAS Backup");
+    backup.enable = mkEnableOption "NAS Backup";
     backup.location = mkOption {
       type = types.str;
       description = "mountpoint for the backup NAS";

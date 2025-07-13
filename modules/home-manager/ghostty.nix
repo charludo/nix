@@ -4,7 +4,7 @@ let
   inherit (config.colorScheme) palette;
 in
 {
-  options.desktop.ghostty.enable = lib.mkEnableOption "enable Ghostty terminal emulator";
+  options.desktop.ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";
 
   config = lib.mkIf cfg.enable {
     programs.ghostty = {

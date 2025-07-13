@@ -11,7 +11,7 @@ let
 in
 {
   options.printers = {
-    enable = lib.mkEnableOption (lib.mdDoc "enable printer config");
+    enable = lib.mkEnableOption "printer config";
   };
 
   config = mkIf cfg.enable {

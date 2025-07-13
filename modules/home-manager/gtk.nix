@@ -11,7 +11,7 @@ let
   inherit (config.colorScheme) palette;
 in
 {
-  options.desktop.gtkProfile.enable = lib.mkEnableOption "enable GTK customizations";
+  options.desktop.gtkProfile.enable = lib.mkEnableOption "GTK customizations";
 
   config = lib.mkIf cfg.enable {
     gtk = {

@@ -5,7 +5,7 @@ let
 in
 {
   options.cursorProfile = {
-    enable = lib.mkEnableOption "Whether to enable icon profiles";
+    enable = lib.mkEnableOption "icon profiles";
     name = lib.mkOption {
       type = lib.types.str;
       description = "Name of the cursor theme";

@@ -9,7 +9,7 @@ let
   cfg = config.games.eso;
 in
 {
-  options.games.eso.enable = lib.mkEnableOption "enable Elder Scrolls Online mods";
+  options.games.eso.enable = lib.mkEnableOption "Elder Scrolls Online mods";
 
   config =
     let

@@ -8,7 +8,7 @@ let
   cfg = config.cli.gh;
 in
 {
-  options.cli.gh.enable = lib.mkEnableOption "enable GitHub cli";
+  options.cli.gh.enable = lib.mkEnableOption "GitHub cli";
 
   config = lib.mkIf cfg.enable {
     programs.gh = {

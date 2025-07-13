@@ -4,6 +4,7 @@ with lib;
 
 {
   options.users.users = mkOption {
+    description = "extension of users.users";
     type =
       with types;
       attrsOf (submodule {
@@ -18,20 +19,20 @@ with lib;
                     serial = mkOption {
                       type = types.nullOr types.int;
                       default = null;
-                      description = "The serial number of the Yubikey managing this identity";
+                      description = "the serial number of the Yubikey managing this identity";
                     };
                     privateKeyFile = mkOption {
                       type = types.path;
-                      description = "The private key file associated with the identity";
+                      description = "the private key file associated with the identity";
                     };
                     publicKeyFile = mkOption {
                       type = types.path;
-                      description = "The public key file associated with the identity";
+                      description = "the public key file associated with the identity";
                     };
                     publicKey = mkOption {
                       type = types.str;
                       default = "";
-                      description = "The public key associated with this identity";
+                      description = "the public key associated with this identity";
                     };
                     keyType = mkOption {
                       type = types.enum [
@@ -39,7 +40,7 @@ with lib;
                         "age"
                       ];
                       default = "ssh";
-                      description = "The type of this identity";
+                      description = "the type of this identity";
                     };
                   };
                   config = {

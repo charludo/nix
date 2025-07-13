@@ -11,7 +11,7 @@ let
 in
 {
   options.fail2ban = {
-    enable = mkEnableOption (lib.mdDoc "enable fail2ban config");
+    enable = mkEnableOption "fail2ban config";
 
     doNotBan = mkOption {
       type = types.listOf types.str;

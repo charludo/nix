@@ -9,7 +9,7 @@ let
   cfg = config.graphicalFixes;
 in
 {
-  options.graphicalFixes.enable = mkEnableOption "enable some graphical fixes";
+  options.graphicalFixes.enable = mkEnableOption "some graphical fixes";
 
   config = mkIf cfg.enable {
     environment.sessionVariables = {

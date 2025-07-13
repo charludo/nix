@@ -9,7 +9,7 @@ let
   cfg = config.desktop.firefox;
 in
 {
-  options.desktop.firefox.enable = lib.mkEnableOption "enable Firefox Librewolf";
+  options.desktop.firefox.enable = lib.mkEnableOption "Firefox Librewolf";
   options.desktop.firefox.profileName = lib.mkOption {
     type = lib.types.str;
     description = "name of the profile to use";

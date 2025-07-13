@@ -8,10 +8,19 @@ let
   cfg = config.cli.bitwarden;
 in
 {
-  options.cli.bitwarden.enable = lib.mkEnableOption "enable rbw bitwarden client";
-  options.cli.bitwarden.keyFile = lib.mkOption { type = lib.types.path; };
-  options.cli.bitwarden.email = lib.mkOption { type = lib.types.str; };
-  options.cli.bitwarden.url = lib.mkOption { type = lib.types.str; };
+  options.cli.bitwarden.enable = lib.mkEnableOption "rbw bitwarden client";
+  options.cli.bitwarden.keyFile = lib.mkOption {
+    type = lib.types.path;
+    description = "path to file containing the bitwarden key/password";
+  };
+  options.cli.bitwarden.email = lib.mkOption {
+    type = lib.types.str;
+    description = "email address used for login to bitwarden";
+  };
+  options.cli.bitwarden.url = lib.mkOption {
+    type = lib.types.str;
+    description = "URL of the self-hosted bitwarden/vaultwarden instance";
+  };
 
   config =
     let

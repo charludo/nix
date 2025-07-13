@@ -8,7 +8,7 @@ let
   cfg = config.desktop.thunderbird;
 in
 {
-  options.desktop.thunderbird.enable = lib.mkEnableOption "enable Thunderbird";
+  options.desktop.thunderbird.enable = lib.mkEnableOption "Thunderbird";
   options.desktop.thunderbird.profileName = lib.mkOption {
     type = lib.types.str;
     description = "name of the profile to use";
