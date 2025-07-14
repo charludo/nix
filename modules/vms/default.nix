@@ -212,6 +212,7 @@ in
     ];
     boot.initrd.kernelModules = [ ];
     boot.kernelModules = [ "kvm-amd" ];
+    boot.kernel.sysctl."vm.swappiness" = 0;
     boot.extraModulePackages = [ ];
 
     fileSystems."/" = lib.mkForce {
