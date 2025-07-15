@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   private-settings,
   outputs,
   ...
@@ -71,11 +70,10 @@ in
           whiteLists = {
             ads = [
               "https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt"
-            ];
-            allowed = [
-              (pkgs.writeText "custom-whitelist.txt" ''
-                *.awin1.com
-              '')
+              ''
+                |
+                mydealz.digidip.net
+              ''
             ];
           };
           clientGroupsBlock = {
