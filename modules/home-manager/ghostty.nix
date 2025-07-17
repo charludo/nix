@@ -10,12 +10,26 @@ in
     programs.ghostty = {
       enable = true;
       enableFishIntegration = true;
+      clearDefaultKeybinds = true;
       settings = {
         theme = "custom";
+
+        font-family = [
+          config.fontProfiles.monospace.family
+          config.fontProfiles.emoji.family
+        ];
+        font-size = config.fontProfiles.monospace.size;
+
+        cursor-style = "block";
+
+        window-padding-x = 10;
+        window-padding-y = 10;
+
+        confirm-close-surface = false;
       };
       themes.custom = {
         background = "${palette.base00}";
-        cursor-color = "${palette.base0C}";
+        cursor-color = "${palette.base07}";
         foreground = "${palette.base07}";
         palette = [
           "0=#${palette.base00}"
@@ -35,8 +49,8 @@ in
           "14=#${palette.base0E}"
           "15=#${palette.base0F}"
         ];
-        selection-background = "${palette.base03}";
-        selection-foreground = "${palette.base08}";
+        selection-background = "${palette.base07}";
+        selection-foreground = "${palette.base00}";
       };
     };
   };
