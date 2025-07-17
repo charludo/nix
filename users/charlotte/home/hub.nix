@@ -22,6 +22,7 @@
   cli = {
     netrc.file = config.age.secrets.netrc.path;
     k9s.enable = true;
+    rmpc.enable = true;
   };
 
   fontProfiles.monospace.size = 13;

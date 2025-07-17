@@ -13,6 +13,7 @@
     musescore.enable = true;
     pdfpc.enable = true;
   };
+  cli.rmpc.enable = true;
 
   projects = private-settings.projects;
   nixvim.languages = {

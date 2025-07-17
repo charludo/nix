@@ -9,6 +9,7 @@
   agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
 
   desktop.discord.enable = true;
+  cli.rmpc.enable = true;
   games = {
     eso.enable = true;
     steam.enable = true;

@@ -16,6 +16,7 @@
   cli = {
     netrc.file = config.age.secrets.netrc.path;
     k9s.enable = true;
+    rmpc.enable = true;
   };
   desktop = {
     daw.enable = true;

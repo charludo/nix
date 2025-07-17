@@ -9,16 +9,26 @@ pkgs.writeShellApplication {
   text = ''
     set +o pipefail
     set +o errexit
-    PLAYER="mpv"
+
+    for p in mpd mpv; do
+        if playerctl -l 2>/dev/null | grep -qx "$p"; then
+            status=$(playerctl -p "$p" status 2>/dev/null)
+            case "$status" in
+                Playing|Paused)
+                    PLAYER=$p
+                    break
+                    ;;
+            esac
+        fi
+    done
+
+    if [ -z "$PLAYER" ]; then
+        echo ""
+        exit 0
+    fi
 
     # Function to get player status, title, and progress
     get_player_info() {
-        status=$(playerctl -p "$PLAYER" status 2>/dev/null)
-        if [[ "$status" != "Playing" && "$status" != "Paused" ]]; then
-            echo ""
-            return
-        fi
-
         title=$(playerctl -p "$PLAYER" metadata --format "{{title}} ( {{duration(position)}} / {{duration(mpris:length)}} )")
         position=$(playerctl -p "$PLAYER" metadata --format "{{position}}")
         length=$(playerctl -p "$PLAYER" metadata --format "{{mpris:length}}")
@@ -69,6 +79,5 @@ pkgs.writeShellApplication {
             echo "Player $action"
         fi
     fi
-
   '';
 }
