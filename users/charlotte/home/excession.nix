@@ -8,14 +8,13 @@
   home.hostname = "excession";
   agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
 
-  desktop = {
-    alacritty.fontSize = 13;
-    discord.enable = true;
-  };
+  desktop.discord.enable = true;
   games = {
     eso.enable = true;
     steam.enable = true;
   };
+
+  fontProfiles.monospace.size = 13;
 
   wayland.windowManager.hyprland.settings = {
     exec = [

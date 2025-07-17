@@ -1,9 +1,4 @@
-{
-  lib,
-  config,
-  pkgs,
-  ...
-}:
+{ lib, config, ... }:
 
 let
   mkFontOption = kind: {
@@ -19,6 +14,12 @@ let
       description = "Package for ${kind} font profile";
       example = "pkgs.fira-code";
     };
+    size = lib.mkOption {
+      type = lib.types.int;
+      default = 11;
+      description = "Font size ${kind} font profile";
+    };
+
   };
   cfg = config.fontProfiles;
 in
@@ -27,6 +28,7 @@ in
     enable = lib.mkEnableOption "font profiles";
     monospace = mkFontOption "monospace";
     regular = mkFontOption "regular";
+    emoji = mkFontOption "emoji";
   };
 
   config = lib.mkIf cfg.enable {
@@ -35,10 +37,10 @@ in
     home.packages = [
       cfg.monospace.package
       cfg.regular.package
-      pkgs.noto-fonts-color-emoji
+      cfg.emoji.package
     ];
 
     gtk.font.name = cfg.regular.family;
-    gtk.font.size = 11;
+    gtk.font.size = cfg.regular.size;
   };
 }

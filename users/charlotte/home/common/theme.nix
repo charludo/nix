@@ -15,10 +15,15 @@
     monospace = {
       family = "GeistMono Nerd Font";
       package = pkgs.nerd-fonts.geist-mono;
+      size = lib.mkDefault 14;
     };
     regular = {
       family = "Cantarell";
       package = pkgs.cantarell-fonts;
+    };
+    emoji = {
+      family = "Noto Color Emoji";
+      package = pkgs.noto-fonts-color-emoji;
     };
   };
 

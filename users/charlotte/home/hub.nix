@@ -14,7 +14,6 @@
   agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
 
   desktop = {
-    alacritty.fontSize = 13;
     darktable.enable = true;
     discord.enable = true;
     musescore.enable = true;
@@ -24,6 +23,8 @@
     netrc.file = config.age.secrets.netrc.path;
     k9s.enable = true;
   };
+
+  fontProfiles.monospace.size = 13;
 
   home.packages = with pkgs; [
     teams-for-linux
