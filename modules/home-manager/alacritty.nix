@@ -5,11 +5,6 @@ let
 in
 {
   options.desktop.alacritty.enable = lib.mkEnableOption "alacritty terminal emulator";
-  options.desktop.alacritty.fontSize = lib.mkOption {
-    type = lib.types.int;
-    default = 14;
-    description = "terminal font size";
-  };
 
   config = lib.mkIf cfg.enable {
 
@@ -17,7 +12,7 @@ in
       enable = true;
       settings = {
         font = {
-          size = cfg.fontSize;
+          size = config.fontProfiles.monospace.size;
           bold.family = "${config.fontProfiles.monospace.family}";
           bold.style = "Bold";
           normal.family = "${config.fontProfiles.monospace.family}";
