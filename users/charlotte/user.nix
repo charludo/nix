@@ -10,6 +10,7 @@ let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
+  age.secrets.charlotte-ssh.rekeyFile = secrets.charlotte-ssh;
   age.secrets.charlotte-password.rekeyFile = secrets.charlotte-password;
   age.secrets.yubikey-diziet-ssh.rekeyFile = secrets.yubikey-diziet-ssh;
   age.secrets.yubikey-perostek-ssh.rekeyFile = secrets.yubikey-perostek-ssh;
@@ -35,7 +36,10 @@ in
       ];
 
     identities = {
-      charlotte.publicKeyFile = ./keys/ssh.pub;
+      charlotte = {
+        publicKeyFile = ./keys/ssh.pub;
+        privateKeyFile = config.age.secrets.charlotte-ssh.path;
+      };
 
       diziet = {
         publicKeyFile = ./keys/diziet_ssh.pub;
