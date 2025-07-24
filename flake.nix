@@ -46,7 +46,6 @@
     nix-colors.url = "github:misterio77/nix-colors";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.4.1";
     musnix.url = "github:musnix/musnix";
-    conduwuit.url = "github:girlbossceo/conduwuit";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     personal-site.url = "git+ssh://git@github.com/charludo/personal-site";

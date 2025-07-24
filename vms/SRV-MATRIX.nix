@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   pkgs,
   private-settings,
@@ -19,19 +18,18 @@ in
     hardware.storage = "64G";
 
     networking.nameservers = [ "192.168.30.13" ];
-    networking.openPorts.tcp = config.services.conduwuit.settings.global.port;
+    networking.openPorts.tcp = config.services.matrix-continuwuity.settings.global.port;
   };
 
   age.secrets.turn = {
     rekeyFile = secrets.gsv-turn;
-    owner = config.services.conduwuit.user;
+    owner = config.services.matrix-continuwuity.user;
   };
 
-  services.conduwuit = {
+  services.matrix-continuwuity = {
     enable = true;
-    package = inputs.conduwuit.outputs.packages."x86_64-linux".default;
     settings.global = rec {
-      allow_check_for_updates = false;
+      allow_announcements_check = false;
       allow_encryption = true;
       allow_registration = false;
       allow_federation = false;
@@ -60,16 +58,16 @@ in
   nas.backup.enable = true;
   environment.systemPackages =
     let
-      restore-conduwuit = pkgs.writeShellApplication {
-        name = "restore-conduwuit";
+      restore-continuwuity = pkgs.writeShellApplication {
+        name = "restore-continuwuity";
         runtimeInputs = [ pkgs.rsync ];
         text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.conduwuit.user}:${config.services.conduwuit.group} ${config.nas.backup.stateLocation}/matrix/ ${config.services.conduwuit.settings.global.database_path}
+          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.matrix-continuwuity.user}:${config.services.matrix-continuwuity.group} ${config.nas.backup.stateLocation}/matrix/ ${config.services.matrix-continuwuity.settings.global.database_path}
         '';
       };
     in
     [
-      restore-conduwuit
+      restore-continuwuity
       pkgs.rsync
     ];
   systemd = {
@@ -83,7 +81,7 @@ in
     };
     services."matrix-backup-daily" = {
       script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.conduwuit.settings.global.database_path} ${config.nas.backup.stateLocation}/matrix
+        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.matrix-continuwuity.settings.global.database_path} ${config.nas.backup.stateLocation}/matrix
       '';
       serviceConfig = {
         Type = "oneshot";
