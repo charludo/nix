@@ -19,7 +19,7 @@ in
       };
       proxmox.qemuExtraConf = {
         cpu = "host";
-        balloon = "1";
+        balloon = "0";
         machine = "q35";
       };
 
