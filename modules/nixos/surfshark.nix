@@ -15,7 +15,7 @@ let
     name = "surfshark-config";
     src = pkgs.fetchurl {
       url = "https://github.com/charludo/surfshark-configs/raw/main/Surfshark_Config.zip";
-      sha256 = "sha256-n2cPHCYxXGzTvPHwCjsHVIj3yM/bnCJw0hwwTNXlcQI=";
+      sha256 = "sha256-+wYMw1YD/hEys1fOrHjdHyltyPFd9c7ppVzkarhgn9Q=";
     };
     phases = [ "installPhase" ];
     buildInputs = [
