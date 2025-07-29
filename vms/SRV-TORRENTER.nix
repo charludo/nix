@@ -15,7 +15,7 @@ let
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.lidarr.user}:${config.services.lidarr.group} ${config.nas.backup.stateLocation}/torrenter/lidarr/ ${config.services.lidarr.dataDir}
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.readarr.user}:${config.services.readarr.group} ${config.nas.backup.stateLocation}/torrenter/readarr/ ${config.services.readarr.dataDir}
       ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr ${config.nas.backup.stateLocation}/torrenter/prowlarr/ /var/lib/prowlarr
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.stateLocation}/torrenter/qbittorrent/ ${config.services.qbittorrent.dataDir}
+      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.stateLocation}/torrenter/qbittorrent/ ${config.services.qbittorrent.profileDir}
     '';
   };
 in
@@ -57,7 +57,7 @@ in
       }
       {
         name = "qbittorrent";
-        port = config.services.qbittorrent.port;
+        port = config.services.qbittorrent.webuiPort;
       }
       {
         name = "nzbget";
@@ -110,6 +110,8 @@ in
 
     qbittorrent.enable = true;
     qbittorrent.openFirewall = true;
+    qbittorrent.webuiPort = 8112;
+    qbittorrent.profileDir = "/var/lib/qbittorrent";
 
     nzbget.enable = true;
 
@@ -204,7 +206,7 @@ in
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.lidarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/lidarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/readarr
         ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ ${config.nas.backup.stateLocation}/torrenter/prowlarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/qbittorrent
+        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.profileDir}/ ${config.nas.backup.stateLocation}/torrenter/qbittorrent
       '';
       serviceConfig = {
         Type = "oneshot";
