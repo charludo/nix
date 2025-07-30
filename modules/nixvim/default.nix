@@ -73,7 +73,6 @@
       undofile = true;
 
       updatetime = 250;
-
     };
 
     extraConfigLua = # lua
