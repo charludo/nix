@@ -8,6 +8,7 @@
 let
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
+  permittedInsecure = ../overlays/insecure.nix;
 in
 rec {
   homeModulesForOsConfig = [
@@ -31,6 +32,8 @@ rec {
             inputs.nix-colors.homeManagerModules.colorScheme
             inputs.nixvim.homeManagerModules.nixvim
             inputs.plasma-manager.homeManagerModules.plasma-manager
+
+            permittedInsecure
           ];
         }
       ] ++ (builtins.attrValues outputs.homeModules);
@@ -46,6 +49,8 @@ rec {
           inputs.agenix.nixosModules.default
           inputs.agenix-rekey.nixosModules.default
           inputs.snow.nixosModules.default
+
+          permittedInsecure
         ]
         ++ (builtins.attrValues outputs.nixosModules)
         ++ [ ../hosts/${hostname} ]
@@ -83,6 +88,8 @@ rec {
             ../modules/vms
             ../hosts/common
             ../users/paki/user.nix
+
+            permittedInsecure
           ] ++ (builtins.attrValues outputs.nixosModules);
           specialArgs = {
             inherit
@@ -107,6 +114,8 @@ rec {
           inputs.agenix-rekey.homeManagerModules.default
           inputs.nix-colors.homeManagerModules.colorScheme
           inputs.nixvim.homeManagerModules.nixvim
+
+          permittedInsecure
         ]
         ++ (builtins.attrValues outputs.homeModules)
         ++ [ ../users/${username}/home/${hostname}.nix ]

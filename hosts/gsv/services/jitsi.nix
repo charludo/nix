@@ -91,8 +91,4 @@ in
     owner = "prosody";
   };
   systemd.services.prosody.serviceConfig.EnvironmentFile = config.age.secrets.coturn-env.path;
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "jitsi-meet-1.0.8043"
-  ];
 }
