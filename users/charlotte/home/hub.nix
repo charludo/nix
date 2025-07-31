@@ -16,6 +16,7 @@
   desktop = {
     darktable.enable = true;
     discord.enable = true;
+    fcitx.enable = true;
     musescore.enable = true;
     pdfpc.enable = true;
   };
@@ -31,7 +32,7 @@
     teams-for-linux
     mattermost-desktop
 
-    anki-bin
+    anki
     orca-slicer
     bitwig-studio
 

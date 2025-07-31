@@ -1,4 +1,9 @@
-{ lib, config, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 
 let
   mkFontOption = kind: {
@@ -29,6 +34,7 @@ in
     monospace = mkFontOption "monospace";
     regular = mkFontOption "regular";
     emoji = mkFontOption "emoji";
+    japanese = lib.mkEnableOption "Japanese font support";
   };
 
   config = lib.mkIf cfg.enable {
@@ -38,6 +44,10 @@ in
       cfg.monospace.package
       cfg.regular.package
       cfg.emoji.package
+    ]
+    ++ lib.optionals cfg.japanese [
+      pkgs.noto-fonts-cjk-sans
+      pkgs.noto-fonts-cjk-serif
     ];
 
     gtk.font.name = cfg.regular.family;
