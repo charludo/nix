@@ -71,22 +71,32 @@ in
         value = {
           forceSSL = site.enableSSL;
           enableACME = site.enableSSL;
+          locations."~* \.(jpg|jpeg|png|gif|ico|webp|css|js|woff2?|ttf|eot|svg)$" = {
+            root = "/var/www/${site.name}/public";
+            tryFiles = "$uri $uri/ =404";
+
+            extraConfig = ''
+              access_log off;
+              expires 30d;
+              add_header Cache-Control "public, max-age=2592000, immutable";
+            '';
+          };
+          locations."~* \.html$" = {
+            root = "/var/www/${site.name}/public";
+            tryFiles = "$uri $uri/ =404";
+
+            extraConfig = ''
+              add_header Cache-Control "no-cache, no-store, must-revalidate, proxy-revalidate";
+              add_header Pragma "no-cache";
+              add_header Expires 0;
+            '';
+          };
           locations."/" = {
             root = "/var/www/${site.name}/public";
           };
           extraConfig = ''
             error_page 404 /notfound;
           '';
-          locations."~* \.html$" = {
-            root = "/var/www/${site.name}/public";
-            tryFiles = "$uri $uri/ =404";
-
-            extraConfig = ''
-              add_header Cache-Control "no-cache, no-store, must-revalidate";
-              add_header Pragma "no-cache";
-              add_header Expires 0;
-            '';
-          };
         };
       }) cfg.siteConfigs
     );
