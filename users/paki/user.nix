@@ -13,16 +13,15 @@ in
   users.users.paki = {
     isNormalUser = true;
     shell = pkgs.bash;
-    extraGroups =
-      [
-        "wheel"
-        "networkmanager"
-        "nas"
-      ]
-      ++ ifTheyExist [
-        "docker"
-        "git"
-      ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "nas"
+    ]
+    ++ ifTheyExist [
+      "docker"
+      "git"
+    ];
 
     hashedPasswordFile = config.age.secrets.paki-password.path;
     openssh.authorizedKeys.keys = [

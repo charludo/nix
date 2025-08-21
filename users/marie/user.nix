@@ -11,16 +11,15 @@ in
     isNormalUser = true;
     shell = pkgs.bash;
     initialPassword = "";
-    extraGroups =
-      [
-        "wheel"
-        "networkmanager"
-        "nas"
-      ]
-      ++ ifTheyExist [
-        "docker"
-        "git"
-      ];
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "nas"
+    ]
+    ++ ifTheyExist [
+      "docker"
+      "git"
+    ];
 
     openssh.authorizedKeys.keys = [
       (builtins.readFile ../charlotte/keys/zakalwe_ssh.pub)

@@ -16,8 +16,9 @@
     inputs.agenix.homeManagerModules.default
     inputs.agenix-rekey.homeManagerModules.default
     inputs.nix-colors.homeManagerModules.colorScheme
-    inputs.nixvim.homeManagerModules.nixvim
-  ] ++ (builtins.attrValues outputs.homeModules);
+    inputs.nixvim.homeModules.nixvim
+  ]
+  ++ (builtins.attrValues outputs.homeModules);
   home-manager.extraSpecialArgs = {
     inherit
       inputs

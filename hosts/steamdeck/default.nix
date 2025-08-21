@@ -51,7 +51,8 @@
   networking.hostName = "steamdeck";
   networking.nameservers = [
     "192.168.30.13"
-  ] ++ private-settings.upstreamDNS.ips;
+  ]
+  ++ private-settings.upstreamDNS.ips;
 
   xdg.portal.enable = true;
   xdg.portal.wlr.enable = true;

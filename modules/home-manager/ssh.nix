@@ -43,7 +43,8 @@ in
             COLORTERM = "truecolor";
           };
         };
-      } // lib.helpers.allVMSSHConfigs;
+      }
+      // lib.helpers.allVMSSHConfigs;
     };
   };
 }

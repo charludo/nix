@@ -22,18 +22,17 @@ in
 
     uid = 1000;
     group = "charlotte";
-    extraGroups =
-      [
-        "wheel"
-        "video"
-        "audio"
-        "networkmanager"
-        "nas"
-      ]
-      ++ ifTheyExist [
-        "docker"
-        "git"
-      ];
+    extraGroups = [
+      "wheel"
+      "video"
+      "audio"
+      "networkmanager"
+      "nas"
+    ]
+    ++ ifTheyExist [
+      "docker"
+      "git"
+    ];
 
     identities = {
       charlotte = {

@@ -30,32 +30,32 @@ rec {
             inputs.agenix.homeManagerModules.default
             inputs.agenix-rekey.homeManagerModules.default
             inputs.nix-colors.homeManagerModules.colorScheme
-            inputs.nixvim.homeManagerModules.nixvim
+            inputs.nixvim.homeModules.nixvim
             inputs.plasma-manager.homeManagerModules.plasma-manager
 
             permittedInsecure
           ];
         }
-      ] ++ (builtins.attrValues outputs.homeModules);
+      ]
+      ++ (builtins.attrValues outputs.homeModules);
     }
   ];
 
   nixos = hostname: enableHomeManager: extraModules: {
     name = hostname;
     value = lib.nixosSystem {
-      modules =
-        [
-          outputs.nixosModules.common
-          inputs.agenix.nixosModules.default
-          inputs.agenix-rekey.nixosModules.default
-          inputs.snow.nixosModules.default
+      modules = [
+        outputs.nixosModules.common
+        inputs.agenix.nixosModules.default
+        inputs.agenix-rekey.nixosModules.default
+        inputs.snow.nixosModules.default
 
-          permittedInsecure
-        ]
-        ++ (builtins.attrValues outputs.nixosModules)
-        ++ [ ../hosts/${hostname} ]
-        ++ lib.optionals enableHomeManager homeModulesForOsConfig
-        ++ extraModules;
+        permittedInsecure
+      ]
+      ++ (builtins.attrValues outputs.nixosModules)
+      ++ [ ../hosts/${hostname} ]
+      ++ lib.optionals enableHomeManager homeModulesForOsConfig
+      ++ extraModules;
       specialArgs = {
         inherit
           lib
@@ -90,7 +90,8 @@ rec {
             ../users/paki/user.nix
 
             permittedInsecure
-          ] ++ (builtins.attrValues outputs.nixosModules);
+          ]
+          ++ (builtins.attrValues outputs.nixosModules);
           specialArgs = {
             inherit
               lib
@@ -107,19 +108,18 @@ rec {
   home = username: hostname: extraModules: {
     name = "${username}@${hostname}";
     value = lib.homeManagerConfiguration {
-      modules =
-        [
-          outputs.homeModules.common
-          inputs.agenix.homeManagerModules.default
-          inputs.agenix-rekey.homeManagerModules.default
-          inputs.nix-colors.homeManagerModules.colorScheme
-          inputs.nixvim.homeManagerModules.nixvim
+      modules = [
+        outputs.homeModules.common
+        inputs.agenix.homeManagerModules.default
+        inputs.agenix-rekey.homeManagerModules.default
+        inputs.nix-colors.homeManagerModules.colorScheme
+        inputs.nixvim.homeModules.nixvim
 
-          permittedInsecure
-        ]
-        ++ (builtins.attrValues outputs.homeModules)
-        ++ [ ../users/${username}/home/${hostname}.nix ]
-        ++ extraModules;
+        permittedInsecure
+      ]
+      ++ (builtins.attrValues outputs.homeModules)
+      ++ [ ../users/${username}/home/${hostname}.nix ]
+      ++ extraModules;
       inherit pkgs;
       extraSpecialArgs = {
         inherit

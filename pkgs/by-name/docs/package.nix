@@ -55,36 +55,35 @@ stdenv.mkDerivation {
   buildInputs = [ mdbook ];
   src = ./.;
   name = "docs";
-  buildPhase =
-    ''
-      mkdir -p $out
-    ''
-    + lib.concatStringsSep "\n" (
-      builtins.attrValues (
-        lib.mapAttrs (
-          p: pv:
-          ''
-            mkdir -p options/${p}
-            touch options/${p}.md
-          ''
-          + (lib.concatStringsSep "\n" (
-            builtins.attrValues (
-              lib.mapAttrs (
-                n: v:
-                # bash
-                ''
-                  cat ${v.optionsCommonMark} >> "options/${p}/${n}.md"
-                '') pv
-            )
-          ))
-        ) options
-      )
+  buildPhase = ''
+    mkdir -p $out
+  ''
+  + lib.concatStringsSep "\n" (
+    builtins.attrValues (
+      lib.mapAttrs (
+        p: pv:
+        ''
+          mkdir -p options/${p}
+          touch options/${p}.md
+        ''
+        + (lib.concatStringsSep "\n" (
+          builtins.attrValues (
+            lib.mapAttrs (
+              n: v:
+              # bash
+              ''
+                cat ${v.optionsCommonMark} >> "options/${p}/${n}.md"
+              '') pv
+          )
+        ))
+      ) options
     )
-    + ''
-      substituteInPlace ./SUMMARY.md \
-        --replace-fail "@OPTIONS@" "${nestedSummaries}"
+  )
+  + ''
+    substituteInPlace ./SUMMARY.md \
+      --replace-fail "@OPTIONS@" "${nestedSummaries}"
 
-      mdbook build
-      cp -r ./book/* $out
-    '';
+    mdbook build
+    cp -r ./book/* $out
+  '';
 }

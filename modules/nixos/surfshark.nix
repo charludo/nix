@@ -155,51 +155,50 @@ in
     })
 
     (mkIf cfg.iptables.enable {
-      networking.firewall.extraCommands =
-        ''
-          iptables -A INPUT -s localhost -j ACCEPT
-          iptables -A OUTPUT -d localhost -j ACCEPT
-          iptables -A INPUT -i lo -j ACCEPT
-          iptables -A OUTPUT -o lo -j ACCEPT
+      networking.firewall.extraCommands = ''
+        iptables -A INPUT -s localhost -j ACCEPT
+        iptables -A OUTPUT -d localhost -j ACCEPT
+        iptables -A INPUT -i lo -j ACCEPT
+        iptables -A OUTPUT -o lo -j ACCEPT
 
-          iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
-          iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
+        iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
+        iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
 
-          iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
-          iptables -A INPUT -p udp --sport 1194 -j ACCEPT
-          iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
-          iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+        iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT
+        iptables -A INPUT -p udp --sport 1194 -j ACCEPT
+        iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
+        iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 
-          iptables -A OUTPUT -o tun0 -j ACCEPT
+        iptables -A OUTPUT -o tun0 -j ACCEPT
 
-        ''
-        + lib.concatStringsSep "" (
-          map (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${
-              builtins.toString config.users.groups."${user}".gid
-            } -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
-          '') cfg.iptables.enforceForUsers
-        )
-        + lib.concatStringsSep "" (
-          map (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${
-              builtins.toString config.users.groups."${user}".gid
-            } -d 127.0.0.1 ! -o tun0 -j ACCEPT
-          '') cfg.iptables.enforceForUsers
-        )
-        + lib.concatStringsSep "" (
-          map (user: ''
-            iptables -A OUTPUT -m owner --gid-owner ${
-              builtins.toString config.users.groups."${user}".gid
-            } ! -o tun0 -j REJECT
-          '') cfg.iptables.enforceForUsers
-        )
-        + ''
+      ''
+      + lib.concatStringsSep "" (
+        map (user: ''
+          iptables -A OUTPUT -m owner --gid-owner ${
+            builtins.toString config.users.groups."${user}".gid
+          } -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
+        '') cfg.iptables.enforceForUsers
+      )
+      + lib.concatStringsSep "" (
+        map (user: ''
+          iptables -A OUTPUT -m owner --gid-owner ${
+            builtins.toString config.users.groups."${user}".gid
+          } -d 127.0.0.1 ! -o tun0 -j ACCEPT
+        '') cfg.iptables.enforceForUsers
+      )
+      + lib.concatStringsSep "" (
+        map (user: ''
+          iptables -A OUTPUT -m owner --gid-owner ${
+            builtins.toString config.users.groups."${user}".gid
+          } ! -o tun0 -j REJECT
+        '') cfg.iptables.enforceForUsers
+      )
+      + ''
 
-          iptables -P INPUT DROP
-          iptables -P FORWARD DROP
-          iptables -P OUTPUT DROP
-        '';
+        iptables -P INPUT DROP
+        iptables -P FORWARD DROP
+        iptables -P OUTPUT DROP
+      '';
     })
   ]);
 }
