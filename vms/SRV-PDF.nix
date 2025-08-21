@@ -1,4 +1,4 @@
-{ pkgs, private-settings, ... }:
+{ private-settings, ... }:
 {
   vm = {
     id = 2202;
@@ -12,15 +12,10 @@
     networking.openPorts.udp = [ 80 ];
   };
 
-  environment.systemPackages = [ pkgs.stirling-pdf ];
-  systemd.services.stirling-pdf = {
-    description = "Stirling PDF Service";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.stirling-pdf}/bin/Stirling-PDF";
-      Restart = "always";
-      RestartSec = "20s";
+  services.stirling-pdf = {
+    enable = true;
+    environment = {
+      SERVER_PORT = 8080;
     };
   };
   services.nginx = {
