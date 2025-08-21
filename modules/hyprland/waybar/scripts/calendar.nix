@@ -1,5 +1,5 @@
 { config, pkgs, ... }:
-pkgs.writers.writePython3Bin "waybar-calendar" { libraries = [ pkgs.python312Packages.caldav ]; } # python
+pkgs.writers.writePython3Bin "waybar-calendar" { libraries = [ pkgs.python313Packages.caldav ]; } # python
   ''
     from caldav import DAVClient
     from datetime import datetime, timedelta, timezone

@@ -34,7 +34,7 @@ in
 
   systemd.services.radicale.environment.PYTHONPATH =
     let
-      python = pkgs.python312.withPackages (
+      python = pkgs.python313.withPackages (
         pkgs: with pkgs; [
           radicale_infcloud
           pytz
@@ -42,7 +42,7 @@ in
         ]
       );
     in
-    "${python}/${pkgs.python312.sitePackages}";
+    "${python}/${pkgs.python313.sitePackages}";
 
   services.nginx = {
     virtualHosts = {

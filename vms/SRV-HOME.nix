@@ -9,7 +9,7 @@ let
 
 
         app = Flask(__name__)
-        cmd = "${pkgs.python312Packages.aiopylgtv}"
+        cmd = "${pkgs.python313Packages.aiopylgtv}"
         cmd = f"{cmd}/bin/aiopylgtvcommand"
 
 
@@ -95,7 +95,7 @@ in
   };
 
   environment.systemPackages = [
-    pkgs.python312Packages.aiopylgtv
+    pkgs.python313Packages.aiopylgtv
     lgtv
   ];
 

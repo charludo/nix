@@ -120,7 +120,7 @@ in
   nixpkgs.overlays = [
     (_final: prev: {
       nzbget = prev.nzbget.overrideAttrs (old: {
-        buildInputs = old.buildInputs ++ [ pkgs.python311 ];
+        buildInputs = old.buildInputs ++ [ pkgs.python313 ];
       });
     })
   ];
@@ -166,7 +166,7 @@ in
       "sys-devices-virtual-net-tun0.device"
       "media-NAS.mount"
     ];
-    services.nzbget.path = [ pkgs.python311 ];
+    services.nzbget.path = [ pkgs.python313 ];
     services.qbittorrent.bindsTo = [
       "sys-devices-virtual-net-tun0.device"
       "media-NAS.mount"
