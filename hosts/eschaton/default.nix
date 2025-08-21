@@ -45,7 +45,8 @@
   networking.hostName = "eschaton";
   networking.nameservers = [
     "192.168.30.13"
-  ] ++ private-settings.upstreamDNS.ips;
+  ]
+  ++ private-settings.upstreamDNS.ips;
 
   boot.kernelParams = [
     "video=eDP-1:2880x1800@59.88"
@@ -53,8 +54,8 @@
   ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  boot.initrd.luks.devices."luks-ae3712c5-9e36-4590-9bed-8529a71859d1".device =
-    "/dev/disk/by-uuid/ae3712c5-9e36-4590-9bed-8529a71859d1";
+  boot.initrd.luks.devices."luks-4e8fd9e1-3165-4997-baa6-2d0ba66dca37".device =
+    "/dev/disk/by-uuid/4e8fd9e1-3165-4997-baa6-2d0ba66dca37";
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.perostek.sudoFile;
 
