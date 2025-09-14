@@ -27,7 +27,7 @@ in
   };
 
   "custom/weather" = {
-    exec = "${curl} \"wttr.in/pdx?format=%c%t\"";
+    exec = "${curl} \"wttr.in/${private-settings.locations.home}?format=%c%t\"";
     restart-interval = 600;
     on-click = "${config.home.sessionVariables.TERMINAL} --hold -e ${curl} wttr.in";
   };
@@ -192,12 +192,9 @@ in
 
   "network#lan" = {
     interface = "eno1";
-    format = "{ifname}";
-    format-ethernet = "󰌗  {ipaddr}/{cidr}";
-    format-disconnected = "";
-    tooltip-format = "{ifname} via {gwaddr} 󰊗";
-    tooltip-format-wifi = "{essid} ({signalStrength}%) ";
-    tooltip-format-ethernet = "{ifname} ";
+    format = "󰌗   {ipaddr}/{cidr}";
+    format-disconnected = "󰲛   {ifname}";
+    tooltip-format = "   {ifname}";
     tooltip-format-disconnected = "Disconnected";
     max-length = 50;
   };
