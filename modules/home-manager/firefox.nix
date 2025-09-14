@@ -19,6 +19,8 @@ in
     programs.librewolf = {
       enable = true;
       pkcs11Modules = [ pkgs.eid-mw ];
+      nativeMessagingHosts = [ pkgs.web-eid-app ];
+      policies.SecurityDevices.p11-kit-proxy = "${pkgs.p11-kit}/lib/p11-kit-proxy.so";
       profiles.${cfg.profileName} = {
         extensions.packages = with pkgs.inputs.firefox-addons; [
           # bitwarden

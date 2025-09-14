@@ -17,5 +17,9 @@ in
   config = mkIf cfg.enable {
     services.pcscd.enable = true;
     environment.systemPackages = [ pkgs.eid-mw ];
+
+    environment.etc."pkcs11/modules/opensc-pkcs11".text = ''
+      module: ${pkgs.opensc}/lib/opensc-pkcs11.so
+    '';
   };
 }
