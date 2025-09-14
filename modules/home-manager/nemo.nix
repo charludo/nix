@@ -16,6 +16,18 @@ in
       nemo-fileroller
     ];
 
+    dconf = {
+      settings = {
+        "org/cinnamon/desktop/applications/terminal" = {
+          exec = "alacritty";
+          exec-arg = "-e fish";
+        };
+        "org/nemo/preferences" = {
+          thumbnail-limit = "104857600";
+        };
+      };
+    };
+
     xdg.desktopEntries.nemo = {
       name = "Nemo";
       type = "Application";
