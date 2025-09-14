@@ -48,7 +48,6 @@
     musnix.url = "github:musnix/musnix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    personal-site.url = "git+ssh://git@github.com/charludo/personal-site";
     blog-site.url = "git+ssh://git@github.com/charludo/barely-website";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
