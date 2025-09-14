@@ -8,6 +8,7 @@
     ./latex.nix
     ./python.nix
     ./rust.nix
+    ./sql.nix
     ./webdev.nix
   ];
   plugins.lsp.servers = {

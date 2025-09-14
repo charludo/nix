@@ -61,6 +61,7 @@
     go.enable = true;
     python.enable = true;
     rust.enable = true;
+    sql.enable = true;
     webdev.enable = true;
   };
 
