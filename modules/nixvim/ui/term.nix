@@ -103,7 +103,16 @@ in
         api.nvim_win_set_buf(win, opts.buf)
       end
 
+      local function move_out_of_nvimtree()
+        local bufname = vim.api.nvim_buf_get_name(0)
+        if bufname:match("NvimTree_") then
+          vim.cmd("wincmd l")
+        end
+      end
+
       local function chadterm_create(opts)
+        move_out_of_nvimtree()
+
         local buf_exists = opts.buf
         opts.buf = opts.buf or vim.api.nvim_create_buf(false, true)
 
