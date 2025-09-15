@@ -31,7 +31,7 @@ rec {
             inputs.agenix-rekey.homeManagerModules.default
             inputs.nix-colors.homeManagerModules.colorScheme
             inputs.nixvim.homeModules.nixvim
-            inputs.plasma-manager.homeManagerModules.plasma-manager
+            inputs.plasma-manager.homeModules.plasma-manager
 
             permittedInsecure
           ];

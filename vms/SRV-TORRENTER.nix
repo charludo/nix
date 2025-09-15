@@ -77,6 +77,8 @@ in
       ];
     };
   };
+  # In the nixpkgs module, qbittorrent is not assigned a gid, which is required for our iptables rules.
+  users.groups.${config.services.qbittorrent.group}.gid = 84;
 
   networking.firewall.interfaces.enp6s18.allowedTCPPorts = [ 6789 ]; # NZBGet web interface
   networking.interfaces.enp6s18.ipv4.routes = [

@@ -8,7 +8,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.ssh = {
       enable = true;
-      addKeysToAgent = "yes";
+      enableDefaultConfig = false;
       matchBlocks = {
         proxmox-gpu = {
           hostname = "192.168.30.14";
@@ -36,12 +36,23 @@ in
             "LogLevel" = "quiet";
           };
         "*" = {
+          addKeysToAgent = "yes";
           identityFile = [ "~/.ssh/id_ed25519" ];
           identitiesOnly = true;
           setEnv = {
             TERM = "xterm-256color";
             COLORTERM = "truecolor";
           };
+
+          forwardAgent = false;
+          compression = false;
+          serverAliveInterval = 0;
+          serverAliveCountMax = 3;
+          hashKnownHosts = false;
+          userKnownHostsFile = "~/.ssh/known_hosts";
+          controlMaster = "no";
+          controlPath = "~/.ssh/master-%r@%n:%p";
+          controlPersist = "no";
         };
       }
       // lib.helpers.allVMSSHConfigs;

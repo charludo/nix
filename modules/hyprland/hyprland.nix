@@ -81,11 +81,6 @@
           "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
         ];
 
-        gestures = {
-          workspace_swipe = true;
-          workspace_swipe_fingers = 3;
-        };
-
         misc = {
           disable_hyprland_logo = true;
           disable_splash_rendering = true;
@@ -118,6 +113,10 @@
             disable_while_typing = false;
           };
         };
+
+        gesture = [
+          "3, horizontal, workspace"
+        ];
 
         monitor =
           map (
@@ -166,7 +165,7 @@
             ];
             terminal = config.home.sessionVariables.TERMINAL;
 
-            rofi = "${pkgs.rofi-wayland.override { plugins = [ pkgs.rofi-emoji-wayland ]; }}/bin/rofi";
+            rofi = "${pkgs.rofi.override { plugins = [ pkgs.rofi-emoji ]; }}/bin/rofi";
             rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";

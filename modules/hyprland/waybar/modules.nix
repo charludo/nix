@@ -6,7 +6,7 @@
 }:
 let
   curl = "${pkgs.curl}/bin/curl";
-  rofi = "${pkgs.rofi-wayland}/bin/rofi";
+  rofi = "${pkgs.rofi}/bin/rofi";
   librewolf = "${pkgs.librewolf}/bin/librewolf";
   thunderbird = "${pkgs.thunderbird}/bin/thunderbird";
   pavucontrol = "${pkgs.pavucontrol}/bin/pavucontrol";

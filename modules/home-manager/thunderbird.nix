@@ -33,12 +33,13 @@ in
           "font.name.serif.x-western" = "${config.fontProfiles.regular.family}";
           "font.name.sans-serif.x-western" = "${config.fontProfiles.regular.family}";
           "mailnews.start_page.enabled" = false;
+          "mail.chat.enabled" = false;
           "mail.spam.markAsReadOnSpam" = true;
           "mail.openpgp.allow_external_gnupg" = true;
           "mail.openpgp.fetch_pubkeys_from_gnupg" = true;
           "mailnews.default_news_view_flags" = 0;
           "mailnews.default_view_flags" = 0;
-          "toolkit.legacyUserProfileCustomizations.stylesheets" = false; # disables the userChorme below, since it's currently not in use
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true; # enable the userChrome below
           "extensions.webextensions.uuids" =
             "{\"default-theme@mozilla.org\":\"2115b3dd-e066-41ea-844d-2c5019d120d9\",\"{a62ef8ec-5fdc-40c2-873c-223b8a6925cc}\":\"ac20100e-09a8-418a-8a8d-53387f57cc59\"}";
           "extensions.webextensions.ExtensionStorageIDB.migrated.{a62ef8ec-5fdc-40c2-873c-223b8a6925cc}" =
@@ -47,8 +48,11 @@ in
         };
         userChrome = # css
           ''
-            ul li ul li ul li div.container span.folder-count-badge.unread-count {
-              display:none !important;
+            /* ul li ul li ul li div.container span.folder-count-badge.unread-count { */
+              /* display:none !important; */
+            /* } */
+            #chatButton, #tasksButton, #today-pane-panel {
+              display:none;
             }
           '';
       };

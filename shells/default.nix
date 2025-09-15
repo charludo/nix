@@ -1,5 +1,6 @@
 {
   age,
+  agenix-rekey,
   openssh,
   nixfmt-rfc-style,
   deadnix,
@@ -10,6 +11,7 @@
 mkShell {
   nativeBuildInputs = [
     age
+    agenix-rekey
     openssh
 
     # used by nix fmt
