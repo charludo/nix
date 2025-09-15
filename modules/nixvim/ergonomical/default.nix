@@ -140,6 +140,68 @@
       };
     }
 
+    # indents
+    {
+      mode = [ "v" ];
+      key = "<C-S-.>";
+      action = ">gv";
+      options = {
+        desc = "indent selection";
+        noremap = true;
+        silent = true;
+      };
+    }
+    {
+      mode = [ "v" ];
+      key = "<C-S-,>";
+      action = "<gv";
+      options = {
+        desc = "unindent selection";
+        noremap = true;
+        silent = true;
+      };
+    }
+    {
+      mode = [ "n" ];
+      key = "<C-S-.>";
+      action = ">>";
+      options = {
+        desc = "indent current line";
+        noremap = true;
+        silent = true;
+      };
+    }
+    {
+      mode = [ "n" ];
+      key = "<C-S-,>";
+      action = "<<";
+      options = {
+        desc = "unindent current line";
+        noremap = true;
+        silent = true;
+      };
+    }
+    {
+      mode = [ "i" ];
+      key = "<C-S-.>";
+      action = "<Esc>>>a";
+      options = {
+        desc = "indent current line (insert mode)";
+        noremap = true;
+        silent = true;
+      };
+    }
+    {
+      mode = [ "i" ];
+      key = "<C-S-,>";
+      action = "<Esc><<a";
+      options = {
+        desc = "unindent current line (insert mode)";
+        noremap = true;
+        silent = true;
+      };
+    }
+
     # window movements & sizing
     {
       mode = [ "n" ];
