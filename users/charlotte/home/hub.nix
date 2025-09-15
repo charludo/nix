@@ -34,7 +34,7 @@
 
     anki
     orca-slicer
-    bitwig-studio
+    # bitwig-studio
 
     ours.nsenter
   ];
