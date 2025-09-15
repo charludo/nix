@@ -18,6 +18,7 @@ in
 
     listening-ips = [ "0.0.0.0" ];
     listening-port = 3478;
+    tls-listening-port = 3479;
 
     relay-ips = [ gsv.ip ];
     min-port = 49152;
@@ -31,8 +32,6 @@ in
     use-auth-secret = true;
     static-auth-secret-file = config.age.secrets.coturn.path;
 
-    no-dtls = true;
-    no-tls = true;
     extraConfig = ''
       no-multicast-peers
       total-quota=50
@@ -46,8 +45,14 @@ in
     };
   };
 
-  networking.firewall.allowedTCPPorts = [ config.services.coturn.listening-port ];
-  networking.firewall.allowedUDPPorts = [ config.services.coturn.listening-port ];
+  networking.firewall.allowedTCPPorts = [
+    config.services.coturn.listening-port
+    config.services.coturn.tls-listening-port
+  ];
+  networking.firewall.allowedUDPPorts = [
+    config.services.coturn.listening-port
+    config.services.coturn.tls-listening-port
+  ];
 
   networking.firewall.allowedUDPPortRanges = [
     {

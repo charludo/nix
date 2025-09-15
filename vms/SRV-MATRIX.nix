@@ -3,6 +3,7 @@
   pkgs,
   private-settings,
   secrets,
+  outputs,
   ...
 }:
 let
@@ -39,10 +40,16 @@ in
       address = [ "0.0.0.0" ];
       port = [ 6167 ];
 
-      turn_uris = [
-        "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
-        "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
-      ];
+      turn_uris =
+        let
+          coturn = outputs.nixosConfigurations.gsv.config.services.coturn;
+        in
+        [
+          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}?transport=udp"
+          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}?transport=tcp"
+          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"
+          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"
+        ];
       turn_secret_file = config.age.secrets.turn.path;
 
       new_user_displayname_suffix = "";

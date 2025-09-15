@@ -31,20 +31,16 @@ in
       useStunTurn = true;
       p2p = {
         useStunTurn = true;
-        stunServers = [
-          {
-            urls = "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp";
-          }
-          {
-            urls = "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp";
-          }
-          {
-            urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp";
-          }
-          {
-            urls = "stun:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp";
-          }
-        ];
+        stunServers =
+          let
+            coturn = config.services.coturn;
+          in
+          [
+            { urls = "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"; }
+            { urls = "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"; }
+            { urls = "stun:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"; }
+            { urls = "stun:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"; }
+          ];
         iceTransportPolicy = "relay";
       };
       desktopSharingFrameRate = {
