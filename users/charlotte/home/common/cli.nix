@@ -55,6 +55,7 @@ in
   };
   home.activation = {
     linkSshKey = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      [ -f ${config.age.secrets.charlotte-ssh.path} ] || exit 0
       ln -sf ${config.age.secrets.charlotte-ssh.path} ${config.home.homeDirectory}/.ssh/id_charlotte
       chmod 600 ${config.home.homeDirectory}/.ssh/id_charlotte
     '';
