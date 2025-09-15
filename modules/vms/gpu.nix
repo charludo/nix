@@ -18,7 +18,6 @@ in
         virtio0 = "vm_datastore_local_gpu:vm-${builtins.toString config.vm.id}-disk-0";
       };
       proxmox.qemuExtraConf = {
-        cpu = "host";
         balloon = "0";
         machine = "q35";
       };

@@ -130,6 +130,7 @@ in
     proxmox.cloudInit.enable = false;
     proxmox.partitionTableType = lib.mkDefault "efi";
     proxmox.qemuExtraConf = {
+      cpu = "host";
       ide2 = lib.mkForce "none,media=cdrom";
       kvm = 1;
     };
