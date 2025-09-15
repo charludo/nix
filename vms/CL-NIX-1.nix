@@ -18,7 +18,7 @@
     inputs.agenix-rekey.homeManagerModules.default
     inputs.nix-colors.homeManagerModules.colorScheme
     inputs.nixvim.homeModules.nixvim
-    inputs.plasma-manager.homeManagerModules.plasma-manager
+    inputs.plasma-manager.homeModules.plasma-manager
   ]
   ++ (builtins.attrValues outputs.homeModules);
   home-manager.extraSpecialArgs = {
@@ -47,9 +47,9 @@
 
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  services.xserver.desktopManager.plasma6.enable = true;
 
-  environment.plasma5.excludePackages = with pkgs.libsForQt5; [
+  environment.plasma6.excludePackages = with pkgs.kdePackages; [
     plasma-browser-integration
   ];
 

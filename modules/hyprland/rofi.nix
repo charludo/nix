@@ -367,19 +367,18 @@ in
 
     pkgs.cliphist
     pkgs.rofi-rbw
-    pkgs.rofi-emoji-wayland
+    pkgs.rofi-emoji
     pkgs.rofi-systemd
     pkgs.rofi-power-menu
   ];
 
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
     font = "${config.fontProfiles.regular.family} 13";
     location = "center";
     plugins = [
       pkgs.rofi-power-menu
-      pkgs.rofi-emoji-wayland
+      pkgs.rofi-emoji
     ];
     terminal = "${config.home.sessionVariables.TERMINAL}";
     theme = rofi-theme;

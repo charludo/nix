@@ -63,6 +63,7 @@
         inherit system;
         overlays = [
           (import ./overlays/nixpkgs.nix { inherit inputs outputs; })
+          inputs.agenix-rekey.overlays.default
         ];
       };
       inherit (pkgs) lib;
@@ -104,8 +105,8 @@
         (lib.mkConfigs.home "charlotte" "mallorca" [ ])
 
         (lib.mkConfigs.home "charlotte" "CL-ROU" [ ])
-        (lib.mkConfigs.home "marie" "CL-NIX-1" [ inputs.plasma-manager.homeManagerModules.plasma-manager ])
-        (lib.mkConfigs.home "marie" "CL-NIX-3" [ inputs.plasma-manager.homeManagerModules.plasma-manager ])
+        (lib.mkConfigs.home "marie" "CL-NIX-1" [ inputs.plasma-manager.homeModules.plasma-manager ])
+        (lib.mkConfigs.home "marie" "CL-NIX-3" [ inputs.plasma-manager.homeModules.plasma-manager ])
       ];
 
       packages.${system} = pkgs.ours;

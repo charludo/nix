@@ -10,7 +10,7 @@
       lookAndFeel = "org.kde.breezedark.desktop";
       cursor.theme = "Bibata-Modern-Ice";
       iconTheme = "Papirus-Dark";
-      wallpaper = "${pkgs.libsForQt5.plasma-workspace-wallpapers}/share/wallpapers/summer_1am/contents/images/1080x1920.jpg";
+      wallpaper = "${pkgs.kdePackages.plasma-workspace-wallpapers}/share/wallpapers/summer_1am/contents/images/1080x1920.jpg";
     };
 
     panels = [
