@@ -30,6 +30,21 @@
   nas.backup.enable = true;
   nas.extraUsers = [ config.services.jellyfin.user ];
 
+  nixpkgs.overlays = [
+    (_final: prev: {
+      jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
+        # Exact version of ffmpeg_* depends on what jellyfin-ffmpeg package is using.
+        # In 24.11 it's ffmpeg_7-full.
+        # See jellyfin-ffmpeg package source for details
+        ffmpeg_7-full = prev.ffmpeg_7-full.override {
+          withMfx = false;
+          withVpl = true;
+          withUnfree = true;
+        };
+      };
+    })
+  ];
+
   users.users."${config.services.jellyfin.user}".extraGroups = [
     "render"
     "video"

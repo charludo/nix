@@ -23,11 +23,19 @@ in
         machine = "q35";
       };
 
+      boot.kernelModules = lib.mkForce [ "kvm-intel" ];
+
       vm.networking.interface = "enp6s18";
       snow.vm.proxmoxHost = "proxmox-gpu";
     })
 
     (lib.mkIf cfg.hardware.gpu.enable {
+      environment.systemPackages = with pkgs; [
+        pciutils
+        clinfo
+        intel-gpu-tools
+      ];
+
       proxmox.qemuExtraConf.hostpci0 = "0000:00:02,pcie=1";
 
       nixpkgs.config.packageOverrides = pkgs: {
@@ -36,24 +44,14 @@ in
       hardware.graphics = {
         enable = true;
         extraPackages = with pkgs; [
-          intel-ocl
           intel-media-driver
-          intel-vaapi-driver
-          vaapiVdpau
-          libvdpau-va-gl
           intel-compute-runtime
           vpl-gpu-rt
         ];
       };
+      hardware.enableAllFirmware = true;
       hardware.firmware = [ pkgs.linux-firmware ];
       boot.kernelPackages = pkgs.linuxPackages_latest;
-      boot.blacklistedKernelModules = [ "i915" ];
-      boot.kernelParams = [
-        "i915.enable_guc=2"
-        "module_blacklist=i915"
-        "xe.force_probe=7d51"
-        "i915.force_probe=!7d51"
-      ];
     })
   ];
 }
