@@ -187,9 +187,25 @@ in
   services.gitea-actions-runner = {
     package = pkgs.forgejo-actions-runner;
     instances = {
-      nix-runner = {
+      nix-runner-1 = {
         enable = true;
-        name = "nix-runner";
+        name = "nix-runner-1";
+        url = "https://git.${private-settings.domains.home}";
+        tokenFile = config.age.secrets.registration-token.path;
+        labels = [ "nix:docker://gitea-runner-nix" ];
+        settings = {
+          container.options = "-e NIX_BUILD_SHELL=/bin/bash -e NIX_PATH=nixpkgs=${inputs.nixpkgs.outPath} -e PAGER=cat -e PATH=/bin -e SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt -v /nix:/nix -v ${storeDeps}/bin:/bin -v ${storeDeps}/etc/ssl:/etc/ssl --user nixuser";
+          container.network = "host";
+          container.valid_volumes = [
+            "/nix"
+            "${storeDeps}/bin"
+            "${storeDeps}/etc/ssl"
+          ];
+        };
+      };
+      nix-runner-2 = {
+        enable = true;
+        name = "nix-runner-2";
         url = "https://git.${private-settings.domains.home}";
         tokenFile = config.age.secrets.registration-token.path;
         labels = [ "nix:docker://gitea-runner-nix" ];
