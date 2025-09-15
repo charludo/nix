@@ -8,8 +8,8 @@ let
   inherit (private-settings) domains gsv;
 in
 {
-  age.secrets.coturn = {
-    rekeyFile = secrets.gsv-coturn;
+  age.secrets.turn = {
+    rekeyFile = secrets.gsv-turn;
     owner = "turnserver";
   };
   services.coturn = {
@@ -18,7 +18,7 @@ in
 
     listening-ips = [ "0.0.0.0" ];
     listening-port = 3478;
-    tls-listening-port = 3479;
+    tls-listening-port = 3480;
 
     relay-ips = [ gsv.ip ];
     min-port = 49152;
@@ -27,10 +27,12 @@ in
     cert = "${config.security.acme.certs."turn.${domains.blog}".directory}/fullchain.pem";
     pkey = "${config.security.acme.certs."turn.${domains.blog}".directory}/key.pem";
 
+    # no-auth = true;
+    no-tcp = true;
     secure-stun = true;
-    lt-cred-mech = true;
+    # lt-cred-mech = true;
     use-auth-secret = true;
-    static-auth-secret-file = config.age.secrets.coturn.path;
+    static-auth-secret-file = config.age.secrets.turn.path;
 
     extraConfig = ''
       no-multicast-peers
@@ -38,10 +40,19 @@ in
     '';
   };
 
+  # allow coturn to read certificate files
+  users.users.turnserver.extraGroups = [ "nginx" ];
+
   services.nginx.virtualHosts = {
     "turn.${domains.blog}" = {
       forceSSL = true;
       enableACME = true;
+    };
+  };
+
+  security.acme.certs = {
+    "turn.${domains.blog}" = {
+      postRun = "systemctl reload nginx.service; systemctl restart coturn.service";
     };
   };
 
