@@ -58,6 +58,8 @@ in
         gpg.format = "ssh";
         user.signingkey = lib.mkIf (cfg.signingKey.file != null) cfg.signingKey.file;
       };
+
+      aliases.ch = "checkout";
     };
     home.file.".ssh/allowed_signers".text = lib.mkIf (
       cfg.signingKey.pub != null
