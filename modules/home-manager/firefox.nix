@@ -224,6 +224,7 @@ in
           "browser.disableResetPrompt" = true;
           "browser.download.panel.shown" = true;
           "browser.download.useDownloadDir" = false;
+          "browser.fullscreen.autohide" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
           "browser.newtabpage.activity-stream.improvesearch.topSiteSearchShortcuts.havePinned" = false;
           "browser.newtabpage.activity-stream.feeds.topsites" = false;
