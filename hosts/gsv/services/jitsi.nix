@@ -82,9 +82,9 @@ in
     '';
   };
 
-  age.secrets.coturn-env = {
-    rekeyFile = secrets.gsv-coturn-env;
+  age.secrets.turn-env = {
+    rekeyFile = secrets.gsv-turn-env;
     owner = "prosody";
   };
-  systemd.services.prosody.serviceConfig.EnvironmentFile = config.age.secrets.coturn-env.path;
+  systemd.services.prosody.serviceConfig.EnvironmentFile = config.age.secrets.turn-env.path;
 }
