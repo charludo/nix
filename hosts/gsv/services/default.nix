@@ -13,7 +13,6 @@
     ./fail2ban.nix
     ./jitsi.nix
     ./mailserver.nix
-    # ./matrix.nix
     ./minecraft.nix
     ./monit.nix
     ./personal-site.nix
