@@ -32,6 +32,10 @@
         ROOT_URL = "https://${DOMAIN}/";
         HTTP_PORT = 3000;
       };
+      session = {
+        PROVIDER = "db";
+        SESSION_LIFE_TIME = 8640000;
+      };
       cors = {
         ENABLED = true;
         ALLOW_DOMAIN = builtins.concatStringsSep ", " [
