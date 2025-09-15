@@ -16,6 +16,7 @@ in
         "--line-number"
         "--column"
         "--smart-case"
+        "--hidden"
       ];
       prompt_prefix = "   ";
       selection_caret = "  ";
@@ -41,7 +42,13 @@ in
         __raw = # lua
           ''require("telescope.sorters").get_fuzzy_file '';
       };
-      file_ignore_patterns = [ "node_modules" ];
+      file_ignore_patterns = [
+        "node_modules"
+        "target"
+        "^.git/"
+        "^.mypy_cache/"
+        "^__pycache__/"
+      ];
       generic_sorter = {
         __raw = # lua
           ''require("telescope.sorters").get_generic_fuzzy_sorter '';
@@ -105,6 +112,26 @@ in
     extensions.ui-select.enable = true;
   };
 
+  extraConfigLua = # lua
+    ''
+      is_inside_work_tree = {}
+      project_files = function()
+        local opts = { hidden = true }
+
+        local cwd = vim.fn.getcwd()
+        if is_inside_work_tree[cwd] == nil then
+          vim.fn.system("git rev-parse --is-inside-work-tree")
+          is_inside_work_tree[cwd] = vim.v.shell_error == 0
+        end
+
+        if is_inside_work_tree[cwd] then
+          require("telescope.builtin").git_files(opts)
+        else
+          require("telescope.builtin").find_files(opts)
+        end
+      end
+    '';
+
   keymaps = [
     {
       key = "<leader>fw";
@@ -156,7 +183,7 @@ in
     }
     {
       key = "<leader>ff";
-      action = "<cmd>Telescope find_files<cr>";
+      action = "<cmd>lua project_files()<cr>";
       options = {
         desc = "Telescope Find files";
       };
