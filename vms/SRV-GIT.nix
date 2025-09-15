@@ -41,8 +41,17 @@
         ];
       };
       service.DISABLE_REGISTRATION = true;
-      repository = {
-        "signing.DEFAULT_TRUST_MODEL" = "collaboratorcommitter";
+      "repository.signing" = {
+        DEFAULT_TRUST_MODEL = "collaboratorcommitter";
+
+        FORMAT = "ssh";
+        SIGNING_KEY = "/etc/ssh/ssh_host_ed25519_key.pub";
+        SIGNING_NAME = "git.${private-settings.domains.home} Instance";
+        SIGNING_EMAIL = "noreply@git.${private-settings.domains.home}";
+        INITIAL_COMMIT = "always";
+        WIKI = "pubkey";
+        CRUD_ACTIONS = "pubkey, parentsigned";
+        MERGES = "pubkey, commitssigned";
       };
     };
   };
