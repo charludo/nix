@@ -109,7 +109,7 @@ rec {
       one_bg3 = "#${palette.base03}";
       grey = "#${darken palette.base00 (-80)}";
       grey_fg = "#${darken palette.base00 (-120)}";
-      grey_fg2 = "#${darken palette.base00 (-140)}";
+      grey_fg2 = "#${darken palette.base00 (-150)}";
       light_grey = "#${darken palette.base02 (-18)}";
       red = "#${palette.base08}";
       baby_pink = "#${darken palette.base0E 6}";

@@ -61,7 +61,7 @@ in
       link = "MatchWord";
     };
     Comment = {
-      fg = palette.grey_fg;
+      fg = palette.grey_fg2;
       italic = false;
     };
     CursorLineNr = {

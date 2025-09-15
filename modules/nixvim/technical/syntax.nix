@@ -384,7 +384,7 @@ in
     };
 
     "@comment" = {
-      fg = colors.grey_fg;
+      fg = colors.grey_fg2;
     };
     "@comment.todo" = {
       fg = colors.grey;
