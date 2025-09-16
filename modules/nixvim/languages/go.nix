@@ -29,7 +29,10 @@ in
     plugins.lint.lintersByFt.go = [ "golangcilint" ];
     plugins.lint.linters.golangcilint.cmd = lib.getExe pkgs.golangci-lint;
 
-    plugins.neotest.adapters.go.enable = true;
+    plugins.neotest.adapters.go = {
+      enable = true;
+      settings.args = [ "-coverprofile=coverage.out" ];
+    };
     plugins.dap-go.enable = true;
 
     extraPackages = with pkgs; [
