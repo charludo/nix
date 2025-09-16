@@ -26,6 +26,7 @@ in
     extraPackages = [
       pkgs.rustfmt
       pkgs.lldb_20
+      pkgs.cargo-nextest
     ];
 
     plugins.crates.enable = true;

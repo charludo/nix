@@ -1,6 +1,7 @@
 {
   imports = [
     ./cmp.nix
+    ./coverage.nix
     ./dap.nix
     ./formatting.nix
     ./linting.nix

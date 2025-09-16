@@ -33,6 +33,7 @@ in
         ".direnv"
         ".venv"
         ".dmypy.json"
+        "coverage.out"
       ];
       extraConfig = {
         init = {
