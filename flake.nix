@@ -40,15 +40,11 @@
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     firefox-addons.inputs.nixpkgs.follows = "nixpkgs";
 
-    nur.url = "github:nix-community/NUR";
-    nur.inputs.nixpkgs.follows = "nixpkgs";
-
     nix-colors.url = "github:misterio77/nix-colors";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.4.1";
     musnix.url = "github:musnix/musnix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    blog-site.url = "git+ssh://git@github.com/charludo/barely-website";
     eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
     idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
   };
