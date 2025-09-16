@@ -1,9 +1,4 @@
-{
-  pkgs,
-  config,
-  inputs,
-  ...
-}:
+{ pkgs, config, ... }:
 {
   vm = {
     id = 2102;
@@ -62,9 +57,9 @@
   users.groups.${config.services.suwayomi-server.user}.gid = 995;
 
   # https://github.com/NixOS/nixpkgs/issues/332776
-  imports = [ inputs.nur.modules.nixos.default ];
+  # imports = [ inputs.nur.modules.nixos.default ];
   services.flaresolverr.enable = true;
-  services.flaresolverr.package = pkgs.nur.repos.xddxdd.flaresolverr-21hsmw;
+  # services.flaresolverr.package = pkgs.nur.repos.xddxdd.flaresolverr-21hsmw;
 
   services.readarr = {
     enable = true;
