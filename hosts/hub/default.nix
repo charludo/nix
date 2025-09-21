@@ -1,4 +1,10 @@
-{ pkgs, private-settings, ... }:
+{
+  pkgs,
+  private-settings,
+  secrets,
+  config,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -35,6 +41,12 @@
 
   nas.enable = true;
   nas.backup.enable = true;
+
+  age.secrets.wanderer-env.rekeyFile = secrets.wanderer-env;
+  services.wanderer = {
+    enable = true;
+    secretsFile = config.age.secrets.wanderer-env.path;
+  };
 
   environment.systemPackages = [ pkgs.ntfs3g ];
   fileSystems."/media/Media" = {
