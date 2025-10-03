@@ -41,7 +41,7 @@
     enable = true;
     efiSupport = true;
     devices = [ "nodev" ];
-    useOSProber = true;
+    useOSProber = false;
 
     extraEntries = ''
       menuentry "Hub" {
@@ -49,7 +49,7 @@
           chainloader /EFI/NixOS-boot/grubx64.efi
       }
     '';
-    extraEntriesBeforeNixOS = true;
+    extraEntriesBeforeNixOS = false;
   };
 
   boot.initrd.kernelModules = [

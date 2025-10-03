@@ -43,15 +43,15 @@
   };
 
   boot.initrd.luks.devices = {
-    "luks-f6e55a8b-1146-43dc-81c7-7bf5deb78fa6" = {
-      device = "/dev/disk/by-uuid/f6e55a8b-1146-43dc-81c7-7bf5deb78fa6";
+    "luks-1d6679b1-71d2-4ed8-8a84-44a28c388a3f" = {
+      device = "/dev/disk/by-uuid/1d6679b1-71d2-4ed8-8a84-44a28c388a3f";
       keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
       keyFileSize = 4096;
       fallbackToPassword = true;
       bypassWorkqueues = true;
     };
-    "luks-6caf2086-fb9b-4668-b5d8-2f4df815c58b" = {
-      device = "/dev/disk/by-uuid/6caf2086-fb9b-4668-b5d8-2f4df815c58b";
+    "luks-19d023d9-885a-4f40-b03c-775d6ec49388" = {
+      device = "/dev/disk/by-uuid/19d023d9-885a-4f40-b03c-775d6ec49388";
       keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
       keyFileSize = 4096;
       fallbackToPassword = true;
@@ -64,7 +64,15 @@
     enable = true;
     efiSupport = true;
     devices = [ "nodev" ];
-    useOSProber = true;
+    useOSProber = false;
+
+    extraEntries = ''
+      menuentry "Excession" {
+          set root=(hd3,1)
+          chainloader /EFI/NixOS-boot/grubx64.efi
+      }
+    '';
+    extraEntriesBeforeNixOS = false;
   };
 
   boot.initrd.kernelModules = [
