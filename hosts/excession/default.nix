@@ -124,11 +124,9 @@
     enable = true;
     enable32Bit = true;
     extraPackages = [
-      pkgs.amdvlk
       pkgs.rocmPackages.clr.icd
       pkgs.mesa
     ];
-    extraPackages32 = [ pkgs.driversi686Linux.amdvlk ];
   };
 
   services.xserver = {
