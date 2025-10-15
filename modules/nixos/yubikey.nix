@@ -141,7 +141,30 @@ in
         yubikey-down
       ];
 
+    # Restart pcscd every 30mins to prevent "please insert card ..."
     services.pcscd.enable = true;
+    # systemd.services.pcscd.serviceConfig = {
+    # Restart = "always";
+    # RuntimeMaxSec = "1800s";
+    # };
+    systemd.services."restart-pcscd" = {
+      description = "Restart pcscd service";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.systemd}/bin/systemctl restart pcscd.service";
+      };
+    };
+
+    systemd.timers."restart-pcscd" = {
+      description = "Timer to restart pcscd every 30 minutes";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30min";
+        OnUnitActiveSec = "30min";
+        Unit = "restart-pcscd.service";
+      };
+    };
+
     services.udev.packages = [ pkgs.yubikey-personalization ];
     services.yubikey-agent.enable = true;
 
