@@ -1,31 +1,18 @@
-{ private-settings, ... }:
+{ pkgs, ... }:
 {
   vm = {
     id = 2202;
     name = "SRV-PDF";
 
     hardware.cores = 2;
-    hardware.memory = 4096;
-    hardware.storage = "16G";
-
-    networking.openPorts.tcp = [ 80 ];
-    networking.openPorts.udp = [ 80 ];
+    hardware.memory = 1024;
+    hardware.storage = "8G";
   };
 
-  services.stirling-pdf = {
+  services.bentopdf = {
     enable = true;
-    environment = {
-      SERVER_PORT = 8080;
-    };
-  };
-  services.nginx = {
-    enable = true;
-    virtualHosts."pdf.${private-settings.domains.ad}" = {
-      extraConfig = ''
-        client_max_body_size 512M;
-      '';
-      locations."/".proxyPass = "http://localhost:8080";
-    };
+    package = pkgs.ours.bentopdf.overrideAttrs { SIMPLE_MODE = "true"; };
+    openFirewall = true;
   };
 
   system.stateVersion = "23.11";
