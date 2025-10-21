@@ -2,6 +2,7 @@
   config,
   private-settings,
   secrets,
+  lib,
   ...
 }:
 let
@@ -67,8 +68,11 @@ in
   services.jitsi-videobridge = {
     enable = true;
     openFirewall = true;
-    nat.harvesterAddresses = [
-      "turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"
+    nat.harvesterAddresses = lib.mkForce [
+      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}?transport=udp"
+      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}?transport=tcp"
+      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
+      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
     ];
     # config.videobridge.cc.assumed-bandwidth-limit = "1000 Mbps";
   };

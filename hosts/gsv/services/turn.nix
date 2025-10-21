@@ -27,11 +27,10 @@ in
     cert = "${config.security.acme.certs."turn.${domains.blog}".directory}/fullchain.pem";
     pkey = "${config.security.acme.certs."turn.${domains.blog}".directory}/key.pem";
 
-    # no-auth = true;
-    no-tcp = true;
-    secure-stun = true;
-    # lt-cred-mech = true;
-    use-auth-secret = true;
+    # no-auth = true;      # anonymous, is default when lt-cred-mech is false
+    # secure-stun = true; # require auth for STUN
+    lt-cred-mech = true;
+    # use-auth-secret = true;
     static-auth-secret-file = config.age.secrets.turn.path;
 
     extraConfig = ''

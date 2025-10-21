@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   private-settings,
   secrets,
   outputs,
@@ -19,7 +20,11 @@ in
     hardware.storage = "64G";
 
     networking.nameservers = [ "192.168.30.13" ];
-    networking.openPorts.tcp = config.services.matrix-continuwuity.settings.global.port;
+    networking.openPorts.tcp = [
+      443
+      8448
+    ]
+    ++ config.services.matrix-continuwuity.settings.global.port;
   };
 
   age.secrets.turn = {
@@ -34,7 +39,7 @@ in
       allow_encryption = true;
       allow_registration = false;
       allow_federation = false;
-      trusted_servers = [ ];
+      trusted_servers = lib.mkForce [ ];
 
       server_name = "matrix.${domains.home}";
       address = [ "0.0.0.0" ];
