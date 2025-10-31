@@ -171,6 +171,7 @@
     wine
 
     prismlauncher
+    heroic
   ];
   environment.sessionVariables = {
     STEAM_EXTRA_COMPAT_TOOLS_PATH = "/home/charlotte/.steam/root/compatibilitytools.d";
