@@ -41,7 +41,7 @@
       config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
     "${config.xdg.userDirs.documents}".source =
       config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";
-    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Musik";
+    "${config.xdg.userDirs.music}".source = config.lib.file.mkOutOfStoreSymlink "/media/NAS/Musik";
     "${config.xdg.userDirs.pictures}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Fotos";
     "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
   };
