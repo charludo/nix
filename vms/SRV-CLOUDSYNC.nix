@@ -12,16 +12,18 @@
     hardware.cores = 2;
     hardware.memory = 2048;
     hardware.storage = "12G";
-
-    networking.nameservers = [ ];
   };
 
   nas.enable = true;
+  nas.backup.enable = true;
 
   age.secrets.borg.rekeyFile = secrets.cloudsync-borg;
 
   services.borgbackup.jobs.remoteBackup = {
-    paths = [ "${config.nas.location}/CloudSync" ];
+    paths = [
+      "${config.nas.location}/CloudSync"
+      "${config.nas.backup.stateLocation}"
+    ];
     exclude = [
       "'**/node_modules'"
       "'**/.venv'"
