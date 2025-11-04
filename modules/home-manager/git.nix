@@ -35,21 +35,14 @@ in
         ".dmypy.json"
         "coverage.out"
       ];
-      extraConfig = {
-        init = {
-          defaultBranch = "main";
-        };
-        pull = {
-          rebase = true;
-        };
-        push = {
-          autoSetupRemote = true;
-        };
-      };
+      settings = {
+        init.defaultBranch = "main";
+        pull.rebase = true;
+        push.autoSetupRemote = true;
 
-      userName = cfg.user.name;
-      userEmail = cfg.user.email;
-      extraConfig = {
+        user.name = cfg.user.name;
+        user.email = cfg.user.email;
+
         safe = {
           directory = "${config.home.homeDirectory}/Documents";
         };
@@ -58,9 +51,9 @@ in
         gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
         gpg.format = "ssh";
         user.signingkey = lib.mkIf (cfg.signingKey.file != null) cfg.signingKey.file;
-      };
 
-      aliases.ch = "checkout";
+        alias.ch = "checkout";
+      };
     };
     home.file.".ssh/allowed_signers".text = lib.mkIf (
       cfg.signingKey.pub != null

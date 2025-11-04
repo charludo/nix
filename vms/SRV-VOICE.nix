@@ -21,16 +21,7 @@ in
   };
 
   services.wyoming = {
-    openwakeword = {
-      enable = true;
-      preloadModels = [
-        "alexa"
-        "hey_jarvis"
-        "hey_mycroft"
-        "hey_rhasspy"
-        "ok_nabu"
-      ];
-    };
+    openwakeword.enable = true;
 
     piper.servers.default = {
       enable = true;

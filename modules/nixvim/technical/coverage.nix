@@ -5,17 +5,19 @@ in
 {
   plugins.coverage = {
     enable = true;
-    autoReload = true;
-    keymaps = {
-      coverage = "<leader>cc";
-      toggle = "<leader>ct";
-      summary = "<leader>cs";
-    };
+    settings = {
+      autoReload = true;
+      keymaps = {
+        coverage = "<leader>cc";
+        toggle = "<leader>ct";
+        summary = "<leader>cs";
+      };
 
-    highlights = {
-      covered.fg = colors.dark_blue;
-      partial.fg = colors.dark_purple;
-      uncovered.fg = colors.orange;
+      highlights = {
+        covered.fg = colors.dark_blue;
+        partial.fg = colors.dark_purple;
+        uncovered.fg = colors.orange;
+      };
     };
   };
 }
