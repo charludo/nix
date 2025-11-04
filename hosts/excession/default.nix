@@ -165,7 +165,7 @@
   environment.systemPackages = with pkgs; [
     ntfs3g
     mangohud
-    protonup
+    protonup-rs
     lutris
     bottles
     wine
