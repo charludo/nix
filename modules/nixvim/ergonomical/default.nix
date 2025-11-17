@@ -50,9 +50,10 @@
     {
       mode = [ "n" ];
       key = "<leader>gd";
-      action = "<cmd>normal! gd<cr>";
+      action = "*N";
       options = {
         desc = "use nvim's built-in goto definition";
+        remap = true;
       };
     }
     {
