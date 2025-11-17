@@ -32,6 +32,7 @@ in
       shellInit = # fish
         ''
           set fish_greeting
+          _tide_find_and_remove kubectl tide_right_prompt_items
         '';
     };
 
