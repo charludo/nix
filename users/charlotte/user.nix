@@ -32,6 +32,7 @@ in
     ++ ifTheyExist [
       "docker"
       "git"
+      "camera"
     ];
 
     identities = {

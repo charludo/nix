@@ -12,5 +12,6 @@ in
   config = mkIf cfg.enable {
     services.gvfs.enable = true;
     services.udisks2.enable = true;
+    programs.gphoto2.enable = true;
   };
 }
