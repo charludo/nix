@@ -1,4 +1,9 @@
-{ lib, config, ... }:
+{
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.cli.k9s;
@@ -8,6 +13,9 @@ in
   options.cli.k9s.enable = lib.mkEnableOption "themed k9s";
 
   config = lib.mkIf cfg.enable {
+    # required for entering shells, among other things
+    home.packages = [ pkgs.kubectl ];
+
     programs.k9s = {
       enable = true;
       settings.k9s.ui.skin = "nix";
