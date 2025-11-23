@@ -33,6 +33,9 @@
     authentik.url = "github:nix-community/authentik-nix";
     authentik.inputs.nixpkgs.follows = "nixpkgs";
 
+    nix-update-notifier.url = "git+ssh://git@github.com/asymmetric/nixpkgs-update-notifier";
+    nix-update-notifier.inputs.nixpkgs.follows = "nixpkgs";
+
     plasma-manager.url = "github:pjones/plasma-manager";
     plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.inputs.home-manager.follows = "home-manager";

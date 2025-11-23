@@ -724,6 +724,26 @@
         "type": "github"
       }
     },
+    "nix-update-notifier": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1754230056,
+        "narHash": "sha256-KRK+vSd2/YpaNoP/sdbBWSCfJA07yEvnwg+394aHHs8=",
+        "ref": "refs/heads/main",
+        "rev": "bc79a19b1e1a6d716d1d6e5be2f45d4c775be009",
+        "revCount": 238,
+        "type": "git",
+        "url": "ssh://git@github.com/asymmetric/nixpkgs-update-notifier"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/asymmetric/nixpkgs-update-notifier"
+      }
+    },
     "nixlib": {
       "locked": {
         "lastModified": 1736643958,
@@ -1037,6 +1057,7 @@
         "musnix": "musnix",
         "nix-colors": "nix-colors",
         "nix-flatpak": "nix-flatpak",
+        "nix-update-notifier": "nix-update-notifier",
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_4",
