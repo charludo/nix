@@ -54,7 +54,13 @@ in
 
     secrets.remotePublicKey = mkOption {
       type = types.str;
-      description = "the public key of the remote server";
+      description = "the public key of the remote endpoint";
+    };
+
+    endpoint = mkOption {
+      type = types.str;
+      description = "the URL or IP of the remote endpoint";
+      default = private-settings.domains.vpn;
     };
   };
 
@@ -77,7 +83,7 @@ in
 
         peers = [
           {
-            endpoint = "${private-settings.domains.vpn}:${builtins.toString cfg.port}";
+            endpoint = "${cfg.endpoint}:${builtins.toString cfg.port}";
             publicKey = cfg.secrets.remotePublicKey;
             allowedIPs = [ cfg.allowedIPs ];
             persistentKeepalive = 25;
@@ -86,10 +92,10 @@ in
         ];
 
         preSetup = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${pkgs.iproute2}/bin/ip route add $(${pkgs.dig}/bin/dig +short ${private-settings.domains.vpn}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+          ${pkgs.iproute2}/bin/ip route add $(${pkgs.dig}/bin/dig +short ${cfg.endpoint}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
         '';
         postShutdown = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${pkgs.iproute2}/bin/ip route del $(${pkgs.dig}/bin/dig +short ${private-settings.domains.vpn}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+          ${pkgs.iproute2}/bin/ip route del $(${pkgs.dig}/bin/dig +short ${cfg.endpoint}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
         '';
       };
     };
