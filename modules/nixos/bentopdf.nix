@@ -14,14 +14,8 @@ in
 
     package = lib.mkPackageOption pkgs "bentopdf" {
       extraDescription = ''
-        To use the "simple mode" variant of bentopdf, which removes all socials, marketing and explanatory texts, set this option to `pkgs.bentopdf.overrideAttrs { SIMPLE_MODE = "true"; }`.
+        To use the "simple mode" variant of bentopdf, which removes all socials, marketing and explanatory texts, set this option to `pkgs.bentopdf.overrideAttrs { SIMPLE_MODE = true; }`.
       '';
-    };
-
-    domain = lib.mkOption {
-      type = lib.types.str;
-      default = "_";
-      description = "The nginx virtual host name to listen on. Set to `_` to forward all requests to bento.";
     };
 
     host = lib.mkOption {
@@ -32,30 +26,21 @@ in
 
     port = lib.mkOption {
       type = lib.types.port;
-      default = 3000;
-      description = "The port to listen on.";
+      default = 4152;
+      description = "The port nginx is listening on for bentopdf.";
     };
 
     openFirewall = lib.mkOption {
       type = lib.types.bool;
-      default = true;
-      description = "Open the port nginx is listening on for bentopdf.";
-    };
-
-    enableSSL = lib.mkOption {
-      type = lib.types.bool;
       default = false;
-      description = "Enable and enforce SSL. Requires separate ACME setup.";
+      description = "Open the port nginx is listening on for bentopdf.";
     };
   };
 
   config = lib.mkIf cfg.enable {
     services.nginx.enable = true;
 
-    services.nginx.virtualHosts."${cfg.domain}" = {
-      forceSSL = cfg.enableSSL;
-      enableACME = cfg.enableSSL;
-
+    services.nginx.virtualHosts."bentopdf" = {
       listen = [
         {
           addr = cfg.host;
@@ -69,7 +54,6 @@ in
         try_files $uri $uri/ /index.html;
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
-        add_header X-XSS-Protection "1; mode=block" always;
       '';
 
       locations."~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$".extraConfig = ''

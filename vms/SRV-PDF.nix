@@ -13,6 +13,7 @@
     enable = true;
     package = pkgs.ours.bentopdf.overrideAttrs { SIMPLE_MODE = "true"; };
     openFirewall = true;
+    port = 3000;
   };
 
   system.stateVersion = "23.11";
