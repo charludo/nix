@@ -20,6 +20,7 @@
   age.secrets.wanderer-env.rekeyFile = secrets.wanderer-env;
   services.wanderer = {
     enable = true;
+    package = pkgs.ours.wanderer;
     origin = "https://pathfinder.${private-settings.domains.home}";
     openFirewall = true;
     services.pocketbase.url = "http://0.0.0.0:8090";

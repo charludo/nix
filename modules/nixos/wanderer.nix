@@ -180,7 +180,7 @@ in
         '';
       };
 
-      package = mkPackageOption pkgs.ours "wanderer" { };
+      package = mkPackageOption pkgs "wanderer" { };
     };
   };
 

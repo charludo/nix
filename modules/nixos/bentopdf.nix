@@ -12,7 +12,7 @@ in
   options.services.bentopdf = {
     enable = lib.mkEnableOption "bentopdf Privacy First PDF Toolkit";
 
-    package = lib.mkPackageOption pkgs.ours "bentopdf" {
+    package = lib.mkPackageOption pkgs "bentopdf" {
       extraDescription = ''
         To use the "simple mode" variant of bentopdf, which removes all socials, marketing and explanatory texts, set this option to `pkgs.bentopdf.overrideAttrs { SIMPLE_MODE = "true"; }`.
       '';
