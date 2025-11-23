@@ -22,6 +22,8 @@
   services.borgbackup.jobs.remoteBackup = {
     paths = [
       "${config.nas.location}/CloudSync"
+      "${config.nas.location}/Musik"
+      "${config.nas.location}/Paperless"
       "${config.nas.backup.stateLocation}"
     ];
     exclude = [
