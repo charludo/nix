@@ -112,7 +112,7 @@
         remux = pkgs.callPackage ./shells/remux.nix { };
       };
 
-      formatter.${system} = pkgs.treefmt;
+      formatter.${system} = pkgs.nixfmt-tree;
 
       nixvimModules.common = import ./modules/nixvim;
       nixosModules.common = import ./modules/nixos;

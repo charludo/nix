@@ -58,13 +58,14 @@ in
         }
       ];
       storageMode = "local";
-      localStorageDir = ../../.
-      + "/private-settings/secrets/rekeyed/${
-        if (lib.hasAttr "networking" config) then
-          config.networking.hostName
-        else
-          "${config.home.username}-${config.home.hostname}"
-      }";
+      localStorageDir =
+        ../../.
+        + "/private-settings/secrets/rekeyed/${
+          if (lib.hasAttr "networking" config) then
+            config.networking.hostName
+          else
+            "${config.home.username}-${config.home.hostname}"
+        }";
     };
   };
 }

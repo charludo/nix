@@ -8,7 +8,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Check nixfmt formatting
-        run: nixfmt -c */**
+        run: nix fmt -- --ci
       - name: Check for dead code
         run: deadnix -f
       - name: Check ruff linting
