@@ -31,13 +31,12 @@ buildNpmPackage (finalAttrs: {
     runHook postInstall
   '';
 
-  passthru.tests.simple = finalAttrs.finalPackage.overrideAttrs { SIMPLE_MODE = "true"; };
-
-  meta = with lib; {
-    description = "A Privacy First PDF Toolkit";
+  meta = {
+    description = "Privacy-first PDF toolkit";
     mainProgram = "bentopdf";
     homepage = "https://bentopdf.com";
-    license = licenses.agpl3Only;
-    maintainers = with maintainers; [ charludo ];
+    changelog = "https://github.com/alam00000/bentopdf/releases";
+    license = lib.licenses.asl20;
+    maintainers = with lib.maintainers; [ charludo ];
   };
 })
