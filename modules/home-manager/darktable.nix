@@ -401,7 +401,7 @@ in
           plugins/darkroom/watermark/color_red=
           plugins/darkroom/watermark/font=
           plugins/darkroom/watermark/text=
-          plugins/darkroom/workflow=scene-referred (filmic)
+          plugins/darkroom/workflow=scene-referred (sigmoid)
           plugins/imageio/format/avif/bpp=8
           plugins/imageio/format/avif/color_mode=false
           plugins/imageio/format/avif/compression_type=1
