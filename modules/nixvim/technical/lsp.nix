@@ -7,11 +7,39 @@ in
     enable = true;
     keymaps.lspBuf = {
       K = "hover";
-      gD = "references";
-      gd = "definition";
-      gi = "implementation";
-      gt = "type_definition";
     };
+    keymaps.extra = [
+      {
+        key = "gd";
+        action = {
+          __raw = "require('telescope.builtin').lsp_definitions ";
+        };
+      }
+      {
+        key = "gD";
+        action = {
+          __raw = "require('telescope.builtin').lsp_references ";
+        };
+      }
+      {
+        key = "gi";
+        action = {
+          __raw = "require('telescope.builtin').lsp_implementations ";
+        };
+      }
+      {
+        key = "gt";
+        action = {
+          __raw = "require('telescope.builtin').lsp_type_definitions ";
+        };
+      }
+      {
+        key = "gE";
+        action = {
+          __raw = "require('telescope.builtin').diagnostics ";
+        };
+      }
+    ];
   };
 
   highlight = {
