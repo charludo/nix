@@ -40,9 +40,9 @@
     username = lib.mkDefault "marie";
     homeDirectory = lib.mkDefault "/home/${config.home.username}";
     stateVersion = lib.mkDefault "23.11";
-    sessionPath = [ "$HOME/.local/bin" ];
+    sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
     sessionVariables = {
-      FLAKE = "$HOME/nix";
+      FLAKE = "${config.home.homeDirectory}/nix";
       EDITOR = "nano";
     };
     language.base = "en_US.UTF-8";
