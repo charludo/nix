@@ -93,6 +93,4 @@
   hardware.graphics.extraPackages = [
     pkgs.rocmPackages.clr.icd
   ];
-
-  system.stateVersion = "23.11";
 }

@@ -42,6 +42,4 @@ in
     };
   };
   systemd.services."wyoming-faster-whisper-de".serviceConfig.ProcSubset = lib.mkForce "all";
-
-  system.stateVersion = "23.11";
 }

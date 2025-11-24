@@ -22,6 +22,4 @@
   nas.extraUsers = [
     config.services.qbittorrent.user
   ];
-
-  system.stateVersion = "23.11";
 }

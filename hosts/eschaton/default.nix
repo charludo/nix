@@ -84,6 +84,4 @@
       intel-compute-runtime
     ];
   };
-
-  system.stateVersion = "23.11";
 }

@@ -65,6 +65,4 @@
       kavita-init
       pkgs.rsync
     ];
-
-  system.stateVersion = "23.11";
 }

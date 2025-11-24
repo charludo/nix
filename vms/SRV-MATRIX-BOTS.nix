@@ -60,6 +60,4 @@
       (lib.optionalString (cfg.timers.jsblob != null) "-timers.jsblob ${cfg.timers.jsblob}")
       (lib.optionalString cfg.debug "-debug")
     ]);
-
-  system.stateVersion = "23.11";
 }

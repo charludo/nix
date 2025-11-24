@@ -42,6 +42,4 @@
     databases = config.services.postgresql.ensureDatabases;
     location = "${config.nas.backup.stateLocation}/authentik";
   };
-
-  system.stateVersion = "23.11";
 }

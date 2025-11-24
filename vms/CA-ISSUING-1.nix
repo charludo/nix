@@ -42,6 +42,4 @@
     lib.mkForce "https://127.0.0.1:${builtins.toString config.services.step-ca.port}";
   networking.hosts."127.0.0.1" = lib.mkForce [ ];
   networking.hosts."192.168.30.33" = lib.mkForce [ ];
-
-  system.stateVersion = "23.11";
 }

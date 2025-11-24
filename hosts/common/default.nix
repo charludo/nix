@@ -18,4 +18,6 @@
   system.activationScripts.script.text = ''
     ln -sf /run/current-system/sw/bin/bash /bin/bash
   '';
+
+  system.stateVersion = lib.mkDefault "23.11";
 }

@@ -104,6 +104,4 @@ in
       enableACME = false;
     };
   };
-
-  system.stateVersion = "23.11";
 }

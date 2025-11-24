@@ -135,6 +135,4 @@ in
       gid = 2134;
     };
   };
-
-  system.stateVersion = "23.11";
 }

@@ -15,6 +15,4 @@
     openFirewall = true;
     port = 3000;
   };
-
-  system.stateVersion = "23.11";
 }

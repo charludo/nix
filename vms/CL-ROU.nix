@@ -46,6 +46,4 @@
   users.defaultUserShell = pkgs.fish;
   yubikey.enable = false;
   snow.enable = true;
-
-  system.stateVersion = "23.11";
 }

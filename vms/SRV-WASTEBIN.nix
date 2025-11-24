@@ -27,6 +27,4 @@
       WASTEBIN_ADDRESS_PORT = "0.0.0.0:8080";
     };
   };
-
-  system.stateVersion = "23.11";
 }

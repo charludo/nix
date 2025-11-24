@@ -43,6 +43,4 @@
     compression = "auto,lzma";
     startAt = "03:15";
   };
-
-  system.stateVersion = "23.11";
 }

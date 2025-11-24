@@ -39,6 +39,4 @@
     databases = config.services.mysql.ensureDatabases;
     location = "${config.nas.backup.stateLocation}/ffsync";
   };
-
-  system.stateVersion = "23.11";
 }

@@ -60,6 +60,4 @@
   services.flatpak.packages = [
     "gg.minion.Minion"
   ];
-
-  system.stateVersion = "23.11";
 }

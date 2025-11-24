@@ -54,5 +54,6 @@ in
       pkgs.rsync
     ];
 
+  # vaultwarden was named bitwarden_rs in prior versions and had a different data dir
   system.stateVersion = "24.11";
 }

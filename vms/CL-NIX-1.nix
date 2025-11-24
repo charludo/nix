@@ -58,6 +58,4 @@
     defaultWindowManager = "startplasma-x11";
     openFirewall = true;
   };
-
-  system.stateVersion = "23.11";
 }

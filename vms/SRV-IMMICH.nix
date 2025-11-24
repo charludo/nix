@@ -52,6 +52,4 @@
   ];
   environment.systemPackages = [ pkgs.cifs-utils ];
   boot.supportedFilesystems = [ "cifs" ];
-
-  system.stateVersion = "23.11";
 }

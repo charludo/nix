@@ -150,6 +150,4 @@
     config.services.suwayomi-server.user
     config.services.readarr.user
   ];
-
-  system.stateVersion = "23.11";
 }
