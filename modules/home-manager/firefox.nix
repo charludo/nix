@@ -80,7 +80,7 @@ in
                   ];
                 }
               ];
-              icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               definedAliases = [ "@np" ];
             };
             "Nix Options" = {
@@ -103,7 +103,7 @@ in
                   ];
                 }
               ];
-              icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               definedAliases = [ "@no" ];
             };
             "HM Options" = {
@@ -140,7 +140,7 @@ in
                   ];
                 }
               ];
-              icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
               definedAliases = [ "@ns" ];
             };
             "Nixpkgs Issues" = {
@@ -182,6 +182,24 @@ in
                 sha256 = "sha256-K4rS0zRVqPc2/DqOv48L3qiEitTA20iigzvQ+c13WTI=";
               }}";
               definedAliases = [ "@noo" ];
+            };
+            "NixVim Options" = {
+              urls = [
+                {
+                  template = "https://nix-community.github.io/nixvim/index.html";
+                  params = [
+                    {
+                      name = "search";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              icon = "${pkgs.fetchurl {
+                url = "https://github.com/nix-community/nixvim/raw/main/assets/nixvim_logo.svg";
+                sha256 = "sha256-ap9wGYxGCobyrEsVtX6DRssH16/sgjc8TMOdXmRFk7U=";
+              }}";
+              definedAliases = [ "@nv" ];
             };
             "GitHub" = {
               urls = [
