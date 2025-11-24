@@ -32,6 +32,12 @@ in
       default = "0.0.0.0/0";
     };
 
+    dns = mkOption {
+      type = types.listOf types.str;
+      description = "additional DNS servers to use when connected to the wireguard network";
+      default = [ ];
+    };
+
     port = mkOption {
       type = types.port;
       description = "the port the endpoint listens on for this tunnel";
@@ -96,6 +102,15 @@ in
         '';
         postShutdown = optional (cfg.allowedIPs == "0.0.0.0/0") ''
           ${pkgs.iproute2}/bin/ip route del $(${pkgs.dig}/bin/dig +short ${cfg.endpoint}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+        '';
+
+        postSetup = optional (cfg.dns != [ ]) ''
+          printf "${
+            concatStringsSep "\n" (map (entry: "nameserver ${entry}") cfg.dns)
+          }" | ${pkgs.openresolv}/bin/resolvconf -a ${cfg.interface} -m 0
+        '';
+        preShutdown = optional (cfg.dns != [ ]) ''
+          "${pkgs.openresolv}/bin/resolvconf -d ${cfg.interface}"
         '';
       };
     };
