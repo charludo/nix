@@ -11,13 +11,12 @@
     hardware.cores = 2;
     hardware.memory = 8192;
     hardware.storage = "16G";
-    # https://github.com/kieraneglin/pinchflat/issues/716
-    networking.openPorts.tcp = [ 8945 ];
 
     certsFor = [
       {
         name = "pinchflat";
         port = config.services.pinchflat.port;
+        defaultProxySettings = false;
       }
     ];
   };
