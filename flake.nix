@@ -8,7 +8,7 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixvim.url = "github:nix-community/nixvim";
-    nixvim.inputs.nixpkgs.follows = "nixpkgs";
+    # nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
     snow.url = "git+ssh://git@github.com/charludo/snow";
     snow.inputs.nixpkgs.follows = "nixpkgs";

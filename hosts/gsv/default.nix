@@ -103,6 +103,8 @@ in
       ];
       authorizedKeys = [ publicKey ];
     };
+    # Not sure if necessary.
+    # zpool import -a
     postCommands = ''
       cat <<EOF > /root/.profile
       if pgrep -x "zfs" > /dev/null

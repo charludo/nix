@@ -36,7 +36,7 @@ in
     let
       python = pkgs.python313.withPackages (
         pkgs: with pkgs; [
-          radicale_infcloud
+          radicale-infcloud
           pytz
           setuptools
         ]
