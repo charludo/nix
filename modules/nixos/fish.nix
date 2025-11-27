@@ -39,6 +39,11 @@ in
           end
         end
       '';
+    programs.fish.interactiveShellInit = # fish
+      ''
+        nix-your-shell fish | source
+      '';
     users.defaultUserShell = pkgs.fish;
+    environment.systemPackages = [ pkgs.nix-your-shell ];
   };
 }
