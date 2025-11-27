@@ -93,5 +93,22 @@ in
       loaded_perl_provider = null;
       loaded_ruby_provider = null;
     };
+
+    keymaps = [
+      {
+        mode = [
+          "n"
+          "i"
+          "v"
+        ];
+        key = "<F1>";
+        action = "<Esc>";
+        options = {
+          desc = "do not open Help. Rebind to Esc instead.";
+          noremap = true;
+          silent = true;
+        };
+      }
+    ];
   };
 }
