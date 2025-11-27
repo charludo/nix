@@ -9,7 +9,6 @@ in
 {
   users.users.marie = {
     isNormalUser = true;
-    shell = pkgs.bash;
     initialPassword = "";
     extraGroups = [
       "wheel"
@@ -43,6 +42,4 @@ in
   users.groups.marie.gid = 1000;
 
   home-manager.users.marie = import ./home/${config.networking.hostName}.nix;
-
-  environment.shells = with pkgs; [ bash ];
 }

@@ -11,7 +11,6 @@
   bluetooth.enable = true;
   docker.enable = true;
   # eid.enable = true;
-  fish.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
@@ -22,7 +21,6 @@
   printers.enable = true;
   rsync.enable = true;
   screensharing.enable = true;
-  snow.enable = true;
   soundConfig.enable = true;
   surfshark.enable = true;
   suspend.enable = true;

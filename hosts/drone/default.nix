@@ -8,7 +8,6 @@
 
   age.enable = true;
   bluetooth.enable = true;
-  fish.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
@@ -69,7 +68,6 @@
   };
 
   snow = {
-    enable = true;
     useRemoteSudo = true;
     buildOnTarget = false;
   };

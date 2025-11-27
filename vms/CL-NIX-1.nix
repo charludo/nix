@@ -34,7 +34,6 @@
 
   users.mutableUsers = lib.mkForce true;
   nas.backup.enable = true;
-  snow.enable = true;
 
   vm = {
     id = 3020;

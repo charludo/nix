@@ -42,8 +42,5 @@
 
   ld.enable = true;
   programs.dconf.enable = true;
-  programs.fish.enable = true;
-  users.defaultUserShell = pkgs.fish;
   yubikey.enable = false;
-  snow.enable = true;
 }

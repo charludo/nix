@@ -6,7 +6,6 @@
     ../../users/charlotte/user.nix
   ];
 
-  fish.enable = true;
   nvim.enable = true;
   plymouth.enable = true;
   plymouth.theme = "dark_planet";

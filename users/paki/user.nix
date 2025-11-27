@@ -12,7 +12,6 @@ in
 
   users.users.paki = {
     isNormalUser = true;
-    shell = pkgs.bash;
     extraGroups = [
       "wheel"
       "networkmanager"
@@ -51,6 +50,4 @@ in
       ];
     }
   ];
-
-  environment.shells = with pkgs; [ bash ];
 }

@@ -2,6 +2,7 @@
   outputs,
   config,
   lib,
+  pkgs,
   private-settings,
   ...
 }:
@@ -139,6 +140,7 @@ in
     nvim.enable = true;
 
     snow = {
+      enable = true;
       tags = [
         "vm"
       ]
@@ -157,6 +159,12 @@ in
         resizeDiskBy = cfg.hardware.storage;
       };
     };
+
+    fish.enable = true;
+    environment.shells = with pkgs; [
+      fish
+      bash
+    ];
 
     networking = {
       hostName = config.vm.name;

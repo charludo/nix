@@ -11,7 +11,6 @@
 
   age.enable = true;
   bluetooth.enable = true;
-  fish.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
@@ -19,7 +18,6 @@
   nvim.enable = true;
   printers.enable = true;
   screensharing.enable = true;
-  snow.enable = true;
   soundConfig.enable = true;
   steamOpenFirewall.enable = true;
   surfshark.enable = true;

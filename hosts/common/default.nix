@@ -5,6 +5,7 @@
     ./nix.nix
     ./nixpkgs.nix
     ./openssh.nix
+    ./shell.nix
   ];
 
   age.enable = true;

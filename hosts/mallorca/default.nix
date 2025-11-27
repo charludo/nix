@@ -15,7 +15,6 @@
   nas.backup.enable = false;
 
   age.enable = true;
-  fish.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
@@ -23,7 +22,6 @@
   nvim.enable = true;
   plymouth.enable = true;
   plymouth.theme = "red_loader";
-  snow.enable = true;
   soundConfig.enable = true;
   screensharing.enable = true;
   surfshark.enable = true;
