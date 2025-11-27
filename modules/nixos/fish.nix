@@ -39,6 +39,10 @@ in
           end
         end
       '';
+    programs.fish.shellInit = # fish
+      ''
+        set fish_greeting
+      '';
     programs.fish.interactiveShellInit = # fish
       ''
         nix-your-shell fish | source
