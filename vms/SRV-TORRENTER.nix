@@ -181,6 +181,32 @@ in
       "sys-devices-virtual-net-tun0.device"
       "media-NAS.mount"
     ];
+
+    # NzbGet and qBittorrent die when tun0 / the NAS become unavailable, but do not come back up.
+    # This is an ugly workaround to ensure they are never down for long.
+    timers."nzbget" = {
+      wantedBy = [ "timers.target" ];
+      requires = [
+        "sys-devices-virtual-net-tun0.device"
+        "media-NAS.mount"
+      ];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+      };
+    };
+    timers."qbittorrent" = {
+      wantedBy = [ "timers.target" ];
+      requires = [
+        "sys-devices-virtual-net-tun0.device"
+        "media-NAS.mount"
+      ];
+      timerConfig = {
+        OnCalendar = "hourly";
+        Persistent = true;
+      };
+    };
+
     services.sonarr.after = [ "media-NAS.mount" ];
     services.radarr.after = [ "media-NAS.mount" ];
     services.lidarr.after = [ "media-NAS.mount" ];
