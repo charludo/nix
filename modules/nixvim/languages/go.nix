@@ -19,6 +19,7 @@ in
         analyses = {
           unusedparams = true;
         };
+        buildFlags = [ "-tags=e2e,linux,!linux,contrast_unstable_api" ];
       };
     };
 
