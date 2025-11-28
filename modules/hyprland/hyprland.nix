@@ -250,6 +250,11 @@
             ]
           ++ (map (n: "${mainMod},${n},workspace,${n}") workspaces)
           ++ (map (n: "${shiftMod},${n},movetoworkspacesilent,${n}") workspaces);
+
+        ecosystem = {
+          no_update_news = true;
+          no_donation_nag = true;
+        };
       };
     extraConfig = '''';
   };
