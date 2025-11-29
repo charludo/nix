@@ -42,6 +42,10 @@ in
         user = gsv.user;
         port = gsv.port-boot;
       };
+      rmpp = {
+        hostname = "192.168.50.130";
+        user = "root";
+      };
       "*".identityFile = lib.mkForce [
         "~/.ssh/id_yubikey"
         "~/.ssh/id_charlotte"
