@@ -14,6 +14,10 @@
   agenix-rekey.pubkey = ../keys/zakalwe_age.pub;
 
   desktop = {
+    bitwig = {
+      enable = true;
+      dataDir = "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}/Bitwig Studio";
+    };
     darktable.enable = true;
     discord.enable = true;
     fcitx.enable = true;
@@ -34,7 +38,6 @@
 
     anki
     orca-slicer
-    # bitwig-studio
 
     ours.nsenter
   ];
