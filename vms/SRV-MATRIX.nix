@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   private-settings,
   secrets,
@@ -68,37 +67,13 @@ in
   };
 
   nas.backup.enable = true;
-  environment.systemPackages =
-    let
-      restore-continuwuity = pkgs.writeShellApplication {
-        name = "restore-continuwuity";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.matrix-continuwuity.user}:${config.services.matrix-continuwuity.group} ${config.nas.backup.stateLocation}/matrix/ ${config.services.matrix-continuwuity.settings.global.database_path}
-        '';
-      };
-    in
-    [
-      restore-continuwuity
-      pkgs.rsync
+  rsync."matrix" = {
+    tasks = [
+      {
+        from = "${config.services.matrix-continuwuity.settings.global.database_path}";
+        to = "${config.nas.backup.stateLocation}/matrix";
+        chown = "${config.services.matrix-continuwuity.user}:${config.services.matrix-continuwuity.group}";
+      }
     ];
-  systemd = {
-    timers."matrix-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "matrix-backup-daily.service";
-      };
-    };
-    services."matrix-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.matrix-continuwuity.settings.global.database_path} ${config.nas.backup.stateLocation}/matrix
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 }

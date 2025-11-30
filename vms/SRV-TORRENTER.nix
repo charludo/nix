@@ -5,20 +5,6 @@
   secrets,
   ...
 }:
-let
-  restore-torrenter = pkgs.writeShellApplication {
-    name = "restore-torrenter";
-    runtimeInputs = [ pkgs.rsync ];
-    text = ''
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.sonarr.user}:${config.services.sonarr.group} ${config.nas.backup.stateLocation}/torrenter/sonarr/ ${config.services.sonarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.radarr.user}:${config.services.radarr.group} ${config.nas.backup.stateLocation}/torrenter/radarr/ ${config.services.radarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.lidarr.user}:${config.services.lidarr.group} ${config.nas.backup.stateLocation}/torrenter/lidarr/ ${config.services.lidarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.readarr.user}:${config.services.readarr.group} ${config.nas.backup.stateLocation}/torrenter/readarr/ ${config.services.readarr.dataDir}
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown prowlarr:prowlarr ${config.nas.backup.stateLocation}/torrenter/prowlarr/ /var/lib/prowlarr
-      ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.qbittorrent.user}:${config.services.qbittorrent.group} ${config.nas.backup.stateLocation}/torrenter/qbittorrent/ ${config.services.qbittorrent.profileDir}
-    '';
-  };
-in
 {
   vm = {
     id = 2101;
@@ -128,7 +114,6 @@ in
   ];
 
   nas.enable = true;
-  nas.backup.enable = true;
   nas.extraUsers = [
     config.services.sonarr.user
     config.services.radarr.user
@@ -137,6 +122,42 @@ in
     config.services.qbittorrent.user
     config.services.nzbget.user
   ];
+
+  nas.backup.enable = true;
+  rsync."torrenter" = {
+    tasks = [
+      {
+        from = "${config.services.sonarr.dataDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/sonarr";
+        chown = "${config.services.sonarr.user}:${config.services.sonarr.group}";
+      }
+      {
+        from = "${config.services.radarr.dataDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/radarr";
+        chown = "${config.services.radarr.user}:${config.services.radarr.group}";
+      }
+      {
+        from = "${config.services.lidarr.dataDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/lidarr";
+        chown = "${config.services.lidarr.user}:${config.services.lidarr.group}";
+      }
+      {
+        from = "${config.services.readarr.dataDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/readarr";
+        chown = "${config.services.readarr.user}:${config.services.readarr.group}";
+      }
+      {
+        from = "/var/lib/prowlarr";
+        to = "${config.nas.backup.stateLocation}/torrenter/prowlarr";
+        chown = "prowlarr:prowlarr";
+      }
+      {
+        from = "${config.services.qbittorrent.profileDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/qbittorrent";
+        chown = "${config.services.qbittorrent.user}:${config.services.qbittorrent.group}";
+      }
+    ];
+  };
 
   age.secrets.nzbget = {
     rekeyFile = secrets.torrenter-nzbget;
@@ -149,10 +170,7 @@ in
     mode = "0444";
   };
 
-  environment.systemPackages = [
-    restore-torrenter
-    pkgs.ours.remux
-  ];
+  environment.systemPackages = [ pkgs.ours.remux ];
 
   systemd = {
     # Ensure qbittorrent/nzbget only start AFTER a VPN connection has been established, and the NAS is mounted for *arr
@@ -212,29 +230,5 @@ in
     services.lidarr.after = [ "media-NAS.mount" ];
     services.readarr.after = [ "media-NAS.mount" ];
     services.prowlarr.after = [ "media-NAS.mount" ];
-
-    timers."torrenter-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "torrenter-backup-daily.service";
-      };
-    };
-    services."torrenter-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.sonarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/sonarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.radarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/radarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.lidarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/lidarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/readarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/prowlarr/ ${config.nas.backup.stateLocation}/torrenter/prowlarr
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.qbittorrent.profileDir}/ ${config.nas.backup.stateLocation}/torrenter/qbittorrent
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 }

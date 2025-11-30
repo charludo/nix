@@ -1,9 +1,4 @@
-{
-  pkgs,
-  config,
-  private-settings,
-  ...
-}:
+{ config, private-settings, ... }:
 {
   vm = {
     id = 2207;
@@ -23,41 +18,16 @@
   };
 
   nas.enable = true;
-  nas.backup.enable = true;
   nas.extraUsers = [ config.services.audiobookshelf.user ];
 
-  systemd = {
-    timers."audiobookshelf-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "audiobookshelf-backup-daily.service";
-      };
-    };
-    services."audiobookshelf-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.audiobookshelf.dataDir}/ ${config.nas.backup.stateLocation}/audiobookshelf
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-  };
-
-  environment.systemPackages =
-    let
-      restore-audiobookshelf = pkgs.writeShellApplication {
-        name = "restore-audiobookshelf";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group} ${config.nas.backup.stateLocation}/audiobookshelf/ ${config.services.audiobookshelf.dataDir}
-        '';
-      };
-    in
-    [
-      restore-audiobookshelf
-      pkgs.rsync
+  nas.backup.enable = true;
+  rsync."audiobookshelf" = {
+    tasks = [
+      {
+        from = "/var/lib/${config.services.audiobookshelf.dataDir}";
+        to = "${config.nas.backup.stateLocation}/audiobookshelf";
+        chown = "${config.services.audiobookshelf.user}:${config.services.audiobookshelf.group}";
+      }
     ];
+  };
 }

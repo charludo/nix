@@ -1,9 +1,4 @@
-{
-  config,
-  pkgs,
-  secrets,
-  ...
-}:
+{ config, secrets, ... }:
 {
   vm = {
     id = 2219;
@@ -34,38 +29,12 @@
   age.secrets.anki-marie.rekeyFile = secrets.marie-anki;
 
   nas.backup.enable = true;
-  systemd = {
-    timers."anki-sync-server-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "anki-sync-server-backup-daily.service";
-      };
-    };
-    services."anki-sync-server-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/anki-sync-server/ ${config.nas.backup.stateLocation}/anki-sync-server
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-  };
-
-  environment.systemPackages =
-    let
-      restore-anki-sync-server = pkgs.writeShellApplication {
-        name = "restore-anki-sync-server";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace  ${config.nas.backup.stateLocation}/anki-sync-server/ /var/lib/anki-sync-server
-        '';
-      };
-    in
-    [
-      restore-anki-sync-server
-      pkgs.rsync
+  rsync."anki" = {
+    tasks = [
+      {
+        from = "/var/lib/anki-sync-server";
+        to = "${config.nas.backup.stateLocation}/anki-sync-server";
+      }
     ];
+  };
 }

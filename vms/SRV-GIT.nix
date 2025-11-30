@@ -60,43 +60,20 @@
     };
   };
 
-  nas.backup.enable = true;
-  nas.extraUsers = [ config.services.forgejo.user ];
-
   fail2ban.enable = true;
   fail2ban.doNotBan = [ "192.168.0.0/16" ];
 
-  environment.systemPackages =
-    let
-      restore-forgejo = pkgs.writeShellApplication {
-        name = "restore-forgejo";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.forgejo.user}:${config.services.forgejo.group} ${config.nas.backup.stateLocation}/forgejo/ ${config.services.forgejo.stateDir}
-        '';
-      };
-    in
-    [
-      restore-forgejo
-      pkgs.rsync
+  nas.extraUsers = [ config.services.forgejo.user ];
+
+  nas.backup.enable = true;
+  rsync."forgejo" = {
+    tasks = [
+      {
+        from = "${config.services.forgejo.stateDir}";
+        to = "${config.nas.backup.stateLocation}/forgejo";
+        chown = "${config.services.forgejo.user}:${config.services.forgejo.group}";
+        extraFlags = "-L";
+      }
     ];
-  systemd = {
-    timers."git-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "git-backup-daily.service";
-      };
-    };
-    services."git-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.forgejo.stateDir}/ ${config.nas.backup.stateLocation}/forgejo
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 }

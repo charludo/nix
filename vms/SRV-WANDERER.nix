@@ -28,41 +28,17 @@
   };
 
   nas.backup.enable = true;
-  nas.extraUsers = [ config.services.wanderer.user ];
-
-  systemd = {
-    timers."wanderer-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "wanderer-backup-daily.service";
-      };
-    };
-    services."wanderer-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.location})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.wanderer.user}:* /var/lib/wanderer/ ${config.nas.backup.stateLocation}/wanderer
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-  };
-
-  environment.systemPackages =
-    let
-      wanderer-init = pkgs.writeShellApplication {
-        name = "wanderer-init";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace --chown=${config.services.wanderer.user}:* ${config.nas.backup.stateLocation}/wanderer/ /var/lib/wanderer
-        '';
-      };
-    in
-    [
-      wanderer-init
-      pkgs.rsync
+  rsync."wanderer" = {
+    tasks = [
+      {
+        from = "/var/lib/wanderer";
+        to = "${config.nas.backup.stateLocation}/wanderer";
+        chown = "wanderer:wanderer";
+        # this might be a problem upon restore;
+        # probably a good idea to rebuild afterwards,
+        # since restore likely deletes the symlinked web files.
+        extraFlags = "--no-links";
+      }
     ];
+  };
 }

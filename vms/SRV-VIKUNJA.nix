@@ -1,9 +1,4 @@
-{
-  config,
-  private-settings,
-  pkgs,
-  ...
-}:
+{ config, private-settings, ... }:
 let
   inherit (private-settings) domains;
 in
@@ -28,40 +23,12 @@ in
 
   nas.enable = true;
   nas.backup.enable = true;
-
-  systemd = {
-    timers."vikunja-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "vikunja-backup-daily.service";
-      };
-    };
-    services."vikunja-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/vikunja/ ${config.nas.backup.stateLocation}/vikunja
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-  };
-
-  environment.systemPackages =
-    let
-      vikunja-init = pkgs.writeShellApplication {
-        name = "vikunja-init";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/vikunja/ /var/lib/vikunja
-        '';
-      };
-    in
-    [
-      vikunja-init
-      pkgs.rsync
+  rsync."vikunja" = {
+    tasks = [
+      {
+        from = "/var/lib/vikunja";
+        to = "${config.nas.backup.stateLocation}/vikunja";
+      }
     ];
+  };
 }
