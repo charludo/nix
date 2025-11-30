@@ -1,8 +1,4 @@
-{
-  pkgs,
-  config,
-  ...
-}:
+{ config, ... }:
 {
   vm = {
     id = 2214;
@@ -26,38 +22,13 @@
   };
 
   nas.backup.enable = true;
-
-  environment.systemPackages =
-    let
-      restore-actual = pkgs.writeShellApplication {
-        name = "restore-actual";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown actual:actual ${config.nas.backup.stateLocation}/actual/ ${config.services.actual.settings.dataDir}
-        '';
-      };
-    in
-    [
-      restore-actual
-      pkgs.rsync
+  rsync."actual" = {
+    tasks = [
+      {
+        from = "${config.services.actual.settings.dataDir}";
+        to = "${config.nas.backup.stateLocation}/actual";
+        chown = "actual:actual";
+      }
     ];
-  systemd = {
-    timers."actual-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "actual-backup-daily.service";
-      };
-    };
-    services."actual-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.actual.settings.dataDir}/ ${config.nas.backup.stateLocation}/actual
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 }

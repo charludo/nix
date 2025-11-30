@@ -1,9 +1,4 @@
-{
-  pkgs,
-  config,
-  private-settings,
-  ...
-}:
+{ config, private-settings, ... }:
 {
   vm = {
     id = 2201;
@@ -26,10 +21,6 @@
     cacheDir = "${dataDir}/cache";
   };
 
-  nas.enable = true;
-  nas.backup.enable = true;
-  nas.extraUsers = [ config.services.jellyfin.user ];
-
   nixpkgs.overlays = [
     (_final: prev: {
       jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
@@ -51,38 +42,17 @@
     "input"
   ];
 
-  systemd = {
-    timers."jellyfin-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "jellyfin-backup-daily.service";
-      };
-    };
-    services."jellyfin-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.jellyfin.dataDir}/ ${config.nas.backup.stateLocation}/jellyfin
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-  };
+  nas.enable = true;
+  nas.extraUsers = [ config.services.jellyfin.user ];
 
-  environment.systemPackages =
-    let
-      restore-jellyfin = pkgs.writeShellApplication {
-        name = "restore-jellyfin";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown ${config.services.jellyfin.user}:${config.services.jellyfin.group} ${config.nas.backup.stateLocation}/jellyfin/ ${config.services.jellyfin.dataDir}
-        '';
-      };
-    in
-    [
-      restore-jellyfin
-      pkgs.rsync
+  nas.backup.enable = true;
+  rsync."jellyfin" = {
+    tasks = [
+      {
+        from = "${config.services.jellyfin.dataDir}";
+        to = "${config.nas.backup.stateLocation}/jellyfin";
+        chown = "${config.services.jellyfin.user}:${config.services.jellyfin.group}";
+      }
     ];
+  };
 }

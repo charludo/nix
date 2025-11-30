@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   private-settings,
   secrets,
   ...
@@ -24,7 +23,6 @@ in
 
   services.vaultwarden = {
     enable = true;
-    backupDir = "${config.nas.backup.stateLocation}/vaultwarden";
     config = {
       DOMAIN = "https://passwords.${domains.home}";
       SIGNUPS_ALLOWED = false;
@@ -35,24 +33,16 @@ in
     # environmentFile = config.age.secrets.vaultwarden.path;
   };
 
-  nas.enable = true;
   nas.backup.enable = true;
-  nas.extraUsers = [ "vaultwarden" ];
-
-  environment.systemPackages =
-    let
-      vaultwarden-init = pkgs.writeShellApplication {
-        name = "vaultwarden-init";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.vaultwarden.backupDir}/ /var/lib/vaultwarden
-        '';
-      };
-    in
-    [
-      vaultwarden-init
-      pkgs.rsync
+  rsync."vaultwarden" = {
+    tasks = [
+      {
+        from = "/var/lib/vaultwarden";
+        to = "${config.nas.backup.stateLocation}/vaultwarden";
+        chown = "${config.users.users.vaultwarden.name}:${config.users.groups.vaultwarden.name}";
+      }
     ];
+  };
 
   # vaultwarden was named bitwarden_rs in prior versions and had a different data dir
   system.stateVersion = "24.11";

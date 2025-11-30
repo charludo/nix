@@ -1,8 +1,4 @@
-{
-  config,
-  pkgs,
-  ...
-}:
+{ config, ... }:
 {
   vm = {
     id = 2216;
@@ -27,47 +23,22 @@
     mediaDir = config.nas.location;
   };
 
+  systemd.services.pinchflat = {
+    after = [ "media-NAS.mount" ];
+    partOf = [ "media-NAS.mount" ];
+  };
+
   nas.enable = true;
-  nas.backup.enable = true;
   nas.extraUsers = [ config.services.pinchflat.user ];
 
-  environment.systemPackages =
-    let
-      restore-pinchflat = pkgs.writeShellApplication {
-        name = "restore-pinchflat";
-        runtimeInputs = [ pkgs.rsync ];
-        text = ''
-          ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace --chown pinchflat:pinchflat ${config.nas.backup.stateLocation}/pinchflat/ /var/lib/pinchflat
-        '';
-      };
-    in
-    [ restore-pinchflat ];
-
-  systemd = {
-    services.pinchflat.after = [
-      "media-NAS.mount"
+  nas.backup.enable = true;
+  rsync."pinchflat" = {
+    tasks = [
+      {
+        from = "/var/lib/pinchflat";
+        to = "${config.nas.backup.stateLocation}/pinchflat";
+        chown = "pinchflat:pinchflat";
+      }
     ];
-    services.pinchflat.partOf = [
-      "media-NAS.mount"
-    ];
-
-    timers."pinchflat-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "pinchflat-backup-daily.service";
-      };
-    };
-    services."pinchflat-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace /var/lib/pinchflat/ ${config.nas.backup.stateLocation}/pinchflat
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 }

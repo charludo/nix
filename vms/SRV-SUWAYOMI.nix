@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ config, ... }:
 {
   vm = {
     id = 2102;
@@ -66,88 +66,51 @@
   systemd = {
     services.suwayomi-server.after = [ "media-NAS.mount" ];
     services.readarr.after = [ "media-NAS.mount" ];
-
-    timers."suwayomi-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "suwayomi-backup-daily.service";
-      };
-    };
-    services."suwayomi-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.suwayomi-server.dataDir}/ ${config.nas.backup.stateLocation}/suwayomi
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-
-    timers."suwayomi-sync" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "hourly";
-        Persistent = true;
-        Unit = "suwayomi-sync.service";
-      };
-    };
-    services."suwayomi-sync" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.location})" == "smb2" ] && find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec ${pkgs.rsync}/bin/rsync -avz --stats --inplace {}/ ${config.nas.location}/Manga \;
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
-
-    timers."readarr-backup-daily" = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = "daily";
-        Persistent = true;
-        Unit = "readarr-backup-daily.service";
-      };
-    };
-    services."readarr-backup-daily" = {
-      script = ''
-        [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
-        ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.services.readarr.dataDir}/ ${config.nas.backup.stateLocation}/torrenter/readarr2
-      '';
-      serviceConfig = {
-        Type = "oneshot";
-        User = "root";
-      };
-    };
   };
 
-  environment.systemPackages =
-    let
-      suwayomi-init = pkgs.writeShellApplication {
-        name = "suwayomi-init";
-        text = ''
-          [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" != "smb2" ] && exit 1
-          ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/suwayomi/ ${config.services.suwayomi-server.dataDir}
-        '';
-      };
-      readarr-init = pkgs.writeShellApplication {
-        name = "readarr-init";
-        text = ''
-          [ "$(stat -f -c %T ${config.nas.backup.stateLocation})" == "smb2" ] && ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${config.nas.backup.stateLocation}/torrenter/readarr2/ ${config.services.readarr.dataDir}
-        '';
-      };
-    in
-    [
-      suwayomi-init
-      readarr-init
-    ];
-
   nas.enable = true;
-  nas.backup.enable = true;
   nas.extraUsers = [
     config.services.suwayomi-server.user
     config.services.readarr.user
   ];
+
+  # this makes the downloaded Mangas available to Kavita
+  rsync."suwayomi-content" = {
+    tasks = [
+      {
+        prefixCommand = "find ${config.services.suwayomi-server.dataDir}/.local/share/Tachidesk/downloads/mangas/*/ -maxdepth 0 -type d -exec";
+        suffixCommand = "\\;"; # terminates exec
+        from = "{}"; # uses the results from find
+        to = "${config.nas.location}/Manga";
+      }
+    ];
+    requires = [
+      "media-NAS.mount"
+    ];
+    timerConfig = {
+      OnCalendar = "hourly";
+      Persistent = true;
+    };
+    restore = false;
+  };
+
+  nas.backup.enable = true;
+  rsync."suwayomi" = {
+    tasks = [
+      {
+        from = "${config.services.suwayomi-server.dataDir}";
+        to = "${config.nas.backup.stateLocation}/suwayomi";
+        chown = "${config.services.suwayomi-server.user}:${config.services.suwayomi-server.group}";
+      }
+    ];
+  };
+  rsync."readarr" = {
+    tasks = [
+      {
+        from = "${config.services.readarr.dataDir}";
+        to = "${config.nas.backup.stateLocation}/torrenter/readarr2";
+        chown = "${config.services.readarr.user}:${config.services.readarr.group}";
+      }
+    ];
+  };
 }
