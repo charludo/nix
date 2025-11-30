@@ -67,6 +67,7 @@ in
       type = types.str;
       description = "the URL or IP of the remote endpoint";
       default = private-settings.domains.vpn;
+      defaultText = "(populated from git submodule)";
     };
   };
 

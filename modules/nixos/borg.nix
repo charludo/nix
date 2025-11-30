@@ -36,6 +36,7 @@ in
             type = str;
             description = "the url of the remote borg repo";
             default = private-settings.domains.cloudsync;
+            defaultText = "(populated from git submodule)";
           };
           port = lib.mkOption {
             type = int;
