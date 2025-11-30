@@ -1,5 +1,4 @@
 {
-  pkgs,
   inputs,
   outputs,
   private-settings,
