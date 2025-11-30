@@ -1,4 +1,9 @@
-{ pkgs, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 {
   imports = [
     ./hardware-configuration.nix
@@ -19,7 +24,6 @@
   nvim.enable = true;
   # onlykey.enable = true;
   printers.enable = true;
-  rsync.enable = true;
   screensharing.enable = true;
   soundConfig.enable = true;
   surfshark.enable = true;
@@ -33,6 +37,23 @@
 
   nas.enable = true;
   nas.backup.enable = true;
+
+  rsync."media" = {
+    tasks = [
+      {
+        from = "/media/Media";
+        to = "${config.nas.location}/CloudSync/Media";
+      }
+    ];
+    timerConfig = {
+      OnBootSec = "30min";
+      OnUnitActiveSec = "1h";
+    };
+    requires = [
+      "media-Media.mount"
+      "media-NAS.mount"
+    ];
+  };
 
   environment.systemPackages = [ pkgs.ntfs3g ];
   fileSystems."/media/Media" = {
