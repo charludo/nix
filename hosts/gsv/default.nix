@@ -29,6 +29,7 @@ in
   # Networking config
   networking = {
     hostName = hostName;
+    nameservers = private-settings.upstreamDNS.ips;
     domain = null;
     hostId = gsv.hostId;
     useDHCP = false;
