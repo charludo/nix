@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (private-settings) domains gsv;
+  inherit (private-settings) domains;
 in
 {
   age.secrets.turn = {
@@ -16,24 +16,21 @@ in
     enable = true;
     realm = "turn.${domains.blog}";
 
-    listening-ips = [ "0.0.0.0" ];
     listening-port = 3478;
     tls-listening-port = 3480;
+    no-cli = true;
 
-    relay-ips = [ gsv.ip ];
     min-port = 49152;
     max-port = 65535;
 
-    cert = "${config.security.acme.certs."turn.${domains.blog}".directory}/fullchain.pem";
+    cert = "${config.security.acme.certs."turn.${domains.blog}".directory}/full.pem";
     pkey = "${config.security.acme.certs."turn.${domains.blog}".directory}/key.pem";
 
-    # no-auth = true;      # anonymous, is default when lt-cred-mech is false
-    # secure-stun = true; # require auth for STUN
-    lt-cred-mech = true;
-    # use-auth-secret = true;
+    use-auth-secret = true;
     static-auth-secret-file = config.age.secrets.turn.path;
 
     extraConfig = ''
+      verbose
       no-multicast-peers
       total-quota=50
     '';
