@@ -29,6 +29,7 @@ in
   age.secrets.turn = {
     rekeyFile = secrets.gsv-turn;
     owner = config.services.matrix-continuwuity.user;
+    group = config.services.matrix-continuwuity.group;
   };
 
   services.matrix-continuwuity = {
@@ -49,11 +50,13 @@ in
           coturn = outputs.nixosConfigurations.gsv.config.services.coturn;
         in
         [
-          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}?transport=udp"
-          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}?transport=tcp"
-          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"
-          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"
+          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}"
+          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}"
         ];
+      # The secrets file MUST NOT be newline-terminated!
+      # If it is, then the key plus the newline is used as the key, leading to
+      # 401 Unauthorized errors from coturn.
+      # https://forgejo.ellis.link/continuwuation/continuwuity/pulls/1209
       turn_secret_file = config.age.secrets.turn.path;
 
       new_user_displayname_suffix = "";
