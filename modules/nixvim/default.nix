@@ -28,7 +28,7 @@ in
 
   config = {
     opts = {
-      shell = "${pkgs.fish}/bin/fish";
+      shell = "${lib.getExe pkgs.fish}";
       termguicolors = true;
       title = true;
       ignorecase = true;
@@ -87,7 +87,7 @@ in
     globals = {
       mapleader = " ";
       equalalways = false;
-      python3_host_prog = "${pkgs.python3}/bin/python3";
+      python3_host_prog = "${lib.getExe pkgs.python3}";
       loaded_python3_provider = null;
       loaded_node_provider = null;
       loaded_perl_provider = null;

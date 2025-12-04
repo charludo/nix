@@ -185,7 +185,7 @@ in
   age.secrets.registration-token.rekeyFile = secrets.gitea-actions-registration-token;
 
   services.gitea-actions-runner = {
-    package = pkgs.forgejo-actions-runner;
+    package = pkgs.forgejo-runner;
     instances = {
       nix-runner-1 = {
         enable = true;

@@ -1,15 +1,16 @@
 {
   config,
+  lib,
   pkgs,
   private-settings,
   ...
 }:
 let
-  curl = "${pkgs.curl}/bin/curl";
-  rofi = "${pkgs.rofi}/bin/rofi";
-  librewolf = "${pkgs.librewolf}/bin/librewolf";
-  thunderbird = "${pkgs.thunderbird}/bin/thunderbird";
-  pavucontrol = "${pkgs.pavucontrol}/bin/pavucontrol";
+  curl = "${lib.getExe pkgs.curl}";
+  rofi = "${lib.getExe pkgs.rofi}";
+  librewolf = "${lib.getExe pkgs.librewolf}";
+  thunderbird = "${lib.getExe pkgs.thunderbird}";
+  pavucontrol = "${lib.getExe pkgs.pavucontrol}";
 
   # These are created in the scripts folder
   playerctl = "waybar-playerctl";

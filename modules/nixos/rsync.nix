@@ -103,7 +103,7 @@ in
               in
               # bash
               ''
-                ${task.prefixCommand} ${pkgs.rsync}/bin/rsync -avz --stats --delete --inplace ${rsync.extraFlags} ${task.extraFlags} "${from}/" "${to}" ${task.suffixCommand}
+                ${task.prefixCommand} ${lib.getExe pkgs.rsync} -avz --stats --delete --inplace ${rsync.extraFlags} ${task.extraFlags} "${from}/" "${to}" ${task.suffixCommand}
               ''
             ) rsync.tasks
           );
@@ -141,7 +141,7 @@ in
                 in
                 # bash
                 ''
-                  ${pkgs.rsync}/bin/rsync -avzI --stats --delete --inplace ${chown} ${rsync.extraFlags} ${task.extraFlags} "${to}/" "${from}"
+                  ${lib.getExe pkgs.rsync} -avzI --stats --delete --inplace ${chown} ${rsync.extraFlags} ${task.extraFlags} "${to}/" "${from}"
                 ''
               ) rsync.tasks
             );

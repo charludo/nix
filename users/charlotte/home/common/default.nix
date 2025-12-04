@@ -27,7 +27,7 @@
     sessionVariables = {
       FLAKE = "${config.home.homeDirectory}/Projekte/nix";
       EDITOR = "nvim";
-      TERMINAL = "${pkgs.alacritty}/bin/alacritty";
+      TERMINAL = "${lib.getExe pkgs.alacritty}";
     };
     language.base = "en_US.UTF-8";
   };

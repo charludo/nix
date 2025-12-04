@@ -24,7 +24,7 @@ let
 
         def run_command(args):
             os.system(
-                f"${cfg.package}/bin/idagio {args}"
+                f"${lib.getExe' cfg.package "idagio"} {args}"
             )
 
 
@@ -121,7 +121,7 @@ in
         User = cfg.user;
         Group = cfg.group;
 
-        ExecStart = "${idagio-web}/bin/idagio-web";
+        ExecStart = "${lib.getExe idagio-web}";
       };
     };
 

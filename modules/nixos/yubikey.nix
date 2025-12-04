@@ -115,16 +115,16 @@ in
   config = lib.mkIf cfg.enable {
     services.udev.extraRules = ''
       # Link/unlink ssh key on yubikey add/remove
-      SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1050", RUN+="${lib.getBin yubikey-up}/bin/yubikey-up"
+      SUBSYSTEM=="usb", ACTION=="add", ATTR{idVendor}=="1050", RUN+="${lib.getExe yubikey-up}"
       # NOTE: Yubikey 4 has a ID_VENDOR_ID on remove, but not Yubikey 5 BIO, whereas both have a HID_NAME.
       # Yubikey 5 HID_NAME uses "YubiKey" whereas Yubikey 4 uses "Yubikey", so matching on "Yubi" works for both
-      SUBSYSTEM=="hid", ACTION=="remove", ENV{HID_NAME}=="Yubico Yubi*", RUN+="${lib.getBin yubikey-down}/bin/yubikey-down"
+      SUBSYSTEM=="hid", ACTION=="remove", ENV{HID_NAME}=="Yubico Yubi*", RUN+="${lib.getExe yubikey-down}"
     ''
     + optionalString cfg.lockOnRemove ''
       SUBSYSTEM=="hid",\
        ACTION=="remove",\
        ENV{HID_NAME}=="Yubico YubiKey FIDO",\
-       RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+       RUN+="${lib.getExe' pkgs.systemd "loginctl"} lock-sessions"
 
     '';
 
@@ -151,7 +151,7 @@ in
       description = "Restart pcscd service";
       serviceConfig = {
         Type = "oneshot";
-        ExecStart = "${pkgs.systemd}/bin/systemctl restart pcscd.service";
+        ExecStart = "${lib.getExe' pkgs.systemd "systemctl"} restart pcscd.service";
       };
     };
 

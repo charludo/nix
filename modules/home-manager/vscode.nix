@@ -20,13 +20,13 @@ in
         ];
         userSettings = {
           "git.enableSmartCommit" = true;
-          "nix.formatterPath" = "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
-          "nix.serverPath" = "${pkgs.nil}/bin/nil";
+          "nix.formatterPath" = "${lib.getExe pkgs.nixpkgs-fmt}";
+          "nix.serverPath" = "${lib.getExe pkgs.nil}";
           "nix.serverSettings" = {
             "nil" = {
               "formatting" = {
                 "command" = [
-                  "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
+                  "${lib.getExe' pkgs.nixfmt-rfc-style "nixfmt"}"
                 ];
               };
             };

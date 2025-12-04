@@ -59,7 +59,7 @@ let
     runtimeInputs = [ surfshark-stop ];
     text = ''
       systemctl daemon-reload
-      ${surfshark-stop}/bin/surfshark-stop
+      ${lib.getExe surfshark-stop}
       services=${services}
       random_service=$(printf "%s\n" "''${services[@]}" | shuf -n1)
       systemctl start "$random_service"
@@ -120,11 +120,11 @@ in
       };
       systemd.services."surfshark-ensure" = {
         script = ''
-          if ${pkgs.iproute2}/bin/ip a show tun0 &> /dev/null;
+          if ${lib.getExe' pkgs.iproute2 "ip"} a show tun0 &> /dev/null;
           then
           exit 0
           else
-          ${surfshark-random}/bin/surfshark-random
+          ${lib.getExe surfshark-random}
           fi
         '';
         serviceConfig = {

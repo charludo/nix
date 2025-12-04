@@ -87,10 +87,10 @@ let
     runtimeInputs = [ notify-telegram ];
     text = ''
       set +o nounset
-      ${notify-telegram}/bin/notify-telegram -m "Monit $MONIT_SERVICE - $MONIT_EVENT at $MONIT_DATE on $MONIT_HOST: $MONIT_ACTION $MONIT_DESCRIPTION."
+      ${lib.getExe notify-telegram} -m "Monit $MONIT_SERVICE - $MONIT_EVENT at $MONIT_DATE on $MONIT_HOST: $MONIT_ACTION $MONIT_DESCRIPTION."
     '';
   };
-  alertTelegram = "${send-telegram}/bin/send-telegram";
+  alertTelegram = "${lib.getExe send-telegram}";
 
   mkMonitOption = configBlock: {
     enable = lib.mkEnableOption "this monit config";
@@ -171,43 +171,43 @@ in
 
     sshd = mkMonitOption ''
       check process sshd with pidfile /var/run/sshd.pid
-        start program  "${pkgs.systemd}/bin/systemctl start sshd"
-        stop program  "${pkgs.systemd}/bin/systemctl stop sshd"
+        start program  "${lib.getExe' pkgs.systemd "systemctl"} start sshd"
+        stop program  "${lib.getExe' pkgs.systemd "systemctl"} stop sshd"
         if failed port 22 protocol ssh for 2 cycles then restart
         if failed port 22 protocol ssh for 2 cycles then exec ${alertTelegram}
     '';
 
     postfix = mkMonitOption ''
       check process postfix with pidfile /var/lib/postfix/queue/pid/master.pid
-        start program = "${pkgs.systemd}/bin/systemctl start postfix"
-        stop program = "${pkgs.systemd}/bin/systemctl stop postfix"
+        start program = "${lib.getExe' pkgs.systemd "systemctl"} start postfix"
+        stop program = "${lib.getExe' pkgs.systemd "systemctl"} stop postfix"
         if failed port 25 protocol smtp for 5 cycles then restart
         if failed port 25 protocol smtp for 5 cycles then restart
     '';
 
     dovecot = mkMonitOption ''
       check process dovecot with pidfile /var/run/dovecot2/master.pid
-        start program = "${pkgs.systemd}/bin/systemctl start dovecot2"
-        stop program = "${pkgs.systemd}/bin/systemctl stop dovecot2"
+        start program = "${lib.getExe' pkgs.systemd "systemctl"} start dovecot2"
+        stop program = "${lib.getExe' pkgs.systemd "systemctl"} stop dovecot2"
         if failed host ${config.mailserver.fqdn} port 993 type tcpssl sslauto protocol imap for 5 cycles then restart
         if failed host ${config.mailserver.fqdn} port 993 type tcpssl sslauto protocol imap for 5 cycles then exec ${alertTelegram}
     '';
 
     rspamd = mkMonitOption ''
       check process rspamd with matching "rspamd: main process"
-        start program = "${pkgs.systemd}/bin/systemctl start rspamd"
-        stop program = "${pkgs.systemd}/bin/systemctl stop rspamd"
+        start program = "${lib.getExe' pkgs.systemd "systemctl"} start rspamd"
+        stop program = "${lib.getExe' pkgs.systemd "systemctl"} stop rspamd"
     '';
 
     smartd = mkMonitOption ''
-      check program smartd with path "${smartd-check}/bin/smartd-check"
+      check program smartd with path "${lib.getExe smartd-check}"
         every 120 cycles
         if status > 0 then alert
         if status > 0 then exec ${alertTelegram}
     '';
 
     zfs = mkMonitOption ''
-      check program zfs-check with path "${zfs-check}/bin/zfs-check"
+      check program zfs-check with path "${lib.getExe zfs-check}"
         if status == 0 then alert
         if status == 0 then exec ${alertTelegram}
     '';

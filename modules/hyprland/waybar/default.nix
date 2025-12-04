@@ -1,12 +1,18 @@
 {
   config,
+  lib,
   pkgs,
   private-settings,
   ...
 }:
 let
   modules = import ./modules.nix {
-    inherit pkgs config private-settings;
+    inherit
+      pkgs
+      lib
+      config
+      private-settings
+      ;
   };
 in
 {

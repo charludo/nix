@@ -138,7 +138,7 @@ in
       }";
       usev6 = "no";
       domains = builtins.map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
-      username = "${pkgs.dig}/bin/nsupdate";
+      username = "${lib.getExe' pkgs.dig "nsupdate"}";
       passwordFile = config.age.secrets.dns-update-pw.path;
       server = private-settings.ad.dnsServer;
       zone = private-settings.domains.ad;

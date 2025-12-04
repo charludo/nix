@@ -28,7 +28,7 @@ in
           user = cfg.defaultUser;
         };
         default_session = {
-          command = "${pkgs.tuigreet}/bin/tuigreet -r --remember-user-session --asterisks --cmd \"Hyprland\"";
+          command = "${lib.getExe pkgs.tuigreet} -r --remember-user-session --asterisks --cmd \"Hyprland\"";
         };
       };
     };

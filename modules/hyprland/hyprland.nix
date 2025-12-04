@@ -165,26 +165,26 @@
             ];
             terminal = config.home.sessionVariables.TERMINAL;
 
-            rofi = "${pkgs.rofi.override { plugins = [ pkgs.rofi-emoji ]; }}/bin/rofi";
-            rofi-rbw = "${pkgs.rofi-rbw}/bin/rofi-rbw";
+            rofi = "${lib.getExe (pkgs.rofi.override { plugins = [ pkgs.rofi-emoji ]; })}";
+            rofi-rbw = "${lib.getExe pkgs.rofi-rbw}";
             menu = "${rofi} -modi \"drun,ssh,filebrowser\" -show drun -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             projects = "${rofi} -modi \"projects:rofi-projects\" -show projects -sort -sorting-method \"fzf\" -matching \"fuzzy\"";
             clipboard = "${rofi} -modi \"emoji,clipboard:rofi-cliphist\" -show emoji -show-icons";
             rbw = "${rofi-rbw} --target password --prompt \"   Vaultwarden   \"";
             screenshots = "${rofi} -modi \"screenshot:rofi-screenshot,screencapture:rofi-screencapture\" -show screenshot";
-            hyprlock = "${pkgs.hyprlock}/bin/hyprlock";
+            hyprlock = "${lib.getExe pkgs.hyprlock}";
 
-            pactl = "${pkgs.pulseaudio}/bin/pactl";
-            playerctl = "${config.services.playerctld.package}/bin/playerctl";
-            playerctld = "${config.services.playerctld.package}/bin/playerctld";
+            pactl = "${lib.getExe' pkgs.pulseaudio "pactl"}";
+            playerctl = "${lib.getExe' config.services.playerctld.package "playerctl"}";
+            playerctld = "${lib.getExe' config.services.playerctld.package "playerctld"}";
           in
           [
             # Program bindings
             "${mainMod},Return,exec,${terminal}"
             "${mainMod},q,killactive"
-            "${shiftMod},q,exec,${pkgs.hyprland}/bin/hyprctl kill"
+            "${shiftMod},q,exec,${lib.getExe' pkgs.hyprland "hyprctl"} kill"
             "${mainMod},l,exec,${hyprlock}"
-            "${shiftMod},l,exec,${pkgs.systemd}/bin/systemctl suspend"
+            "${shiftMod},l,exec,${lib.getExe' pkgs.systemd "systemctl"} suspend"
 
             "${mainMod},Tab,cyclenext"
             "${mainMod},Tab,bringactivetotop"

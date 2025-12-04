@@ -99,19 +99,19 @@ in
         ];
 
         preSetup = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${pkgs.iproute2}/bin/ip route add $(${pkgs.dig}/bin/dig +short ${cfg.endpoint}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+          ${lib.getExe' pkgs.iproute2 "ip"} route add $(${lib.getExe pkgs.dig} +short ${cfg.endpoint}) via $(${lib.getExe' pkgs.iproute2 "ip"} route show 0.0.0.0/0 | ${lib.getExe' pkgs.gawk "awk"} '{print $3}')
         '';
         postShutdown = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${pkgs.iproute2}/bin/ip route del $(${pkgs.dig}/bin/dig +short ${cfg.endpoint}) via $(${pkgs.iproute2}/bin/ip route show 0.0.0.0/0 | ${pkgs.gawk}/bin/awk '{print $3}')
+          ${lib.getExe' pkgs.iproute2 "ip"} route del $(${lib.getExe pkgs.dig} +short ${cfg.endpoint}) via $(${lib.getExe' pkgs.iproute2 "ip"} route show 0.0.0.0/0 | ${lib.getExe' pkgs.gawk "awk"} '{print $3}')
         '';
 
         postSetup = optional (cfg.dns != [ ]) ''
           printf "${
             concatStringsSep "\n" (map (entry: "nameserver ${entry}") cfg.dns)
-          }" | ${pkgs.openresolv}/bin/resolvconf -a ${cfg.interface} -m 0
+          }" | ${lib.getExe' pkgs.openresolv "resolvconf"} -a ${cfg.interface} -m 0
         '';
         preShutdown = optional (cfg.dns != [ ]) ''
-          "${pkgs.openresolv}/bin/resolvconf -d ${cfg.interface}"
+          "${lib.getExe' pkgs.openresolv "resolvconf"} -d ${cfg.interface}"
         '';
       };
     };

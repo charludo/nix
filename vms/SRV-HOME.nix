@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   lgtv =
     pkgs.writers.writePython3Bin "lgtv" { libraries = [ pkgs.python313Packages.flask ]; } # python
@@ -9,8 +9,7 @@ let
 
 
         app = Flask(__name__)
-        cmd = "${pkgs.python313Packages.aiopylgtv}"
-        cmd = f"{cmd}/bin/aiopylgtvcommand"
+        cmd = "${lib.getExe' pkgs.python313Packages.aiopylgtv "aiopylgtvcommand"}"
 
 
         def run_command(args):
@@ -118,7 +117,7 @@ in
       User = "lgtv";
       Group = "lgtv";
 
-      ExecStart = "${lgtv}/bin/lgtv";
+      ExecStart = lib.getExe lgtv;
     };
   };
 

@@ -51,7 +51,7 @@ in
         Requires = optionals cfg.socket.enable [ "yubikey-touch-detector.socket" ];
       };
       Service = {
-        ExecStart = "${cfg.package}/bin/yubikey-touch-detector ${concatStringsSep " " cfg.extraArgs}";
+        ExecStart = "${lib.getExe' cfg.package "yubikey-touch-detector"} ${concatStringsSep " " cfg.extraArgs}";
         Environment = [ "PATH=${lib.makeBinPath [ pkgs.gnupg ]}" ];
         Restart = "on-failure";
         RestartSec = "1sec";

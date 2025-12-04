@@ -64,7 +64,7 @@ in
     ];
 
     plugins.dap.adapters.executables.lldb = {
-      command = "${pkgs.lldb_20}/bin/lldb-vscode";
+      command = "${lib.getExe' pkgs.lldb_20 "lldb-vscode"}";
     };
   };
 }

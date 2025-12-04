@@ -29,19 +29,19 @@ in
         set -euo pipefail
 
         echo "Starting tailscaled.service..."
-        ${pkgs.systemd}/bin/systemctl start tailscaled.service
+        ${lib.getExe' pkgs.systemd "systemctl"} start tailscaled.service
 
         echo "Bringing up tailscale..."
-        ${pkgs.tailscale}/bin/tailscale up --accept-routes --ssh
+        ${lib.getExe pkgs.tailscale} up --accept-routes --ssh
       '')
       (pkgs.writeShellScriptBin "tailscale-down" ''
         set -euo pipefail
 
         echo "Bringing down tailscale..."
-        ${pkgs.tailscale}/bin/tailscale down
+        ${lib.getExe pkgs.tailscale} down
 
         echo "Stopping tailscaled.service..."
-        ${pkgs.systemd}/bin/systemctl stop tailscaled.service
+        ${lib.getExe' pkgs.systemd "systemctl"} stop tailscaled.service
       '')
     ];
   };

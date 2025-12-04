@@ -272,7 +272,7 @@ in
 
         EnvironmentFile = cfg.secretsFile;
 
-        ExecStart = "${pkgs.nodejs}/bin/node ${stateDir}/web/build/index.js";
+        ExecStart = "${lib.getExe' pkgs.nodejs "node"} ${stateDir}/web/build/index.js";
         Restart = "on-failure";
       };
     };

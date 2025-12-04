@@ -22,7 +22,7 @@ in
         settings = {
           screencast = {
             chooser_type = "simple";
-            chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -ro";
+            chooser_cmd = "${lib.getExe pkgs.slurp} -f %o -ro";
           };
         };
       };

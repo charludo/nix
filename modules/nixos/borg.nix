@@ -103,8 +103,8 @@ in
               environment
               # bash
               + ''
-                ${pkgs.borgbackup}/bin/borg init --encryption=repokey --remote-path=${repo}
-                ${pkgs.borgbackup}/bin/borg key export ${repo}
+                ${lib.getExe' pkgs.borgbackup "borg"} init --encryption=repokey --remote-path=${repo}
+                ${lib.getExe' pkgs.borgbackup "borg"} key export ${repo}
               '';
           })
           (pkgs.writeShellApplication {
@@ -115,7 +115,7 @@ in
               # bash
               + ''
                 mkdir -p "/mnt/borg-${name}"
-                ${pkgs.borgbackup}/bin/borg mount ${repo} "/mnt/borg-${name}"
+                ${lib.getExe' pkgs.borgbackup "borg"} mount ${repo} "/mnt/borg-${name}"
                 echo "mounted to /mnt/borg-${name}"
               '';
           })
@@ -124,7 +124,7 @@ in
             runtimeInputs = [ pkgs.borgbackup ];
             text = # bash
               ''
-                ${pkgs.borgbackup}/bin/borg umount "/mnt/borg-${name}"
+                ${lib.getExe' pkgs.borgbackup "borg"} umount "/mnt/borg-${name}"
                 echo "un-mounted /mnt/borg-${name}"
               '';
           })
@@ -135,7 +135,7 @@ in
               environment
               # bash
               + ''
-                ${pkgs.borgbackup}/bin/borg check ${repo}
+                ${lib.getExe' pkgs.borgbackup "borg"} check ${repo}
               '';
           })
         ]
