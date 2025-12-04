@@ -3,6 +3,7 @@ let
   lgtv =
     pkgs.writers.writePython3Bin "lgtv" { libraries = [ pkgs.python313Packages.flask ]; } # python
       ''
+        # flake8: noqa
         from flask import Flask
         import os
         import time
@@ -14,7 +15,7 @@ let
 
         def run_command(args):
             os.system(
-                f"{cmd} 192.168.24.100 {args}"
+                f"{cmd} 192.168.24.200 {args}"
             )
 
 
