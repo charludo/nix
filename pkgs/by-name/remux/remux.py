@@ -219,8 +219,8 @@ def remove_unwanted_tracks(in_file):
     """
     Remove all audio and subtitle tracks which are in unmonitored languages
     """
-    ok_subtitles = ["en", "eng", "de", "ger", "und", "unknown"]
-    ok_audio = ok_subtitles + ["ja", "jpn"]
+    ok_subtitles = ["en", "eng", "de", "ger", "ja", "jpn", "und", "unknown"]
+    ok_audio = ["en", "eng", "de", "ger", "ja", "jpn", "und", "unknown"]
 
     _, existing_audio, existing_subtitles = get_tracks(in_file)
     if not (
