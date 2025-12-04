@@ -26,6 +26,7 @@ in
       imports = [ ../nixvim ];
       enable = true;
       colors = lib.mkDefault config.colorScheme.palette;
+      palette = lib.colors.extendPalette config.colorScheme.palette;
       languages = cfg.languages;
 
       opts = lib.mkIf cfg.spellChecking {

@@ -8,7 +8,6 @@
 let
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
-  permittedInsecure = ../overlays/insecure.nix;
 in
 rec {
   homeModulesForOsConfig = [
@@ -19,6 +18,7 @@ rec {
           inputs
           outputs
           lib
+          pkgs
           private-settings
           secrets
           ;
@@ -32,8 +32,6 @@ rec {
             inputs.nix-colors.homeManagerModules.colorScheme
             inputs.nixvim.homeModules.nixvim
             inputs.plasma-manager.homeModules.plasma-manager
-
-            permittedInsecure
           ];
         }
       ]
@@ -50,7 +48,8 @@ rec {
         inputs.agenix-rekey.nixosModules.default
         inputs.snow.nixosModules.default
 
-        permittedInsecure
+        # Ensures we use pkgs.ours as well here
+        { nixpkgs.pkgs = pkgs; }
       ]
       ++ (builtins.attrValues outputs.nixosModules)
       ++ [ ../hosts/${hostname} ]
@@ -58,9 +57,9 @@ rec {
       ++ extraModules;
       specialArgs = {
         inherit
-          lib
           inputs
           outputs
+          lib
           private-settings
           secrets
           ;
@@ -80,6 +79,9 @@ rec {
             inputs.agenix-rekey.nixosModules.default
             inputs.snow.nixosModules.default
 
+            # Ensures we use pkgs.ours as well here
+            { nixpkgs.pkgs = pkgs; }
+
             inputs.nixos-generators.nixosModules.all-formats
             "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
             "${inputs.nixpkgs}/nixos/modules/virtualisation/proxmox-image.nix"
@@ -88,15 +90,13 @@ rec {
             ../modules/vms
             ../hosts/common
             ../users/paki/user.nix
-
-            permittedInsecure
           ]
           ++ (builtins.attrValues outputs.nixosModules);
           specialArgs = {
             inherit
-              lib
               inputs
               outputs
+              lib
               private-settings
               secrets
               ;
@@ -114,8 +114,6 @@ rec {
         inputs.agenix-rekey.homeManagerModules.default
         inputs.nix-colors.homeManagerModules.colorScheme
         inputs.nixvim.homeModules.nixvim
-
-        permittedInsecure
       ]
       ++ (builtins.attrValues outputs.homeModules)
       ++ [ ../users/${username}/home/${hostname}.nix ]
@@ -123,9 +121,9 @@ rec {
       inherit pkgs;
       extraSpecialArgs = {
         inherit
-          lib
           inputs
           outputs
+          lib
           private-settings
           secrets
           ;

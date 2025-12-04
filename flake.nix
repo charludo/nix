@@ -8,9 +8,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     nixvim.url = "github:nix-community/nixvim";
-    # nixvim.inputs.nixpkgs.follows = "nixpkgs";
 
-    snow.url = "git+ssh://git@github.com/charludo/snow";
+    snow.url = "github:charludo/snow";
     snow.inputs.nixpkgs.follows = "nixpkgs";
 
     nixos-generators.url = "github:nix-community/nixos-generators";
@@ -33,7 +32,7 @@
     authentik.url = "github:nix-community/authentik-nix";
     authentik.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix-update-notifier.url = "git+ssh://git@github.com/asymmetric/nixpkgs-update-notifier";
+    nix-update-notifier.url = "github:asymmetric/nixpkgs-update-notifier";
     nix-update-notifier.inputs.nixpkgs.follows = "nixpkgs";
 
     plasma-manager.url = "github:pjones/plasma-manager";
@@ -48,8 +47,10 @@
     musnix.url = "github:musnix/musnix";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    eso-reshade.url = "git+ssh://git@github.com/charludo/eso-reshade";
-    idagio.url = "git+ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver";
+    eso-reshade.url = "github:charludo/eso-reshade";
+    eso-reshade.inputs.nixpkgs.follows = "nixpkgs";
+    idagio.url = "github:charludo/IDAGIO-Downloader-Rust-ver";
+    idagio.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -61,16 +62,21 @@
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
-          (import ./overlays/nixpkgs.nix { inherit inputs outputs; })
+          (import ./overlays/nixpkgs.nix)
+          (import ./overlays/ours.nix { inherit outputs; })
           inputs.agenix-rekey.overlays.default
+          inputs.firefox-addons.overlays.default
         ];
+        config = {
+          allowUnfree = true;
+          allowUnfreePredicate = (_: true);
+          permittedInsecurePackages = import ./overlays/insecure.nix;
+          packageOverrides = import ./overlays/overrides.nix;
+        };
       };
       inherit (pkgs) lib;
     in
     {
-      inherit lib;
-      overlays = import ./overlays/flake-inputs.nix { inherit inputs outputs; };
-
       nixosConfigurations =
         builtins.listToAttrs [
           (lib.mkConfigs.nixos "hub" true [ inputs.nixos-hardware.nixosModules.gigabyte-b550 ])
@@ -108,7 +114,8 @@
         (lib.mkConfigs.home "marie" "CL-NIX-3" [ inputs.plasma-manager.homeModules.plasma-manager ])
       ];
 
-      packages.${system} = pkgs.ours;
+      packages.${system} = import ./pkgs { inherit inputs pkgs; };
+      lib = import ./lib { inherit inputs outputs pkgs; };
 
       devShells.${system} = {
         default = pkgs.callPackage ./shells { };

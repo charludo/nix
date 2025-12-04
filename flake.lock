@@ -170,20 +170,22 @@
     },
     "eso-reshade": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": [
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1734271430,
         "narHash": "sha256-wCa+2zUBHN/9IMIKuowtzQYmFidRY9Azr9PejSwHJag=",
-        "ref": "refs/heads/main",
+        "owner": "charludo",
+        "repo": "eso-reshade",
         "rev": "8fbd802f0d05abe078db9c9d5721a33178870df2",
-        "revCount": 11,
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/eso-reshade"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/eso-reshade"
+        "owner": "charludo",
+        "repo": "eso-reshade",
+        "type": "github"
       }
     },
     "fenix": {
@@ -513,21 +515,23 @@
     "idagio": {
       "inputs": {
         "fenix": "fenix",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
         "utils": "utils"
       },
       "locked": {
         "lastModified": 1722883548,
         "narHash": "sha256-/fJ1RYbbmp42dtlcIgDgjULXiiQXgi/5XOKu1VSP09E=",
-        "ref": "refs/heads/main",
+        "owner": "charludo",
+        "repo": "IDAGIO-Downloader-Rust-ver",
         "rev": "eaaae3168b65bfb10b6657d950df0ee93f1363b5",
-        "revCount": 32,
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/IDAGIO-Downloader-Rust-ver"
+        "owner": "charludo",
+        "repo": "IDAGIO-Downloader-Rust-ver",
+        "type": "github"
       }
     },
     "ixx": {
@@ -624,7 +628,7 @@
     },
     "musnix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs"
       },
       "locked": {
         "lastModified": 1763506376,
@@ -732,15 +736,15 @@
       "locked": {
         "lastModified": 1754230056,
         "narHash": "sha256-KRK+vSd2/YpaNoP/sdbBWSCfJA07yEvnwg+394aHHs8=",
-        "ref": "refs/heads/main",
+        "owner": "asymmetric",
+        "repo": "nixpkgs-update-notifier",
         "rev": "bc79a19b1e1a6d716d1d6e5be2f45d4c775be009",
-        "revCount": 238,
-        "type": "git",
-        "url": "ssh://git@github.com/asymmetric/nixpkgs-update-notifier"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/asymmetric/nixpkgs-update-notifier"
+        "owner": "asymmetric",
+        "repo": "nixpkgs-update-notifier",
+        "type": "github"
       }
     },
     "nixlib": {
@@ -797,16 +801,18 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1764081664,
-        "narHash": "sha256-sUoHmPr/EwXzRMpv1u/kH+dXuvJEyyF2Q7muE+t0EU4=",
+        "lastModified": 1756542300,
+        "narHash": "sha256-tlOn88coG5fzdyqz6R93SQL5Gpq+m/DsWpekNFhqPQk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "dc205f7b4fdb04c8b7877b43edb7b73be7730081",
+        "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
         "type": "github"
       },
       "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "nixpkgs-lib": {
@@ -841,34 +847,6 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-UlRZtrCnhPFSJlDQE7M0eyhgvuuHBTe1eJ9N9AQlJQ0=",
-        "path": "/nix/store/3pif36ks3f56py4wb1dkq6sh0nkf3ygj-source",
-        "type": "path"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1756542300,
-        "narHash": "sha256-tlOn88coG5fzdyqz6R93SQL5Gpq+m/DsWpekNFhqPQk=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "d7600c775f877cd87b4f5a831c28aa94137377aa",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
         "lastModified": 1763966396,
         "narHash": "sha256-6eeL1YPcY1MV3DDStIDIdy/zZCDKgHdkCmsrLJFiZf0=",
         "owner": "nixos",
@@ -883,7 +861,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_5": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1764081664,
         "narHash": "sha256-sUoHmPr/EwXzRMpv1u/kH+dXuvJEyyF2Q7muE+t0EU4=",
@@ -902,7 +880,7 @@
     "nixvim": {
       "inputs": {
         "flake-parts": "flake-parts_3",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_3",
         "nuschtosSearch": "nuschtosSearch",
         "systems": "systems_5"
       },
@@ -1057,7 +1035,7 @@
         "nix-update-notifier": "nix-update-notifier",
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_2",
         "nixvim": "nixvim",
         "plasma-manager": "plasma-manager",
         "snow": "snow"
@@ -1108,15 +1086,15 @@
       "locked": {
         "lastModified": 1750271011,
         "narHash": "sha256-LIOnjVyx73YfaY37dlNe0j4yeVUIyZ8Wtx7bteeP7t4=",
-        "ref": "refs/heads/main",
+        "owner": "charludo",
+        "repo": "snow",
         "rev": "389b7c96b437a84c6570e49010fa8ec0c947e42f",
-        "revCount": 11,
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/snow"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/charludo/snow"
+        "owner": "charludo",
+        "repo": "snow",
+        "type": "github"
       }
     },
     "systems": {

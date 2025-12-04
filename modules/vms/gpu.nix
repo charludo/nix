@@ -37,9 +37,6 @@ in
 
       proxmox.qemuExtraConf.hostpci0 = "0000:00:02,pcie=1";
 
-      nixpkgs.config.packageOverrides = pkgs: {
-        vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
-      };
       hardware.graphics = {
         enable = true;
         extraPackages = with pkgs; [

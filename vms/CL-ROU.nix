@@ -1,6 +1,8 @@
 {
   inputs,
   outputs,
+  lib,
+  pkgs,
   private-settings,
   secrets,
   ...
@@ -22,6 +24,8 @@
     inherit
       inputs
       outputs
+      lib
+      pkgs
       private-settings
       secrets
       ;

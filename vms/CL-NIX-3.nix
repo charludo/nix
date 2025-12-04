@@ -25,6 +25,8 @@
     inherit
       inputs
       outputs
+      lib
+      pkgs
       private-settings
       secrets
       ;
@@ -52,7 +54,7 @@
 
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma6.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
   environment.plasma6.excludePackages = with pkgs.kdePackages; [
     plasma-browser-integration

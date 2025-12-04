@@ -1,12 +1,5 @@
-{ outputs, pkgs, ... }:
+{ pkgs, ... }:
 {
-  nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays;
-    config = {
-      allowUnfree = true;
-    };
-  };
-
   environment.systemPackages = with pkgs; [
     jq
     gcc

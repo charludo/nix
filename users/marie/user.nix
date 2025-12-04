@@ -31,12 +31,13 @@ in
       git
       dig
       nano
-      neovim
       tcpdump
       nettools
       traceroute
       nmap
       wirelesstools
+
+      ours.nvim
     ];
   };
   users.groups.marie.gid = 1000;

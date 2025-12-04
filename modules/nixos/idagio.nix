@@ -23,8 +23,10 @@ let
 
 
         def run_command(args):
+            # pylint: disable=line-too-long
+            cmd = "${lib.getExe cfg.package}"
             os.system(
-                f"${lib.getExe' cfg.package "idagio"} {args}"
+                f"{cmd} {args}"
             )
 
 

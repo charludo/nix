@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  inputs,
   secrets,
   ...
 }:
@@ -101,17 +100,8 @@
     idagio.enable = true;
     idagio.openFirewall = true;
     idagio.configLocation = config.age.secrets.idagio.path;
-    idagio.package = inputs.idagio.packages.x86_64-linux.default;
+    idagio.package = pkgs.ours.idagio;
   };
-
-  # NZBGet scripts require python
-  nixpkgs.overlays = [
-    (_final: prev: {
-      nzbget = prev.nzbget.overrideAttrs (old: {
-        buildInputs = old.buildInputs ++ [ pkgs.python313 ];
-      });
-    })
-  ];
 
   nas.enable = true;
   nas.extraUsers = [

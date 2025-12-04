@@ -1,12 +1,8 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }:
-let
-  colorLib = import ../../lib/colors.nix { inherit lib; };
-in
 {
   imports = [
     ./ergonomical
@@ -22,7 +18,6 @@ in
   options.palette = lib.mkOption {
     type = lib.types.anything;
     description = "48 color palette used for neovim. Usually auto-generated from a 16 color palette.";
-    default = colorLib.extendPalette config.colors;
     defaultText = lib.literalExpression "lib.colors.extendPalette config.colors";
   };
 

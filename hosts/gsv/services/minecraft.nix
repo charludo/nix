@@ -1,7 +1,6 @@
 {
   config,
   private-settings,
-  lib,
   pkgs,
   ...
 }:
@@ -39,10 +38,4 @@
   system.activationScripts.script.text = ''
     ln -sf ${./pickaxe.png} ${config.services.minecraft-server.dataDir}/server-icon.png
   '';
-
-  nixpkgs.config.allowUnfreePredicate =
-    pkg:
-    builtins.elem (lib.getName pkg) [
-      "minecraft-server"
-    ];
 }

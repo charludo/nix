@@ -1,9 +1,7 @@
-{
-  nixpkgs.config.permittedInsecurePackages = [
-    "libsoup-2.74.3" # used by Darktable
+[
+  "libsoup-2.74.3" # used by Darktable
 
-    "jitsi-meet-1.0.8792" # used by Jitsi
+  "jitsi-meet-1.0.8792" # used by Jitsi
 
-    "qtwebengine-5.15.19" # used by Jellyfin Media Player
-  ];
-}
+  "qtwebengine-5.15.19" # used by Jellyfin Media Player
+]
