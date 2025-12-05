@@ -24,16 +24,11 @@ rec {
           ;
       };
       home-manager.sharedModules = [
-        outputs.homeModules.common
-        {
-          imports = [
-            inputs.agenix.homeManagerModules.default
-            inputs.agenix-rekey.homeManagerModules.default
-            inputs.nix-colors.homeManagerModules.colorScheme
-            inputs.nixvim.homeModules.nixvim
-            inputs.plasma-manager.homeModules.plasma-manager
-          ];
-        }
+        inputs.agenix.homeManagerModules.default
+        inputs.agenix-rekey.homeManagerModules.default
+        inputs.nix-colors.homeManagerModules.colorScheme
+        inputs.nixvim.homeModules.nixvim
+        inputs.plasma-manager.homeModules.plasma-manager
       ]
       ++ (builtins.attrValues outputs.homeModules);
     }
@@ -78,6 +73,7 @@ rec {
             inputs.agenix.nixosModules.default
             inputs.agenix-rekey.nixosModules.default
             inputs.snow.nixosModules.default
+            inputs.home-manager.nixosModules.home-manager
 
             # Ensures we use pkgs.ours as well here
             { nixpkgs.pkgs = pkgs; }

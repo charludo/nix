@@ -1,35 +1,5 @@
 {
-  inputs,
-  outputs,
-  lib,
-  pkgs,
-  private-settings,
-  secrets,
-  ...
-}:
-{
-  imports = [
-    inputs.home-manager.nixosModules.home-manager
-    ../users/charlotte/user.nix
-  ];
-
-  home-manager.users.charlotte.imports = [
-    inputs.agenix.homeManagerModules.default
-    inputs.agenix-rekey.homeManagerModules.default
-    inputs.nix-colors.homeManagerModules.colorScheme
-    inputs.nixvim.homeModules.nixvim
-  ]
-  ++ (builtins.attrValues outputs.homeModules);
-  home-manager.extraSpecialArgs = {
-    inherit
-      inputs
-      outputs
-      lib
-      pkgs
-      private-settings
-      secrets
-      ;
-  };
+  imports = [ ../users/charlotte/user.nix ];
 
   vm = {
     id = 3022;
@@ -41,6 +11,8 @@
 
     networking.openPorts.tcp = [ 8000 ];
     networking.openPorts.udp = [ 8000 ];
+
+    clientDevice.enable = true;
   };
 
   ld.enable = true;

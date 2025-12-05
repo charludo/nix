@@ -11,6 +11,7 @@ let
 in
 {
   imports = [
+    ./client.nix
     ./certs.nix
     ./gpu.nix
   ];
