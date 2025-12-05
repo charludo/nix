@@ -47,12 +47,18 @@ in
           directory = "${config.home.homeDirectory}/Documents";
         };
         commit.gpgsign = true;
-        format.signoff = true;
+        format = {
+          signoff = true;
+          numbered = false;
+          signature = "";
+        };
+        am.threeWay = false;
         gpg.ssh.allowedSignersFile = "~/.ssh/allowed_signers";
         gpg.format = "ssh";
         user.signingkey = lib.mkIf (cfg.signingKey.file != null) cfg.signingKey.file;
 
         alias.ch = "checkout";
+        alias.fm = "format-patch --zero-commit --full-index";
       };
     };
     home.file.".ssh/allowed_signers".text = lib.mkIf (
