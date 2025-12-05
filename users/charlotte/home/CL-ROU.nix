@@ -12,7 +12,7 @@
     gh.enable = true;
     git = {
       enable = true;
-      signingKey.pub = ../keys/ssh.pub;
+      sshKey.pub = ../keys/ssh.pub;
       user.name = private-settings.git.charlotte.name;
       user.email = private-settings.git.charlotte.email;
     };

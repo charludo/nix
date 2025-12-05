@@ -22,9 +22,9 @@ in
     gh.enable = true;
     git = {
       enable = true;
+      sshKey.pub = ../../keys/ssh.pub;
       user.name = private-settings.git.charlotte.name;
       user.email = private-settings.git.charlotte.email;
-      signingKey.pub = ../../keys/ssh.pub;
     };
     nix-your-shell.enable = true;
   };

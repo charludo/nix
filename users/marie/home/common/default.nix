@@ -21,7 +21,7 @@
     fzf.enable = true;
     git = {
       enable = true;
-      signingKey.pub = ../../keys/ssh.pub;
+      sshKey.pub = ../../keys/ssh.pub;
       user.name = private-settings.git.marie.name;
       user.email = private-settings.git.marie.email;
     };
