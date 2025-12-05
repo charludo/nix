@@ -72,6 +72,8 @@ in
       )
       // {
         ddclient.path = [ pkgs.dig ];
+        ddclient.serviceConfig.User = "ddclient";
+        ddclient.serviceConfig.Group = "ddclient";
       };
 
     services.nginx = {
@@ -142,7 +144,16 @@ in
       passwordFile = config.age.secrets.dns-update-pw.path;
       server = private-settings.ad.dnsServer;
       zone = private-settings.domains.ad;
+      # Has to be used until https://github.com/NixOS/nixpkgs/pull/468051 is merged
+      # configFile = "/var/lib/ddclient/changed-conf.conf";
     };
-    age.secrets.dns-update-pw.rekeyFile = secrets.dns-update-pw;
+    age.secrets.dns-update-pw = {
+      rekeyFile = secrets.dns-update-pw;
+      owner = "ddclient";
+      group = "ddclient";
+    };
+    users.users.ddclient.group = "ddclient";
+    users.users.ddclient.isNormalUser = true;
+    users.groups.ddclient = { };
   };
 }
