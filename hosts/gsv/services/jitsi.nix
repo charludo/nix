@@ -1,8 +1,8 @@
 {
   config,
-  private-settings,
-  secrets,
   lib,
+  pkgs,
+  private-settings,
   ...
 }:
 let
@@ -23,24 +23,25 @@ in
     config = {
       hosts.anonymousdomain = "guest.jitsi.${domains.blog}";
       hosts.authdomain = "jitsi.${domains.blog}";
-      authdomain = "jitsi.${domains.blog}";
+      hosts.domain = "jitsi.${domains.blog}";
       enableInsecureRoomNameWarning = true;
       audioQuality = {
         stereo = true;
         opusMaxAverageBitrate = 510000;
       };
-      useStunTurn = true;
       p2p = {
-        useStunTurn = true;
         stunServers =
           let
             coturn = config.services.coturn;
+            domain = "turn.${domains.blog}";
+            port = builtins.toString coturn.listening-port;
+            portTls = builtins.toString coturn.tls-listening-port;
           in
           [
-            { urls = "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"; }
-            { urls = "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"; }
-            { urls = "stun:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=udp"; }
-            { urls = "stun:turn.${domains.blog}:${builtins.toString coturn.listening-port}?transport=tcp"; }
+            { urls = "stun:${domain}:${port}"; }
+            { urls = "stuns:${domain}:${portTls}"; }
+            { urls = "turn:${domain}:${port}"; }
+            { urls = "turns:${domain}:${portTls}"; }
           ];
         iceTransportPolicy = "relay";
       };
@@ -69,12 +70,9 @@ in
     enable = true;
     openFirewall = true;
     nat.harvesterAddresses = lib.mkForce [
-      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}?transport=udp"
-      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}?transport=tcp"
-      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=udp"
-      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}?transport=tcp"
+      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}"
+      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"
     ];
-    # config.videobridge.cc.assumed-bandwidth-limit = "1000 Mbps";
   };
 
   services.prosody = {
@@ -86,9 +84,25 @@ in
     '';
   };
 
-  age.secrets.turn-env = {
-    rekeyFile = secrets.gsv-turn-env;
-    owner = "prosody";
+  # allow prosody to read certificate files
+  users.users.prosody.extraGroups = [ "jitsi-meet" ];
+
+  # After a while, jicofo dies and the dreaded "an error occurred!"
+  # is seen when the second user joins. This "fixes" that...
+  # https://github.com/jitsi/jitsi-meet/issues/1390
+  systemd.services."restart-jicofo" = {
+    description = "Restart jicofo service";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${lib.getExe' pkgs.systemd "systemctl"} restart jicofo.service";
+    };
   };
-  systemd.services.prosody.serviceConfig.EnvironmentFile = config.age.secrets.turn-env.path;
+  systemd.timers."restart-jicofo" = {
+    description = "Timer to restart jicofo every day";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      RandomizedDelaySec = "3h";
+    };
+  };
 }
