@@ -143,10 +143,6 @@ in
 
     # Restart pcscd every 30mins to prevent "please insert card ..."
     services.pcscd.enable = true;
-    # systemd.services.pcscd.serviceConfig = {
-    # Restart = "always";
-    # RuntimeMaxSec = "1800s";
-    # };
     systemd.services."restart-pcscd" = {
       description = "Restart pcscd service";
       serviceConfig = {
@@ -154,7 +150,6 @@ in
         ExecStart = "${lib.getExe' pkgs.systemd "systemctl"} restart pcscd.service";
       };
     };
-
     systemd.timers."restart-pcscd" = {
       description = "Timer to restart pcscd every 30 minutes";
       wantedBy = [ "timers.target" ];
