@@ -404,6 +404,7 @@ in
       kb-mode-next = "Alt+Right,Control+Tab";
       kb-mode-previous = "Alt+Left,Control+ISO_Left_Tab";
       kb-custom-1 = "Alt+Return";
+      kb-row-select = "";
     };
   };
 }
