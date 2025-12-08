@@ -157,7 +157,7 @@ in
         ip = cfg.networking.address;
         proxmoxHost = lib.mkDefault "proxmox";
         proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
-        resizeDiskBy = cfg.hardware.storage;
+        resizeDiskTo = cfg.hardware.storage;
       };
     };
 

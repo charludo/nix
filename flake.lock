@@ -1084,11 +1084,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1750271011,
-        "narHash": "sha256-LIOnjVyx73YfaY37dlNe0j4yeVUIyZ8Wtx7bteeP7t4=",
+        "lastModified": 1765217479,
+        "narHash": "sha256-FFyQ1OtMBHePQ4CR8wflOulwA/ZleU1YHjlWN6cePrs=",
         "owner": "charludo",
         "repo": "snow",
-        "rev": "389b7c96b437a84c6570e49010fa8ec0c947e42f",
+        "rev": "31b1074423ce02ebdb689bc0d1886e93c8f18d7c",
         "type": "github"
       },
       "original": {
