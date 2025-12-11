@@ -2,6 +2,7 @@
 {
   environment.systemPackages = with pkgs; [
     jq
+    jless
     gcc
     unzip
     ripgrep
