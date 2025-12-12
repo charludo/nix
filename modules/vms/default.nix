@@ -212,6 +212,12 @@ in
       dates = "monthly";
       options = "-d";
     };
+    nix.settings = {
+      extra-substituters = [ "https://cache.${private-settings.domains.blog}" ];
+      extra-trusted-public-keys = [
+        "cache.${private-settings.domains.blog}-1:uh2KzANysUoaMiEesTO2IkE2h/ycuJKE3Jx8yz4XYJI="
+      ];
+    };
 
     # Hardware config is always identical
     boot.initrd.availableKernelModules = [
