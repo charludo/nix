@@ -7,6 +7,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.PAT }}
       - name: Check nixfmt formatting
         run: nix fmt -- --ci
       - name: Check for dead code
