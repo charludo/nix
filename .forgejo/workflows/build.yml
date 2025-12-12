@@ -1,0 +1,14 @@
+name: Build all flake outputs
+run-name: ${{ forgejo.actor }} is building all flake outputs (this may take a while)
+on: [push]
+jobs:
+  build-outputs:
+    runs-on: buildbot
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.PAT }}
+      - name: Build all flake outputs
+        run: nix build .?submodules=1#ci-builds

@@ -9,6 +9,7 @@
   imports = [
     ./blocky.nix
     ./borg.nix
+    ./cache.nix
     ./crabfit.nix
     ./fail2ban.nix
     ./jitsi.nix
