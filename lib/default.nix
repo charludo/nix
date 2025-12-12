@@ -13,8 +13,9 @@ let
         lib = self;
       in
       {
-        helpers = import ./helpers.nix { inherit lib outputs; };
+        ci = import ./ci.nix { inherit lib; };
         colors = import ./colors.nix { inherit lib; };
+        helpers = import ./helpers.nix { inherit lib outputs; };
         mkConfigs = import ./mkConfigs.nix {
           inherit
             lib

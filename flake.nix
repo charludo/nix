@@ -134,5 +134,7 @@
         homeConfigurations = self.homeConfigurations;
         collectHomeManagerConfigurations = true;
       };
+
+      ci-builds = pkgs.writeText "output-matrix.json" (builtins.toJSON (lib.ci.allOutputs self system));
     };
 }
