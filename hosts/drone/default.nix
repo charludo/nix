@@ -69,7 +69,7 @@
 
   snow = {
     useRemoteSudo = true;
-    buildOnTarget = false;
+    buildHost = "gsv";
   };
 
   hardware.graphics.enable = true;

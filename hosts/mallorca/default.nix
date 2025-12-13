@@ -53,5 +53,7 @@
     };
   };
 
+  snow.buildHost = "gsv";
+
   hardware.graphics.enable = true;
 }
