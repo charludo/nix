@@ -90,6 +90,7 @@ in
   # After a while, jicofo dies and the dreaded "an error occurred!"
   # is seen when the second user joins. This "fixes" that...
   # https://github.com/jitsi/jitsi-meet/issues/1390
+  systemd.services.jicofo.serviceConfig.LimitNOFILE = 52428800;
   systemd.services."restart-jicofo" = {
     description = "Restart jicofo service";
     serviceConfig = {
