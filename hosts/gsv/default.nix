@@ -7,7 +7,12 @@
 let
   inherit (private-settings) gsv;
   hostName = "gsv";
-  publicKey = builtins.readFile ../../users/charlotte/keys/ssh.pub;
+  publicKeys = builtins.map builtins.readFile [
+    ../../users/charlotte/keys/zakalwe_ssh.pub
+    ../../users/charlotte/keys/perostek_ssh.pub
+    ../../users/charlotte/keys/diziet_ssh.pub
+    ../../users/charlotte/keys/ssh.pub
+  ];
 in
 {
   imports = [
@@ -21,7 +26,7 @@ in
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
 
   # Make sure we can get on the system via ssh
-  users.users."${gsv.user}".openssh.authorizedKeys.keys = [ publicKey ];
+  users.users."${gsv.user}".openssh.authorizedKeys.keys = publicKeys;
   services.openssh.ports = [ gsv.port ];
 
   snow.targetHost = "root@${gsv.ip}";
@@ -102,7 +107,7 @@ in
         /boot-2/initrd-ssh-key
         /boot-3/initrd-ssh-key
       ];
-      authorizedKeys = [ publicKey ];
+      authorizedKeys = publicKeys;
     };
     # Not sure if necessary.
     # zpool import -a
