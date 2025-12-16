@@ -14,7 +14,6 @@
   age.enable = true;
   # androidUtils.enable = true;
   bluetooth.enable = true;
-  docker.enable = true;
   # eid.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;

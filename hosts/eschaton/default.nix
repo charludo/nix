@@ -13,7 +13,6 @@
 
   age.enable = true;
   bluetooth.enable = true;
-  docker.enable = true;
   graphicalFixes.enable = true;
   greetd.enable = true;
   gvfs.enable = true;
