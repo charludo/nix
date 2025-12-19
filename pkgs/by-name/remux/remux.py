@@ -215,12 +215,51 @@ def audio_conversion_successful(in_file, tmp_file):
     return True
 
 
+def get_extra_wanted_tracks(in_file):
+    """
+    Recurse up the tree and check for .remux files, which can contain
+    extra languages to keep for all files in all subdirs.
+    """
+    in_file = os.environ.get(
+        "sonarr_episodefile_sourcepath",
+        os.environ.get("radarr_moviefile_sourcepath", in_file),
+    )
+    p = Path(in_file).resolve()
+
+    remux_files = []
+    while str(p) != "/":
+        p = p.parent
+        remux_files.append(p / ".remux")
+
+    tracks = []
+    for f in remux_files:
+        try:
+            with f.open("r", encoding="utf-8") as file:
+                tracks += [t.strip() for t in file.read().split(",") if t.strip()]
+        except FileNotFoundError:
+            continue
+
+    return tracks
+
+
+def remux_languages(languages):
+    """
+    Removes all >2-char length language codes, only leaving those that mkvmerge accepts,
+    then readds the `und` (undefined) code and returns comma-separated string
+    """
+    return ",".join([lang for lang in languages if len(lang) == 2] + ["und"])
+
+
 def remove_unwanted_tracks(in_file):
     """
     Remove all audio and subtitle tracks which are in unmonitored languages
     """
     ok_subtitles = ["en", "eng", "de", "ger", "ja", "jpn", "und", "unknown"]
     ok_audio = ["en", "eng", "de", "ger", "ja", "jpn", "und", "unknown"]
+
+    extra_tracks = get_extra_wanted_tracks(in_file)
+    ok_subtitles += extra_tracks
+    ok_audio += extra_tracks
 
     _, existing_audio, existing_subtitles = get_tracks(in_file)
     if not (
@@ -239,7 +278,7 @@ def remove_unwanted_tracks(in_file):
     tmp_file = get_tmp_file(in_file)
     try:
         subprocess.run(
-            f"mkvmerge -o {tmp_file} -a de,en,ja,und -s de,en,und -B -M {shellescape.quote(in_file)}",
+            f"mkvmerge -o {tmp_file} -a {remux_languages(ok_audio)} -s {remux_languages(ok_subtitles)} -B -M {shellescape.quote(in_file)}",
             check=True,
             shell=True,
         )
