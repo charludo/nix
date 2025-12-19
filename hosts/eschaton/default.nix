@@ -72,6 +72,7 @@
 
   snow = {
     useRemoteSudo = true;
+    useSubstitutes = true;
     buildHost = "gsv";
   };
 

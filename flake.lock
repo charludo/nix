@@ -1031,11 +1031,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1765644212,
-        "narHash": "sha256-J39C+T46aTa5/+AvKvOn4jgf1oCXvqaSKketUd1n0uc=",
+        "lastModified": 1766134483,
+        "narHash": "sha256-8ZOomsoZw0BbVyx+7XnAZvZfjmt73yUwhHtulzPn0LQ=",
         "owner": "charludo",
         "repo": "snow",
-        "rev": "b0dcf67639c242316a395d8008400fa83ab88ebc",
+        "rev": "c0cc1a9d99d00c5cf4a067a3db200d5651a39d7e",
         "type": "github"
       },
       "original": {

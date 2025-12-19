@@ -29,7 +29,10 @@ in
   users.users."${gsv.user}".openssh.authorizedKeys.keys = publicKeys;
   services.openssh.ports = [ gsv.port ];
 
-  snow.targetHost = "root@${gsv.ip}";
+  snow = {
+    targetHost = "root@${gsv.ip}";
+    useSubstitutes = true;
+  };
 
   # Networking config
   networking = {
