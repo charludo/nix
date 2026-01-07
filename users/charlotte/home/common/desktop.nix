@@ -7,9 +7,11 @@
     element.enable = true;
     firefox.enable = true;
     firefox.profileName = "charlotte";
+    gtkProfile.enable = true;
     jellyfin.enable = true;
     nemo.enable = true;
     pulse.enable = true;
+    qtProfile.enable = true;
     sioyek.enable = true;
     thunderbird.enable = true;
     thunderbird.profileName = "charlotte";

@@ -14,7 +14,6 @@
 
   age.enable = true;
   gpg.enable = lib.mkDefault true;
-  xdgProfile.enable = lib.mkDefault true;
 
   cli = {
     bat.enable = true;
@@ -26,6 +25,8 @@
       user.email = private-settings.git.marie.email;
     };
   };
+
+  desktop.vscode.enable = true;
 
   programs.bash = {
     enable = true;

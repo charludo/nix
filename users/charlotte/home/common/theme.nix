@@ -7,9 +7,6 @@
 {
   colorScheme = lib.mkDefault inputs.nix-colors.colorSchemes.primer-dark-dimmed;
 
-  desktop.gtkProfile.enable = true;
-  desktop.qtProfile.enable = true;
-
   fontProfiles = {
     enable = true;
     monospace = {

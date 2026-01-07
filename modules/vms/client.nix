@@ -54,6 +54,7 @@ in
 
       services.xrdp = {
         enable = true;
+        audio.enable = true;
         defaultWindowManager = "startplasma-x11";
         openFirewall = true;
       };
