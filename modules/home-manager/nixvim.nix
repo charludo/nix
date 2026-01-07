@@ -78,5 +78,9 @@ in
       icon = "nvim";
       mimeType = [ "text/*" ];
     };
+
+    home.file.".hidden".text = ''
+      go
+    '';
   };
 }
