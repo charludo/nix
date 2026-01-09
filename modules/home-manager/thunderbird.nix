@@ -21,6 +21,7 @@ in
         isDefault = true;
         settings = {
           "calendar.week.start" = 1;
+          "intl.regional_prefs.use_os_locales" = true;
           "mailnews.default_sort_order" = 2;
           "mailnews.default_sort_type" = 18;
           "mailnews.default_news_sort_order" = 2;
