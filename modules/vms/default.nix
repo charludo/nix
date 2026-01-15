@@ -192,19 +192,7 @@ in
     services.qemuGuest.enable = true;
 
     # Overwriting parts of hosts/common
-    programs.ssh = lib.mkForce {
-      knownHosts = lib.filterAttrs (_: v: v.publicKeyFile != null) (
-        builtins.mapAttrs (name: _: {
-          publicKeyFile = (
-            if (lib.pathExists ./keys/ssh_host_${name}_ed25519_key.pub) then
-              ./keys/ssh_host_${name}_ed25519_key.pub
-            else
-              null
-          );
-          extraHostNames = (lib.optional (name == config.vm.name) "localhost");
-        }) outputs.nixosConfigurations
-      );
-    };
+    programs.ssh.knownHosts = lib.mkForce { };
 
     security.pki.certificateFiles = [ private-settings.caIssuing1.root ];
 
