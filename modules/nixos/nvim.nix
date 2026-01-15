@@ -16,7 +16,7 @@ in
       type = lib.types.package;
       description = "Package to use. Defaults to custom nixvim package provided by this flake.";
       default = pkgs.ours.nvim;
-      defaultText = lib.literalExpression ''pkgs.ours.nvim'';
+      defaultText = lib.literalExpression "pkgs.ours.nvim";
     };
   };
 

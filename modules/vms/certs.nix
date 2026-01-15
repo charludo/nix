@@ -33,7 +33,7 @@ in
               type = lib.types.str;
               description = "URI used as the proxyPass target in nginx";
               default = "http://${config.address}:${builtins.toString config.port}/";
-              defaultText = lib.literalExpression ''http://''${config.address}:''${builtins.toString config.port}/'';
+              defaultText = lib.literalExpression "http://\${config.address}:\${builtins.toString config.port}/";
             };
             defaultProxySettings = lib.mkOption {
               type = lib.types.bool;

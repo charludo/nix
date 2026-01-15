@@ -1,4 +1,4 @@
-{ private-settings, ... }:
+{ config, private-settings, ... }:
 let
   inherit (private-settings) domains loginAccounts forwards;
 in
@@ -12,7 +12,7 @@ in
       domains.blog
     ];
     messageSizeLimit = 209715200;
-    certificateScheme = "acme";
+    x509.useACMEHost = config.mailserver.fqdn;
     fullTextSearch = {
       enable = true;
       autoIndex = true;

@@ -1,7 +1,7 @@
 excludes = ["*.pub", "*.png", "*.lock", "*.md", "*toml", "private-settings", ".git*", "*.yml"]
 
 
-[formatter.nixfmt-rfc-style]
+[formatter.nixfmt]
 command = "nixfmt"
 includes = ["*.nix"]
 

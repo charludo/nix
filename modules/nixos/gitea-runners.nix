@@ -225,7 +225,7 @@ in
               pkgs.lftp
               pkgs.openssh
 
-              pkgs.nixfmt-rfc-style
+              pkgs.nixfmt
               pkgs.deadnix
               pkgs.ruff
             ]
