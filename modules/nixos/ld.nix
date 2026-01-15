@@ -17,14 +17,8 @@ in
     additionalPackages = mkOption {
       type = types.listOf (types.path);
       default = [ pkgs.ruff ];
-      defaultText = lib.literalExpression ''[ pkgs.ruff ]'';
+      defaultText = lib.literalExpression "[ pkgs.ruff ]";
       description = "add additional packages for which to enable dynamic linking";
-    };
-
-    bool = mkOption {
-      type = types.bool;
-      default = false;
-      description = "";
     };
   };
 

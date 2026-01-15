@@ -1,7 +1,6 @@
 [book]
 authors = ["Charlotte Hartmann Paludo"]
 language = "en"
-multilingual = false
 src = "."
 title = "nix"
 description = "nix config for the pakihoehle"

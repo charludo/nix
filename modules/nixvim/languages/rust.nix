@@ -51,7 +51,7 @@ in
         request = "launch";
         program = {
           __raw = # lua
-            ''function() return vim.fn.input('Path of the executable: ', vim.fn.getcwd() .. '/', 'file') end '';
+            "function() return vim.fn.input('Path of the executable: ', vim.fn.getcwd() .. '/', 'file') end ";
         };
         cwd = {
           __raw = # lua

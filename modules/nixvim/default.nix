@@ -55,6 +55,7 @@
       '';
       foldnestmax = 3;
       foldminlines = 1;
+      foldlevel = 999;
 
       laststatus = 3;
       showmode = false;

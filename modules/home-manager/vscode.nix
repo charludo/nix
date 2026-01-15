@@ -26,7 +26,7 @@ in
             "nil" = {
               "formatting" = {
                 "command" = [
-                  "${lib.getExe' pkgs.nixfmt-rfc-style "nixfmt"}"
+                  "${lib.getExe pkgs.nixfmt}"
                 ];
               };
             };
@@ -38,7 +38,7 @@ in
     };
     home.packages = [
       pkgs.nil
-      pkgs.nixfmt-rfc-style
+      pkgs.nixfmt
     ];
   };
 }

@@ -24,20 +24,20 @@ in
   options.cli.git.sshKey.file = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = "${config.home.homeDirectory}/.ssh/id_ed25519";
-    defaultText = lib.literalExpression ''''${config.home.homeDirectory}/.ssh/id_ed25519.pub'';
+    defaultText = lib.literalExpression "\${config.home.homeDirectory}/.ssh/id_ed25519.pub";
     description = "path to the private key used by SSH";
   };
   options.cli.git.signingKey.pub = lib.mkOption {
     type = lib.types.nullOr lib.types.path;
     description = "path to the public key used for commit signing";
     default = cfg.sshKey.pub;
-    defaultText = lib.literalExpression ''''${config.cli.git.sshKey.pub}'';
+    defaultText = lib.literalExpression "\${config.cli.git.sshKey.pub}";
   };
   options.cli.git.signingKey.file = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     description = "path to the private key used for commit signing";
     default = cfg.sshKey.file;
-    defaultText = lib.literalExpression ''''${config.cli.git.sshKey.file}'';
+    defaultText = lib.literalExpression "\${config.cli.git.sshKey.file}";
   };
 
   config = lib.mkIf cfg.enable {

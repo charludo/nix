@@ -57,7 +57,7 @@
     alsaSeq.enable = false;
 
     rtcqs.enable = true;
-    kernel.realtime = true;
+    kernel.realtime = false; # currently broken
 
     rtirq = {
       resetAll = 1;

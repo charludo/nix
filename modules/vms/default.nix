@@ -68,7 +68,7 @@ in
       gateway = lib.mkOption {
         type = lib.types.str;
         default = "192.168.${builtins.substring 0 2 (toString config.vm.id)}.1";
-        defaultText = lib.literalExpression ''192.168.''${builtins.substring 0 2 (toString config.vm.id)}.1'';
+        defaultText = lib.literalExpression "192.168.\${builtins.substring 0 2 (toString config.vm.id)}.1";
         description = "gateway the VM should use";
       };
       prefixLength = lib.mkOption {

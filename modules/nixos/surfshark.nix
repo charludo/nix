@@ -35,7 +35,7 @@ let
   getConfig = filePath: {
     name = "${builtins.substring 0 (builtins.stringLength filePath - 5) filePath}";
     value = {
-      config = ''config ${configFiles}/${filePath} '';
+      config = "config ${configFiles}/${filePath} ";
       autoStart = false;
       updateResolvConf = true;
     };

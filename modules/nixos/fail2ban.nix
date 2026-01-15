@@ -79,7 +79,7 @@ in
                 cloudflare-token-multi[cftoken="$(cat ${config.age.secrets.fail2ban-cf-token.path})", ${zoneStrings}]
                         iptables-allports''
             else
-              ''iptables-allports'';
+              "iptables-allports";
         in
         {
           # Misc

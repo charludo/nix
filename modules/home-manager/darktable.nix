@@ -13,13 +13,13 @@ in
     type = lib.types.str;
     description = "where to save the Darktable DB";
     default = "${config.xdg.userDirs.pictures}/.darktable/library.db";
-    defaultText = lib.literalExpression ''''${config.xdg.userDirs.pictures}/.darktable/library.db'';
+    defaultText = lib.literalExpression "\${config.xdg.userDirs.pictures}/.darktable/library.db";
   };
   options.desktop.darktable.configLocation = lib.mkOption {
     type = lib.types.str;
     description = "where to save Darktable files";
     default = "${config.home.homeDirectory}/.config/darktable";
-    defaultText = lib.literalExpression ''''${config.home.homeDirectory}/.config/darktable'';
+    defaultText = lib.literalExpression "\${config.home.homeDirectory}/.config/darktable";
   };
 
   config =
