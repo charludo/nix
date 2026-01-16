@@ -10,5 +10,6 @@
     wget
     dig
     traceroute
+    pciutils
   ];
 }
