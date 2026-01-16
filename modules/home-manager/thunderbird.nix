@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  private-settings,
-  ...
-}:
+{ config, lib, ... }:
 let
   cfg = config.desktop.thunderbird;
 in
@@ -58,8 +53,6 @@ in
           '';
       };
     };
-
-    accounts.email.accounts = lib.mkDefault private-settings.accounts;
 
     home.file.".thunderbird/${config.home.username}/xulstore.json" = {
       force = true;

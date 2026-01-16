@@ -100,6 +100,8 @@
           ])
 
           (lib.mkConfigs.nixos "gsv" true [ inputs.mailserver.nixosModules.mailserver ])
+
+          (lib.mkConfigs.nixos "desktop" true [ ])
         ]
         // lib.mkConfigs.vms ./vms;
 
@@ -114,6 +116,8 @@
         (lib.mkConfigs.home "charlotte" "CL-ROU" [ ])
         (lib.mkConfigs.home "marie" "CL-NIX-1" [ inputs.plasma-manager.homeModules.plasma-manager ])
         (lib.mkConfigs.home "marie" "CL-NIX-3" [ inputs.plasma-manager.homeModules.plasma-manager ])
+
+        (lib.mkConfigs.home "marie" "desktop" [ ])
       ];
 
       packages.${system} = import ./pkgs { inherit inputs pkgs; };

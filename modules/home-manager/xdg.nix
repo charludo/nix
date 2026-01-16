@@ -9,7 +9,7 @@ in
     xdg.userDirs = {
       enable = true;
       createDirectories = true;
-      desktop = "${config.home.homeDirectory}";
+      desktop = lib.mkDefault "${config.home.homeDirectory}";
       documents = "${config.home.homeDirectory}/Documents";
       download = "${config.home.homeDirectory}/Downloads";
       music = "${config.home.homeDirectory}/Music";
@@ -18,7 +18,7 @@ in
       templates = "${config.home.homeDirectory}";
       videos = "${config.home.homeDirectory}/Videos";
       extraConfig = {
-        XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projekte";
+        XDG_PROJECTS_DIR = lib.mkDefault "${config.home.homeDirectory}/Projekte";
       };
     };
   };

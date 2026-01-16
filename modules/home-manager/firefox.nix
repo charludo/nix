@@ -14,6 +14,13 @@ in
     type = lib.types.str;
     description = "name of the profile to use";
   };
+  options.desktop.firefox.extraSearchEngines = lib.mkEnableOption "additional search engines";
+  options.desktop.firefox.replaceXDGEntry = lib.mkEnableOption "replace the firefox/librewolf xdg desktop entry";
+  options.desktop.firefox.extraConfig = lib.mkOption {
+    type = lib.types.anything;
+    description = "extra firefox `about:config` options";
+    default = { };
+  };
 
   config = lib.mkIf cfg.enable {
     programs.librewolf = {
@@ -57,7 +64,6 @@ in
                 url = "https://kagi.com/favicon.ico";
                 sha256 = "sha256-6I9Kn+JtovACV3fgJgHy0MAeqNT+qlHHAQb2meWWiXA=";
               }}";
-              definedAliases = [ "@k" ];
             };
             "Nix Packages" = {
               urls = [
@@ -230,7 +236,7 @@ in
             "Mojeek".metaData.hidden = true;
             "SearXNG - searx.be".metaData.hidden = true;
             "StartPage".metaData.hidden = true;
-            "wikipedia".metaData.hidden = true;
+            "wikipedia".metaData.hidden = cfg.extraSearchEngines;
             "google".metaData.alias = "@g";
           };
         };
@@ -246,12 +252,13 @@ in
           "browser.newtabpage.activity-stream.improvesearch.topSiteSearchShortcuts.havePinned" = false;
           "browser.newtabpage.activity-stream.feeds.topsites" = false;
           "browser.newtabpage.enabled" = false;
+          "browser.policies.runOncePerModification.removeSearchEngines" = [ ];
+          "browser.policies.runOncePerModification.setDefaultSearchEngine" = "Kagi";
           "browser.search.separatePrivateDefault" = false;
           "browser.shell.checkDefaultBrowser" = false;
           "browser.shell.defaultBrowserCheckCount" = 1;
-          "browser.toolbars.bookmarks.visibility" = "never";
-          "browser.uiCustomization.state" =
-            ''{"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["sponsorblocker_ajay_app-browser-action","passbolt_passbolt_com-browser-action","amptra_keepa_com-browser-action","unchecker_ad5001_eu-browser-action","firefoxextension_reviewmeta_com-browser-action","_732216ec-0dab-43bb-ac85-4b5e1977599d_-browser-action","firefoxcolor_mozilla_com-browser-action","_contain-facebook-browser-action"],"nav-bar":["back-button","forward-button","stop-reload-button","urlbar-container","downloads-button","_testpilot-containers-browser-action","reset-pbm-toolbar-button","_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action","ublock0_raymondhill_net-browser-action","unified-extensions-button"],"toolbar-menubar":["menubar-items"],"TabsToolbar":["tabbrowser-tabs","new-tab-button","alltabs-button"],"PersonalToolbar":[]},"seen":["save-to-pocket-button","developer-button","ublock0_raymondhill_net-browser-action","_testpilot-containers-browser-action","passbolt_passbolt_com-browser-action","amptra_keepa_com-browser-action","unchecker_ad5001_eu-browser-action","firefoxextension_reviewmeta_com-browser-action","_732216ec-0dab-43bb-ac85-4b5e1977599d_-browser-action","firefoxcolor_mozilla_com-browser-action","_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action","sponsorblocker_ajay_app-browser-action","_contain-facebook-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","toolbar-menubar","TabsToolbar","widget-overflow-fixed-list","unified-extensions-area"],"currentVersion":20,"newElementCount":8}'';
+          "browser.urlbar.placeholderName" = "Kagi";
+          "browser.urlbar.placeholderName.private" = "Kagi";
           "cookiebanners.service.mode" = 2;
           "dom.security.https_only_mode" = true;
           "privacy.trackingprotection.enabled" = true;
@@ -280,7 +287,8 @@ in
           "privacy.resistFingerprinting" = false;
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "webgl.disabled" = false;
-        };
+        }
+        // cfg.extraConfig;
         userChrome = # css
           ''
             #alltabs-button { display: none !important; }
@@ -288,14 +296,14 @@ in
       };
     };
 
-    xdg.mimeApps.defaultApplications = {
+    xdg.mimeApps.defaultApplications = lib.mkIf cfg.replaceXDGEntry {
       "text/html" = [ "firefox.desktop" ];
       "text/xml" = [ "firefox.desktop" ];
       "x-scheme-handler/http" = [ "firefox.desktop" ];
       "x-scheme-handler/https" = [ "firefox.desktop" ];
     };
 
-    xdg.desktopEntries.firefox = {
+    xdg.desktopEntries.firefox = lib.mkIf cfg.replaceXDGEntry {
       name = "Firefox (Librewolf)";
       genericName = "Web Browser";
       exec = "librewolf --name librewolf %U";

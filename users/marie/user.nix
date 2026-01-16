@@ -1,19 +1,17 @@
-{
-  pkgs,
-  config,
-  ...
-}:
+{ config, pkgs, ... }:
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
 in
 {
   users.users.marie = {
     isNormalUser = true;
+    description = "Marie";
     initialPassword = "";
     extraGroups = [
       "wheel"
       "networkmanager"
       "nas"
+      "gamemode"
     ]
     ++ ifTheyExist [
       "docker"
@@ -41,6 +39,24 @@ in
     ];
   };
   users.groups.marie.gid = 1000;
+
+  security.sudo.extraRules = [
+    {
+      users = [ "marie" ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+  security.pam.services.marie = {
+    kwallet = {
+      enable = true;
+      package = pkgs.kdePackages.kwallet-pam;
+    };
+  };
 
   home-manager.users.marie = import ./home/${config.networking.hostName}.nix;
 }

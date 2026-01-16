@@ -30,7 +30,7 @@
     ours.nsenter
   ];
 
-  accounts.email.accounts = private-settings.accountsWork;
+  accounts.email.accounts = private-settings.charlotte.accountsWork;
 
   projects = private-settings.projects;
   nixvim.languages = {

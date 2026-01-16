@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   private-settings,
   ...
 }:
@@ -17,6 +18,7 @@
 
   cli = {
     bat.enable = true;
+    fish.enable = true;
     fzf.enable = true;
     git = {
       enable = true;
@@ -26,7 +28,25 @@
     };
   };
 
-  desktop.vscode.enable = true;
+  desktop = {
+    alacritty.enable = true;
+    firefox = {
+      enable = true;
+      profileName = "marie";
+      extraSearchEngines = true;
+      extraConfig = {
+        "browser.search.widget.inNavBar" = true;
+      };
+    };
+    vscode.enable = true;
+  };
+
+  services.remmina.enable = true;
+
+  home.packages = with pkgs; [
+    # additional user-specific packages go here
+    cowsay
+  ];
 
   programs.bash = {
     enable = true;
