@@ -7,7 +7,6 @@ in
   options.desktop.alacritty.enable = lib.mkEnableOption "alacritty terminal emulator";
 
   config = lib.mkIf cfg.enable {
-
     programs.alacritty = {
       enable = true;
       settings = {
@@ -20,8 +19,8 @@ in
         };
         window = {
           dynamic_padding = false;
-          padding.x = 10;
-          padding.y = 10;
+          padding.x = lib.mkDefault 10;
+          padding.y = lib.mkDefault 10;
         };
         env.TERM = "xterm-256color";
         colors = {

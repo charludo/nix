@@ -20,7 +20,7 @@ in
         ];
         userSettings = {
           "git.enableSmartCommit" = true;
-          "nix.formatterPath" = "${lib.getExe pkgs.nixpkgs-fmt}";
+          "nix.formatterPath" = "${lib.getExe pkgs.nixfmt}";
           "nix.serverPath" = "${lib.getExe pkgs.nil}";
           "nix.serverSettings" = {
             "nil" = {
@@ -33,6 +33,7 @@ in
           };
           "nix.enableLanguageServer" = true;
           "editor.formatOnSave" = true;
+          "editor.fontFamily" = "${config.fontProfiles.monospace.family}";
         };
       };
     };

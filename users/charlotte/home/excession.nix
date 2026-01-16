@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, private-settings, ... }:
 {
   imports = [
     ./common
@@ -46,13 +46,7 @@
     "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
   };
 
-  projects = [
-    {
-      name = "nix";
-      repo = "git@github.com:charludo/nix";
-      enableDirenv = false;
-    }
-  ];
+  projects = private-settings.just-nix-projects;
 
   #  ------
   # | DP-2 |

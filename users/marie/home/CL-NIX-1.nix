@@ -1,7 +1,7 @@
 {
   imports = [
     ./common
-    ./common/desktop.nix
+    ./common/kde.nix
   ];
   home.hostname = "CL-NIX-1";
 }
