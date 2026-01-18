@@ -13,6 +13,7 @@
 
   age.enable = true;
   # androidUtils.enable = true;
+  # ausweisapp.enable = true;
   bluetooth.enable = true;
   # eid.enable = true;
   graphicalFixes.enable = true;
