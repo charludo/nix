@@ -34,7 +34,7 @@
     gc = {
       automatic = lib.mkDefault true;
       dates = lib.mkDefault "weekly";
-      options = lib.mkDefault "--delete-older-than 3d";
+      options = lib.mkDefault "--delete-older-than 7d";
     };
 
     nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];
