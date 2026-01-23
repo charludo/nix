@@ -100,10 +100,7 @@
     extraEntriesBeforeNixOS = false;
   };
 
-  boot.initrd.kernelModules = [
-    "amdgpu"
-    "usb_storage"
-  ];
+  boot.initrd.kernelModules = [ "usb_storage" ];
   boot.kernelParams = [
     "video=DP-2:2560x1440@59.91"
     "video=DP-3:2560x1440@59.91"
@@ -118,4 +115,9 @@
   hardware.graphics.extraPackages = [
     pkgs.rocmPackages.clr.icd
   ];
+
+  hardware.amdgpu = {
+    initrd.enable = true;
+    opencl.enable = true;
+  };
 }
