@@ -42,9 +42,6 @@
     firefox-addons.url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     firefox-addons.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Use solely for jellyfin-media-player with Qt6
-    nixpkgs-jmp-qt6.url = "github:picnoir/nixpkgs/pic/jellyfin-qt6";
-
     nix-colors.url = "github:misterio77/nix-colors";
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=v0.4.1";
     musnix.url = "github:musnix/musnix";
@@ -65,7 +62,7 @@
       pkgs = import nixpkgs {
         inherit system;
         overlays = [
-          (import ./overlays/nixpkgs.nix { inherit inputs; })
+          (import ./overlays/nixpkgs.nix)
           (import ./overlays/ours.nix { inherit outputs; })
           inputs.agenix-rekey.overlays.default
           inputs.firefox-addons.overlays.default

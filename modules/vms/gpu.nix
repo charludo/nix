@@ -32,22 +32,27 @@ in
       environment.systemPackages = with pkgs; [
         pciutils
         clinfo
-        intel-gpu-tools
+        libva-utils
+        nvtopPackages.intel
       ];
 
       proxmox.qemuExtraConf.hostpci0 = "0000:00:02,pcie=1";
+      proxmox.qemuExtraConf.hostpci1 = "0000:00:1f,pcie=1";
 
       hardware.graphics = {
         enable = true;
         extraPackages = with pkgs; [
+          intel-ocl
           intel-media-driver
           intel-compute-runtime
           vpl-gpu-rt
         ];
       };
       hardware.enableAllFirmware = true;
+      hardware.intel-gpu-tools.enable = true;
       hardware.firmware = [ pkgs.linux-firmware ];
       boot.kernelPackages = pkgs.linuxPackages_latest;
+      environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
     })
   ];
 }
