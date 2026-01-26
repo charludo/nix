@@ -769,22 +769,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-jmp-qt6": {
-      "locked": {
-        "lastModified": 1764267553,
-        "narHash": "sha256-Tyy980UaZjs7e/lozepuydFPY6QsaQc9gF8UiVAhxS4=",
-        "owner": "picnoir",
-        "repo": "nixpkgs",
-        "rev": "f933ee8d7f522df75f16ce8203f2e6c614c41520",
-        "type": "github"
-      },
-      "original": {
-        "owner": "picnoir",
-        "ref": "pic/jellyfin-qt6",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1765674936,
@@ -982,7 +966,6 @@
         "nixos-generators": "nixos-generators",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_2",
-        "nixpkgs-jmp-qt6": "nixpkgs-jmp-qt6",
         "nixvim": "nixvim",
         "plasma-manager": "plasma-manager",
         "snow": "snow"

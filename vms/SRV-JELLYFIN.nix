@@ -6,7 +6,7 @@
 
     hardware.cores = 4;
     hardware.memory = 32768;
-    hardware.storage = "64G";
+    hardware.storage = "128G";
     hardware.gpu.enable = true;
 
     networking.nameservers = private-settings.upstreamDNS.ips;
@@ -19,6 +19,15 @@
     configDir = "${dataDir}/config";
     logDir = "${dataDir}/log";
     cacheDir = "${dataDir}/cache";
+  };
+
+  systemd.services.jellyfin.environment.LIBVA_DRIVER_NAME = "iHD";
+  systemd.services.jellyfin.serviceConfig = {
+    PrivateDevices = false;
+    DeviceAllow = [
+      "/dev/dri/card0"
+      "/dev/dri/renderD128"
+    ];
   };
 
   users.users."${config.services.jellyfin.user}".extraGroups = [
