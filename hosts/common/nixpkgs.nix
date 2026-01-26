@@ -11,5 +11,6 @@
     dig
     traceroute
     pciutils
+    ncdu
   ];
 }
