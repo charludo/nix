@@ -405,7 +405,13 @@ if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "all":
         for path in Path("/media/NAS/Filme & Serien/Anime").rglob("*.mkv"):
             subprocess.run(f'remux "{path}"', shell=True)
+        for path in Path("/media/NAS/Filme & Serien/Anime Movies").rglob("*.mkv"):
+            subprocess.run(f'remux "{path}"', shell=True)
         for path in Path("/media/NAS/Filme & Serien/Filme").rglob("*.mkv"):
+            subprocess.run(f'remux "{path}"', shell=True)
+        for path in Path("/media/NAS/Filme & Serien/Kids Movies").rglob("*.mkv"):
+            subprocess.run(f'remux "{path}"', shell=True)
+        for path in Path("/media/NAS/Filme & Serien/Klassiker").rglob("*.mkv"):
             subprocess.run(f'remux "{path}"', shell=True)
         for path in Path("/media/NAS/Filme & Serien/Serien").rglob("*.mkv"):
             subprocess.run(f'remux "{path}"', shell=True)
