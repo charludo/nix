@@ -348,7 +348,7 @@ let
                 if [ "$1" = "''${entry}" ]
                 then
                     # shellcheck disable=SC1065
-                    coproc ( ${config.home.sessionVariables.TERMINAL} --working-directory "${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/''${entry}" -e direnv exec . nvim)
+                    coproc ( ${config.home.sessionVariables.TERMINAL} --working-directory "${config.xdg.userDirs.extraConfig.PROJECTS}/''${entry}" -e direnv exec . nvim)
                     exit 0
                 fi
             done

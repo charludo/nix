@@ -18,7 +18,7 @@ in
       templates = "${config.home.homeDirectory}";
       videos = "${config.home.homeDirectory}/Videos";
       extraConfig = {
-        XDG_PROJECTS_DIR = lib.mkDefault "${config.home.homeDirectory}/Projekte";
+        PROJECTS = lib.mkDefault "${config.home.homeDirectory}/Projekte";
       };
     };
   };

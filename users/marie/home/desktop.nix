@@ -17,7 +17,7 @@
   };
   xdgProfile.enable = true;
   xdg.userDirs.desktop = "${config.home.homeDirectory}/Desktop";
-  xdg.userDirs.extraConfig.XDG_PROJECTS_DIR = config.home.homeDirectory;
+  xdg.userDirs.extraConfig.PROJECTS = config.home.homeDirectory;
 
   fontProfiles.monospace.size = 13;
   programs.alacritty.settings.window.padding.x = 0;

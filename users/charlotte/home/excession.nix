@@ -25,19 +25,19 @@
       "jellyfinmediaplayer"
     ];
 
-    windowrulev2 = [
-      "opaque, class:(steam$)"
-      "workspace 2, class:steam"
-      "workspace 1 silent, class:librewolf"
-      "workspace 3 silent, class:discord"
-      "workspace 3 silent, class:com.github.iwalton3.jellyfin-media-player"
+    windowrule = [
+      "opaque, match:class (steam$)"
+      "workspace 2, match:class steam"
+      "workspace 1 silent, match:class librewolf"
+      "workspace 3 silent, match:class discord"
+      "workspace 3 silent, match:class com.github.iwalton3.jellyfin-media-player"
     ];
   };
 
   # XDG dirs are (partly) symlinks to an external drive
-  xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR = "${config.home.homeDirectory}/Creativity";
+  xdg.userDirs.extraConfig.CREATIVITY = "${config.home.homeDirectory}/Creativity";
   home.file = {
-    "${config.xdg.userDirs.extraConfig.XDG_CREATIVITY_DIR}".source =
+    "${config.xdg.userDirs.extraConfig.CREATIVITY}".source =
       config.lib.file.mkOutOfStoreSymlink "/media/Media/Kreatives";
     "${config.xdg.userDirs.documents}".source =
       config.lib.file.mkOutOfStoreSymlink "/media/Media/Dokumente";

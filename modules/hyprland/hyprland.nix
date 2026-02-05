@@ -77,8 +77,8 @@
           preserve_split = true;
         };
 
-        windowrulev2 = [
-          "fullscreenstate 0, class:com.github.iwalton3.jellyfin-media-player"
+        windowrule = [
+          "fullscreen_state 0, match:class com.github.iwalton3.jellyfin-media-player"
         ];
 
         misc = {

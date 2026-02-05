@@ -22,7 +22,7 @@ in
 
       gtk3.bookmarks = [
         "file://${config'.xdg.userDirs.documents}"
-        "file://${config'.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}"
+        "file://${config'.xdg.userDirs.extraConfig.PROJECTS}"
         "file:///media/NAS"
       ];
 

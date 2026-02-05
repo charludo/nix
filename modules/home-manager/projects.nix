@@ -51,7 +51,7 @@ in
           acc: entry:
           acc
           // {
-            "${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/${entry.name}/.envrc" = {
+            "${config.xdg.userDirs.extraConfig.PROJECTS}/${entry.name}/.envrc" = {
               text = # bash
                 ''
                   ''${DIRENV_DISABLE:+exit}
@@ -71,7 +71,7 @@ in
             };
           };
         paths = builtins.concatStringsSep ", " (
-          map (entry: ''"${config.xdg.userDirs.extraConfig.XDG_PROJECTS_DIR}/${entry.name}"'') cfg
+          map (entry: ''"${config.xdg.userDirs.extraConfig.PROJECTS}/${entry.name}"'') cfg
         );
       in
       (lib.foldl addEntry { } (lib.filter (p: p.writeEnvrc) cfg))
