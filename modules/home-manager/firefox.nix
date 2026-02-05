@@ -62,7 +62,7 @@ in
               ];
               icon = "${pkgs.fetchurl {
                 url = "https://kagi.com/favicon.ico";
-                sha256 = "sha256-6I9Kn+JtovACV3fgJgHy0MAeqNT+qlHHAQb2meWWiXA=";
+                sha256 = "sha256-0XKaJfJ2ePms80DeXRMZt4YQPFPab5zM/EXfkny03ZQ=";
               }}";
             };
             "Nix Packages" = {
