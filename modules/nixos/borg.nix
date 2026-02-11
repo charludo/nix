@@ -103,7 +103,7 @@ in
               environment
               # bash
               + ''
-                ${lib.getExe' pkgs.borgbackup "borg"} init --encryption=repokey --remote-path=${repo}
+                ${lib.getExe' pkgs.borgbackup "borg"} init --encryption=repokey ${repo}
                 ${lib.getExe' pkgs.borgbackup "borg"} key export ${repo}
               '';
           })
