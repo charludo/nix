@@ -83,4 +83,11 @@
       intel-compute-runtime
     ];
   };
+
+  borg.island = {
+    paths = [ "/home/charlotte/Island" ];
+    startAt = [ ];
+    secrets.password = secrets.borg-password-eschaton;
+    secrets.sshKey = secrets.borg-ssh;
+  };
 }
