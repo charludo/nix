@@ -12,7 +12,7 @@
 
     hardware.cores = 4;
     hardware.memory = 24576;
-    hardware.storage = "128G";
+    hardware.storage = "256G";
 
     certsFor = [
       {
