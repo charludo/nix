@@ -88,7 +88,7 @@ in
       lib.mapAttrsToList (
         name: borg:
         let
-          repo = "ssh://${borg.remote}:${builtins.toString borg.port}/./${name}";
+          repo = "ssh://${borg.remote}/./${name}";
           environment = ''
             export BORG_PASSCOMMAND="${config.services.borgbackup.jobs."${name}".encryption.passCommand}"
             export BORG_REPO="${config.services.borgbackup.jobs."${name}".repo}"
