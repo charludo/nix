@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  inputs,
+  ...
+}:
 let
   cfg = config.nixvim;
 in
@@ -44,6 +49,26 @@ in
           command = "setlocal nospell";
         }
       ];
+
+      # Largely copied from: https://github.com/MattSturgeon/nix-config/blob/5dd1b19bc69fa33bfc950c10083490187c3d58a2/nvim/config/lsp.nix#L24-L48
+      plugins.lsp.servers.nixd = {
+        enable = true;
+        settings =
+          let
+            flake = ''(builtins.getFlake "${inputs.self}")'';
+            system = "\${builtins.currentSystem}";
+          in
+          {
+            nixpkgs.expr = "import ${flake}.inputs.nixpkgs { }";
+            options = {
+              # Hardcoding flake outputs here is not nice, but the options are the same everywhere. So. Eh.
+              nixvim.expr = "${flake}.packages.${system}.nvim.options";
+              nixos.expr = "${flake}.nixosConfigurations.hub.options";
+              vms.expr = "${flake}.nixosConfigurations.SRV-GIT.options";
+              home-manager.expr = ''${flake}.homeConfigurations."charlotte@hub".options'';
+            };
+          };
+      };
     };
 
     xdg.configFile = lib.mkIf cfg.spellChecking {

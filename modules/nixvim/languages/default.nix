@@ -13,7 +13,7 @@
   ];
   plugins.lsp.servers = {
     # config languages
-    nil_ls.enable = true;
+    nixd.enable = true;
     lua_ls.enable = true;
 
     # bash
