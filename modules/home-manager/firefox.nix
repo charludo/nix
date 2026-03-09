@@ -36,9 +36,15 @@ in
         ];
         search = {
           force = true;
-          default = "Kagi";
+          default = "ddg"; # See below.
           engines = {
-            "Kagi" = {
+            # Librewolf constantly re-adds ddg and sets it as default:
+            # https://codeberg.org/librewolf/issues/issues/2470
+            # https://github.com/nix-community/home-manager/issues/7438
+            # and I am completely out of fucks to give.
+            # So, this hacky shit.
+            "ddg" = {
+              _name = "Kagi";
               urls = [
                 {
                   template = "https://kagi.com/search";
@@ -228,16 +234,19 @@ in
               }}";
               definedAliases = [ "@gh" ];
             };
+            "google".metaData.hidden = true;
             "bing".metaData.hidden = true;
-            "ddg".metaData.hidden = true;
-            "DuckDuckGo Lite".metaData.hidden = true;
             "ebay".metaData.hidden = true;
-            "MetaGer".metaData.hidden = true;
-            "Mojeek".metaData.hidden = true;
-            "SearXNG - searx.be".metaData.hidden = true;
-            "StartPage".metaData.hidden = true;
-            "wikipedia".metaData.hidden = cfg.extraSearchEngines;
-            "google".metaData.alias = "@g";
+            "perplexity".metaData.hidden = true;
+            "policy-DuckDuckGo Lite".metaData.hidden = true;
+            "policy-Searx Belgium".metaData.hidden = true;
+            "policy-MetaGer".metaData.hidden = true;
+            "policy-Startpage".metaData.hidden = true;
+            "policy-Mojeek".metaData.hidden = true;
+            "wikipedia".metaData.hidden = !cfg.extraSearchEngines;
+
+            # See comment on Kagi above.
+            # "ddg".metaData.hidden = true;
           };
         };
         bookmarks = { };
