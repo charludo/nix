@@ -67,6 +67,7 @@ in
       home.packages = with pkgs; [
         darktable
         exiftool
+        hugin
       ];
 
       xdg.desktopEntries."org.darktable.darktable" = {
@@ -130,8 +131,13 @@ in
       home.file."${cfg.configLocation}/darktablerc" = {
         force = true;
         text = ''
+          lua/executable_paths/hugin=${lib.getExe' pkgs.hugin "hugin"}
+          lua/executable_paths/hugin_executor=${lib.getExe' pkgs.hugin "hugin_executor"}
+          lua/executable_paths/pto_gen=${lib.getExe' pkgs.hugin "pto_gen"}
+          lua/script_manager/tools/executable_manager=TRUE
           lua/script_manager/filmsim/fujifilm_auto_settings=TRUE
           lua/script_manager/filmsim/FilmSimPanel=TRUE
+          lua/script_manager/contrib/hugin=TRUE
           accel/assign_instance=false
           accel/enable_fallbacks=false
           accel/hide_notice=false
