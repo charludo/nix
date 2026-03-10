@@ -25,6 +25,20 @@ in
       pulse.enable = true;
       jack.enable = true;
       wireplumber.enable = true;
+      wireplumber.extraConfig.bluetooth = {
+        "monitor.bluez.rules" = [
+          {
+            matches = [
+              { device.name = "~bluez_card.*"; }
+            ];
+            actions = {
+              update-props = {
+                bluez5.hw-volume = [ ];
+              };
+            };
+          }
+        ];
+      };
 
       raopOpenFirewall = true;
 
