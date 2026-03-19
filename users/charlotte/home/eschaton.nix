@@ -48,6 +48,11 @@
     webdev.enable = true;
   };
 
+  services.ssh-agent = {
+    enable = true;
+    enableFishIntegration = true;
+  };
+
   services.hypridle.settings.listener = [
     {
       timeout = 900;
