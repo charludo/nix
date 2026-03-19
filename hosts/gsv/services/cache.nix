@@ -24,9 +24,9 @@
 
   age.secrets.nix-cache-signing-key.rekeyFile = secrets.gsv-nix-cache;
   services.harmonia = {
-    enable = true;
-    signKeyPaths = [ config.age.secrets.nix-cache-signing-key.path ];
-    settings.bind = "127.0.0.1:5021";
+    cache.enable = true;
+    cache.signKeyPaths = [ config.age.secrets.nix-cache-signing-key.path ];
+    cache.settings.bind = "127.0.0.1:5021";
   };
 
   # keep sliding window of store paths over the past 2 months
@@ -49,7 +49,7 @@
       forceSSL = true;
       enableACME = true;
       locations."/" = {
-        proxyPass = "http://${config.services.harmonia.settings.bind}";
+        proxyPass = "http://${config.services.harmonia.cache.settings.bind}";
         extraConfig = ''
           proxy_set_header Host $host;
           proxy_redirect http:// https://;

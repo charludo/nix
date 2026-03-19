@@ -35,10 +35,10 @@ in
       beamSize = 0;
       language = "de";
       uri = "tcp://0.0.0.0:10300";
-      initialPrompt = ''
-        Das Folgende ist ein Befehl an einen Sprachassistenten.
-        Geräte wie "Licht", Zimmer wie "Wohnzimmer" oder "Schlafzimmer", oder Uhrzeiten können vorkommen.
-      '';
+      # initialPrompt = ''
+      # Das Folgende ist ein Befehl an einen Sprachassistenten.
+      # Geräte wie "Licht", Zimmer wie "Wohnzimmer" oder "Schlafzimmer", oder Uhrzeiten können vorkommen.
+      # '';
     };
   };
   systemd.services."wyoming-faster-whisper-de".serviceConfig.ProcSubset = lib.mkForce "all";
