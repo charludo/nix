@@ -17,13 +17,18 @@ in
       default = "charlotte";
       description = "default user to be logged in";
     };
+    autoLogin = mkOption {
+      type = types.bool;
+      default = true;
+      description = "enable automatic defaultUser login";
+    };
   };
 
   config = mkIf cfg.enable {
     services.greetd = {
       enable = true;
       settings = {
-        initial_session = {
+        initial_session = lib.mkIf cfg.autoLogin {
           command = "Hyprland";
           user = cfg.defaultUser;
         };
