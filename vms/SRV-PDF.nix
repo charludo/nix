@@ -1,4 +1,3 @@
-{ pkgs, ... }:
 {
   vm = {
     id = 2202;
@@ -7,12 +6,19 @@
     hardware.cores = 2;
     hardware.memory = 1024;
     hardware.storage = "8G";
+
+    networking.openPorts.tcp = [ 3000 ];
   };
 
   services.bentopdf = {
     enable = true;
-    package = pkgs.ours.bentopdf.overrideAttrs { SIMPLE_MODE = "true"; };
-    openFirewall = true;
-    port = 3000;
+    domain = "_";
+    nginx.enable = true;
+    nginx.virtualHost.listen = [
+      {
+        addr = "0.0.0.0";
+        port = 3000;
+      }
+    ];
   };
 }
