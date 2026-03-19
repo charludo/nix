@@ -28,6 +28,14 @@
     teams-for-linux
     jitsi-meet-electron
     ours.nsenter
+
+    (pkgs.writeShellApplication {
+      name = "sway";
+      runtimeInputs = [ pkgs.cowsay ];
+      text = ''
+        cowsay "we have sway at home"
+      '';
+    })
   ];
 
   accounts.email.accounts = private-settings.charlotte.accountsWork;
@@ -46,6 +54,13 @@
       on-timeout = "hyprlock";
     }
   ];
+  systemd.user.services.swayidle = {
+    Service = {
+      ExecStart = "swaylock";
+      Type = "simple";
+      Restart = "no";
+    };
+  };
 
   #  -------
   # | eDP-1 |

@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   private-settings,
   secrets,
@@ -36,7 +37,7 @@
   nas.enable = true;
   nas.backup.enable = true;
 
-  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.enable = lib.mkForce false;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.networkmanager.enable = true;
@@ -82,5 +83,18 @@
       vpl-gpu-rt
       intel-compute-runtime
     ];
+  };
+
+  # Just ISO Things...
+  boot.loader.limine.enable = true;
+  boot.loader.limine.secureBoot.enable = true;
+  environment.systemPackages = [
+    pkgs.bitwarden-desktop
+    pkgs.sbctl # secureboot keys
+  ];
+  greetd.autoLogin = false;
+  services.paretosecurity = {
+    enable = true;
+    users = private-settings.paretoUsers;
   };
 }

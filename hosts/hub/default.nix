@@ -35,12 +35,6 @@
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.zakalwe.sudoFile;
 
-  services.paretosecurity = {
-    enable = true;
-    trayIcon = false;
-    users = private-settings.paretoUsers;
-  };
-
   nas.enable = true;
   nas.backup.enable = true;
   # nas.qnap.enable = true;
