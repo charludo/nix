@@ -57,5 +57,10 @@ in
       }
       // lib.helpers.allVMSSHConfigs;
     };
+
+    services.ssh-agent = {
+      enable = true;
+      enableFishIntegration = true;
+    };
   };
 }
