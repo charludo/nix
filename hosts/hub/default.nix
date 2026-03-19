@@ -43,6 +43,7 @@
 
   nas.enable = true;
   nas.backup.enable = true;
+  # nas.qnap.enable = true;
 
   rsync."media" = {
     tasks = [

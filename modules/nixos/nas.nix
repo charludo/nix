@@ -33,6 +33,13 @@ in
       default = "${mountRoot}/Backup/vm_state";
     };
 
+    qnap.enable = mkEnableOption "NAS QNAP";
+    qnap.location = mkOption {
+      type = types.str;
+      description = "mountpoint for the QNAP NAS";
+      default = "${mountRoot}/QNAP";
+    };
+
     extraUsers = mkOption {
       type = types.listOf (types.str);
       description = "additional users who should be allowed to use the NAS";
@@ -83,6 +90,19 @@ in
         description = "Mount for Backup";
         what = "//192.168.30.11/Backup";
         where = cfg.backup.location;
+        type = "cifs";
+        options =
+          let
+            automount_opts = "uid=1000,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+          in
+          "${automount_opts},credentials=${config.age.secrets.nas.path}";
+        wantedBy = [ "multi-user.target" ];
+      })
+
+      (mkIf cfg.qnap.enable {
+        description = "Mount for QNAP";
+        what = "//192.168.30.12/Backup";
+        where = cfg.qnap.location;
         type = "cifs";
         options =
           let
