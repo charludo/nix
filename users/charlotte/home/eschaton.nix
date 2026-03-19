@@ -40,6 +40,13 @@
     webdev.enable = true;
   };
 
+  services.hypridle.settings.listener = [
+    {
+      timeout = 900;
+      on-timeout = "hyprlock";
+    }
+  ];
+
   #  -------
   # | eDP-1 |
   #  -------
