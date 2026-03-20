@@ -75,6 +75,7 @@
     useRemoteSudo = true;
     useSubstitutes = true;
     buildHost = "gsv";
+    targetHost = "eschaton";
   };
 
   hardware.graphics = {
@@ -86,6 +87,7 @@
   };
 
   # Just ISO Things...
+  services.openssh.ports = [ private-settings.paretoSSH ];
   boot.loader.limine.enable = true;
   boot.loader.limine.secureBoot.enable = true;
   environment.systemPackages = [

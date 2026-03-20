@@ -46,6 +46,11 @@ in
         hostname = "192.168.50.130"; # DHCP reservation
         user = "root";
       };
+      eschaton = {
+        hostname = "192.168.50.133"; # DHCP reservation
+        user = "charlotte";
+        port = private-settings.paretoSSH;
+      };
       "*".identityFile = lib.mkForce [
         "~/.ssh/id_yubikey"
         "~/.ssh/id_charlotte"
