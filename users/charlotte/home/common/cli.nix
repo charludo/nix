@@ -43,7 +43,7 @@ in
         port = gsv.port-boot;
       };
       rmpp = {
-        hostname = "192.168.50.130";
+        hostname = "192.168.50.130"; # DHCP reservation
         user = "root";
       };
       "*".identityFile = lib.mkForce [

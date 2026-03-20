@@ -27,7 +27,7 @@ in
           user = "root";
         };
 
-        "* !proxmox !proxmox2 !proxmox-gpu !home-assistant !gsv !gsv-boot" = {
+        "${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}" = {
           user = "paki";
         };
         "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}".extraOptions =
