@@ -65,6 +65,7 @@
       Type = "simple";
       Restart = "no";
     };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   #  -------
