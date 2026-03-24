@@ -99,4 +99,8 @@
     enable = true;
     users = private-settings.paretoUsers;
   };
+  systemd.user.timers."paretosecurity-user".timerConfig.OnBootSec = "3min";
+  system.activationScripts.pareto-permissions.text = ''
+    chmod 444 /sys/class/dmi/id/product_serial
+  '';
 }
