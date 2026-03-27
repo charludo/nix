@@ -1,4 +1,4 @@
-{ private-settings, ... }:
+{ pkgs, private-settings, ... }:
 {
   imports = [
     ./hardware-configuration.nix
@@ -16,6 +16,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  environment.systemPackages = [ pkgs.protonup-rs ];
 
   jovian = {
     devices.steamdeck = {
@@ -32,6 +33,12 @@
     };
     steamos.useSteamOSConfig = true;
   };
+  # https://github.com/Jovian-Experiments/Jovian-NixOS/issues/564
+  systemd.user.services."steamos-manager".serviceConfig.ExecStartPre = pkgs.lib.getExe (
+    pkgs.writeShellScriptBin "wait-for-start" ''
+      sleep 10
+    ''
+  );
 
   users.users.charlotte.extraGroups = [ "steamos" ];
   security.sudo.extraRules = [
