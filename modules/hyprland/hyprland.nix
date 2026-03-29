@@ -78,7 +78,7 @@
         };
 
         windowrule = [
-          "fullscreen_state 0, match:class com.github.iwalton3.jellyfin-media-player"
+          "fullscreen_state 0, match:class org.jellyfin.JellyfinDesktop"
         ];
 
         misc = {

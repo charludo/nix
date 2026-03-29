@@ -12,7 +12,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
-      jellyfin-media-player
+      jellyfin-desktop
       mpd-mpris
       playerctl
     ];

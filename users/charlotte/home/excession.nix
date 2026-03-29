@@ -30,7 +30,7 @@
       "workspace 2, match:class steam"
       "workspace 1 silent, match:class librewolf"
       "workspace 3 silent, match:class discord"
-      "workspace 3 silent, match:class com.github.iwalton3.jellyfin-media-player"
+      "workspace 3 silent, match:class org.jellyfin.JellyfinDesktop"
     ];
   };
 
