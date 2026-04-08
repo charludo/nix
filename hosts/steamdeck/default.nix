@@ -33,12 +33,6 @@
     };
     steamos.useSteamOSConfig = true;
   };
-  # https://github.com/Jovian-Experiments/Jovian-NixOS/issues/564
-  systemd.user.services."steamos-manager".serviceConfig.ExecStartPre = pkgs.lib.getExe (
-    pkgs.writeShellScriptBin "wait-for-start" ''
-      sleep 10
-    ''
-  );
 
   users.users.charlotte.extraGroups = [ "steamos" ];
   security.sudo.extraRules = [
