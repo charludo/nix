@@ -11,6 +11,7 @@
     ./borg.nix
     ./cache.nix
     ./fail2ban.nix
+    ./filebrowser.nix
     ./jitsi.nix
     ./mailserver.nix
     ./minecraft.nix
