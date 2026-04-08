@@ -20,11 +20,13 @@
   };
   desktop = {
     daw.enable = true;
+    fcitx.enable = true;
     musescore.enable = true;
     pdfpc.enable = true;
   };
 
   home.packages = with pkgs; [
+    anki
     teams-for-linux
     jitsi-meet-electron
     ours.nsenter
