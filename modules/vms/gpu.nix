@@ -52,7 +52,6 @@ in
       hardware.intel-gpu-tools.enable = true;
       hardware.firmware = [ pkgs.linux-firmware ];
       boot.kernelPackages = pkgs.linuxPackages_latest;
-      environment.sessionVariables.LIBVA_DRIVER_NAME = "iHD";
     })
   ];
 }

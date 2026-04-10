@@ -21,7 +21,6 @@
     cacheDir = "${dataDir}/cache";
   };
 
-  systemd.services.jellyfin.environment.LIBVA_DRIVER_NAME = "iHD";
   systemd.services.jellyfin.serviceConfig = {
     PrivateDevices = false;
     DeviceAllow = [
