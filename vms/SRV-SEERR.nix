@@ -1,7 +1,9 @@
-{ config, private-settings, ... }:
-let
-  dataDir = "/var/lib/jellyseerr";
-in
+{
+  config,
+  lib,
+  private-settings,
+  ...
+}:
 {
   vm = {
     id = 2223;
@@ -15,22 +17,24 @@ in
     certsFor = [
       {
         name = "seerr";
-        port = config.services.jellyseerr.port;
+        port = config.services.seerr.port;
       }
     ];
   };
 
-  services.jellyseerr = {
+  services.seerr = {
     enable = true;
     openFirewall = true;
+    configDir = "/var/lib/seerr";
   };
+  systemd.services.seerr.serviceConfig.StateDirectory = lib.mkForce "seerr";
 
   nas.backup.enable = true;
-  rsync."jellyseerr" = {
+  rsync."seerr" = {
     tasks = [
       {
-        from = "${dataDir}";
-        to = "${config.nas.backup.stateLocation}/jellyseerr";
+        from = "${config.services.seerr.configDir}";
+        to = "${config.nas.backup.stateLocation}/seerr";
       }
     ];
   };

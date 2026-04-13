@@ -20,6 +20,7 @@ in
       extraConfig = {
         PROJECTS = lib.mkDefault "${config.home.homeDirectory}/Projekte";
       };
+      setSessionVariables = true;
     };
   };
 }

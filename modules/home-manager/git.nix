@@ -81,6 +81,7 @@ in
         alias.ch = "checkout";
         alias.fm = "format-patch --zero-commit --full-index";
       };
+      signing.format = "openpgp";
     };
     home.file.".ssh/allowed_signers".text = lib.mkIf (
       cfg.signingKey.pub != null
