@@ -24,9 +24,9 @@ in
     ];
 
     # Annoying hacks to make Bitwig use a different location for storage
-    home.file."Bitwig Studio".source = lib.mkIf (cfg.dataDir != null) (
-      config.lib.file.mkOutOfStoreSymlink cfg.dataDir
-    );
+    home.file."Bitwig Studio" = lib.mkIf (cfg.dataDir != null) {
+      source = config.lib.file.mkOutOfStoreSymlink cfg.dataDir;
+    };
     home.file.".hidden".text = ''
       Bitwig Studio
     '';
