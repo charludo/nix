@@ -19,6 +19,7 @@
     rmpc.enable = true;
   };
   desktop = {
+    bitwig.enable = true;
     daw.enable = true;
     fcitx.enable = true;
     musescore.enable = true;
