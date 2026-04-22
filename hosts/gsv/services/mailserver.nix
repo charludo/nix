@@ -16,9 +16,8 @@ in
     fullTextSearch = {
       enable = true;
       autoIndex = true;
-      enforced = "body";
     };
-    loginAccounts = loginAccounts;
+    accounts = loginAccounts;
     forwards = forwards;
     localDnsResolver = false;
   };

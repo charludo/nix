@@ -49,6 +49,7 @@ in
         ".envrc"
         ".direnv"
         ".venv"
+        ".claude"
         ".dmypy.json"
         "coverage.out"
       ];

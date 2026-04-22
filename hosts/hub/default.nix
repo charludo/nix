@@ -63,18 +63,18 @@
   };
 
   boot.initrd.luks.devices = {
-    "luks-1d6679b1-71d2-4ed8-8a84-44a28c388a3f" = {
-      device = "/dev/disk/by-uuid/1d6679b1-71d2-4ed8-8a84-44a28c388a3f";
-      keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
-      keyFileSize = 4096;
-      fallbackToPassword = true;
-      bypassWorkqueues = true;
-    };
+    # /
     "luks-19d023d9-885a-4f40-b03c-775d6ec49388" = {
       device = "/dev/disk/by-uuid/19d023d9-885a-4f40-b03c-775d6ec49388";
       keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
       keyFileSize = 4096;
-      fallbackToPassword = true;
+      bypassWorkqueues = true;
+    };
+    # swap
+    "luks-1d6679b1-71d2-4ed8-8a84-44a28c388a3f" = {
+      device = "/dev/disk/by-uuid/1d6679b1-71d2-4ed8-8a84-44a28c388a3f";
+      keyFile = "/dev/disk/by-id/usb-Intenso_Micro_Line_6414041056097521862-0:0";
+      keyFileSize = 4096;
       bypassWorkqueues = true;
     };
   };

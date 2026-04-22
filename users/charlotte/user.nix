@@ -27,6 +27,7 @@ in
       "audio"
       "networkmanager"
       "nas"
+      "dialout"
     ]
     ++ ifTheyExist [
       "docker"

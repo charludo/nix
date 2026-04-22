@@ -8,7 +8,7 @@
 let
   inherit (private-settings) domains;
 
-  mailAccounts = config.mailserver.loginAccounts;
+  mailAccounts = config.mailserver.accounts;
   htpasswd = pkgs.writeText "radicale.users" (
     lib.concatStrings (
       lib.flip lib.mapAttrsToList mailAccounts (mail: user: mail + ":" + user.hashedPassword + "\n")
