@@ -29,9 +29,6 @@
     mdbook.url = "github:pbar1/nix-mdbook";
     mdbook.inputs.nixpkgs.follows = "nixpkgs";
 
-    authentik.url = "github:nix-community/authentik-nix";
-    authentik.inputs.nixpkgs.follows = "nixpkgs";
-
     nix-update-notifier.url = "github:asymmetric/nixpkgs-update-notifier";
     nix-update-notifier.inputs.nixpkgs.follows = "nixpkgs";
 
