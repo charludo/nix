@@ -113,28 +113,5 @@ in
       authorizedKeys = publicKeys;
     };
   };
-
-  # Write a .profile so that SSH-ing into the initrd automatically offers to
-  # unlock ZFS. postCommands is not supported in systemd stage 1.
-  boot.initrd.systemd.services.zfs-unlock-profile = {
-    description = "Setup ZFS unlock profile for initrd SSH sessions";
-    wantedBy = [ "initrd.target" ];
-    unitConfig.DefaultDependencies = false;
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-    };
-    script = ''
-      mkdir -p /root
-      cat > /root/.profile << 'PROFILE'
-      if pgrep -x "zfs" > /dev/null
-      then
-        zfs load-key -a
-        killall zfs
-      else
-        echo "zfs not running -- maybe the pool is taking some time to load for some unforseen reason."
-      fi
-      PROFILE
-    '';
-  };
+  boot.initrd.systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
 }
