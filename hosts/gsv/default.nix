@@ -32,6 +32,7 @@ in
   snow = {
     targetHost = "root@${gsv.ip}";
     useSubstitutes = true;
+    buildMeOn = "gsv";
   };
 
   # Networking config

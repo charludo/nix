@@ -148,9 +148,7 @@ in
       ++ (lib.optionals (builtins.substring 0 2 config.networking.hostName == "CL") [ "client-vm" ]);
       useRemoteSudo = lib.mkDefault true;
       askSudoPassword = lib.mkDefault false;
-      buildOnTarget = lib.mkDefault false;
       targetHost = lib.mkDefault "paki@${config.vm.networking.address}";
-      buildHost = lib.mkDefault "gsv";
 
       vm = {
         id = cfg.id;
