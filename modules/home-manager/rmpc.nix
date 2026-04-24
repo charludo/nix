@@ -33,7 +33,7 @@ in
         # ron
         ''
           (
-            address: "${config.services.mpd.network.listenAddress}:${builtins.toString config.services.mpd.network.port}",
+            address: "${config.services.mpd.network.listenAddress}:${toString config.services.mpd.network.port}",
             lyrics_dir: Some("${cfg.musicLocation}"),
             scrolloff: 8,
             wrap_navigation: true,

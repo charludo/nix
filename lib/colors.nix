@@ -30,7 +30,7 @@ rec {
   rgbToHex =
     rgb:
     let
-      hexList = builtins.map decToHex rgb;
+      hexList = map decToHex rgb;
       hexColor = builtins.concatStringsSep "" hexList;
     in
     hexColor;
@@ -117,7 +117,7 @@ rec {
       line = "#${darken palette.base00 (-30)}";
       green = "#${darken palette.base0B (-12)}";
       vibrant_green = "#${palette.base0B}";
-      dark_blue = "#${darken palette.base0D (18)}";
+      dark_blue = "#${darken palette.base0D 18}";
       nord_blue = "#${darken palette.base0D (-12)}";
       blue = "#${palette.base0D}";
       yellow = "#${palette.base0A}";

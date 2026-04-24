@@ -17,7 +17,7 @@
     forceSSL = true;
     enableACME = true;
     locations."/" = {
-      proxyPass = "http://127.0.0.1:${builtins.toString config.services.rmfakecloud.port}/";
+      proxyPass = "http://127.0.0.1:${toString config.services.rmfakecloud.port}/";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_set_header  X-Script-Name /;

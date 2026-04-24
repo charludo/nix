@@ -32,7 +32,7 @@ rec {
 
   allVMNames =
     path:
-    builtins.map (f: lib.removeSuffix ".nix" f) (
+    map (f: lib.removeSuffix ".nix" f) (
       builtins.attrNames (
         builtins.readDir (
           builtins.filterSource (path: type: type != "directory" && baseNameOf path != ".nix") path

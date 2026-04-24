@@ -32,8 +32,8 @@ in
             redirectURI = lib.mkOption {
               type = lib.types.str;
               description = "URI used as the proxyPass target in nginx";
-              default = "http://${config.address}:${builtins.toString config.port}/";
-              defaultText = lib.literalExpression "http://\${config.address}:\${builtins.toString config.port}/";
+              default = "http://${config.address}:${toString config.port}/";
+              defaultText = lib.literalExpression "http://\${config.address}:\${toString config.port}/";
             };
             defaultProxySettings = lib.mkOption {
               type = lib.types.bool;
@@ -62,7 +62,7 @@ in
     };
     systemd.services =
       builtins.listToAttrs (
-        builtins.map (entry: {
+        map (entry: {
           name = "acme-${entry.name}.${private-settings.domains.ad}";
           value = {
             after = [ "ddclient.service" ];
@@ -88,7 +88,7 @@ in
       '';
     };
     services.nginx.virtualHosts = builtins.listToAttrs (
-      builtins.map (entry: {
+      map (entry: {
         name = "${entry.name}.${private-settings.domains.ad}";
         value = {
           forceSSL = true;
@@ -125,7 +125,7 @@ in
     ];
     networking.hosts = {
       "192.168.30.33" = [ (builtins.head private-settings.caIssuing1.dnsNames) ];
-      "127.0.0.1" = builtins.map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
+      "127.0.0.1" = map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
     };
 
     services.ddclient = {
@@ -139,7 +139,7 @@ in
         ]
       }";
       usev6 = "no";
-      domains = builtins.map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
+      domains = map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
       username = "${lib.getExe' pkgs.dig "nsupdate"}";
       passwordFile = config.age.secrets.dns-update-pw.path;
       server = private-settings.ad.dnsServer;

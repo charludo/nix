@@ -143,7 +143,7 @@ in
     ];
     extraConfig = ''
       turn_external_host = "turn.${domains.blog}"
-      turn_external_port = ${builtins.toString outputs.nixosConfigurations.gsv.config.services.coturn.listening-port}
+      turn_external_port = ${toString outputs.nixosConfigurations.gsv.config.services.coturn.listening-port}
       turn_external_secret = "${gsv.turnSecret}"
 
       consider_bosh_secure = true;

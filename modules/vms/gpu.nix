@@ -15,7 +15,7 @@ in
     (lib.mkIf (cfg.runOnGPUHost || cfg.hardware.gpu.enable) {
       proxmox.qemuConf = {
         scsihw = "virtio-scsi-pci";
-        virtio0 = "vm_datastore_local_gpu:vm-${builtins.toString config.vm.id}-disk-0";
+        virtio0 = "vm_datastore_local_gpu:vm-${toString config.vm.id}-disk-0";
       };
       proxmox.qemuExtraConf = {
         balloon = "0";

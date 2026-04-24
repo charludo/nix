@@ -20,7 +20,7 @@ in
     enable = true;
     settings.auth = {
       type = "htpasswd";
-      htpasswd_filename = builtins.toString htpasswd;
+      htpasswd_filename = toString htpasswd;
       htpasswd_encryption = "bcrypt";
     };
     settings.web = {

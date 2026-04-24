@@ -13,14 +13,10 @@ let
     let
       applicableKeys = filterAttrs (_: id: id.serial != null && id.keyType == "ssh") cfg.identities;
       yubikeyPublics = concatStringsSep " " (
-        mapAttrsToList (
-          _: id: "[${builtins.toString id.publicKeyFile}]=\"${builtins.toString id.serial}\""
-        ) applicableKeys
+        mapAttrsToList (_: id: "[${toString id.publicKeyFile}]=\"${toString id.serial}\"") applicableKeys
       );
       yubikeyPrivates = concatStringsSep " " (
-        mapAttrsToList (
-          _: id: "[${builtins.toString id.privateKeyFile}]=\"${builtins.toString id.serial}\""
-        ) applicableKeys
+        mapAttrsToList (_: id: "[${toString id.privateKeyFile}]=\"${toString id.serial}\"") applicableKeys
       );
     in
     pkgs.writeShellApplication {

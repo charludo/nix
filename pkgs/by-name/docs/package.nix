@@ -17,7 +17,7 @@ let
 
   mkCleaned =
     options:
-    builtins.removeAttrs options [
+    removeAttrs options [
       "_module"
       "_freeformOptions"
       "warnings"
@@ -31,7 +31,7 @@ let
   mkSummary =
     section: options:
     lib.concatStringsSep "\n" (
-      builtins.map (n: "  - [${n}](options/${section}/${n}.md)") (builtins.attrNames options)
+      map (n: "  - [${n}](options/${section}/${n}.md)") (builtins.attrNames options)
     );
 
   options = {

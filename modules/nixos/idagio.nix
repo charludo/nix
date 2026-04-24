@@ -60,7 +60,7 @@ let
 
 
         if __name__ == '__main__':
-            app.run(host='${cfg.host}', port=${builtins.toString cfg.port})
+            app.run(host='${cfg.host}', port=${toString cfg.port})
       '';
 in
 {

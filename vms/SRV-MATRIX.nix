@@ -50,8 +50,8 @@ in
           coturn = outputs.nixosConfigurations.gsv.config.services.coturn;
         in
         [
-          "turns:turn.${domains.blog}:${builtins.toString coturn.tls-listening-port}"
-          "turn:turn.${domains.blog}:${builtins.toString coturn.listening-port}"
+          "turns:turn.${domains.blog}:${toString coturn.tls-listening-port}"
+          "turn:turn.${domains.blog}:${toString coturn.listening-port}"
         ];
       # The secrets file MUST NOT be newline-terminated!
       # If it is, then the key plus the newline is used as the key, leading to

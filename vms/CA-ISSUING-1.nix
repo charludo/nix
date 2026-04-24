@@ -37,9 +37,9 @@
   };
 
   # Needed to bootstrap signing the actual server URL's certificate
-  security.acme.defaults.server = "https://${config.vm.networking.address}:${builtins.toString config.services.step-ca.port}/acme/acme/directory";
+  security.acme.defaults.server = "https://${config.vm.networking.address}:${toString config.services.step-ca.port}/acme/acme/directory";
   services.nginx.virtualHosts."${builtins.head private-settings.caIssuing1.dnsNames}".locations."/".proxyPass =
-    lib.mkForce "https://127.0.0.1:${builtins.toString config.services.step-ca.port}";
+    lib.mkForce "https://127.0.0.1:${toString config.services.step-ca.port}";
   networking.hosts."127.0.0.1" = lib.mkForce [ ];
   networking.hosts."192.168.30.33" = lib.mkForce [ ];
 }

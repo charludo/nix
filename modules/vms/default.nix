@@ -113,7 +113,7 @@ in
   config = lib.mkIf cfg.enable {
     proxmox.qemuConf = {
       scsihw = lib.mkDefault "virtio-scsi-single";
-      virtio0 = lib.mkDefault "vm_datastore:vm-${builtins.toString config.vm.id}-disk-0";
+      virtio0 = lib.mkDefault "vm_datastore:vm-${toString config.vm.id}-disk-0";
       boot = "order=virtio0";
       ostype = "l26";
       cores = config.vm.hardware.cores;

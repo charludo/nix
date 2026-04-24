@@ -88,9 +88,9 @@ in
         customDNS.mapping = lib.mkIf cfg.addEntriesForVMs (
           builtins.listToAttrs (
             lib.lists.flatten (
-              builtins.map (
+              map (
                 vm:
-                builtins.map (entry: {
+                map (entry: {
                   name = "${entry.name}.${private-settings.domains.ad}";
                   value = outputs.nixosConfigurations.${vm}.config.vm.networking.address;
                 }) outputs.nixosConfigurations.${vm}.config.vm.certsFor

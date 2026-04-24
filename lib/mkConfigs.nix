@@ -65,7 +65,7 @@ rec {
   vms =
     vmPath:
     builtins.listToAttrs (
-      builtins.map (name: {
+      map (name: {
         inherit name;
         value = lib.nixosSystem {
           modules = [

@@ -7,7 +7,7 @@
 let
   inherit (private-settings) gsv;
   hostName = "gsv";
-  publicKeys = builtins.map builtins.readFile [
+  publicKeys = map builtins.readFile [
     ../../users/charlotte/keys/zakalwe_ssh.pub
     ../../users/charlotte/keys/perostek_ssh.pub
     ../../users/charlotte/keys/diziet_ssh.pub

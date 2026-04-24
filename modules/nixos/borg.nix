@@ -75,9 +75,7 @@ in
           passCommand = "cat ${config.age.secrets."borg-password-${name}".path}";
         };
         environment = {
-          BORG_RSH = "ssh -p ${builtins.toString borg.port} -i ${
-            config.age.secrets."borg-ssh-key-${name}".path
-          }";
+          BORG_RSH = "ssh -p ${toString borg.port} -i ${config.age.secrets."borg-ssh-key-${name}".path}";
         };
         compression = "auto,lzma";
         doInit = false; # instead, provide script below

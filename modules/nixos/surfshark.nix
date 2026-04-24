@@ -98,7 +98,7 @@ in
   };
 
   config = mkIf cfg.enable (mkMerge [
-    ({
+    {
       age.secrets.openvpn.rekeyFile = secrets.vpn;
       networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
@@ -107,7 +107,7 @@ in
         surfshark-random
         surfshark-stop
       ];
-    })
+    }
 
     (mkIf cfg.alwaysOn {
       systemd.timers."surfshark-ensure-minutely" = {
@@ -175,21 +175,21 @@ in
       + lib.concatStringsSep "" (
         map (user: ''
           iptables -A OUTPUT -m owner --gid-owner ${
-            builtins.toString config.users.groups."${user}".gid
+            toString config.users.groups."${user}".gid
           } -d 192.168.0.0/16 ! -o tun0 -j ACCEPT
         '') cfg.iptables.enforceForUsers
       )
       + lib.concatStringsSep "" (
         map (user: ''
           iptables -A OUTPUT -m owner --gid-owner ${
-            builtins.toString config.users.groups."${user}".gid
+            toString config.users.groups."${user}".gid
           } -d 127.0.0.1 ! -o tun0 -j ACCEPT
         '') cfg.iptables.enforceForUsers
       )
       + lib.concatStringsSep "" (
         map (user: ''
           iptables -A OUTPUT -m owner --gid-owner ${
-            builtins.toString config.users.groups."${user}".gid
+            toString config.users.groups."${user}".gid
           } ! -o tun0 -j REJECT
         '') cfg.iptables.enforceForUsers
       )

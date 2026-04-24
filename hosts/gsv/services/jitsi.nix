@@ -34,8 +34,8 @@ in
           let
             coturn = config.services.coturn;
             domain = "turn.${domains.blog}";
-            port = builtins.toString coturn.listening-port;
-            portTls = builtins.toString coturn.tls-listening-port;
+            port = toString coturn.listening-port;
+            portTls = toString coturn.tls-listening-port;
           in
           [
             { urls = "stun:${domain}:${port}"; }
@@ -70,8 +70,8 @@ in
     enable = true;
     openFirewall = true;
     nat.harvesterAddresses = lib.mkForce [
-      "turns:turn.${domains.blog}:${builtins.toString config.services.coturn.tls-listening-port}"
-      "turn:turn.${domains.blog}:${builtins.toString config.services.coturn.listening-port}"
+      "turns:turn.${domains.blog}:${toString config.services.coturn.tls-listening-port}"
+      "turn:turn.${domains.blog}:${toString config.services.coturn.listening-port}"
     ];
   };
 
@@ -79,7 +79,7 @@ in
     extraModules = [ "turn_external" ];
     extraConfig = ''
       turn_external_host = "turn.${domains.blog}"
-      turn_external_port = ${builtins.toString config.services.coturn.listening-port}
+      turn_external_port = ${toString config.services.coturn.listening-port}
       turn_external_secret = "${gsv.turnSecret}"
     '';
   };

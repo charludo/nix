@@ -140,7 +140,7 @@ in
     adminInterface = mkMonitOption ''
       set httpd port 2812 and use address localhost
         allow localhost
-        allow admin:${builtins.toString cfg.adminPassword}
+        allow admin:${toString cfg.adminPassword}
     '';
 
     system = mkMonitOption ''

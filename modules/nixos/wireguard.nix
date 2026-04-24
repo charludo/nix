@@ -90,7 +90,7 @@ in
 
         peers = [
           {
-            endpoint = "${cfg.endpoint}:${builtins.toString cfg.port}";
+            endpoint = "${cfg.endpoint}:${toString cfg.port}";
             publicKey = cfg.secrets.remotePublicKey;
             allowedIPs = [ cfg.allowedIPs ];
             persistentKeepalive = 25;
