@@ -127,6 +127,7 @@ in
     # https://bugzilla.mozilla.org/show_bug.cgi?id=2007074
     home.file.".hidden".text = ''
       Thunderbird
+      thunderbird
     '';
   };
 }
