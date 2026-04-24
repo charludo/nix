@@ -23,7 +23,7 @@ in
           exec-arg = "-e fish";
         };
         "org/nemo/preferences" = {
-          thumbnail-limit = "104857600";
+          thumbnail-limit = lib.gvariant.mkUint64 104857600;
         };
       };
     };
