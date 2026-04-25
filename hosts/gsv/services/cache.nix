@@ -23,6 +23,10 @@
   };
 
   age.secrets.nix-cache-signing-key.rekeyFile = secrets.gsv-nix-cache;
+  age.secrets.nix-cache-htpasswd = {
+    rekeyFile = secrets.gsv-nix-cache-htpasswd;
+    owner = "nginx";
+  };
   services.harmonia = {
     cache.enable = true;
     cache.signKeyPaths = [ config.age.secrets.nix-cache-signing-key.path ];
@@ -57,6 +61,8 @@
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection $connection_upgrade;
+          auth_basic "Nix cache";
+          auth_basic_user_file ${config.age.secrets.nix-cache-htpasswd.path};
         '';
       };
     };

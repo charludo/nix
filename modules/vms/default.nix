@@ -3,6 +3,7 @@
   lib,
   pkgs,
   private-settings,
+  secrets,
   ...
 }:
 let
@@ -198,11 +199,13 @@ in
       dates = "monthly";
       options = "-d";
     };
+    age.secrets.nix-cache-netrc.rekeyFile = secrets.nix-cache-netrc;
     nix.settings = {
       extra-substituters = [ "https://cache.${private-settings.domains.blog}" ];
       extra-trusted-public-keys = [
         "cache.${private-settings.domains.blog}-1:uh2KzANysUoaMiEesTO2IkE2h/ycuJKE3Jx8yz4XYJI="
       ];
+      netrc-file = config.age.secrets.nix-cache-netrc.path;
     };
 
     # Hardware config is always identical

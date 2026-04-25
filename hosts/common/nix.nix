@@ -1,10 +1,17 @@
 {
+  config,
   inputs,
   lib,
   private-settings,
+  secrets,
   ...
 }:
 {
+  age.secrets.nix-cache-netrc = {
+    rekeyFile = secrets.nix-cache-netrc;
+    mode = "0444";
+  };
+
   nix = {
     settings = {
       trusted-users = [
@@ -29,6 +36,7 @@
       extra-trusted-public-keys = [
         "cache.${private-settings.domains.blog}-1:uh2KzANysUoaMiEesTO2IkE2h/ycuJKE3Jx8yz4XYJI="
       ];
+      netrc-file = config.age.secrets.nix-cache-netrc.path;
     };
 
     gc = {
