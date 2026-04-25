@@ -3,7 +3,6 @@
   lib,
   pkgs,
   private-settings,
-  secrets,
   ...
 }:
 let
@@ -14,6 +13,7 @@ in
     ./client.nix
     ./certs.nix
     ./gpu.nix
+    ./unsupervised-updates.nix
   ];
 
   options.vm = {
@@ -189,7 +189,7 @@ in
     nixpkgs.hostPlatform = "x86_64-linux";
     services.qemuGuest.enable = true;
 
-    # Overwriting parts of hosts/common
+    # Overwriting parts of hosts/common (imported in mkConfig)
     programs.ssh.knownHosts = lib.mkForce { };
 
     security.pki.certificateFiles = [ private-settings.caIssuing1.root ];
@@ -198,14 +198,6 @@ in
       automatic = true;
       dates = "monthly";
       options = "-d";
-    };
-    age.secrets.nix-cache-netrc.rekeyFile = secrets.nix-cache-netrc;
-    nix.settings = {
-      extra-substituters = [ "https://cache.${private-settings.domains.blog}" ];
-      extra-trusted-public-keys = [
-        "cache.${private-settings.domains.blog}-1:uh2KzANysUoaMiEesTO2IkE2h/ycuJKE3Jx8yz4XYJI="
-      ];
-      netrc-file = config.age.secrets.nix-cache-netrc.path;
     };
 
     # Hardware config is always identical

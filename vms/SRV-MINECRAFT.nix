@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   private-settings,
   config,
@@ -13,6 +14,7 @@
     hardware.memory = 8192;
     hardware.storage = "64G";
   };
+  snow.tags = lib.mkForce [ "vm" ];
 
   services.minecraft-server = {
     enable = true;

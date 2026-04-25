@@ -11,6 +11,7 @@
     rekeyFile = secrets.nix-cache-netrc;
     mode = "0444";
   };
+  age.secrets.git-credentials.rekeyFile = secrets.git-credentials;
 
   nix = {
     settings = {
@@ -46,5 +47,11 @@
     };
 
     nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];
+  };
+
+  # git credential store for fetching (private) repos and submodules.
+  programs.git = {
+    enable = true;
+    config."credential".helper = "store --file ${config.age.secrets.git-credentials.path}";
   };
 }
