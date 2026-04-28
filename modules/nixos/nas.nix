@@ -72,46 +72,52 @@ in
       serviceConfig.SupplementaryGroups = [ "nas" ];
     });
 
-    systemd.mounts = [
-      (mkIf cfg.enable {
-        description = "Mount for NAS";
-        what = "//192.168.30.11/NAS";
-        where = cfg.location;
-        type = "cifs";
-        options =
-          let
-            automount_opts = "uid=1000,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-          in
-          "${automount_opts},credentials=${config.age.secrets.nas.path}";
-        wantedBy = [ "multi-user.target" ];
-      })
+    systemd.mounts =
+      let
+        mountOpts =
+          credentials:
+          lib.concatStringsSep "," [
+            "uid=1000"
+            "gid=1111"
+            "file_mode=0770"
+            "dir_mode=0770"
+            "x-systemd.automount"
+            "noauto"
+            "x-systemd.idle-timeout=60"
+            "x-systemd.device-timeout=5s"
+            "x-systemd.mount-timeout=5s"
+            "credentials=${credentials}"
+          ];
+        nasCredentials = config.age.secrets.nas.path;
+      in
+      [
+        (mkIf cfg.enable {
+          description = "Mount for NAS";
+          what = "//192.168.30.11/NAS";
+          where = cfg.location;
+          type = "cifs";
+          options = mountOpts nasCredentials;
+          wantedBy = [ "multi-user.target" ];
+        })
 
-      (mkIf cfg.backup.enable {
-        description = "Mount for Backup";
-        what = "//192.168.30.11/Backup";
-        where = cfg.backup.location;
-        type = "cifs";
-        options =
-          let
-            automount_opts = "uid=1000,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-          in
-          "${automount_opts},credentials=${config.age.secrets.nas.path}";
-        wantedBy = [ "multi-user.target" ];
-      })
+        (mkIf cfg.backup.enable {
+          description = "Mount for Backup";
+          what = "//192.168.30.11/Backup";
+          where = cfg.backup.location;
+          type = "cifs";
+          options = mountOpts nasCredentials;
+          wantedBy = [ "multi-user.target" ];
+        })
 
-      (mkIf cfg.qnap.enable {
-        description = "Mount for QNAP";
-        what = "//192.168.30.12/Backup";
-        where = cfg.qnap.location;
-        type = "cifs";
-        options =
-          let
-            automount_opts = "uid=1000,gid=1111,file_mode=0770,dir_mode=0770,x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-          in
-          "${automount_opts},credentials=${config.age.secrets.nas.path}";
-        wantedBy = [ "multi-user.target" ];
-      })
-    ];
+        (mkIf cfg.qnap.enable {
+          description = "Mount for QNAP";
+          what = "//192.168.30.12/Backup";
+          where = cfg.qnap.location;
+          type = "cifs";
+          options = mountOpts nasCredentials;
+          wantedBy = [ "multi-user.target" ];
+        })
+      ];
 
   };
 }
