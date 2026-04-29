@@ -1,7 +1,15 @@
 { lib, pkgs, ... }:
 let
+  python3 = pkgs.python313.override {
+    # Build without any X86_V2+ baseline (not available on our VMs)
+    packageOverrides = self: super: {
+      numpy = super.numpy.overridePythonAttrs (old: {
+        mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dcpu-baseline=none" ];
+      });
+    };
+  };
   lgtv =
-    pkgs.writers.writePython3Bin "lgtv" { libraries = [ pkgs.python313Packages.flask ]; } # python
+    pkgs.writers.writePython3Bin "lgtv" { libraries = [ python3.pkgs.flask ]; } # python
       ''
         # flake8: noqa
         from flask import Flask
@@ -10,11 +18,11 @@ let
 
 
         app = Flask(__name__)
-        cmd = "${lib.getExe' pkgs.python313Packages.aiopylgtv "aiopylgtvcommand"}"
+        cmd = "${lib.getExe' python3.pkgs.aiopylgtv "aiopylgtvcommand"}"
 
 
         def run_command(args):
-            os.system(
+            _ = os.system(
                 f"{cmd} 192.168.24.200 {args}"
             )
 
@@ -95,7 +103,7 @@ in
   };
 
   environment.systemPackages = [
-    pkgs.python313Packages.aiopylgtv
+    python3.pkgs.aiopylgtv
     lgtv
   ];
 
