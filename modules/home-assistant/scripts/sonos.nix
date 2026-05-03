@@ -1,4 +1,7 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+in
 {
   hass.scripts = {
     sonos_play_pause = {
@@ -8,7 +11,7 @@
         {
           action = "media_player.media_play_pause";
           data = { };
-          target.entity_id = "media_player.alle";
+          target.entity_id = e.media_player.alle;
         }
       ];
     };
@@ -19,8 +22,8 @@
       sequence = [
         {
           action = "media_player.volume_mute";
-          target.entity_id = "media_player.living_room";
-          data.is_volume_muted = "{{ not state_attr('media_player.living_room', 'is_volume_muted') }}";
+          target.entity_id = e.media_player.living_room;
+          data.is_volume_muted = "{{ not state_attr('${e.media_player.living_room}', 'is_volume_muted') }}";
         }
       ];
     };
@@ -31,8 +34,8 @@
       sequence = [
         {
           action = "media_player.volume_mute";
-          target.entity_id = "media_player.office";
-          data.is_volume_muted = "{{ not state_attr('media_player.office', 'is_volume_muted') }}";
+          target.entity_id = e.media_player.office;
+          data.is_volume_muted = "{{ not state_attr('${e.media_player.office}', 'is_volume_muted') }}";
         }
       ];
     };
@@ -44,19 +47,19 @@
         {
           action = "media_player.media_stop";
           target.entity_id = [
-            "media_player.alle"
-            "media_player.living_room"
-            "media_player.office"
+            e.media_player.alle
+            e.media_player.living_room
+            e.media_player.office
           ];
         }
         {
           action = "media_player.turn_off";
-          target.entity_id = "media_player.alle";
+          target.entity_id = e.media_player.alle;
         }
         { delay = "00:00:01"; }
         {
           action = "media_player.turn_on";
-          target.entity_id = "media_player.alle";
+          target.entity_id = e.media_player.alle;
         }
       ];
     };

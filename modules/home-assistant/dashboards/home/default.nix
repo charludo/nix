@@ -23,9 +23,9 @@ in
     default = true;
     views = [
       (import ./view-home.nix { inherit lib e areas; })
-      (import ./view-botty.nix { inherit lib; })
-      (import ./view-sonos.nix { inherit lib; })
-      (import ./view-einstellungen.nix { inherit lib; })
+      (import ./view-botty.nix { inherit lib e; })
+      (import ./view-sonos.nix { inherit lib e; })
+      (import ./view-einstellungen.nix { inherit lib e; })
     ];
   };
 }

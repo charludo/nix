@@ -1,6 +1,12 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   ha = lib.ha;
+  e = config.hass.entities;
   cfg = (pkgs.formats.yaml { }).generate "dashboard-umwelt-details.yaml" {
     views = [
       {
@@ -13,7 +19,7 @@ let
             (ha.mkMushTitle "Vorhersage")
             {
               type = "weather-forecast";
-              entity = "weather.openweathermap";
+              entity = e.weather.openweathermap;
               show_current = true;
               show_forecast = true;
               forecast_type = "hourly";
@@ -23,22 +29,22 @@ let
               type = "glance";
               entities = [
                 {
-                  entity = "sensor.openweathermap_gefuhlte_temperatur";
+                  entity = e.sensor.openweathermap_gefuhlte_temperatur;
                   name = "Gefühlt";
                 }
                 {
-                  entity = "sensor.sun_next_dawn";
+                  entity = e.sensor.sun_next_dawn;
                   name = "Sonnenaufgang";
                 }
                 {
-                  entity = "sensor.sun_next_dusk";
+                  entity = e.sensor.sun_next_dusk;
                   name = "Sonnenuntergang";
                 }
               ];
             }
             {
               type = "history-graph";
-              entities = [ "sun.sun" ];
+              entities = [ e.sun.sun ];
             }
           ])
           (ha.mkGridSection [
@@ -51,9 +57,9 @@ let
               show_icon = true;
               show_state = true;
               entities = [
-                { entity = "sensor.thermometer_terrasse_temperature"; }
-                { entity = "sensor.thermometer_terrasse_humidity"; }
-                { entity = "sensor.thermometer_terrasse_pressure"; }
+                { entity = e.sensor.thermometer_terrasse.temperature; }
+                { entity = e.sensor.thermometer_terrasse.humidity; }
+                { entity = e.sensor.thermometer_terrasse.pressure; }
               ];
             }
             {
@@ -64,9 +70,9 @@ let
               show_icon = true;
               show_state = true;
               entities = [
-                { entity = "sensor.thermometer_gewachshaus_temperature"; }
-                { entity = "sensor.thermometer_gewachshaus_humidity"; }
-                { entity = "sensor.thermometer_gewachshaus_pressure"; }
+                { entity = e.sensor.thermometer_gewachshaus.temperature; }
+                { entity = e.sensor.thermometer_gewachshaus.humidity; }
+                { entity = e.sensor.thermometer_gewachshaus.pressure; }
               ];
             }
           ])
@@ -74,7 +80,7 @@ let
             (ha.mkMushTitle "Echtzeit (OpenWeather)")
             {
               type = "sensor";
-              entity = "sensor.openweathermap_temperatur";
+              entity = e.sensor.openweathermap_temperatur;
               name = "Temperatur";
               graph = "line";
               detail = 2;
@@ -83,14 +89,14 @@ let
             (ha.mkHStack [
               {
                 type = "sensor";
-                entity = "sensor.openweathermap_windgeschwindigkeit";
+                entity = e.sensor.openweathermap_windgeschwindigkeit;
                 name = "Windgeschwindigkeit";
                 graph = "line";
                 detail = 2;
               }
               {
                 type = "sensor";
-                entity = "sensor.openweathermap_bewolkung";
+                entity = e.sensor.openweathermap_bewolkung;
                 name = "Wolkendecke";
                 graph = "line";
                 detail = 2;
@@ -100,7 +106,7 @@ let
             (ha.mkHStack [
               {
                 type = "sensor";
-                entity = "sensor.weather_wind_gust";
+                entity = e.sensor.weather_wind_gust;
                 name = "Böengeschwindigkeit";
                 graph = "line";
                 detail = 2;
@@ -108,7 +114,7 @@ let
               }
               {
                 type = "sensor";
-                entity = "sensor.openweathermap_regenintensitat";
+                entity = e.sensor.openweathermap_regenintensitat;
                 name = "Regenmenge";
                 graph = "line";
                 detail = 2;

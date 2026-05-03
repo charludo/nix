@@ -23,12 +23,12 @@ let
       humidityEntity = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Entity ID for the area's humidity sensor";
+        description = "Entity ID for the area's humidity sensor.";
       };
       temperatureEntity = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Entity ID for the area's temperature sensor";
+        description = "Entity ID for the area's temperature sensor.";
       };
     };
   };

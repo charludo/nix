@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, e }:
 let
   ha = lib.ha;
 
@@ -162,9 +162,9 @@ in
       name = "Sonos";
       badgeCard = {
         type = "custom:button-card";
-        name = ''[[[ return states["media_player.alle"].state.charAt(0).toUpperCase() + states["media_player.alle"].state.slice(1); ]]]'';
+        name = ''[[[ return states["${e.media_player.alle}"].state.charAt(0).toUpperCase() + states["${e.media_player.alle}"].state.slice(1); ]]]'';
         show_icon = false;
-        entity = "media_player.alle";
+        entity = e.media_player.alle;
         tap_action = {
           action = "more-info";
           haptic = "medium";
@@ -202,9 +202,9 @@ in
         # Album art with blurred background
         {
           type = "custom:button-card";
-          entity = "media_player.alle";
+          entity = e.media_player.alle;
           show_entity_picture = true;
-          entity_picture = "[[[ return states['media_player.alle'].attributes.entity_picture ]]]";
+          entity_picture = "[[[ return states['${e.media_player.alle}'].attributes.entity_picture ]]]";
           show_name = false;
           tap_action = {
             action = "navigate";
@@ -212,25 +212,25 @@ in
           };
           custom_fields.info.card = {
             type = "custom:button-card";
-            entity = "media_player.alle";
+            entity = e.media_player.alle;
             show_entity_picture = true;
-            entity_picture = "[[[ return states['media_player.alle'].attributes.entity_picture ]]]";
+            entity_picture = "[[[ return states['${e.media_player.alle}'].attributes.entity_picture ]]]";
             tap_action = {
               action = "navigate";
               navigation_path = "/music-assistant";
             };
             name = ''
               [[[
-                if (states['media_player.alle'].attributes.media_title)
-                  return states['media_player.alle'].attributes.media_title;
+                if (states['${e.media_player.alle}'].attributes.media_title)
+                  return states['${e.media_player.alle}'].attributes.media_title;
                 else
                   return "-";
               ]]]
             '';
             label = ''
               [[[
-                if (states['media_player.alle'].attributes.media_artist)
-                  return states['media_player.alle'].attributes.media_artist;
+                if (states['${e.media_player.alle}'].attributes.media_artist)
+                  return states['${e.media_player.alle}'].attributes.media_artist;
                 else
                   return "";
               ]]]
@@ -316,14 +316,14 @@ in
           (mkSonosBtn {
             name = "Abspielen";
             icon = "mdi:play";
-            entity = "media_player.office";
+            entity = e.media_player.office;
             bg = "var(--green)";
             iconColor = "var(--black)";
             nameColor = "var(--black)";
             tapAction = {
               action = "call-service";
               haptic = "medium";
-              service = "script.sonos_play_pause";
+              service = e.script.sonos_play_pause;
             };
             states = [
               (ha.mkStateStyleFull {
@@ -337,13 +337,13 @@ in
           (ha.mkVStack [
             (mkSonosSpeakerToggle {
               name = "Wohnzimmer";
-              entity = "media_player.living_room";
-              service = "script.sonos_wohnzimmer_toggle";
+              entity = e.media_player.living_room;
+              service = e.script.sonos_wohnzimmer_toggle;
             })
             (mkSonosSpeakerToggle {
               name = "Büro";
-              entity = "media_player.office";
-              service = "script.sonos_buro_toggle";
+              entity = e.media_player.office;
+              service = e.script.sonos_buro_toggle;
             })
           ])
         ])
@@ -357,7 +357,7 @@ in
               action = "call-service";
               haptic = "medium";
               service = "media_player.media_previous_track";
-              service_data.entity_id = "media_player.alle";
+              service_data.entity_id = e.media_player.alle;
             };
           })
           (mkSonosBtn {
@@ -367,14 +367,14 @@ in
               action = "call-service";
               haptic = "medium";
               service = "media_player.media_previous_track";
-              service_data.entity_id = "media_player.alle";
+              service_data.entity_id = e.media_player.alle;
             };
           })
           (ha.mkVStack [
             (mkSonosBtn {
               name = "Shuffle aus";
               icon = "mdi:shuffle-disabled";
-              entity = "media_player.alle";
+              entity = e.media_player.alle;
               height = 88;
               padding = "13px 0px 16px 20px";
               iconColor = "var(--white)";
@@ -384,7 +384,7 @@ in
                 haptic = "medium";
                 service = "media_player.shuffle_set";
                 service_data = {
-                  entity_id = "media_player.alle";
+                  entity_id = e.media_player.alle;
                   shuffle = "[[[\n  return !entity.attributes.shuffle;\n]]]\n";
                 };
               };
@@ -402,7 +402,7 @@ in
             (mkSonosBtn {
               name = "Loop aus";
               icon = "mdi:repeat-off";
-              entity = "media_player.alle";
+              entity = e.media_player.alle;
               height = 88;
               padding = "13px 0px 16px 20px";
               iconColor = "var(--white)";
@@ -412,7 +412,7 @@ in
                 haptic = "medium";
                 service = "media_player.repeat_set";
                 service_data = {
-                  entity_id = "media_player.alle";
+                  entity_id = e.media_player.alle;
                   repeat = "[[[\n  const modes = ['off', 'all'];\n  const current = entity.attributes.repeat ?? 'off';\n  return modes[(modes.indexOf(current) + 1) % modes.length];\n]]]\n";
                 };
               };
@@ -434,7 +434,7 @@ in
         (ha.mkHStack [
           (mkVolumeSliderCard {
             name = "";
-            entity = "media_player.alle";
+            entity = e.media_player.alle;
             height = 400;
           })
           (ha.mkVStack [
@@ -446,16 +446,16 @@ in
               tapAction = {
                 action = "call-service";
                 haptic = "medium";
-                service = "script.media_seek";
+                service = e.script.media_seek;
                 data = {
                   seek_amount = -10;
-                  media_player = "media_player.alle";
+                  media_player = e.media_player.alle;
                 };
               };
             })
             (mkVolumeSliderCard {
               name = "Wohnzimmer";
-              entity = "media_player.living_room";
+              entity = e.media_player.living_room;
               height = 276;
             })
           ])
@@ -468,16 +468,16 @@ in
               tapAction = {
                 action = "call-service";
                 haptic = "medium";
-                service = "script.media_seek";
+                service = e.script.media_seek;
                 data = {
                   seek_amount = 10;
-                  media_player = "media_player.alle";
+                  media_player = e.media_player.alle;
                 };
               };
             })
             (mkVolumeSliderCard {
               name = "Büro";
-              entity = "media_player.office";
+              entity = e.media_player.office;
               height = 276;
             })
           ])
@@ -487,7 +487,7 @@ in
         (mkSonosBtn {
           name = "Player neu starten";
           icon = "mdi:restart";
-          entity = "media_player.alle";
+          entity = e.media_player.alle;
           height = 88;
           padding = "13px 0px 16px 20px";
           iconColor = "var(--white)";
@@ -495,7 +495,7 @@ in
           centered = true;
           tapAction = {
             action = "call-service";
-            service = "script.sonos_reset";
+            service = e.script.sonos_reset;
           };
           states = [
             (ha.mkStateStyleFull {

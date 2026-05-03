@@ -1,4 +1,7 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+in
 {
   hass.automations = {
     heat_greenhouse = {
@@ -70,12 +73,12 @@
               conditions = [
                 {
                   condition = "numeric_state";
-                  entity_id = "sensor.cumulative_rain_8h";
+                  entity_id = e.sensor.cumulative_rain_8h;
                   above = 4;
                 }
                 {
                   condition = "numeric_state";
-                  entity_id = "sensor.cumulative_rain_24h";
+                  entity_id = e.sensor.cumulative_rain_24h;
                   above = 10;
                 }
               ];
@@ -84,7 +87,7 @@
           "then" = [
             {
               condition = "state";
-              entity_id = "switch.steckdose_wasserpumpe_switch";
+              entity_id = e.switch.steckdose_wasserpumpe.switch;
               state = "on";
             }
             {
@@ -102,7 +105,7 @@
           "else" = [
             {
               condition = "state";
-              entity_id = "switch.steckdose_wasserpumpe_switch";
+              entity_id = e.switch.steckdose_wasserpumpe.switch;
               state = "off";
             }
             {
@@ -149,7 +152,7 @@
                 {
                   action = "switch.turn_on";
                   data = { };
-                  target.entity_id = "switch.steckdose_pflanzenlicht_switch";
+                  target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
                 }
               ];
             }
@@ -165,7 +168,7 @@
                 {
                   action = "switch.turn_off";
                   data = { };
-                  target.entity_id = "switch.steckdose_pflanzenlicht_switch";
+                  target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
                 }
               ];
             }

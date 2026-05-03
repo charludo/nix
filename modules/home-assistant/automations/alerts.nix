@@ -1,4 +1,7 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+in
 {
   hass.automations = {
     warnung_temperatur_gewachshaus = {
@@ -184,7 +187,7 @@
       condition = [
         {
           condition = "state";
-          entity_id = "input_boolean.turalarm";
+          entity_id = e.input_boolean.turalarm;
           state = "on";
         }
       ];
@@ -214,7 +217,7 @@
           action = "input_boolean.turn_on";
           metadata = { };
           data = { };
-          target.entity_id = "input_boolean.turalarm_persistent";
+          target.entity_id = e.input_boolean.turalarm_persistent;
         }
       ];
     };

@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, e }:
 let
   ha = lib.ha;
 in
@@ -21,17 +21,17 @@ in
           title = "Garten";
           cards = [
             (ha.mkToggleCard {
-              entity = "input_boolean.settings_garten_anzucht";
+              entity = e.input_boolean.settings_garten_anzucht;
               name = "Anzucht";
               onColor = "var(--green)";
             })
             (ha.mkToggleCard {
-              entity = "input_boolean.settings_garten_bewasserung";
+              entity = e.input_boolean.settings_garten_bewasserung;
               name = "Bewässerung";
               onColor = "var(--blue)";
             })
             (ha.mkToggleCard {
-              entity = "input_boolean.settings_garten_heizung";
+              entity = e.input_boolean.settings_garten_heizung;
               name = "Heizung";
               onColor = "var(--yellow)";
             })

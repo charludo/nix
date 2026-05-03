@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, e }:
 let
   ha = lib.ha;
 in
@@ -12,11 +12,11 @@ in
       name = "Botty";
       badgeCard = {
         type = "custom:button-card";
-        name = ''[[[return states["vacuum.botty"].attributes.status]]]'';
-        label = ''[[[return states["vacuum.botty"].attributes.battery_level + "%"]]]'';
+        name = ''[[[return states["${e.vacuum.botty}"].attributes.status]]]'';
+        label = ''[[[return states["${e.vacuum.botty}"].attributes.battery_level + "%"]]]'';
         show_label = true;
         show_icon = false;
-        entity = "vacuum.botty";
+        entity = e.vacuum.botty;
         tap_action = {
           action = "more-info";
           haptic = "medium";
@@ -59,7 +59,7 @@ in
           icons = [ ];
           tiles = [ ];
           map_source = {
-            camera = "image.botty_live_map";
+            camera = e.image.botty_live_map;
             crop = {
               top = 170;
               right = 210;
@@ -68,7 +68,7 @@ in
             };
           };
           calibration_source.camera = true;
-          entity = "vacuum.botty";
+          entity = e.vacuum.botty;
           vacuum_platform = "send_command";
           map_locked = true;
           two_finger_pan = false;
@@ -108,17 +108,17 @@ in
         # Room toggles row 1: Wohnzimmer, Büro, Küche
         (ha.mkHStack [
           (ha.mkRoomToggleCard {
-            entity = "input_boolean.botty_wohnzimmer_reinigen";
+            entity = e.input_boolean.botty_wohnzimmer_reinigen;
             name = "Wohnzimmer";
             icon = "mdi:television-classic";
           })
           (ha.mkRoomToggleCard {
-            entity = "input_boolean.botty_buro_reinigen";
+            entity = e.input_boolean.botty_buro_reinigen;
             name = "Büro";
             icon = "mdi:chair-rolling";
           })
           (ha.mkRoomToggleCard {
-            entity = "input_boolean.botty_kueche_reinigen";
+            entity = e.input_boolean.botty_kueche_reinigen;
             name = "Küche";
             icon = "mdi:stove";
           })
@@ -127,14 +127,14 @@ in
         # Room toggles row 2: Sofa + repeat count + control buttons
         (ha.mkHStack [
           (ha.mkRoomToggleCard {
-            entity = "input_boolean.botty_sofa_reinigen";
+            entity = e.input_boolean.botty_sofa_reinigen;
             name = "Sofa";
             icon = "mdi:sofa-single";
           })
-          (ha.mkConditional [ (ha.stateIs "vacuum.botty" "docked") ] {
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] {
             type = "custom:button-card";
             icon = "mdi:numeric-1-box";
-            entity = "input_number.botty_wiederholungen";
+            entity = e.input_number.botty_wiederholungen;
             name = "Anzahl";
             label = "Wiederholungen";
             show_label = true;
@@ -154,7 +154,7 @@ in
             ];
             tap_action = {
               action = "call-service";
-              service = "script.botty_wiederholungen";
+              service = e.script.botty_wiederholungen;
               haptic = "medium";
             };
             styles = ha.mkActionCardStyles {
@@ -165,7 +165,7 @@ in
               zIndex = 1;
             };
           })
-          (ha.mkConditional [ (ha.stateIs "vacuum.botty" "docked") ] {
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] {
             type = "custom:button-card";
             icon = "mdi:robot-vacuum";
             name = "Reinigung";
@@ -173,7 +173,7 @@ in
             show_label = true;
             tap_action = {
               action = "call-service";
-              service = "script.botty_reinigung";
+              service = e.script.botty_reinigung;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {
@@ -187,19 +187,19 @@ in
           (ha.mkConditional
             [
               (ha.orConditions [
-                (ha.stateIs "vacuum.botty" "returning")
-                (ha.stateIs "vacuum.botty" "cleaning")
+                (ha.stateIs e.vacuum.botty "returning")
+                (ha.stateIs e.vacuum.botty "cleaning")
               ])
             ]
             {
               type = "custom:button-card";
               icon = "mdi:pause";
               name = "Pausieren";
-              label = ''[[[return Math.round(states["sensor.botty_aktuelle_reinigungsdauer"].state / 60) + " Minuten"]]]'';
+              label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
               show_label = true;
               tap_action = {
                 action = "call-service";
-                service = "script.botty_pausieren";
+                service = e.script.botty_pausieren;
                 haptic = "success";
               };
               styles = ha.mkActionCardStyles {
@@ -211,15 +211,15 @@ in
               };
             }
           )
-          (ha.mkConditional [ (ha.stateIs "vacuum.botty" "paused") ] {
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "paused") ] {
             type = "custom:button-card";
             icon = "mdi:play";
             name = "Fortsetzen";
-            label = ''[[[return Math.round(states["sensor.botty_aktuelle_reinigungsdauer"].state / 60) + " Minuten"]]]'';
+            label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
             show_label = true;
             tap_action = {
               action = "call-service";
-              service = "script.botty_fortsetzen";
+              service = e.script.botty_fortsetzen;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {
@@ -230,15 +230,15 @@ in
               zIndex = 1;
             };
           })
-          (ha.mkConditional [ (ha.stateNot "vacuum.botty" "docked") ] {
+          (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] {
             type = "custom:button-card";
             icon = "mdi:home";
             name = "Beenden";
-            label = ''[[[return states["sensor.botty_aktueller_reinigungsbereich"].state + "m² gereinigt"]]]'';
+            label = ''[[[return states["${e.sensor.botty_aktueller_reinigungsbereich}"].state + "m² gereinigt"]]]'';
             show_label = true;
             tap_action = {
               action = "call-service";
-              service = "script.botty_zurueckkehren";
+              service = e.script.botty_zurueckkehren;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {
@@ -253,15 +253,15 @@ in
         # Brush remaining counters row 1
         (ha.mkHStack [
           (ha.mkRemainingCard {
-            sensorTemplate = "sensor.botty_restkapazitat_der_hauptburste";
+            sensorTemplate = e.sensor.botty_restkapazitat_der_hauptburste;
             label = "Hauptbürste";
-            resetScript = "script.botty_main_brush_reset";
+            resetScript = e.script.botty_main_brush_reset;
             resetConfirmation = "Sicher, dass du die Hauptbürste zurücksetzen möchtest?";
           })
           (ha.mkRemainingCard {
-            sensorTemplate = "sensor.botty_restkapazitat_der_seitenburste";
+            sensorTemplate = e.sensor.botty_restkapazitat_der_seitenburste;
             label = "Seintenbürste";
-            resetScript = "script.botty_side_brush_reset";
+            resetScript = e.script.botty_side_brush_reset;
             resetConfirmation = "Sicher, dass du die Seitenbürste zurücksetzen möchtest?";
           })
         ])
@@ -269,15 +269,15 @@ in
         # Brush remaining counters row 2
         (ha.mkHStack [
           (ha.mkRemainingCard {
-            sensorTemplate = "sensor.botty_filter_restkapazitat";
+            sensorTemplate = e.sensor.botty_filter_restkapazitat;
             label = "Filter";
-            resetScript = "script.botty_filter_reset";
+            resetScript = e.script.botty_filter_reset;
             resetConfirmation = "Sicher, dass du den Filter zurücksetzen möchtest?";
           })
           (ha.mkRemainingCard {
-            sensorTemplate = "sensor.botty_bis_sensorreinigung_verbleibend";
+            sensorTemplate = e.sensor.botty_bis_sensorreinigung_verbleibend;
             label = "Sensorreinigung";
-            resetScript = "script.botty_sensor_cleaning_reset";
+            resetScript = e.script.botty_sensor_cleaning_reset;
             resetConfirmation = "Sicher, dass du die Sensorreinigung zurücksetzen möchtest?";
           })
         ])

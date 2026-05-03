@@ -1,6 +1,12 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   ha = lib.ha;
+  e = config.hass.entities;
   cfg = (pkgs.formats.yaml { }).generate "dashboard-umwelt.yaml" {
     views = [
       {
@@ -15,12 +21,12 @@ let
               name = "Gewächshaus vs Terrasse";
               entities = [
                 {
-                  entity = "sensor.thermometer_gewachshaus_temperature";
+                  entity = e.sensor.thermometer_gewachshaus.temperature;
                   show_state = true;
                   state_adaptive_color = true;
                 }
                 {
-                  entity = "sensor.thermometer_terrasse_temperature";
+                  entity = e.sensor.thermometer_terrasse.temperature;
                   show_state = true;
                   show_indicator = true;
                   state_adaptive_color = true;
@@ -38,15 +44,15 @@ let
             (ha.mkHStack [
               (ha.mkTempHumGraph {
                 name = "Gewächshaus";
-                tempEntity = "sensor.thermometer_gewachshaus_temperature";
-                humEntity = "sensor.thermometer_gewachshaus_humidity";
+                tempEntity = e.sensor.thermometer_gewachshaus.temperature;
+                humEntity = e.sensor.thermometer_gewachshaus.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
               (ha.mkTempHumGraph {
                 name = "Terrasse";
-                tempEntity = "sensor.thermometer_terrasse_temperature";
-                humEntity = "sensor.thermometer_terrasse_humidity";
+                tempEntity = e.sensor.thermometer_terrasse.temperature;
+                humEntity = e.sensor.thermometer_terrasse.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
@@ -56,25 +62,25 @@ let
             (ha.mkMushTitle "Drinnen")
             (ha.mkTempHumGraph {
               name = "Wohnzimmer";
-              tempEntity = "sensor.thermometer_wohnzimmer_temperature";
-              humEntity = "sensor.thermometer_wohnzimmer_humidity";
+              tempEntity = e.sensor.thermometer_wohnzimmer.temperature;
+              humEntity = e.sensor.thermometer_wohnzimmer.humidity;
             })
             (ha.mkHStack [
               (ha.mkTempHumGraph {
                 name = "Schlafzimmer";
-                tempEntity = "sensor.thermometer_schlafzimmer_temperature";
-                humEntity = "sensor.thermometer_schlafzimmer_humidity";
+                tempEntity = e.sensor.thermometer_schlafzimmer.temperature;
+                humEntity = e.sensor.thermometer_schlafzimmer.humidity;
               })
               (ha.mkTempHumGraph {
                 name = "Büro";
-                tempEntity = "sensor.thermometer_buro_temperature";
-                humEntity = "sensor.thermometer_buro_humidity";
+                tempEntity = e.sensor.thermometer_buro.temperature;
+                humEntity = e.sensor.thermometer_buro.humidity;
               })
             ])
             (ha.mkTempHumGraph {
               name = "Badezimmer";
-              tempEntity = "sensor.thermometer_badezimmer_temperature";
-              humEntity = "sensor.thermometer_badezimmer_humidity";
+              tempEntity = e.sensor.thermometer_badezimmer.temperature;
+              humEntity = e.sensor.thermometer_badezimmer.humidity;
             })
           ])
           (ha.mkGridSection [
@@ -82,14 +88,14 @@ let
             (ha.mkHStack [
               (ha.mkTempHumGraph {
                 name = "Serverschrank";
-                tempEntity = "sensor.thermometer_serverschrank_temperature";
-                humEntity = "sensor.thermometer_serverschrank_humidity";
+                tempEntity = e.sensor.thermometer_serverschrank.temperature;
+                humEntity = e.sensor.thermometer_serverschrank.humidity;
                 upperBound = "~30";
               })
               (ha.mkTempHumGraph {
                 name = "Filamentbox";
-                tempEntity = "sensor.thermometer_filamentbox_temperature";
-                humEntity = "sensor.thermometer_filamentbox_humidity";
+                tempEntity = e.sensor.thermometer_filamentbox.temperature;
+                humEntity = e.sensor.thermometer_filamentbox.humidity;
                 upperBound = "~30";
               })
             ])
@@ -109,7 +115,7 @@ let
               title = "Gewächshaus vs Terrasse";
               entities = [
                 {
-                  entity = "sensor.thermometer_gewachshaus_temperature";
+                  entity = e.sensor.thermometer_gewachshaus.temperature;
                   name = "Gewächshaus";
                   line = {
                     width = 2;
@@ -117,7 +123,7 @@ let
                   };
                 }
                 {
-                  entity = "sensor.thermometer_terrasse_temperature";
+                  entity = e.sensor.thermometer_terrasse.temperature;
                   name = "Terrasse";
                   line = {
                     color = "orange";
@@ -135,7 +141,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Gewächshaus";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_gewachshaus_humidity" "sensor.thermometer_gewachshaus_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_gewachshaus.humidity e.sensor.thermometer_gewachshaus.temperature;
               yRange = [
                 0
                 100
@@ -149,7 +155,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Terrasse";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_terrasse_humidity" "sensor.thermometer_terrasse_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_terrasse.humidity e.sensor.thermometer_terrasse.temperature;
               yRange = [
                 0
                 100
@@ -163,7 +169,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Badezimmer";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_badezimmer_humidity" "sensor.thermometer_badezimmer_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_badezimmer.humidity e.sensor.thermometer_badezimmer.temperature;
               yRange = [
                 0
                 100
@@ -177,7 +183,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Wohnzimmer";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_wohnzimmer_humidity" "sensor.thermometer_wohnzimmer_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_wohnzimmer.humidity e.sensor.thermometer_wohnzimmer.temperature;
               yRange = [
                 0
                 100
@@ -191,7 +197,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Schlafzimmer";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_schlafzimmer_humidity" "sensor.thermometer_schlafzimmer_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_schlafzimmer.humidity e.sensor.thermometer_schlafzimmer.temperature;
               yRange = [
                 0
                 100
@@ -205,7 +211,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Büro";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_buro_humidity" "sensor.thermometer_buro_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_buro.humidity e.sensor.thermometer_buro.temperature;
               yRange = [
                 0
                 100
@@ -219,7 +225,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Serverschrank";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_serverschrank_humidity" "sensor.thermometer_serverschrank_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_serverschrank.humidity e.sensor.thermometer_serverschrank.temperature;
               yRange = [
                 0
                 100
@@ -233,7 +239,7 @@ let
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Filamentbox";
-              entities = ha.mkTempHumPlotlyEntities "sensor.thermometer_filamentbox_humidity" "sensor.thermometer_filamentbox_temperature";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_filamentbox.humidity e.sensor.thermometer_filamentbox.temperature;
               yRange = [
                 0
                 100

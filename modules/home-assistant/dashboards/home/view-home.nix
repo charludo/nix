@@ -56,17 +56,17 @@ in
           type = "grid";
           columns = 1;
           cards = [
-            (ha.mkConditional [ (ha.stateIs "media_player.alle" "playing") ] {
+            (ha.mkConditional [ (ha.stateIs e.media_player.alle "playing") ] {
               type = "custom:button-card";
               icon = "mdi:pause";
-              entity = "media_player.alle";
+              entity = e.media_player.alle;
               name = "Musik anhalten";
-              label = "[[[return states['media_player.alle'].attributes.media_title]]]";
+              label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
               show_label = true;
               tap_action = {
                 action = "call-service";
                 haptic = "medium";
-                service = "script.sonos_play_pause";
+                service = e.script.sonos_play_pause;
               };
               styles = ha.mkActionCardStyles {
                 cardBg = "var(--yellow)";
@@ -77,16 +77,16 @@ in
                 };
               };
             })
-            (ha.mkConditional [ (ha.stateIs "binary_sensor.tursensor_opening" "on") ] {
+            (ha.mkConditional [ (ha.stateIs e.binary_sensor.tursensor.opening "on") ] {
               type = "custom:button-card";
               icon = "mdi:door-open";
               name = "Wohnungstür offen";
-              entity = "binary_sensor.tursensor_opening";
-              label = ''[[[return "seit: " + states["sensor.tursensor_last_changed"].state ]]]'';
+              entity = e.binary_sensor.tursensor.opening;
+              label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
               show_label = true;
               tap_action = {
                 action = "call-service";
-                service = "script.botty_zurueckkehren";
+                service = e.script.botty_zurueckkehren;
                 haptic = "success";
               };
               hold_action = {
@@ -103,12 +103,12 @@ in
                 };
               };
             })
-            (ha.mkConditional [ (ha.stateIs "input_boolean.turalarm_persistent" "on") ] {
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.turalarm_persistent "on") ] {
               type = "custom:button-card";
               icon = "mdi:door-open";
               name = "Wohnungstür wurde geöffnet";
-              entity = "binary_sensor.tursensor_opening";
-              label = ''[[[return "letzte Änderung: " + states["sensor.tursensor_last_changed"].state + ", jetzt: " + states["binary_sensor.tursensor_opening"].state ]]]'';
+              entity = e.binary_sensor.tursensor.opening;
+              label = ''[[[return "letzte Änderung: " + states["${e.sensor.tursensor_last_changed}"].state + ", jetzt: " + states["${e.binary_sensor.tursensor.opening}"].state ]]]'';
               show_label = true;
               hold_action = {
                 action = "more-info";
@@ -117,7 +117,7 @@ in
               tap_action = {
                 action = "call-service";
                 service = "input_boolean.turn_off";
-                service_data.entity_id = "input_boolean.turalarm_persistent";
+                service_data.entity_id = e.input_boolean.turalarm_persistent;
                 haptic = "success";
               };
               confirmation.text = "Sicher, dass du die Warnung deaktivieren möchtest?";
@@ -131,15 +131,15 @@ in
                 };
               };
             })
-            (ha.mkConditional [ (ha.stateNot "vacuum.botty" "docked") ] {
+            (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] {
               type = "custom:button-card";
               icon = "mdi:robot-vacuum";
               name = "Botty anhalten";
-              label = ''[[[return states["sensor.botty_current_clean_area"].state + "m² gereinigt"]]]'';
+              label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
               show_label = true;
               tap_action = {
                 action = "call-service";
-                service = "script.botty_pausieren";
+                service = e.script.botty_pausieren;
                 haptic = "success";
               };
               styles = ha.mkActionCardStyles {
@@ -169,7 +169,7 @@ in
               withSlider = true;
             })
             (ha.mkToggleCard {
-              entity = "fan.xiaomi_smart_fan";
+              entity = e.fan.xiaomi_smart_fan;
               name = "Ventilator";
               onColor = "var(--blue)";
               withSlider = true;
@@ -189,7 +189,7 @@ in
             navigation_path = "/dashboard-garten";
           };
           cards = [
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_anzucht" "on") ] (
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] (
               ha.mkToggleCard {
                 entity = e.switch.steckdose_pflanzenlicht.switch;
                 name = "Pflanzenlicht";
@@ -197,9 +197,9 @@ in
                 onColor = "var(--green)";
               }
             ))
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_anzucht" "on") ] {
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] {
               type = "custom:button-card";
-              entity = "automation.pflanzenlicht_an_aus";
+              entity = e.automation.pflanzenlicht;
               name = "Pflanzlicht-Automatik";
               icon = ha.robotIcon;
               tap_action = {
@@ -211,10 +211,10 @@ in
                 haptic = "medium";
               };
               custom_fields = {
-                uren = "[[[ return states['input_number.stunden_sonnenlicht_setzlinge'].state + 'h' ]]]";
+                uren = "[[[ return states['${e.input_number.stunden_sonnenlicht_setzlinge}'].state + 'h' ]]]";
                 slider.card = {
                   type = "custom:my-slider-v2";
-                  entity = "input_number.stunden_sonnenlicht_setzlinge";
+                  entity = e.input_number.stunden_sonnenlicht_setzlinge;
                   min = 1;
                   max = 24;
                   step = 1;
@@ -227,7 +227,7 @@ in
                     card = {
                       height = "16px";
                       padding = "0 8px";
-                      background = "[[[ return states['automation.pflanzenlicht_an_aus']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
+                      background = "[[[ return states['${e.automation.pflanzenlicht}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
                     };
                     track = {
                       overflow = "visible";
@@ -235,7 +235,7 @@ in
                     };
                     progress.background = "none";
                     thumb = {
-                      background = "[[[ return states['automation.pflanzenlicht_an_aus']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
+                      background = "[[[ return states['${e.automation.pflanzenlicht}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
                       top = "2px";
                       right = "-6px";
                       height = "12px";
@@ -296,7 +296,7 @@ in
                 })
               ];
             })
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_bewasserung" "on") ] (
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (
               ha.mkToggleCard {
                 entity = e.switch.steckdose_wasserpumpe.switch;
                 name = "Wasserpumpe";
@@ -304,21 +304,23 @@ in
                 onColor = "var(--blue)";
               }
             ))
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_bewasserung" "on") ] (mkAutoToggle {
-              entity = "automation.deaktiviere_pumpe_nach_regen";
-              name = "Bewässerungs-Automatik";
-              onColor = "var(--blue)";
-            }))
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_heizung" "on") ] (
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ]
+              (mkAutoToggle {
+                entity = e.automation.deaktiviere_pumpe_nach_regen;
+                name = "Bewässerungs-Automatik";
+                onColor = "var(--blue)";
+              })
+            )
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (
               ha.mkToggleCard {
-                entity = "switch.steckdose_gewachshaus_heizung_switch";
+                entity = e.switch.steckdose_gewachshaus_heizung.switch;
                 name = "Gewächshaus Heizung";
                 icon = "mdi:radiator";
                 onColor = "var(--red)";
               }
             ))
-            (ha.mkConditional [ (ha.stateIs "input_boolean.settings_garten_heizung" "on") ] (mkAutoToggle {
-              entity = "automation.heat_greenhouse";
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (mkAutoToggle {
+              entity = e.automation.heat_greenhouse;
               name = "Heizungs-Automatik";
               onColor = "var(--red)";
             }))
@@ -348,7 +350,7 @@ in
           cards = [
             {
               type = "custom:button-card";
-              entity = "input_boolean.turalarm";
+              entity = e.input_boolean.turalarm;
               name = ''[[[ return entity.state === "on" ? "Türalarm: Armed" : "Türalarm:  Disarmed"; ]]]'';
               icon = "[[[ return entity.attributes.icon ]]]";
               show_label = true;
@@ -406,13 +408,19 @@ in
           type = "grid";
           columns = 3;
           title = "Räume";
-          cards = map (nv: {
-            type = "area";
-            area = ha.mkSlug nv.name;
-            show_camera = false;
-            display_type = "compact";
-            navigation_path = "/dashboard-areas/${ha.mkSlug nv.name}";
-          }) (lib.sort (a: b: a.value.order < b.value.order) (lib.mapAttrsToList lib.nameValuePair areas));
+          cards = map (
+            nv:
+            let
+              slug = e.area.${ha.mkSlug nv.name};
+            in
+            {
+              type = "area";
+              area = slug;
+              show_camera = false;
+              display_type = "compact";
+              navigation_path = "/dashboard-areas/${slug}";
+            }
+          ) (lib.sort (a: b: a.value.order < b.value.order) (lib.mapAttrsToList lib.nameValuePair areas));
         }
 
       ];

@@ -7,6 +7,7 @@
 let
   ha = lib.ha;
   cfg = config.hass;
+  e = cfg.entities;
 
   tempDevicesInArea =
     areaName:
@@ -15,7 +16,7 @@ let
       device.area == areaName
       && lib.elem "temperature" (device.sensor or [ ])
       && lib.elem "humidity" (device.sensor or [ ])
-    ) cfg.devices;
+    ) cfg.devices.zigbee;
 
   powerDevicesInArea =
     areaName:
@@ -24,7 +25,7 @@ let
       device.area == areaName
       && lib.elem "power" (device.sensor or [ ])
       && lib.elem "current" (device.sensor or [ ])
-    ) cfg.devices;
+    ) cfg.devices.zigbee;
 
   mkAreaView =
     name: area:
@@ -33,11 +34,12 @@ let
       powerDevices = powerDevicesInArea name;
       hasTempDevices = tempDevices != { };
       hasPowerDevices = powerDevices != { };
+      areaSlug = ha.mkSlug name;
     in
     {
       type = "sections";
       max_columns = 3;
-      path = ha.mkSlug name;
+      path = areaSlug;
       icon = area.icon;
       badges = [ ];
       header = ha.mkViewHeader name;
@@ -49,8 +51,8 @@ let
               deviceName: _:
               ha.mkTempHumPlot {
                 name = deviceName;
-                tempEntity = "sensor.${ha.mkSlug deviceName}_temperature";
-                humEntity = "sensor.${ha.mkSlug deviceName}_humidity";
+                tempEntity = e.sensor.${ha.mkSlug deviceName}.temperature;
+                humEntity = e.sensor.${ha.mkSlug deviceName}.humidity;
               }
             ) tempDevices)
           ))
@@ -62,8 +64,8 @@ let
               deviceName: _:
               ha.mkPowerPlot {
                 name = deviceName;
-                powerEntity = "sensor.${ha.mkSlug deviceName}_power";
-                currentEntity = "sensor.${ha.mkSlug deviceName}_current";
+                powerEntity = e.sensor.${ha.mkSlug deviceName}.power;
+                currentEntity = e.sensor.${ha.mkSlug deviceName}.current;
               }
             ) powerDevices)
           ))
@@ -80,7 +82,7 @@ let
               filter = {
                 include = [
                   {
-                    area = ha.mkSlug name;
+                    area = e.area.${areaSlug};
                     options = { };
                   }
                 ];

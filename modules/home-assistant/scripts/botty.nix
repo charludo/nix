@@ -1,4 +1,7 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+in
 {
   hass.scripts = {
     botty_reinigung = {
@@ -12,22 +15,22 @@
               conditions = [
                 {
                   condition = "state";
-                  entity_id = "input_boolean.botty_wohnzimmer_reinigen";
+                  entity_id = e.input_boolean.botty_wohnzimmer_reinigen;
                   state = "off";
                 }
                 {
                   condition = "state";
-                  entity_id = "input_boolean.botty_kueche_reinigen";
+                  entity_id = e.input_boolean.botty_kueche_reinigen;
                   state = "off";
                 }
                 {
                   condition = "state";
-                  entity_id = "input_boolean.botty_buro_reinigen";
+                  entity_id = e.input_boolean.botty_buro_reinigen;
                   state = "off";
                 }
                 {
                   condition = "state";
-                  entity_id = "input_boolean.botty_sofa_reinigen";
+                  entity_id = e.input_boolean.botty_sofa_reinigen;
                   state = "off";
                 }
               ];
@@ -47,7 +50,7 @@
                   }
                 ];
               };
-              target.entity_id = "vacuum.botty";
+              target.entity_id = e.vacuum.botty;
             }
           ];
           "else" = [
@@ -66,7 +69,7 @@
                     [25800,33825,29450,29800,{{states.input_number.botty_wiederholungen.state|int}}],
                   {%endif%}]'';
               };
-              target.entity_id = "vacuum.botty";
+              target.entity_id = e.vacuum.botty;
             }
           ];
         }
@@ -74,16 +77,16 @@
           action = "input_boolean.turn_off";
           data = { };
           target.entity_id = [
-            "input_boolean.botty_wohnzimmer_reinigen"
-            "input_boolean.botty_buro_reinigen"
-            "input_boolean.botty_kueche_reinigen"
-            "input_boolean.botty_sofa_reinigen"
+            e.input_boolean.botty_wohnzimmer_reinigen
+            e.input_boolean.botty_buro_reinigen
+            e.input_boolean.botty_kueche_reinigen
+            e.input_boolean.botty_sofa_reinigen
           ];
         }
         {
           action = "input_number.set_value";
           data.value = 1;
-          target.entity_id = "input_number.botty_wiederholungen";
+          target.entity_id = e.input_number.botty_wiederholungen;
         }
       ];
     };
@@ -96,7 +99,7 @@
           "if" = [
             {
               condition = "numeric_state";
-              entity_id = "input_number.botty_wiederholungen";
+              entity_id = e.input_number.botty_wiederholungen;
               below = 3;
             }
           ];
@@ -104,14 +107,14 @@
             {
               action = "input_number.increment";
               data = { };
-              target.entity_id = "input_number.botty_wiederholungen";
+              target.entity_id = e.input_number.botty_wiederholungen;
             }
           ];
           "else" = [
             {
               action = "input_number.set_value";
               data.value = 1;
-              target.entity_id = "input_number.botty_wiederholungen";
+              target.entity_id = e.input_number.botty_wiederholungen;
             }
           ];
         }
@@ -125,7 +128,7 @@
         {
           action = "vacuum.send_command";
           data.command = "app_pause";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
         }
         {
           delay = {
@@ -138,7 +141,7 @@
         {
           action = "vacuum.send_command";
           data.command = "app_charge";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
         }
       ];
     };
@@ -150,7 +153,7 @@
         {
           action = "vacuum.send_command";
           data.command = "app_pause";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
         }
       ];
     };
@@ -162,7 +165,7 @@
         {
           action = "vacuum.send_command";
           data.command = "resume_zoned_clean";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
         }
       ];
     };
@@ -172,7 +175,7 @@
       sequence = [
         {
           action = "vacuum.send_command";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
           data = {
             command = "reset_consumable";
             params = [ "main_brush_work_time" ];
@@ -186,7 +189,7 @@
       sequence = [
         {
           action = "vacuum.send_command";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
           data = {
             command = "reset_consumable";
             params = [ "side_brush_work_time" ];
@@ -200,7 +203,7 @@
       sequence = [
         {
           action = "vacuum.send_command";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
           data = {
             command = "reset_consumable";
             params = [ "filter_work_time" ];
@@ -214,7 +217,7 @@
       sequence = [
         {
           action = "vacuum.send_command";
-          target.entity_id = "vacuum.botty";
+          target.entity_id = e.vacuum.botty;
           data = {
             command = "reset_consumable";
             params = [ "sensor_dirty_time" ];
