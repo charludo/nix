@@ -33,6 +33,15 @@ let
     };
 in
 {
+  auth_oidc = mkComponent {
+    pname = "auth_oidc";
+    version = "1.0.2";
+    owner = "christiaangoossens";
+    repo = "hass-oidc-auth";
+    rev = "v1.0.2";
+    sha256 = "sha256-ZYJD0PVh2E07cdY1a7uxSxdooAMz78HwJpwr4uWofZM=";
+  };
+
   xiaomi_cloud_map_extractor = mkComponent {
     pname = "xiaomi_cloud_map_extractor";
     version = "3.0.0-alpha-24";

@@ -9,11 +9,8 @@ in
       mode = "single";
       trigger = [
         {
-          type = "temperature";
-          platform = "device";
-          device_id = "0d0c12739a631dc265cac89ddf746d79";
-          entity_id = "2ef90068ad11bc1ce32e743ea56479e5";
-          domain = "sensor";
+          platform = "numeric_state";
+          entity_id = e.sensor.thermometer_gewachshaus.temperature;
           below = 5;
         }
       ];
@@ -40,10 +37,8 @@ in
       ];
       action = [
         {
-          type = "turn_on";
-          device_id = "eb3007b41930c5b917d219ee918f1d27";
-          entity_id = "f8c2c05a274826ae13fd387acb8782ee";
-          domain = "switch";
+          action = "switch.turn_on";
+          target.entity_id = e.switch.steckdose_gewachshaus_heizung.switch;
         }
       ];
     };
@@ -91,14 +86,11 @@ in
               state = "on";
             }
             {
-              metadata = { };
-              data = { };
-              target.device_id = "7a7069710c1960c35f7ccc83c00a424e";
               action = "switch.turn_off";
+              target.entity_id = e.switch.steckdose_wasserpumpe.switch;
             }
             {
-              action = "notify.mobile_app_xiaomi_15";
-              metadata = { };
+              action = e.mobile_app.phone_charlotte;
               data.message = "Disabled pump due to rain in the past 16 hours.";
             }
           ];
@@ -109,14 +101,11 @@ in
               state = "off";
             }
             {
-              metadata = { };
-              data = { };
-              target.device_id = "7a7069710c1960c35f7ccc83c00a424e";
               action = "switch.turn_on";
+              target.entity_id = e.switch.steckdose_wasserpumpe.switch;
             }
             {
-              action = "notify.mobile_app_xiaomi_15";
-              metadata = { };
+              action = e.mobile_app.phone_charlotte;
               data.message = "Re-activated pump.";
             }
           ];

@@ -1,9 +1,64 @@
 { lib, config, ... }:
 let
   e = config.hass.entities;
+  cfg = config.hass.botty;
+
+  zoneToggles = lib.mapAttrsToList (slug: _: e.input_boolean.${"botty_${slug}_reinigen"}) cfg.zones;
+
+  # One Jinja {% if %}-clause per zone; emits its rectangle plus the global
+  # repeat counter only when the matching toggle is on.
+  mkZoneClause =
+    slug:
+    {
+      x1,
+      y1,
+      x2,
+      y2,
+    }:
+    let
+      bool = e.input_boolean.${"botty_${slug}_reinigen"};
+      coords = lib.concatStringsSep "," (
+        map toString [
+          x1
+          y1
+          x2
+          y2
+        ]
+      );
+    in
+    "{% if is_state('${bool}', 'on') %}[${coords},{{ states.input_number.botty_wiederholungen.state | int }}],{% endif %}";
+
+  zonedCleanParams = "[" + lib.concatStrings (lib.mapAttrsToList mkZoneClause cfg.zones) + "]";
 in
 {
-  hass.scripts = {
+  options.hass.botty.zones = lib.mkOption {
+    type = lib.types.attrsOf (
+      lib.types.submodule {
+        options = {
+          x1 = lib.mkOption {
+            type = lib.types.int;
+            description = "First-corner X coordinate (vacuum map space)";
+          };
+          y1 = lib.mkOption {
+            type = lib.types.int;
+            description = "First-corner Y coordinate (vacuum map space)";
+          };
+          x2 = lib.mkOption {
+            type = lib.types.int;
+            description = "Opposite-corner X coordinate";
+          };
+          y2 = lib.mkOption {
+            type = lib.types.int;
+            description = "Opposite-corner Y coordinate";
+          };
+        };
+      }
+    );
+    default = { };
+    description = "Vacuum zone rectangles keyed by room slug; each is paired with input_boolean.botty_<slug>_reinigen";
+  };
+
+  config.hass.scripts = {
     botty_reinigung = {
       alias = "Botty Reinigung";
       icon = "mdi:robot-vacuum";
@@ -12,28 +67,11 @@ in
           "if" = [
             {
               condition = "and";
-              conditions = [
-                {
-                  condition = "state";
-                  entity_id = e.input_boolean.botty_wohnzimmer_reinigen;
-                  state = "off";
-                }
-                {
-                  condition = "state";
-                  entity_id = e.input_boolean.botty_kueche_reinigen;
-                  state = "off";
-                }
-                {
-                  condition = "state";
-                  entity_id = e.input_boolean.botty_buro_reinigen;
-                  state = "off";
-                }
-                {
-                  condition = "state";
-                  entity_id = e.input_boolean.botty_sofa_reinigen;
-                  state = "off";
-                }
-              ];
+              conditions = map (entity_id: {
+                condition = "state";
+                inherit entity_id;
+                state = "off";
+              }) zoneToggles;
             }
           ];
           "then" = [
@@ -58,16 +96,7 @@ in
               action = "vacuum.send_command";
               data = {
                 command = "app_zoned_clean";
-                params = ''
-                  [{%if states.input_boolean.botty_sofa_reinigen.state=='on'%}
-                    [26000,25975,29550,{{states.input_number.botty_wiederholungen.state|int}}],
-                  {%endif%} {%if states.input_boolean.botty_kueche_reinigen.state=='on'%}
-                    [22400,23700,24125,27825,{{states.input_number.botty_wiederholungen.state|int}}],
-                  {%endif%} {%if states.input_boolean.botty_wohnzimmer_reinigen.state=='on'%}
-                    [22075,29800,29675,23475,{{states.input_number.botty_wiederholungen.state|int}}],
-                  {%endif%} {%if states.input_boolean.botty_buro_reinigen.state=='on'%}
-                    [25800,33825,29450,29800,{{states.input_number.botty_wiederholungen.state|int}}],
-                  {%endif%}]'';
+                params = zonedCleanParams;
               };
               target.entity_id = e.vacuum.botty;
             }
@@ -76,12 +105,7 @@ in
         {
           action = "input_boolean.turn_off";
           data = { };
-          target.entity_id = [
-            e.input_boolean.botty_wohnzimmer_reinigen
-            e.input_boolean.botty_buro_reinigen
-            e.input_boolean.botty_kueche_reinigen
-            e.input_boolean.botty_sofa_reinigen
-          ];
+          target.entity_id = zoneToggles;
         }
         {
           action = "input_number.set_value";

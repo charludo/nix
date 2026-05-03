@@ -11,22 +11,22 @@ let
     options = {
       item = lib.mkOption {
         type = lib.types.str;
-        description = "Panel slug as it appears in the sidebar URL (e.g. lovelace, dashboard-areas, history).";
+        description = "Panel slug as it appears in the sidebar URL (e.g. lovelace, dashboard-areas, history)";
       };
       name = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Override the display name shown in the sidebar.";
+        description = "Override the display name shown in the sidebar";
       };
       hide = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Hide this item from the sidebar entirely.";
+        description = "Hide this item from the sidebar entirely";
       };
       divider = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Add a divider below this item.";
+        description = "Add a divider below this item";
       };
     };
   };
@@ -49,7 +49,7 @@ in
   options.hass.sidebar = lib.mkOption {
     type = lib.types.listOf itemSubmodule;
     default = [ ];
-    description = "Sidebar item order and visibility, written to custom-sidebar.yaml.";
+    description = "Sidebar item order and visibility, written to custom-sidebar.yaml";
   };
 
   config = lib.mkIf (cfg.sidebar != [ ]) {

@@ -1,4 +1,7 @@
-{ ... }:
+{ lib, config, ... }:
+let
+  e = config.hass.entities;
+in
 {
   hass.automations = {
     licht_an_bei_toilettengang = {
@@ -6,11 +9,9 @@
       mode = "single";
       trigger = [
         {
-          type = "motion";
-          platform = "device";
-          device_id = "d2bab798acadc41473cab603251f3bab";
-          entity_id = "1a1b4452116eabcb90717ffdb41dd6b3";
-          domain = "binary_sensor";
+          platform = "state";
+          entity_id = e.binary_sensor.bewegungsmelder.motion;
+          to = "on";
         }
       ];
       condition = [
@@ -32,22 +33,18 @@
               ];
             }
             {
-              condition = "device";
-              type = "is_off";
-              device_id = "7c9fa7b2158e8bb87759b9ce6a97560a";
-              entity_id = "f4686c2712b4575c9022ef7d646425b4";
-              domain = "light";
+              condition = "state";
+              entity_id = e.light.strahler.light;
+              state = "off";
             }
           ];
         }
       ];
       action = [
         {
-          type = "turn_on";
-          device_id = "7c9fa7b2158e8bb87759b9ce6a97560a";
-          entity_id = "f4686c2712b4575c9022ef7d646425b4";
-          domain = "light";
-          brightness_pct = 100;
+          action = "light.turn_on";
+          target.entity_id = e.light.strahler.light;
+          data.brightness_pct = 100;
         }
       ];
     };
@@ -57,11 +54,9 @@
       mode = "single";
       trigger = [
         {
-          type = "motion";
-          platform = "device";
-          device_id = "d2bab798acadc41473cab603251f3bab";
-          entity_id = "1a1b4452116eabcb90717ffdb41dd6b3";
-          domain = "binary_sensor";
+          platform = "state";
+          entity_id = e.binary_sensor.bewegungsmelder.motion;
+          to = "off";
         }
       ];
       condition = [
@@ -83,21 +78,17 @@
               ];
             }
             {
-              condition = "device";
-              type = "is_on";
-              device_id = "7c9fa7b2158e8bb87759b9ce6a97560a";
-              entity_id = "f4686c2712b4575c9022ef7d646425b4";
-              domain = "light";
+              condition = "state";
+              entity_id = e.light.strahler.light;
+              state = "on";
             }
           ];
         }
       ];
       action = [
         {
-          type = "turn_off";
-          device_id = "7c9fa7b2158e8bb87759b9ce6a97560a";
-          entity_id = "f4686c2712b4575c9022ef7d646425b4";
-          domain = "light";
+          action = "light.turn_off";
+          target.entity_id = e.light.strahler.light;
         }
       ];
     };

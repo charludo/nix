@@ -6,7 +6,7 @@ let
   areaOption = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
-    description = "Home Assistant area name this entity belongs to.";
+    description = "Home Assistant area name this entity belongs to";
   };
 
   withAreaSubmodule = lib.types.submodule {
@@ -17,54 +17,65 @@ let
     options = {
       id = lib.mkOption {
         type = lib.types.str;
-        description = "Zigbee MAC address (colon-separated), e.g. 00:15:8d:00:09:45:19:da";
+        description = "Zigbee MAC address in colon-separated form, e.g. 00:15:8d:00:09:45:19:da";
       };
       area = lib.mkOption {
         type = lib.types.str;
-        description = "Home Assistant area name";
+        description = "Home Assistant area this device belongs to";
       };
       binary_sensor = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Binary sensor sub-entity names exposed by the device";
       };
       diagnostic = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = "Diagnostic sensors (battery, etc.). Entity IDs are generated under the `sensor.` domain.";
+        description = "Diagnostic sensor names (battery etc.); generated under the sensor domain";
       };
       light = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Light sub-entity names exposed by the device";
       };
       number = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Number sub-entity names exposed by the device";
       };
       select = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Select sub-entity names exposed by the device";
       };
       sensor = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Sensor sub-entity names exposed by the device";
       };
       switch = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
+        description = "Switch sub-entity names exposed by the device";
       };
     };
   };
 
   inputBooleanSubmodule = lib.types.submodule {
     options = {
-      name = lib.mkOption { type = lib.types.str; };
+      name = lib.mkOption {
+        type = lib.types.str;
+        description = "Friendly name displayed in the UI";
+      };
       icon = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
+        description = "MDI icon for the input boolean";
       };
       initial = lib.mkOption {
         type = lib.types.nullOr lib.types.bool;
         default = null;
+        description = "Initial state on Home Assistant startup";
       };
       area = areaOption;
     };
@@ -72,24 +83,37 @@ let
 
   inputNumberSubmodule = lib.types.submodule {
     options = {
-      name = lib.mkOption { type = lib.types.str; };
-      min = lib.mkOption { type = lib.types.number; };
-      max = lib.mkOption { type = lib.types.number; };
+      name = lib.mkOption {
+        type = lib.types.str;
+        description = "Friendly name displayed in the UI";
+      };
+      min = lib.mkOption {
+        type = lib.types.number;
+        description = "Minimum allowed value";
+      };
+      max = lib.mkOption {
+        type = lib.types.number;
+        description = "Maximum allowed value";
+      };
       step = lib.mkOption {
         type = lib.types.number;
         default = 1;
+        description = "Step size used by sliders and increment/decrement actions";
       };
       initial = lib.mkOption {
         type = lib.types.nullOr lib.types.number;
         default = null;
+        description = "Initial value on Home Assistant startup";
       };
       icon = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
+        description = "MDI icon for the input number";
       };
       unit_of_measurement = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
+        description = "Unit suffix shown next to the value";
       };
       area = areaOption;
     };
@@ -122,10 +146,7 @@ let
         entries = lib.genAttrs device.${nixKey} (e: "${haDomain}.${slug}_${e}");
         existing = acc.${haDomain} or { device = slug; };
       in
-      if device.${nixKey} == [ ] then
-        acc
-      else
-        acc // { ${haDomain} = existing // entries; }
+      if device.${nixKey} == [ ] then acc else acc // { ${haDomain} = existing // entries; }
     ) { } (lib.attrNames zigbeeDomainMap);
 
   # Aggregate: domain -> deviceSlug -> { device, <subEntities> }
@@ -160,6 +181,16 @@ let
     script = lib.mapAttrs (slug: _: "script.${slug}") cfg.scripts;
     automation = lib.mapAttrs (slug: _: "automation.${slug}") cfg.automations;
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
+
+    # Mobile-app phones produce notify-service strings, slugified from their
+    # human-readable name (the Companion-app device name in HA).
+    mobile_app = lib.mapAttrs' (
+      name: _:
+      let
+        slug = mkSlug name;
+      in
+      lib.nameValuePair slug "notify.mobile_app_${slug}"
+    ) cfg.devices.mobile_apps;
   };
 
   # Final entities tree: zigbee (with sub-entities) and simple entities coexist
@@ -177,62 +208,64 @@ in
       zigbee = lib.mkOption {
         type = lib.types.attrsOf zigbeeDeviceSubmodule;
         default = { };
-        description = "Zigbee devices managed by ZHA. Entity IDs are derived from the device name slug.";
+        description = "Zigbee devices managed by ZHA, keyed by human-readable name";
       };
       input_booleans = lib.mkOption {
         type = lib.types.attrsOf inputBooleanSubmodule;
         default = { };
+        description = "Declarative input_boolean helpers keyed by slug";
       };
       input_numbers = lib.mkOption {
         type = lib.types.attrsOf inputNumberSubmodule;
         default = { };
+        description = "Declarative input_number helpers keyed by slug";
       };
       media_players = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known media_player entities keyed by slug";
       };
       vacuums = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known vacuum entities keyed by slug";
       };
       fans = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known fan entities keyed by slug";
       };
       images = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known image entities keyed by slug";
       };
       suns = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known sun entities keyed by slug";
       };
       weathers = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
+        description = "Known weather entities keyed by slug";
       };
       sensors = lib.mkOption {
         type = lib.types.attrsOf withAreaSubmodule;
         default = { };
-        description = "Extra sensors (template, statistics, integration-provided) referenced by slug.";
+        description = "Extra sensors (template, statistics, integration-provided) referenced by slug";
+      };
+      mobile_apps = lib.mkOption {
+        type = lib.types.attrsOf withAreaSubmodule;
+        default = { };
+        description = "Companion-app phones keyed by human-readable name, exposed as e.mobile_app.<slug> notify-service strings";
       };
     };
 
     entities = lib.mkOption {
       type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
       readOnly = true;
-      description = ''
-        Type-safe entity ID tree, indexed by HA domain then device/entity slug.
-
-        For zigbee devices, each slug holds an attrset:
-          e.sensor.thermometer_wohnzimmer.temperature  # "sensor.thermometer_wohnzimmer_temperature"
-          e.sensor.thermometer_wohnzimmer.device       # "thermometer_wohnzimmer"  (slug only)
-
-        For simple entities (one per slug), each slug holds the entity ID string:
-          e.vacuum.botty                # "vacuum.botty"
-          e.input_boolean.turalarm      # "input_boolean.turalarm"
-          e.script.botty_zurueckkehren  # "script.botty_zurueckkehren"
-      '';
+      description = "Type-safe entity ID tree indexed by HA domain then device/entity slug";
     };
   };
 

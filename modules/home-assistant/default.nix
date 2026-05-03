@@ -29,6 +29,7 @@
           psycopg2
 
           python-miio
+          joserfc
           vacuum-map-parser-base
           vacuum-map-parser-roborock
           p.vacuum-map-parser-dreame
@@ -49,6 +50,7 @@
         "sun"
         "history"
         "statistics"
+        "webostv"
       ];
 
       lovelaceConfigWritable = false;
@@ -65,6 +67,7 @@
         };
 
         logger.default = "warn";
+        mobile_app = { };
 
         history = { };
         sun = { };

@@ -62,18 +62,14 @@ let
             run_command("button EZSOUND")
 
 
-        @app.route('/sound/up', methods=['GET'])
+        @app.route('/up', methods=['GET'])
         def up_sound():
             run_command("button UP")
-            time.sleep(0.2)
-            run_command("button ENTER")
 
 
-        @app.route('/sound/down', methods=['GET'])
+        @app.route('/down', methods=['GET'])
         def down_sound():
             run_command("button DOWN")
-            time.sleep(0.2)
-            run_command("button ENTER")
 
 
         @app.route('/back', methods=['GET'])
@@ -84,6 +80,11 @@ let
         @app.route('/enter', methods=['GET'])
         def enter():
             run_command("button ENTER")
+
+
+        @app.route('/settings', methods=['GET'])
+        def settings():
+            run_command("button MENU")
 
 
         if __name__ == '__main__':

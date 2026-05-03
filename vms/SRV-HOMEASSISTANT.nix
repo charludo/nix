@@ -27,6 +27,33 @@ in
     ];
   };
 
+  # nas.backup.enable = true;
+  #
+  # services.postgresqlBackup = {
+  #   enable = true;
+  #   databases = [ "hass" ];
+  #   compression = "zstd";
+  # };
+  #
+  # rsync."srv-homeassistant" = {
+  #   tasks = [
+  #     {
+  #       from = config.services.home-assistant.configDir;
+  #       to = "${config.nas.backup.stateLocation}/hass";
+  #       chown = "hass:hass";
+  #       extraFlags = "--exclude=secrets.yaml";
+  #     }
+  #     {
+  #       from = "/var/lib/music-assistant";
+  #       to = "${config.nas.backup.stateLocation}/music-assistant";
+  #     }
+  #     {
+  #       from = config.services.postgresqlBackup.location;
+  #       to = "${config.nas.backup.stateLocation}/postgresql";
+  #     }
+  #   ];
+  # };
+
   services.music-assistant = {
     enable = true;
     openFirewall = true;
@@ -81,12 +108,47 @@ in
     };
   };
 
+  hass.botty.zones = {
+    # Each slug must match input_boolean.botty_<slug>_reinigen.
+    # Coords are vacuum-map-space rectangles. Re-harvest from the
+    # interactive `vacuum_clean_zone` mode if the map ever rebuilds.
+    sofa = {
+      x1 = 26000;
+      y1 = 25975;
+      x2 = 29550;
+      y2 = 28000; # TODO verify y2; old config was missing this and only sent 3 coords
+    };
+    kueche = {
+      x1 = 22400;
+      y1 = 23700;
+      x2 = 24125;
+      y2 = 27825;
+    };
+    wohnzimmer = {
+      x1 = 22075;
+      y1 = 29800;
+      x2 = 29675;
+      y2 = 23475;
+    };
+    buro = {
+      x1 = 25800;
+      y1 = 33825;
+      x2 = 29450;
+      y2 = 29800;
+    };
+  };
+
   hass.devices = {
+    mobile_apps = {
+      "Phone Charlotte" = { };
+      "Phone Marie" = { };
+    };
+
     media_players = {
       alle = { };
       living_room.area = "Wohnzimmer";
       office.area = "Büro";
-      lg_webos_smart_tv.area = "Wohnzimmer";
+      lg_c4.area = "Wohnzimmer";
     };
 
     vacuums = {

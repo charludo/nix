@@ -67,9 +67,9 @@ let
       iconColor = "var(--white)";
       nameColor = "var(--white)";
       tapAction = {
-        action = "call-service";
+        action = "perform-action";
         haptic = "medium";
-        inherit service;
+        perform_action = service;
       };
       states = [
         (ha.mkStateStyleFull {
@@ -321,9 +321,9 @@ in
             iconColor = "var(--black)";
             nameColor = "var(--black)";
             tapAction = {
-              action = "call-service";
+              action = "perform-action";
               haptic = "medium";
-              service = e.script.sonos_play_pause;
+              perform_action = e.script.sonos_play_pause;
             };
             states = [
               (ha.mkStateStyleFull {
@@ -354,20 +354,20 @@ in
             name = "Voriger";
             icon = "mdi:skip-previous";
             tapAction = {
-              action = "call-service";
+              action = "perform-action";
               haptic = "medium";
-              service = "media_player.media_previous_track";
-              service_data.entity_id = e.media_player.alle;
+              perform_action = "media_player.media_previous_track";
+              data.entity_id = e.media_player.alle;
             };
           })
           (mkSonosBtn {
             name = "Nächster";
             icon = "mdi:skip-next";
             tapAction = {
-              action = "call-service";
+              action = "perform-action";
               haptic = "medium";
-              service = "media_player.media_previous_track";
-              service_data.entity_id = e.media_player.alle;
+              perform_action = "media_player.media_previous_track";
+              data.entity_id = e.media_player.alle;
             };
           })
           (ha.mkVStack [
@@ -380,10 +380,10 @@ in
               iconColor = "var(--white)";
               nameColor = "var(--white)";
               tapAction = {
-                action = "call-service";
+                action = "perform-action";
                 haptic = "medium";
-                service = "media_player.shuffle_set";
-                service_data = {
+                perform_action = "media_player.shuffle_set";
+                data = {
                   entity_id = e.media_player.alle;
                   shuffle = "[[[\n  return !entity.attributes.shuffle;\n]]]\n";
                 };
@@ -408,10 +408,10 @@ in
               iconColor = "var(--white)";
               nameColor = "var(--white)";
               tapAction = {
-                action = "call-service";
+                action = "perform-action";
                 haptic = "medium";
-                service = "media_player.repeat_set";
-                service_data = {
+                perform_action = "media_player.repeat_set";
+                data = {
                   entity_id = e.media_player.alle;
                   repeat = "[[[\n  const modes = ['off', 'all'];\n  const current = entity.attributes.repeat ?? 'off';\n  return modes[(modes.indexOf(current) + 1) % modes.length];\n]]]\n";
                 };
@@ -444,9 +444,9 @@ in
               height = 84;
               padding = "8px 0px 16px 20px";
               tapAction = {
-                action = "call-service";
+                action = "perform-action";
                 haptic = "medium";
-                service = e.script.media_seek;
+                perform_action = e.script.media_seek;
                 data = {
                   seek_amount = -10;
                   media_player = e.media_player.alle;
@@ -466,9 +466,9 @@ in
               height = 84;
               padding = "8px 0px 16px 20px";
               tapAction = {
-                action = "call-service";
+                action = "perform-action";
                 haptic = "medium";
-                service = e.script.media_seek;
+                perform_action = e.script.media_seek;
                 data = {
                   seek_amount = 10;
                   media_player = e.media_player.alle;
@@ -494,8 +494,8 @@ in
           nameColor = "var(--white)";
           centered = true;
           tapAction = {
-            action = "call-service";
-            service = e.script.sonos_reset;
+            action = "perform-action";
+            perform_action = e.script.sonos_reset;
           };
           states = [
             (ha.mkStateStyleFull {

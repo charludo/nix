@@ -34,6 +34,7 @@ in
           card_width = "calc(100% - 48px)";
           parameters = {
             centeredSlides = true;
+            centeredSlidesBounds = true;
             slidesPerView = "auto";
             spaceBetween = 16;
             initialSlide = 1;
@@ -64,9 +65,9 @@ in
               label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
               show_label = true;
               tap_action = {
-                action = "call-service";
+                action = "perform-action";
                 haptic = "medium";
-                service = e.script.sonos_play_pause;
+                perform_action = e.script.sonos_play_pause;
               };
               styles = ha.mkActionCardStyles {
                 cardBg = "var(--yellow)";
@@ -85,8 +86,8 @@ in
               label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
               show_label = true;
               tap_action = {
-                action = "call-service";
-                service = e.script.botty_zurueckkehren;
+                action = "perform-action";
+                perform_action = e.script.botty_zurueckkehren;
                 haptic = "success";
               };
               hold_action = {
@@ -115,9 +116,9 @@ in
                 haptic = "medium";
               };
               tap_action = {
-                action = "call-service";
-                service = "input_boolean.turn_off";
-                service_data.entity_id = e.input_boolean.turalarm_persistent;
+                action = "perform-action";
+                perform_action = "input_boolean.turn_off";
+                data.entity_id = e.input_boolean.turalarm_persistent;
                 haptic = "success";
               };
               confirmation.text = "Sicher, dass du die Warnung deaktivieren möchtest?";
@@ -138,8 +139,8 @@ in
               label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
               show_label = true;
               tap_action = {
-                action = "call-service";
-                service = e.script.botty_pausieren;
+                action = "perform-action";
+                perform_action = e.script.botty_pausieren;
                 haptic = "success";
               };
               styles = ha.mkActionCardStyles {
@@ -304,13 +305,11 @@ in
                 onColor = "var(--blue)";
               }
             ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ]
-              (mkAutoToggle {
-                entity = e.automation.deaktiviere_pumpe_nach_regen;
-                name = "Bewässerungs-Automatik";
-                onColor = "var(--blue)";
-              })
-            )
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (mkAutoToggle {
+              entity = e.automation.deaktiviere_pumpe_nach_regen;
+              name = "Bewässerungs-Automatik";
+              onColor = "var(--blue)";
+            }))
             (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (
               ha.mkToggleCard {
                 entity = e.switch.steckdose_gewachshaus_heizung.switch;
@@ -324,20 +323,6 @@ in
               name = "Heizungs-Automatik";
               onColor = "var(--red)";
             }))
-          ];
-        }
-
-        # Dashboards nav grid
-        {
-          square = false;
-          type = "grid";
-          columns = 2;
-          title = "Dashboards";
-          cards = [
-            (ha.mkNavCard "Wetter" "/dashboard-umwelt-details")
-            (ha.mkNavCard "Sensoren" "/dashboard-umwelt")
-            (ha.mkNavCard "Garten" "/dashboard-garten")
-            (ha.mkNavCard "Stromverbrauch" "/dashboard-stromverbrauch")
           ];
         }
 
@@ -402,25 +387,54 @@ in
           ];
         }
 
-        # Rooms grid
+        # Dashboards nav grid
         {
           square = false;
           type = "grid";
-          columns = 3;
+          columns = 2;
+          title = "Dashboards";
+          cards = [
+            (ha.mkNavCard "Wetter" "/dashboard-umwelt-details")
+            (ha.mkNavCard "Sensoren" "/dashboard-umwelt")
+            (ha.mkNavCard "Garten" "/dashboard-garten")
+            (ha.mkNavCard "Stromverbrauch" "/dashboard-stromverbrauch")
+          ];
+        }
+
+        # Rooms swipe-card
+        {
+          square = false;
+          type = "grid";
+          columns = 1;
           title = "Räume";
-          cards = map (
-            nv:
-            let
-              slug = e.area.${ha.mkSlug nv.name};
-            in
+          cards = [
             {
-              type = "area";
-              area = slug;
-              show_camera = false;
-              display_type = "compact";
-              navigation_path = "/dashboard-areas/${slug}";
+              type = "custom:swipe-card";
+              parameters = {
+                centeredSlides = true;
+                centeredSlidesBounds = true;
+                slidesPerView = 2.5;
+                initialSlide = 0;
+                spaceBetween = 16;
+                freeMode = true;
+                centerInsufficientSlides = true;
+                snapToSlideEdge = true;
+              };
+              cards = map (
+                nv:
+                let
+                  slug = e.area.${ha.mkSlug nv.name};
+                in
+                {
+                  type = "area";
+                  area = slug;
+                  show_camera = false;
+                  display_type = "compact";
+                  navigation_path = "/dashboard-areas/${slug}";
+                }
+              ) (lib.sort (a: b: a.value.order < b.value.order) (lib.mapAttrsToList lib.nameValuePair areas));
             }
-          ) (lib.sort (a: b: a.value.order < b.value.order) (lib.mapAttrsToList lib.nameValuePair areas));
+          ];
         }
 
       ];

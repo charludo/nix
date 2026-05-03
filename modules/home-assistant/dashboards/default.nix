@@ -63,6 +63,7 @@ in
         mushroom
         plotly-chart-card
         swipe-card
+        lg-remote-control
         my-slider-v2
         xiaomi-vacuum-map-card
         layout-card

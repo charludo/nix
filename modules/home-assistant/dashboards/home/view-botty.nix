@@ -153,8 +153,8 @@ in
               }
             ];
             tap_action = {
-              action = "call-service";
-              service = e.script.botty_wiederholungen;
+              action = "perform-action";
+              perform_action = e.script.botty_wiederholungen;
               haptic = "medium";
             };
             styles = ha.mkActionCardStyles {
@@ -172,8 +172,8 @@ in
             label = "starten";
             show_label = true;
             tap_action = {
-              action = "call-service";
-              service = e.script.botty_reinigung;
+              action = "perform-action";
+              perform_action = e.script.botty_reinigung;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {
@@ -198,8 +198,8 @@ in
               label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
               show_label = true;
               tap_action = {
-                action = "call-service";
-                service = e.script.botty_pausieren;
+                action = "perform-action";
+                perform_action = e.script.botty_pausieren;
                 haptic = "success";
               };
               styles = ha.mkActionCardStyles {
@@ -218,8 +218,8 @@ in
             label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
             show_label = true;
             tap_action = {
-              action = "call-service";
-              service = e.script.botty_fortsetzen;
+              action = "perform-action";
+              perform_action = e.script.botty_fortsetzen;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {
@@ -237,8 +237,8 @@ in
             label = ''[[[return states["${e.sensor.botty_aktueller_reinigungsbereich}"].state + "m² gereinigt"]]]'';
             show_label = true;
             tap_action = {
-              action = "call-service";
-              service = e.script.botty_zurueckkehren;
+              action = "perform-action";
+              perform_action = e.script.botty_zurueckkehren;
               haptic = "success";
             };
             styles = ha.mkActionCardStyles {

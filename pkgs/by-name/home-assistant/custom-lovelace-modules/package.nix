@@ -43,6 +43,13 @@ in
     sha256 = "0caf1pkscl12pxdyr0acmxb6d1ia1b3z2khdnik7zk06g8h4cgy1";
   };
 
+  lg-remote-control = mkCard {
+    pname = "lg-remote-control";
+    version = "2.0.4";
+    url = "https://github.com/madmicio/LG-WebOS-Remote-Control/releases/download/2.0.4/lg-remote-control.js";
+    sha256 = "1j7b0j7a5wp27z0vrlby8dngcz385h2icqpn3xdr7nam6gckxfzd";
+  };
+
   my-slider-v2 = mkCard {
     pname = "my-slider-v2";
     version = "1.0.6";

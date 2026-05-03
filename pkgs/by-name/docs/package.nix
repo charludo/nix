@@ -43,6 +43,7 @@ let
     "HomeManager" = mkOptionsDoc (mkOptions ../../../modules/home-manager { });
     "NixVim" = mkOptionsDoc (mkOptions ../../../modules/nixvim { });
     "VMs" = mkOptionsDoc (mkOptions ../../../modules/vms { });
+    "HomeAssistant" = mkOptionsDoc (mkOptions ../../../modules/home-assistant { });
   };
 
   nestedSummaries = lib.concatStringsSep "\n" (

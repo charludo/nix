@@ -1,25 +1,31 @@
 { ... }:
 {
   hass.automations = {
-    lg_picture_mode = {
-      alias = "LG Picture Mode";
+    lg_picture_mode_day = {
+      alias = "LG Picture Mode: Day at sunrise";
       mode = "single";
       trigger = [
         {
-          platform = "webhook";
-          allowed_methods = [
-            "POST"
-            "PUT"
-          ];
-          local_only = true;
-          webhook_id = "-kLWFUupoQJU-drBnLJa4OSFp";
+          platform = "sun";
+          event = "sunrise";
         }
       ];
       action = [
+        { action = "rest_command.lgtv_picture_day"; }
+      ];
+    };
+
+    lg_picture_mode_night = {
+      alias = "LG Picture Mode: Night at sunset";
+      mode = "single";
+      trigger = [
         {
-          service = "shell_command.set_light_mode_sdr";
-          data = { };
+          platform = "sun";
+          event = "sunset";
         }
+      ];
+      action = [
+        { action = "rest_command.lgtv_picture_night"; }
       ];
     };
 
@@ -35,7 +41,7 @@
       action = [
         {
           action = "frontend.set_theme";
-          data.name = "Rounded Dark";
+          data.name = "Rounded";
         }
       ];
     };

@@ -13,7 +13,7 @@ let
       order = lib.mkOption {
         type = lib.types.int;
         default = 1000;
-        description = "Sort order for sidebar and dashboard tabs (lower = first).";
+        description = "Sort order for sidebar and dashboard tabs (lower = first)";
       };
       icon = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
@@ -23,12 +23,12 @@ let
       humidityEntity = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Entity ID for the area's humidity sensor.";
+        description = "Entity ID for the area's humidity sensor";
       };
       temperatureEntity = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Entity ID for the area's temperature sensor.";
+        description = "Entity ID for the area's temperature sensor";
       };
     };
   };
@@ -64,7 +64,7 @@ in
   options.hass.areas = lib.mkOption {
     type = lib.types.attrsOf areaSubmodule;
     default = { };
-    description = "Home Assistant areas, written declaratively to .storage/core.area_registry.";
+    description = "Home Assistant areas, written declaratively to .storage/core.area_registry";
   };
 
   config = lib.mkIf (cfg.areas != { }) {
