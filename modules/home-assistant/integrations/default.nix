@@ -9,6 +9,7 @@
     ./oidc.nix
     ./openweathermap.nix
     ./sonos.nix
+    ./voice.nix
     ./xiaomi.nix
     ./zigbee.nix
   ];

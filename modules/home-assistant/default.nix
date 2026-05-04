@@ -10,6 +10,7 @@
     ./dashboards
     ./devices.nix
     ./integrations
+    ./intents
     ./scripts
   ];
   options = { };
