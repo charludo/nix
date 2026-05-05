@@ -18,8 +18,10 @@ DEFAULT_SLOT_EXTRACTION = True
 # doing — pointing it at this entity itself would loop.
 DEFAULT_BASE_AGENT = "conversation.home_assistant"
 
-# Stash key in `hass.data[DOMAIN]`.
+# Stash keys in `hass.data[DOMAIN]`.
 KEY_CONVERSATION_INTENTS = "_conversation_intents"
+KEY_CONVERSATION_LISTS = "_conversation_lists"
+KEY_CONVERSATION_EXPANSION_RULES = "_conversation_expansion_rules"
 
 # Marker substituted in for `{slot}` placeholders during pattern expansion.
 # Matched as a wildcard during scoring; mined out for slot extraction.

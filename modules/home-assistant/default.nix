@@ -29,6 +29,7 @@
         [
           psycopg2
 
+          ical
           python-miio
           joserfc
           vacuum-map-parser-base

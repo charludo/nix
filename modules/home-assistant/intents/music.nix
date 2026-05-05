@@ -2,12 +2,26 @@
 let
   e = config.hass.entities;
   player = e.media_player.alle;
+
+  playPlaylist = name: [{
+    action = "music_assistant.play_media";
+    target.entity_id = player;
+    data = {
+      media_id = name;
+      media_type = "playlist";
+    };
+  }];
 in
 {
   hass.voice.intents = {
     MusikAn = [
       "(Spiele|Spiel|Starte) [Musik|die Musik]"
       "Musik (an|abspielen|starten)"
+    ];
+    MusikFortsetzen = [
+      "Musik fortsetzen"
+      "(Mache|Setze) Musik fort"
+      "(Fortsetzen|Weiter abspielen|Weiterspielen)"
     ];
     MusikPause = [
       "(Pausiere|Stoppe|Anhalten) [die Musik]"
@@ -22,10 +36,12 @@ in
     MusikShuffleAn = [
       "Shuffle (an|ein|aktivieren)"
       "Mischen (an|ein|aktivieren)"
+      "Zufallswiedergabe (an|ein|aktivieren)"
     ];
     MusikShuffleAus = [
       "Shuffle (aus|ab|deaktivieren)"
       "Mischen (aus|ab|deaktivieren)"
+      "Zufallswiedergabe (aus|ab|deaktivieren)"
     ];
     PlayerNeustart = [
       "(Player|Spieler) (neu starten|neustarten|resetten)"
@@ -36,109 +52,121 @@ in
       "Zufälliges Album"
       "Random Album"
     ];
+    ZufaelligerKuenstler = [
+      "(Spiele|Spiel) [einen ]zufälligen (Künstler|Artist)"
+      "Zufälliger (Künstler|Artist)"
+      "Random Artist"
+    ];
     NeueMusik = [
-      "(Spiele|Spiel) neue Musik"
+      "(Spiele|Spiel) [die ]neue[n] (Musik|Tracks|Titel|Lieder)"
       "(Spiele|Spiel) [die ]Playlist (neue Musik|Neue Tracks|Recently Added)"
+      "Recently Added"
+    ];
+    KuerzlichGespielt = [
+      "(Spiele|Spiel) [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
+      "Recently Played"
     ];
   };
 
-  hass.voice.intent_scripts = {
-    MusikAn = {
-      action = [
-        {
-          action = "media_player.media_play";
-          target.entity_id = player;
-        }
+  # Wildcard `{playlist}` for arbitrary user-created playlists. Requires
+  # the custom_sentences route — `lists.playlist.wildcard` isn't accepted
+  # by HA's `conversation:` schema.
+  hass.voice.custom_sentences.music = {
+    language = "de";
+    intents.MusikPlaylist.data = [{
+      sentences = [
+        "(Spiele|Spiel|Starte) [die ]Playlist {playlist}"
+        "Playlist {playlist}"
       ];
-      speech.text = "Wird abgespielt.";
+    }];
+    lists.playlist.values = ["Bridgerton Pop" "NieR" "Philharmonix" "Sea Shanties"];
+  };
+
+  hass.voice.intent_scripts = {
+    # MusikAn now starts a "shuffle everything" listening session via
+    # Music Assistant's auto-generated 500-random playlist.
+    MusikAn = {
+      action = playPlaylist "500 random tracks (from library)";
+      speech.text = "Spiele 500 zufällige Titel.";
+    };
+
+    MusikFortsetzen = {
+      action = [{
+        action = "media_player.media_play";
+        target.entity_id = player;
+      }];
+      speech.text = "Wird fortgesetzt.";
     };
 
     MusikPause = {
-      action = [
-        {
-          action = "media_player.media_pause";
-          target.entity_id = player;
-        }
-      ];
+      action = [{
+        action = "media_player.media_pause";
+        target.entity_id = player;
+      }];
       speech.text = "Pausiert.";
     };
 
     MusikNaechster = {
-      action = [
-        {
-          action = "media_player.media_next_track";
-          target.entity_id = player;
-        }
-      ];
+      action = [{
+        action = "media_player.media_next_track";
+        target.entity_id = player;
+      }];
       speech.text = "Nächster Titel.";
     };
 
     MusikShuffleAn = {
-      action = [
-        {
-          action = "media_player.shuffle_set";
-          target.entity_id = player;
-          data.shuffle = true;
-        }
-      ];
+      action = [{
+        action = "media_player.shuffle_set";
+        target.entity_id = player;
+        data.shuffle = true;
+      }];
       speech.text = "Shuffle aktiviert.";
     };
 
     MusikShuffleAus = {
-      action = [
-        {
-          action = "media_player.shuffle_set";
-          target.entity_id = player;
-          data.shuffle = false;
-        }
-      ];
+      action = [{
+        action = "media_player.shuffle_set";
+        target.entity_id = player;
+        data.shuffle = false;
+      }];
       speech.text = "Shuffle deaktiviert.";
     };
 
     PlayerNeustart = {
-      action = [ { action = e.script.sonos_reset; } ];
+      action = [{ action = e.script.sonos_reset; }];
       speech.text = "Player wird neu gestartet.";
     };
 
-    # Music Assistant doesn't ship a built-in "random album" picker, so we
-    # search the library for a batch of albums and play a random one.
     ZufaelligesAlbum = {
-      action = [
-        {
-          action = "music_assistant.search";
-          data = {
-            name = "";
-            media_type = [ "album" ];
-            limit = 50;
-          };
-          response_variable = "result";
-        }
-        {
-          action = "music_assistant.play_media";
-          target.entity_id = player;
-          data = {
-            media_id = "{{ (result.albums | random).uri }}";
-            media_type = "album";
-          };
-        }
-      ];
+      action = playPlaylist "Random Album (from library)";
       speech.text = "Spiele ein zufälliges Album.";
     };
 
-    # Recently-added playlist on Music Assistant. The playlist's display
-    # name in MA must match `media_id` exactly; rename here if it doesn't.
+    ZufaelligerKuenstler = {
+      action = playPlaylist "Random Artist (from library)";
+      speech.text = "Spiele einen zufälligen Künstler.";
+    };
+
     NeueMusik = {
-      action = [
-        {
-          action = "music_assistant.play_media";
-          target.entity_id = player;
-          data = {
-            media_id = "Recently Added Tracks";
-            media_type = "playlist";
-          };
-        }
-      ];
+      action = playPlaylist "Recently added tracks";
       speech.text = "Spiele neue Musik.";
+    };
+
+    KuerzlichGespielt = {
+      action = playPlaylist "Recently played tracks";
+      speech.text = "Spiele zuletzt gehörte Titel.";
+    };
+
+    MusikPlaylist = {
+      action = [{
+        action = "music_assistant.play_media";
+        target.entity_id = player;
+        data = {
+          media_id = "{{ playlist }}";
+          media_type = "playlist";
+        };
+      }];
+      speech.text = "Spiele Playlist {{ playlist }}.";
     };
   };
 }

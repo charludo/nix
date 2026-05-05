@@ -82,8 +82,8 @@ in
                 params = [
                   {
                     segments = [
-                      16
-                      17
+                      18 # Wohnzimmer
+                      17 # Büro
                     ];
                   }
                 ];

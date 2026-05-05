@@ -34,7 +34,9 @@ from .const import (
     DEFAULT_SLOT_EXTRACTION,
     DEFAULT_THRESHOLD,
     DOMAIN,
+    KEY_CONVERSATION_EXPANSION_RULES,
     KEY_CONVERSATION_INTENTS,
+    KEY_CONVERSATION_LISTS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,15 +76,22 @@ PLATFORMS: list[Platform] = [Platform.CONVERSATION]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Capture the user's `conversation.intents` and bootstrap the agent.
+    """Capture the user's `conversation` block and bootstrap the agent.
 
-    HA processes ``conversation.intents`` into IntentHandlers shortly
-    after this hook runs, losing the original sentence patterns. We
-    stash a copy in ``hass.data`` so the conversation entity can read
-    them at setup time.
+    HA's conversation integration validates only `intents:` strictly, but
+    the YAML schema accepts the full Hassil-style `lists:` and
+    `expansion_rules:` blocks (``extra=ALLOW_EXTRA``). We stash all three
+    so the conversation entity can layer user-defined lists/rules on top
+    of the language pack's defaults.
     """
-    conv_intents = (config.get("conversation") or {}).get("intents") or {}
-    hass.data.setdefault(DOMAIN, {})[KEY_CONVERSATION_INTENTS] = dict(conv_intents)
+    conv = config.get("conversation") or {}
+    hass.data.setdefault(DOMAIN, {})[KEY_CONVERSATION_INTENTS] = dict(
+        conv.get("intents") or {}
+    )
+    hass.data[DOMAIN][KEY_CONVERSATION_LISTS] = dict(conv.get("lists") or {})
+    hass.data[DOMAIN][KEY_CONVERSATION_EXPANSION_RULES] = dict(
+        conv.get("expansion_rules") or {}
+    )
 
     if DOMAIN not in config:
         return True

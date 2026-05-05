@@ -27,6 +27,6 @@
     threshold = 70;
     expansion_cap = 16;
     slot_extraction = true;
-    include_builtins = true;
+    include_builtins = false;
   };
 }

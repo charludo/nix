@@ -113,28 +113,28 @@ in
     # Coords are vacuum-map-space rectangles. Re-harvest from the
     # interactive `vacuum_clean_zone` mode if the map ever rebuilds.
     sofa = {
-      x1 = 26000;
-      y1 = 25975;
-      x2 = 29550;
-      y2 = 28000; # TODO verify y2; old config was missing this and only sent 3 coords
+      x1 = 23500;
+      y1 = 25150;
+      x2 = 26300;
+      y2 = 29250;
     };
     kueche = {
-      x1 = 22400;
-      y1 = 23700;
-      x2 = 24125;
-      y2 = 27825;
+      x1 = 19510;
+      y1 = 25150;
+      x2 = 23500;
+      y2 = 27700;
     };
     wohnzimmer = {
-      x1 = 22075;
-      y1 = 29800;
-      x2 = 29675;
-      y2 = 23475;
+      x1 = 19510;
+      y1 = 25150;
+      x2 = 26300;
+      y2 = 31250;
     };
     buro = {
-      x1 = 25800;
-      y1 = 33825;
-      x2 = 29450;
-      y2 = 29800;
+      x1 = 20250;
+      y1 = 31300;
+      x2 = 26250;
+      y2 = 35100;
     };
   };
 

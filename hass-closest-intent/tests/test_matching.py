@@ -18,6 +18,7 @@ sys.path.insert(
 from const import SLOT_WILDCARD  # type: ignore  # noqa: E402
 from matching import (  # type: ignore  # noqa: E402
     Candidate,
+    Resolver,
     build_canonical,
     expand_pattern,
     extract_slots,
@@ -103,6 +104,26 @@ def test_score_ignores_slot_wildcard() -> None:
     assert score("wie ist das wetter um zwölf uhr", cand) >= 80
 
 
+def test_score_slot_pattern_with_multi_token_slot() -> None:
+    cand = f"test zwei im {SLOT_WILDCARD}"
+    assert score("test zwei im wohn zimmern", cand) >= 80
+
+
+def test_score_slot_pattern_with_typo_in_fixed_parts() -> None:
+    cand = f"test zwei im {SLOT_WILDCARD}"
+    assert score("tst zwei im wohnzimmer", cand) >= 70
+
+
+def test_score_slot_pattern_with_typo_in_slot_value() -> None:
+    cand = f"test drei mit {SLOT_WILDCARD}"
+    assert score("test drei mit chrlotte", cand) >= 80
+
+
+def test_score_slot_pattern_rejects_unrelated() -> None:
+    cand = f"test zwei im {SLOT_WILDCARD}"
+    assert score("ich mag musik", cand) < 70
+
+
 # ---------------------------------------------------------------------------
 # find_best
 # ---------------------------------------------------------------------------
@@ -147,6 +168,41 @@ def test_extract_slots_returns_raw_text() -> None:
     assert extract_slots("wie ist das wetter um 14 uhr", cand) == ["14"]
 
 
+def test_extract_slots_tolerates_typo_in_fixed_part() -> None:
+    cand = Candidate(
+        intent="X",
+        pattern_idx=0,
+        text=f"test zwei im {SLOT_WILDCARD}",
+        slot_names=["area"],
+    )
+    # "im" → "in" (one-char typo in fixed part) should still align.
+    # Capture may include leftover boundary chars; resolver cleans up.
+    out = extract_slots("test zwei in büro", cand)
+    assert out is not None and "büro" in out[0]
+
+
+def test_extract_slots_tolerates_merged_tokens() -> None:
+    cand = Candidate(
+        intent="X",
+        pattern_idx=0,
+        text=f"test zwei im {SLOT_WILDCARD}",
+        slot_names=["area"],
+    )
+    # STT merged "im büro" → no space between fixed and slot.
+    out = extract_slots("test zwein büro", cand)
+    assert out is not None and "büro" in out[0]
+
+
+def test_extract_slots_multi_token_slot_value() -> None:
+    cand = Candidate(
+        intent="X",
+        pattern_idx=0,
+        text=f"test zwei im {SLOT_WILDCARD}",
+        slot_names=["area"],
+    )
+    assert extract_slots("test zwei im wohn zimmern", cand) == ["wohn zimmern"]
+
+
 def test_extract_slots_two_slots() -> None:
     cand = Candidate(
         intent="X",
@@ -186,3 +242,85 @@ def test_build_canonical_handles_multiple_slots() -> None:
         slot_names=["x", "y"],
     )
     assert build_canonical(cand, ["foo", "bar"]) == "a foo b bar c"
+
+
+# ---------------------------------------------------------------------------
+# Resolver: expansion rules
+# ---------------------------------------------------------------------------
+
+
+def test_resolver_inlines_simple_rule() -> None:
+    r = Resolver(expansion_rules={"gruss": ["hallo", "moin"]})
+    assert r.inline_rules("<gruss> closest_intent") == "(hallo|moin) closest_intent"
+
+
+def test_resolver_inlines_recursively() -> None:
+    r = Resolver(expansion_rules={
+        "outer": ["<inner> da", "anders"],
+        "inner": ["hier", "dort"],
+    })
+    out = r.inline_rules("<outer>")
+    assert out == "((hier|dort) da|anders)"
+
+
+def test_resolver_inlines_unknown_rule_unchanged() -> None:
+    r = Resolver()
+    assert r.inline_rules("<unknown> rest") == "<unknown> rest"
+
+
+def test_expand_pattern_uses_resolver_rules() -> None:
+    r = Resolver(expansion_rules={"gruss": ["hallo", "moin"]})
+    out = expand_pattern("<gruss> closest_intent", cap=16, resolver=r)
+    texts = [t for (t, _) in out]
+    assert "hallo closest_intent" in texts
+    assert "moin closest_intent" in texts
+
+
+# ---------------------------------------------------------------------------
+# Resolver: slot value resolution
+# ---------------------------------------------------------------------------
+
+
+def test_resolver_resolves_exact_match() -> None:
+    r = Resolver(slot_values={"area": ["Wohnzimmer", "Küche", "Büro"]})
+    assert r.resolve_slot("Wohnzimmer", "area") == "Wohnzimmer"
+
+
+def test_resolver_resolves_typo_to_closest() -> None:
+    r = Resolver(slot_values={"area": ["Wohnzimmer", "Küche", "Büro"]})
+    assert r.resolve_slot("wohnzma", "area") == "Wohnzimmer"
+
+
+def test_resolver_returns_raw_when_no_close_match() -> None:
+    r = Resolver(slot_values={"area": ["Wohnzimmer", "Küche", "Büro"]})
+    assert r.resolve_slot("garage", "area") == "garage"
+
+
+def test_resolver_returns_raw_for_unknown_list() -> None:
+    r = Resolver()
+    assert r.resolve_slot("anything", "no_such_list") == "anything"
+
+
+def test_build_canonical_uses_resolver_for_slot_value() -> None:
+    r = Resolver(slot_values={"area": ["Wohnzimmer", "Küche"]})
+    cand = Candidate(
+        intent="LightOn",
+        pattern_idx=0,
+        text=f"schalte das licht im {SLOT_WILDCARD} an",
+        slot_names=["area"],
+    )
+    canonical = build_canonical(cand, ["wohnzma"], resolver=r)
+    assert canonical == "schalte das licht im wohnzimmer an"
+
+
+def test_build_canonical_keeps_raw_when_resolver_finds_nothing() -> None:
+    r = Resolver(slot_values={"area": ["Wohnzimmer"]})
+    cand = Candidate(
+        intent="LightOn",
+        pattern_idx=0,
+        text=f"licht im {SLOT_WILDCARD}",
+        slot_names=["area"],
+    )
+    # "garage" is too far from "Wohnzimmer" — pass through unchanged.
+    canonical = build_canonical(cand, ["garage"], resolver=r)
+    assert canonical == "licht im garage"
