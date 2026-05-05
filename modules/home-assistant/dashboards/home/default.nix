@@ -26,6 +26,10 @@ in
       (import ./view-botty.nix { inherit lib e; })
       (import ./view-sonos.nix { inherit lib e; })
       (import ./view-tv.nix { inherit lib e; })
+      (import ./view-einkaufsliste.nix {
+        inherit lib;
+        supermarkets = config.hass.shopping.supermarkets or { };
+      })
       (import ./view-einstellungen.nix { inherit lib e; })
     ];
   };

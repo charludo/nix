@@ -1,0 +1,14 @@
+refresh:
+  name: Refresh shopping list
+  description: >-
+    Fetch active items from the configured to-do entity, categorise
+    them, and update the sensor for the named supermarket (or all of
+    them if omitted).
+  fields:
+    supermarket:
+      name: Supermarket
+      description: Refresh only this supermarket. Omit to refresh all.
+      example: ALDI
+      required: false
+      selector:
+        text:

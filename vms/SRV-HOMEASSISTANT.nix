@@ -10,7 +10,7 @@ in
     name = "SRV-HOMEASSISTANT";
 
     hardware.cores = 4;
-    hardware.memory = 8192;
+    hardware.memory = 16384;
     hardware.storage = "8G";
 
     networking.openPorts.tcp = [
@@ -436,6 +436,108 @@ in
           "start_up_current_level"
         ];
         area = "Wohnzimmer";
+      };
+    };
+  };
+
+  hass.shopping = {
+    todo_entity = "todo.shopping_list";
+    supermarkets = {
+      REWE = {
+        color = "var(--red)";
+        categories = [
+          "Obst"
+          "Gemüse"
+          "Backwaren"
+          "Aufstrich"
+          "Coffee&Tea"
+          "Salz&Gewürze"
+          "Backzutaten"
+          "Charcuterie"
+          "Nudeln&Reis"
+          "Tomatensoße"
+          "Konserven"
+          "Asia"
+          "Soßen"
+          "Essig&Öl"
+          "Fleisch"
+          "Alkohol"
+          "Eier"
+          "Fisch"
+          "Veganes"
+          "Milchprodukte"
+          "FrischeNudeln"
+          "Schreibwaren"
+          "Softdrinks"
+          "Reinigungsmittel&Müll"
+          "Zahnputz"
+          "Kosmetik"
+          "Seife&Shampoo"
+          "Mexiko"
+          "Süßwaren"
+          "Tiefgefrorenes"
+          "Sonstiges"
+        ];
+      };
+
+      Edeka = {
+        color = "var(--yellow)";
+        categories = [
+          "Gemüse"
+          "Obst"
+          "Veganes"
+          "FrischeNudeln"
+          "Eier"
+          "Kosmetik"
+          "Zahnputz"
+          "Seife&Shampoo"
+          "Reinigungsmittel&Müll"
+          "Essig&Öl"
+          "Konserven"
+          "Soßen"
+          "Aufstrich"
+          "Backwaren"
+          "Coffee&Tea"
+          "Fisch"
+          "Asia"
+          "Backzutaten"
+          "Nudeln&Reis"
+          "Tomatensoße"
+          "Charcuterie"
+          "Milchprodukte"
+          "Fleisch"
+          "Salz&Gewürze"
+          "Alkohol"
+          "Softdrinks"
+          "Süßwaren"
+          "Mexiko"
+          "Schreibwaren"
+          "Tiefgefrorenes"
+          "Sonstiges"
+        ];
+      };
+
+      Baumarkt = {
+        color = "var(--green)";
+        categories = [
+          "Gartencenter&Baumarkt"
+          "Sonstiges"
+        ];
+      };
+
+      Asiamarkt = {
+        color = "var(--blue)";
+        categories = [
+          "Asia"
+          "Mexiko"
+        ];
+      };
+
+      Apotheke = {
+        color = "var(--white)";
+        categories = [
+          "Apotheke"
+        ];
       };
     };
   };

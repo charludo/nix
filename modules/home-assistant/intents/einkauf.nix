@@ -11,20 +11,25 @@
   hass.voice.custom_sentences.einkauf = {
     language = "de";
     intents = {
-      Einkauf_Add.data = [{
-        sentences = [
-          "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"
-          "{item} auf die Einkaufsliste"
-          "Einkaufsliste {item}"
-        ];
-      }];
-      ToDo_Add.data = [{
-        sentences = [
-          "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
-          "{item} auf die ToDo-Liste"
-          "ToDo-Liste {item}"
-        ];
-      }];
+      Einkauf_Add.data = [
+        {
+          sentences = [
+            "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"
+            "{item} auf die Einkaufsliste"
+            "Einkaufsliste {item}"
+            "Füge {item} zur Einkaufsliste hinzu"
+          ];
+        }
+      ];
+      ToDo_Add.data = [
+        {
+          sentences = [
+            "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+            "{item} auf die ToDo-Liste"
+            "ToDo-Liste {item}"
+          ];
+        }
+      ];
     };
     lists.item.wildcard = true;
   };
@@ -35,7 +40,7 @@
       action = {
         service = "todo.add_item";
         data.item = "{{ item }}";
-        target.entity_id = "todo.einkaufsliste";
+        target.entity_id = "todo.shopping_list";
       };
     };
     ToDo_Add = {

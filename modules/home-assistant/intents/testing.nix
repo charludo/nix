@@ -31,7 +31,10 @@
       ];
     };
     lists.bewohner.values = [
-      { "in" = "Charlotte"; out = "person.charlotte"; }
+      {
+        "in" = "Charlotte";
+        out = "person.charlotte";
+      }
     ];
     expansion_rules.test_gruss = "(hallo|guten tag|moin)";
   };

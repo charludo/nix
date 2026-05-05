@@ -63,6 +63,12 @@ in
     src = ../../../../hass-closest-intent;
   };
 
+  grocery_categorize = mkLocalComponent {
+    pname = "grocery_categorize";
+    version = "0.1.0";
+    src = ../../../../hass-grocery-categorize;
+  };
+
   auth_oidc = mkComponent {
     pname = "auth_oidc";
     version = "1.0.2";

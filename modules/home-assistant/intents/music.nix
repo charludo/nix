@@ -3,14 +3,16 @@ let
   e = config.hass.entities;
   player = e.media_player.alle;
 
-  playPlaylist = name: [{
-    action = "music_assistant.play_media";
-    target.entity_id = player;
-    data = {
-      media_id = name;
-      media_type = "playlist";
-    };
-  }];
+  playPlaylist = name: [
+    {
+      action = "music_assistant.play_media";
+      target.entity_id = player;
+      data = {
+        media_id = name;
+        media_type = "playlist";
+      };
+    }
+  ];
 in
 {
   hass.voice.intents = {
@@ -73,13 +75,20 @@ in
   # by HA's `conversation:` schema.
   hass.voice.custom_sentences.music = {
     language = "de";
-    intents.MusikPlaylist.data = [{
-      sentences = [
-        "(Spiele|Spiel|Starte) [die ]Playlist {playlist}"
-        "Playlist {playlist}"
-      ];
-    }];
-    lists.playlist.values = ["Bridgerton Pop" "NieR" "Philharmonix" "Sea Shanties"];
+    intents.MusikPlaylist.data = [
+      {
+        sentences = [
+          "(Spiele|Spiel|Starte) [die ]Playlist {playlist}"
+          "Playlist {playlist}"
+        ];
+      }
+    ];
+    lists.playlist.values = [
+      "Bridgerton Pop"
+      "NieR"
+      "Philharmonix"
+      "Sea Shanties"
+    ];
   };
 
   hass.voice.intent_scripts = {
@@ -91,49 +100,59 @@ in
     };
 
     MusikFortsetzen = {
-      action = [{
-        action = "media_player.media_play";
-        target.entity_id = player;
-      }];
+      action = [
+        {
+          action = "media_player.media_play";
+          target.entity_id = player;
+        }
+      ];
       speech.text = "Wird fortgesetzt.";
     };
 
     MusikPause = {
-      action = [{
-        action = "media_player.media_pause";
-        target.entity_id = player;
-      }];
+      action = [
+        {
+          action = "media_player.media_pause";
+          target.entity_id = player;
+        }
+      ];
       speech.text = "Pausiert.";
     };
 
     MusikNaechster = {
-      action = [{
-        action = "media_player.media_next_track";
-        target.entity_id = player;
-      }];
+      action = [
+        {
+          action = "media_player.media_next_track";
+          target.entity_id = player;
+        }
+      ];
       speech.text = "Nächster Titel.";
     };
 
     MusikShuffleAn = {
-      action = [{
-        action = "media_player.shuffle_set";
-        target.entity_id = player;
-        data.shuffle = true;
-      }];
+      action = [
+        {
+          action = "media_player.shuffle_set";
+          target.entity_id = player;
+          data.shuffle = true;
+        }
+      ];
       speech.text = "Shuffle aktiviert.";
     };
 
     MusikShuffleAus = {
-      action = [{
-        action = "media_player.shuffle_set";
-        target.entity_id = player;
-        data.shuffle = false;
-      }];
+      action = [
+        {
+          action = "media_player.shuffle_set";
+          target.entity_id = player;
+          data.shuffle = false;
+        }
+      ];
       speech.text = "Shuffle deaktiviert.";
     };
 
     PlayerNeustart = {
-      action = [{ action = e.script.sonos_reset; }];
+      action = [ { action = e.script.sonos_reset; } ];
       speech.text = "Player wird neu gestartet.";
     };
 
@@ -158,14 +177,16 @@ in
     };
 
     MusikPlaylist = {
-      action = [{
-        action = "music_assistant.play_media";
-        target.entity_id = player;
-        data = {
-          media_id = "{{ playlist }}";
-          media_type = "playlist";
-        };
-      }];
+      action = [
+        {
+          action = "music_assistant.play_media";
+          target.entity_id = player;
+          data = {
+            media_id = "{{ playlist }}";
+            media_type = "playlist";
+          };
+        }
+      ];
       speech.text = "Spiele Playlist {{ playlist }}.";
     };
   };

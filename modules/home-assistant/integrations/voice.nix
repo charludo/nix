@@ -1,4 +1,9 @@
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   cfg = config.hass.voice;
   haDir = config.services.home-assistant.configDir;
@@ -45,13 +50,15 @@ in
     };
 
     custom_sentences = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule {
-        freeformType = yamlFormat.type;
-        options.language = lib.mkOption {
-          type = lib.types.str;
-          description = "Language code (e.g. \"de\"). Determines the directory the file lands in.";
-        };
-      });
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          freeformType = yamlFormat.type;
+          options.language = lib.mkOption {
+            type = lib.types.str;
+            description = "Language code (e.g. \"de\"). Determines the directory the file lands in.";
+          };
+        }
+      );
       default = { };
       description = ''
         Hassil ``custom_sentences/<lang>/<name>.yaml`` files. The full

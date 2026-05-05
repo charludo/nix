@@ -19,11 +19,11 @@
 
   hass.voice.intent_scripts = {
     TV_Hell = {
-      action = [{ action = "rest_command.lgtv_picture_day"; }];
+      action = [ { action = "rest_command.lgtv_picture_day"; } ];
       speech.text = "Bild ist jetzt hell.";
     };
     TV_Dunkel = {
-      action = [{ action = "rest_command.lgtv_picture_night"; }];
+      action = [ { action = "rest_command.lgtv_picture_night"; } ];
       speech.text = "Bild ist jetzt dunkel.";
     };
   };
