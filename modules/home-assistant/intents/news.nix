@@ -1,8 +1,30 @@
-{ lib, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   e = config.hass.entities;
-  sonos = e.media_player.office;
+  sonos = e.media_player.living_room;
   allPlayer = e.media_player.alle;
+
+  newsDir = "/var/lib/hass/www/news";
+
+  # Sonos needs a direct, anonymous URL it can fetch from. HA serves
+  # `<config>/www/` at `/local/` without auth, so we derive the host
+  # URL from the VM's IP (vm.id 2403 → 192.168.24.103, port 8123).
+  haBaseUrl =
+    let
+      id = toString config.vm.id;
+    in
+    "http://192.168.${builtins.substring 0 2 id}.1${builtins.substring 2 2 id}:8123";
+
+  feeds = {
+    "tagesschau_100s.mp3" =
+      "https://www.tagesschau.de/multimedia/sendung/tagesschau_in_100_sekunden/podcast-ts100-audio-100~podcast.xml";
+    "wdr_aktuell.mp3" = "https://www1.wdr.de/mediathek/audio/wdr-aktuell-news/wdr-aktuell-152.podcast";
+  };
 
   # Sonos UPnP can briefly time out on rapid state changes (stop → play
   # against a still-syncing group), so the prep steps tolerate failure
@@ -22,34 +44,77 @@ let
     { delay.seconds = 2; }
   ];
 
-  # Two REST sensors poll each podcast's RSS every 5 min and pluck the
-  # latest episode's MP3 URL via regex. Cleaner than command_line+curl:
-  # no shell, no extra processes, native HA template.
-  podcastFeed = name: url: {
-    inherit name;
-    platform = "rest";
-    resource = url;
-    value_template = ''
-      {% set m = value | regex_findall('https?://[^"\s]+\.mp3') %}
-      {{ m[0] if m else "" }}
-    '';
-    scan_interval = 300;
-  };
-
-  playUrl = mediaIdTemplate: enqueue: {
+  # Direct URL into HA's `www/` (served at `/local/`, no auth required).
+  playLocal = filename: enqueue: {
     action = "media_player.play_media";
     target.entity_id = sonos;
     data = {
-      media_content_id = mediaIdTemplate;
+      media_content_id = "${haBaseUrl}/local/news/${filename}";
       media_content_type = "music";
       inherit enqueue;
     };
   };
-
-  tagesschauUrl = "{{ states('sensor.tagesschau_100s_mp3') }}";
-  wdrUrl = "{{ states('sensor.wdr_aktuell_mp3') }}";
 in
 {
+  # ---------------------------------------------------------------------
+  # Background fetcher: download the latest episode of each feed every
+  # 15 min. Always overwrite — only the newest is kept on disk.
+  # ---------------------------------------------------------------------
+  systemd.services.fetch-news-podcasts = {
+    description = "Download latest news podcast episodes for HA";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "hass";
+      Group = "hass";
+    };
+    path = with pkgs; [
+      curl
+      gnugrep
+      coreutils
+    ];
+    script = ''
+      set -u
+      mkdir -p "${newsDir}"
+
+      fetch_latest() {
+        local feed="$1"
+        local out="$2"
+        local url
+        url=$(curl -fsSL --max-time 15 "$feed" \
+              | grep -oE 'https?://[^"]+\.mp3' \
+              | head -1)
+        if [ -z "$url" ]; then
+          echo "No MP3 URL found in $feed" >&2
+          return 1
+        fi
+        echo "Fetching $url -> $out"
+        curl -fsSL --retry 3 --max-time 60 -o "$out.tmp" "$url" \
+          && mv "$out.tmp" "$out"
+      }
+
+      ${lib.concatStringsSep "\n" (
+        lib.mapAttrsToList (filename: feed: ''
+          fetch_latest ${lib.escapeShellArg feed} ${lib.escapeShellArg "${newsDir}/${filename}"} || true
+        '') feeds
+      )}
+    '';
+  };
+
+  systemd.timers.fetch-news-podcasts = {
+    description = "Periodically fetch news podcast episodes";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "15min";
+      Persistent = true;
+    };
+  };
+
+  # ---------------------------------------------------------------------
+  # Voice intents
+  # ---------------------------------------------------------------------
   hass.voice.intents = {
     Tagesschau = [
       "(Spiele|Spiel|Starte) [die ]Tagesschau"
@@ -70,30 +135,19 @@ in
 
   hass.voice.intent_scripts = {
     Tagesschau = {
-      action = prepare ++ [ (playUrl tagesschauUrl "play") ];
+      action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "play") ];
       speech.text = "Spiele Tagesschau.";
     };
     WDR_Aktuell = {
-      action = prepare ++ [ (playUrl wdrUrl "play") ];
+      action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "play") ];
       speech.text = "Spiele WDR Aktuell.";
     };
-    # Sonos queues the second item; plays them back-to-back without us
-    # having to detect end-of-track. `enqueue: play` clears + starts;
-    # `enqueue: add` appends.
     Nachrichten = {
       action = prepare ++ [
-        (playUrl tagesschauUrl "play")
-        (playUrl wdrUrl "add")
+        (playLocal "tagesschau_100s.mp3" "play")
+        (playLocal "wdr_aktuell.mp3" "add")
       ];
       speech.text = "Spiele Nachrichten.";
     };
-  };
-
-  services.home-assistant.config = {
-    sensor = [
-      (podcastFeed "tagesschau_100s_mp3" "https://www.tagesschau.de/multimedia/sendung/tagesschau_in_100_sekunden/podcast-ts100-audio-100~podcast.xml")
-
-      (podcastFeed "wdr_aktuell_mp3" "https://www1.wdr.de/mediathek/audio/wdr-aktuell-news/wdr-aktuell-152.podcast")
-    ];
   };
 }

@@ -1,5 +1,6 @@
 {
   imports = [
+    ./botty.nix
     ./climate.nix
     ./einkauf.nix
     ./garden.nix
