@@ -1,0 +1,8 @@
+{
+  "config": {
+    "abort": {
+      "yaml_only": "Closest Intent is configured via YAML — see the README.",
+      "already_configured": "Closest Intent is already configured."
+    }
+  }
+}

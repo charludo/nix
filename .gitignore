@@ -1,3 +1,5 @@
 result
 .ruff_cache
 /hass
+__pycache__
+.pytest_cache

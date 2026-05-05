@@ -1,6 +1,7 @@
 {
   imports = [
     ./areas.nix
+    ./closest_intent.nix
     ./helpers.nix
     ./sidebar.nix
     ./lgtv.nix

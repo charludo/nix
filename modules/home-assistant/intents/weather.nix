@@ -19,8 +19,8 @@ in
       "Wettervorhersage [für die nächsten Tage]"
     ];
     WetterStunde = [
-      "Wie [wird|ist] das Wetter um {stunde} Uhr"
-      "Wie warm wird es um {stunde} Uhr"
+      "Wie [wird|ist] das Wetter um {timer_hours:hours} Uhr"
+      "Wie warm wird es um {timer_hours:hours} Uhr"
     ];
     WindAktuell = [
       "Wie windig ist es [heute|jetzt|gerade]"
@@ -38,8 +38,8 @@ in
       "Wird es heute regnen"
     ];
     RegenStunde = [
-      "Regnet es um {stunde} Uhr"
-      "Wird es um {stunde} Uhr regnen"
+      "Regnet es um {timer_hours:hours} Uhr"
+      "Wird es um {timer_hours:hours} Uhr regnen"
     ];
   };
 

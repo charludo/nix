@@ -31,8 +31,38 @@ let
         isHomeAssistantComponent = true;
       };
     };
+
+  # Same shape as `mkComponent` but takes a local source tree instead of
+  # fetching from GitHub. Used while a component is still in-tree; swap to
+  # `mkComponent` once the component lives in its own repo.
+  mkLocalComponent =
+    {
+      pname,
+      version,
+      src,
+      domain ? pname,
+      componentPath ? "custom_components/${domain}",
+    }:
+    stdenv.mkDerivation {
+      inherit pname version src;
+      dontBuild = true;
+      installPhase = ''
+        mkdir -p $out/custom_components
+        cp -r ${componentPath} $out/custom_components/${domain}
+      '';
+      passthru = {
+        inherit domain;
+        isHomeAssistantComponent = true;
+      };
+    };
 in
 {
+  closest_intent = mkLocalComponent {
+    pname = "closest_intent";
+    version = "0.1.0";
+    src = ../../../../hass-closest-intent;
+  };
+
   auth_oidc = mkComponent {
     pname = "auth_oidc";
     version = "1.0.2";

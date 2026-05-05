@@ -7,12 +7,17 @@ in
     intents = lib.mkOption {
       type = lib.types.attrsOf (lib.types.listOf lib.types.str);
       default = { };
-      description = "Conversation intents keyed by name; values are sentence-pattern strings";
+      description = ''
+        Conversation intents keyed by name; values are sentence-pattern
+        strings. Slot patterns ({slot} or {slot:list}) require Hassil-
+        compatible syntax — slot lists must already exist in HA's
+        loaded intents pack or be defined in your conversation YAML.
+      '';
       example = lib.literalExpression ''
         {
           WetterHeute = [
-            "Wie ist das Wetter (heute|jetzt|gerade)?"
-            "Wie warm ist es draußen?"
+            "Wie ist das Wetter (heute|jetzt|gerade)"
+            "Wie warm ist es draußen"
           ];
         }
       '';
