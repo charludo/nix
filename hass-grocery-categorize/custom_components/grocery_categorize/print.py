@@ -42,6 +42,7 @@ def render_markdown(
     ordered_categories: list[str],
     items_by_cat: dict[str, list[str]],
     when: str,
+    missing_categories: list[str] | None = None,
 ) -> str:
     lines = [f"*{when}*  ", f"*{supermarket}*  ", "<br/>"]
     # Sonstiges only renders if explicitly listed in `ordered_categories`
@@ -55,6 +56,13 @@ def render_markdown(
         for it in items:
             lines.append(f"{it}  ")
         lines.append("<br/>")
+    if missing_categories:
+        # Confident classifications dropped because this supermarket's
+        # category list doesn't include them — useful "buy elsewhere"
+        # hint at the bottom of the printout.
+        lines.append(
+            f"*(Nicht in {supermarket}: {', '.join(missing_categories)})*"
+        )
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -138,16 +146,25 @@ def main() -> int:
     allowed = set(ordered)
     include_fallback = FALLBACK_CATEGORY in allowed
     items_by_cat: dict[str, list[str]] = {}
+    missing_cats: set[str] = set()
     for m in matches:
         if m.category in allowed:
             cat = m.category
         elif m.category == FALLBACK_CATEGORY and include_fallback:
             cat = FALLBACK_CATEGORY
         else:
+            if m.category != FALLBACK_CATEGORY:
+                missing_cats.add(m.category)
             continue
         items_by_cat.setdefault(cat, []).append(m.item)
 
-    markdown = render_markdown(args.supermarket, ordered, items_by_cat, when_short)
+    markdown = render_markdown(
+        args.supermarket,
+        ordered,
+        items_by_cat,
+        when_short,
+        missing_categories=sorted(missing_cats),
+    )
     rendered_count = sum(len(v) for v in items_by_cat.values())
 
     json.dump(

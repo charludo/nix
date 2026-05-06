@@ -95,17 +95,33 @@ class Classifier:
         self._threshold = threshold
         self._categories = categories if categories is not None else CATEGORIES
 
+        # Each anchor entry can be a plain string (single-form anchor)
+        # or a list of strings (multi-form, with index 0 = canonical
+        # display name). Both flatten into the same flat lookup tables;
+        # anchor_orig records the canonical for *every* form, so when
+        # any variant matches we surface the canonical for display.
+        #
+        # We deliberately do NOT auto-anchor on the category name —
+        # ``"Salz&Gewürze"`` as a string would otherwise match all kinds
+        # of items containing ``"gewürz"``. Add an explicit anchor entry
+        # if you want a category name to also be matchable as input.
         self._cat_names: list[str] = []
         anchor_norm: list[str] = []
         anchor_orig: list[str] = []
         anchor_owner: list[int] = []
         for ci, (name, anchors) in enumerate(self._categories):
             self._cat_names.append(name)
-            # Treat the category name itself as an additional anchor.
-            for a in [name, *anchors]:
-                anchor_norm.append(_normalize(a))
-                anchor_orig.append(a)
-                anchor_owner.append(ci)
+            for entry in anchors:
+                if isinstance(entry, str):
+                    canonical = entry.title() if entry.islower() else entry
+                    forms = [entry]
+                else:
+                    canonical = entry[0]
+                    forms = list(entry)
+                for form in forms:
+                    anchor_norm.append(_normalize(form))
+                    anchor_orig.append(canonical)
+                    anchor_owner.append(ci)
         self._anchor_norm = anchor_norm
         self._anchor_orig = anchor_orig
         self._anchor_owner = np.asarray(anchor_owner)

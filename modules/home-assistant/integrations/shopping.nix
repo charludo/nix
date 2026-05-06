@@ -1,7 +1,14 @@
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   cfg = config.hass.shopping;
-  customComponents = pkgs.callPackage ../../../pkgs/by-name/home-assistant/custom-components/package.nix { };
+  customComponents =
+    pkgs.callPackage ../../../pkgs/by-name/home-assistant/custom-components/package.nix
+      { };
 in
 {
   options.hass.shopping = {
@@ -16,29 +23,31 @@ in
     };
 
     supermarkets = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule {
-        options = {
-          categories = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            description = ''
-              Ordered list of category names (matching
-              ``custom_components/grocery_categorize/categories.py``).
-              Order = store aisle sequence. Categories not listed are
-              silently dropped from this supermarket's view; ``Sonstiges``
-              is always rendered last when non-empty.
-            '';
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            categories = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              description = ''
+                Ordered list of category names (matching
+                ``custom_components/grocery_categorize/categories.py``).
+                Order = store aisle sequence. Categories not listed are
+                silently dropped from this supermarket's view; ``Sonstiges``
+                is always rendered last when non-empty.
+              '';
+            };
+            color = lib.mkOption {
+              type = lib.types.str;
+              default = "var(--green)";
+              description = ''
+                Background colour for the supermarket's button on the
+                shopping-list dashboard view. Any CSS colour expression
+                works (``"var(--blue)"``, ``"#ff8800"`` etc.).
+              '';
+            };
           };
-          color = lib.mkOption {
-            type = lib.types.str;
-            default = "var(--green)";
-            description = ''
-              Background colour for the supermarket's button on the
-              shopping-list dashboard view. Any CSS colour expression
-              works (``"var(--blue)"``, ``"#ff8800"`` etc.).
-            '';
-          };
-        };
-      });
+        }
+      );
       default = { };
       example = lib.literalExpression ''
         {
@@ -48,7 +57,7 @@ in
           };
           REWE = {
             color = "var(--red)";
-            categories = [ "Obst" "Gemüse" "Charcuterie" ];
+            categories = [ "Obst" "Gemüse" "Aufschnitt" ];
           };
         }
       '';

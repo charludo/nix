@@ -71,4 +71,43 @@ def test_score_is_returned() -> None:
     clf = Classifier(categories=CATS, threshold=80)
     m = clf.classify(["Vollmilch"])[0]
     assert m.score >= 80
-    assert m.matched_anchor == "vollmilch"
+    # Lowercase anchors get auto-title-cased into the canonical form.
+    assert m.matched_anchor == "Vollmilch"
+
+
+def test_tomaten_resolves_to_gemuese_not_tomatensosse() -> None:
+    """Bare ``"Tomaten"`` is the produce, not pasta sauce.
+
+    Pulls in the real CATEGORIES because the bug only manifests when
+    Tomatensoße (which contains anchors like ``"gehackte tomaten"``,
+    ``"stückige tomaten"``) and Gemüse (which contains ``"Tomaten"``)
+    coexist — both score 100 via token_set_ratio. Cross-category
+    tiebreak by closest anchor-length to input must pick the 7-char
+    ``"Tomaten"`` over the 16-char ``"Gehackte Tomaten"``.
+    """
+    clf = Classifier()  # default = real CATEGORIES
+    matches = {m.item: m.category for m in clf.classify(
+        ["Tomaten", "Tomate", "Gehackte Tomaten", "Tomatensoße"]
+    )}
+    assert matches["Tomaten"] == "Gemüse"
+    assert matches["Tomate"] == "Gemüse"
+    assert matches["Gehackte Tomaten"] == "Tomatensoße"
+    assert matches["Tomatensoße"] == "Tomatensoße"
+
+
+def test_list_anchor_canonical() -> None:
+    """List-form anchors: any element matches; index-0 is the
+    canonical surfaced on the Match. Used to fold typos / STT garbles
+    under a single clean display name."""
+    cats = [
+        ("Backwaren", [["Süßstoff", "süßstofftabletten", "stevia"]]),
+        ("Milchprodukte", [["Crème Fraîche", "creme fraiche"]]),
+    ]
+    clf = Classifier(categories=cats, threshold=80)
+    matches = {m.item: m for m in clf.classify(
+        ["süßstofftabletten", "stevia", "creme fraiche", "Crème Fraîche"]
+    )}
+    assert matches["süßstofftabletten"].matched_anchor == "Süßstoff"
+    assert matches["stevia"].matched_anchor == "Süßstoff"
+    assert matches["creme fraiche"].matched_anchor == "Crème Fraîche"
+    assert matches["Crème Fraîche"].matched_anchor == "Crème Fraîche"

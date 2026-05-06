@@ -72,7 +72,13 @@ class PrintView(HomeAssistantView):
         markdown = result.get("markdown") or "_Noch keine Liste generiert._"
         supermarket = result.get("supermarket") or ""
         suffix = f" — {supermarket}" if supermarket else ""
-        body = _md.markdown(markdown, extensions=["extra", "sane_lists"])
+        # python-markdown lazy-loads its extension entry-points on
+        # first call, which does sync file I/O (entry_points.txt).
+        # HA's event-loop watchdog catches that — push the conversion
+        # onto the executor so the loop stays clean.
+        body = await self._hass.async_add_executor_job(
+            lambda: _md.markdown(markdown, extensions=["extra", "sane_lists"])
+        )
         page = _PAGE_TEMPLATE.format(
             title_suffix=html.escape(suffix),
             body=body,

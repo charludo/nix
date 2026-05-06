@@ -114,10 +114,14 @@ def _format_group(
     inputs = _dedup_preserve_order([m.item for m in matches])
     if anchor is None:
         return inputs[0].title() if is_compound else inputs[0]
+    # The anchor here is already the canonical form from the classifier
+    # (title-cased for plain-string anchors, used as-is for list-form
+    # anchors). No further .title() — it would mangle multi-word
+    # canonicals like ``"Rotkohl im Glas"`` → ``"Rotkohl Im Glas"``.
     distinct_keys = {_eq_key(i) for i in inputs}
     if distinct_keys == {_eq_key(anchor)}:
-        return anchor.title()
-    return f"{anchor.title()} *({', '.join(inputs)})*"
+        return anchor
+    return f"{anchor} *({', '.join(inputs)})*"
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -222,12 +226,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             # multiple inputs that match the same anchor (or compound
             # form) collapse into one entry with a joined parenthetical.
             grouped: dict[str, dict[tuple, list]] = {}
+            # Track categories that the classifier confidently placed
+            # items in, but the supermarket doesn't carry. Surfaced at
+            # the bottom of the printed list as a hint that items live
+            # in a different store. Sonstiges (genuinely unclassified)
+            # is not a "missing category" — different signal.
+            missing_cats: set[str] = set()
             for m in matches:
                 if m.category in allowed:
                     cat = m.category
                 elif m.category == FALLBACK_CATEGORY and include_fallback:
                     cat = FALLBACK_CATEGORY
                 else:
+                    if m.category != FALLBACK_CATEGORY:
+                        missing_cats.add(m.category)
                     continue
 
                 if not m.matched_anchor:
@@ -263,7 +275,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 count += len(rendered)
 
             markdown = render_markdown(
-                supermarket, ordered, items_by_cat, when_short
+                supermarket,
+                ordered,
+                items_by_cat,
+                when_short,
+                missing_categories=sorted(missing_cats),
             )
             result = {
                 "supermarket": supermarket,
