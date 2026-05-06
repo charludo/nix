@@ -22,6 +22,10 @@ DEFAULT_BASE_AGENT = "conversation.home_assistant"
 KEY_CONVERSATION_INTENTS = "_conversation_intents"
 KEY_CONVERSATION_LISTS = "_conversation_lists"
 KEY_CONVERSATION_EXPANSION_RULES = "_conversation_expansion_rules"
+KEY_AGENT_INSTANCES = "_agent_instances"
+
+# Diagnostic service name.
+SERVICE_DUMP_CANDIDATES = "dump_candidates"
 
 # Marker substituted in for `{slot}` placeholders during pattern expansion.
 # Matched as a wildcard during scoring; mined out for slot extraction.

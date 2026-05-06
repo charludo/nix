@@ -1,74 +1,142 @@
 # Closest Intent
 
-A standalone Home Assistant conversation agent that fuzzy-matches the
-user's text against the explicitly-defined `intent_script` patterns and
-fires the closest one.
+A Home Assistant conversation agent that wraps your existing
+conversation pipeline with **token-level fuzzy matching** for
+STT-error tolerance. When on-device speech recognition mishears
+"Pumpe an" as "pumpr an", or merges "wohn zimmer" into a single
+token, this agent recognises the closest defined intent, rebuilds a
+canonical sentence with the slot values the user actually spoke, and
+forwards it to your real conversation agent (HA's bundled one by
+default).
 
-Built for the case where on-device STT (faster-whisper, etc.) is fast
-but not 100% accurate, and full LLM fallback is overkill for a small
-closed set of voice commands.
+It's surface-level fuzz only. It will not infer "make it warmer" →
+"set thermostat to 22°C". For semantic understanding use an LLM.
+For "the user almost said one of my known phrases", use this.
+
+## When to use this
+
+- **You want low-latency, deterministic, offline voice control** over
+  a closed set of phrases (your `intent_script` patterns or
+  `custom_sentences`).
+- **Your STT pipeline is fast but lossy** — Whisper-tiny, Vosk, etc.
+  often emit slightly mangled text that Hassil's strict matcher
+  rejects.
+- **You don't want LLM-shaped costs and latency** for every utterance.
+  An LLM fallback for a closed-set match is overkill.
+
+## When *not* to use this
+
+- You need natural-language understanding ("turn it down a bit").
+  → Use HA's LLM agent (Anthropic, OpenAI, Ollama).
+- Your STT is already accurate enough that Hassil matches reliably.
+  → You don't need this layer.
+- You want intent matching against entity *aliases* you haven't yet
+  defined. Closest Intent reads HA's area/floor/entity registries to
+  power slot-value resolution but doesn't invent new vocabulary.
 
 ## How it works
 
-- Reads `conversation.intents` at YAML load time. Those become the pool
-  of candidate intents.
-- On every utterance: expand patterns (`[opt]`, `(a|b)`, `{slot}`),
-  score the user text against each candidate via RapidFuzz
-  `token_sort_ratio`, pick the highest scorer above the threshold.
-- On a match: substitute the captured slot text back into the matched
-  pattern (the canonical sentence), then forward that cleaned-up
-  sentence to the configured base agent (default: HA's bundled one).
-  HA does the rest — Hassil parsing, slot validation, intent dispatch.
-- On no match: forward the user's *original* text to the base agent
-  unchanged. The user gets the base agent's locale-aware response
-  (which might recognise the utterance, or might give a polite "I
-  don't understand").
+```
+                  user speech (STT-mangled)
+                              │
+                              ▼
+            ┌──────────────────────────────────┐
+            │ Closest Intent agent             │
+            │ ─────────────────────────────────│
+            │ 1. Expand each pattern           │
+            │    [opt] / (a|b) / {slot} /      │
+            │    <expansion_rule>              │
+            │                                  │
+            │ 2. Score user text against each  │
+            │    candidate via RapidFuzz       │
+            │                                  │
+            │ 3. Pick highest above threshold  │
+            │                                  │
+            │ 4. Extract slot values, fuzz-    │
+            │    resolve against known lists   │
+            │    (areas, floors, entity names) │
+            │                                  │
+            │ 5. Build canonical sentence      │
+            └──────────────┬───────────────────┘
+                           │ canonical text
+                           ▼
+            ┌──────────────────────────────────┐
+            │ Base conversation agent          │
+            │ (HA's bundled one by default)    │
+            │ Hassil parses → dispatches intent│
+            └──────────────────────────────────┘
+```
+
+If nothing scores above threshold, the user's original text is
+forwarded unchanged — the base agent gets a chance to handle it
+itself, and the user gets that agent's locale-appropriate "I don't
+understand" if it doesn't.
 
 ## Cascading with the default agent
 
-This is **not** a wrapper around the default agent. It's a peer.
+Closest Intent is a **peer** to HA's default conversation agent, not a
+wrapper. The recommended setup is to enable HA's
+**"Prefer handling commands locally"** toggle on the Assist pipeline:
 
-If you want HA's default agent tried first, with this acting only as a
-fallback for misrecognised speech, enable
-**"Prefer handling commands locally"** on the Assist pipeline:
+> Settings → Voice assistants → (pipeline) → Edit → Conversation
+>   agent → Prefer handling commands locally
 
-> Settings → Voice assistants → (pipeline) → Edit → Conversation agent
->   → Prefer handling commands locally
+Then:
 
-When that toggle is on:
 1. HA's default Hassil agent gets the utterance first.
 2. If it cleanly handles it (lights, areas, built-ins) → done.
-3. If it returns `NO_INTENT_MATCH` → falls through to **Closest Intent**,
+3. If it returns `NO_INTENT_MATCH` → falls through to Closest Intent,
    which fuzzy-matches your `conversation.intents` patterns.
 
-When it's off, this agent runs solo.
+If the toggle is off, this agent runs solo and is responsible for
+matching every utterance.
 
-## Why not embeddings?
+## Installation
 
-Surface-level STT errors (homophones, missing articles, swapped word
-order) are exactly what `token_sort_ratio` handles. Embedding models
-add hundreds of MB of weights and 50–200 ms of inference for a
-closed-set match — overkill.
+### HACS (recommended)
 
-## Configuration
+1. HACS → ⋮ → Custom repositories
+2. Add `https://github.com/charludo/hass-closest-intent` as
+   "Integration"
+3. Install **Closest Intent**, restart Home Assistant
+4. Settings → Devices & services → Add integration → "Closest Intent"
+5. Pick your base agent and tune the threshold; you're done.
+
+### YAML
+
+If you prefer YAML, add a `closest_intent:` block to
+`configuration.yaml`. The integration sets itself up on the next
+restart. YAML and the UI options flow coexist — UI options override
+YAML on a per-key basis.
 
 ```yaml
-# Enable the agent — patterns are read automatically from `conversation.intents`.
 closest_intent:
+  threshold: 70
+```
 
-# Your normal HA intents block; closest_intent picks them up.
+## Configuration reference
+
+| Option              | Default                          | Range / type                  | Description |
+|---------------------|----------------------------------|-------------------------------|-------------|
+| `threshold`         | `70`                             | `0`–`100`                     | Minimum similarity score (RapidFuzz `token_sort_ratio` / `partial_ratio`) for a candidate to be considered. Higher = stricter. |
+| `expansion_cap`     | `16`                             | `0` or positive int           | Max number of variants generated per pattern by `[opt]` / `(a\|b)` expansion. `0` disables expansion entirely (useful if your patterns have no alternation). |
+| `allowlist`         | `null` (= all)                   | list of intent names          | Restrict matching to these intent names. Names not in the list are ignored. |
+| `slot_extraction`   | `true`                           | bool                          | If `false`, intents containing `{slot}` placeholders are skipped — only fixed-string patterns are matched. |
+| `include_builtins`  | `false`                          | bool                          | Also fuzz-match HA's built-in intents (`HassTurnOn` etc.) from the `home_assistant_intents` package. **Costly** — the built-in pack expands to thousands of candidates per language. |
+| `base_agent`        | `conversation.home_assistant`    | conversation entity ID        | The agent to forward the canonical (post-match) sentence to. **Don't** point this at this entity itself — that loops. |
+
+## Examples
+
+### Plain pattern, no slots
+
+```yaml
 conversation:
   intents:
-    WetterHeute:
-      - "Wie ist das Wetter heute"
-      - "Wie warm ist es draußen"
     PumpeAn:
-      - "Schalte die Pumpe an"
-      - "Pumpe an"
+      - "(Aktiviere|Schalte) [die ][Wasser]Pumpe [an|ein]"
+      - "[Wasser]Pumpe an"
 
 intent_script:
-  WetterHeute:
-    speech.text: "Aktuell sind es {{ states('sensor.foo') | round(0) }} Grad."
   PumpeAn:
     action:
       - action: switch.turn_on
@@ -77,32 +145,124 @@ intent_script:
     speech.text: "Pumpe aktiviert."
 ```
 
-### Options
+User utterances that all hit `PumpeAn`:
+
+| Spoken                | What STT gave HA          | Matched? |
+|-----------------------|----------------------------|----------|
+| "Pumpe an"            | `pumpe an`                | ✓ exact  |
+| "Pumpe an"            | `pumpr an`                | ✓ fuzz (one-char typo) |
+| "Pumpe an"            | `pumpe a`                 | ✓ fuzz (truncation) |
+| "Aktiviere die Pumpe" | `aktivire die pumpe`      | ✓ fuzz |
+| "Schalte die Pumpe ein" | `schalte die wasserpumpe ein` | ✓ exact (after expansion) |
+
+### Pattern with slot, fuzz-resolved against the area registry
 
 ```yaml
-closest_intent:
-  threshold: 70                              # 0–100, higher = stricter
-  expansion_cap: 16                          # 0 disables [...] / (a|b) expansion
-  slot_extraction: true                      # best-effort slot capture
-  include_builtins: false                    # also fuzzy-match HassTurnOn, etc.
-  intents: null                              # null = all from conversation.intents;
-                                             # or a list to restrict to specific names
+conversation:
+  intents:
+    Botty_Wohnzimmer:
+      - "(Reinige|Sauge) [im|das] {area}"
 ```
 
-### Modes
+If the area registry contains `Wohnzimmer`, `Büro`, `Küche`:
 
-| You want… | Set |
-|---|---|
-| Fuzzy-match all your custom `conversation.intents` | (default — leave `intents: null`) |
-| Restrict to a few specific intent names | `intents: [WetterHeute, PumpeAn]` |
-| Also fuzzy-match HA's built-in intents (HassTurnOn, etc.) | `include_builtins: true` |
+| Spoken                  | STT gave              | Match → canonical                   |
+|-------------------------|-----------------------|-------------------------------------|
+| "Reinige das Wohnzimmer" | `reinige das wohnzma` | `reinige das wohnzimmer`           |
+| "Sauge im Büro"         | `sauge im buro`       | `sauge im büro`                    |
+| "Reinige die Küche"     | `reinige die kueche`  | `reinige die küche`                |
+
+The captured slot text (`wohnzma`, `buro`, `kueche`) is fuzz-matched
+against the area registry; the canonical sentence forwarded to the
+base agent uses the registry's exact spelling so Hassil's strict
+slot-list matcher accepts it.
+
+### Wildcard slot (`custom_sentences/`)
+
+For free-form slot values (a shopping-list item, a playlist name)
+HA's `conversation.intents` schema isn't enough — you need a wildcard
+slot list, which only `custom_sentences/` accepts.
+
+```yaml
+# custom_sentences/de/einkauf.yaml
+language: de
+intents:
+  Einkauf_Add:
+    data:
+      - sentences:
+          - "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"
+          - "{item} auf die Einkaufsliste"
+lists:
+  item:
+    wildcard: true
+```
+
+```yaml
+intent_script:
+  Einkauf_Add:
+    speech.text: '"{{ item }}" hinzugefügt.'
+    action:
+      service: todo.add_item
+      data:
+        item: "{{ item }}"
+      target:
+        entity_id: todo.shopping_list
+```
+
+| Spoken                                    | Captured slot      |
+|-------------------------------------------|--------------------|
+| "Schreib Vollmilch auf die Einkaufsliste" | `vollmilch`        |
+| "Pack Salami auf die Einkaufsliste"       | `salami`           |
+| "Tortellini auf die Einkaufsliste"        | `tortellini`       |
+| "Setze veganes Hack auf die Einkaufsliste" | `veganes hack`    |
+
+The agent strips known STT-noise prefixes (single-letter garbles,
+common 2-3-char artefacts) so `"e milch auf die einkaufsliste"` →
+`milch`, not `e milch`.
+
+## Diagnostics
+
+When something doesn't match the way you expect, call:
+
+```
+service: closest_intent.dump_candidates
+```
+
+The integration logs:
+- **INFO**: a one-line summary per loaded agent.
+- **DEBUG**: a full JSON dump of the candidate pool, per-language —
+  expansion rules, slot values from the registries, every expanded
+  candidate sentence by intent.
+
+Set the integration's logger to `debug` in `configuration.yaml`
+first:
+
+```yaml
+logger:
+  default: info
+  logs:
+    custom_components.closest_intent: debug
+```
+
+The agent also INFO-logs every match it makes
+(`pumpr an → PumpeAn (score=87, captured=[]) → forwarding pumpe an
+to conversation.home_assistant`), so you can usually see what's
+happening without the explicit dump.
+
+## Multi-language (Assist pipelines)
+
+Each Assist pipeline carries its own language. Closest Intent builds
+a separate candidate pool per language on first request, so a user
+with parallel German and English pipelines gets the right vocabulary
+for each. The matching algorithm itself is language-agnostic — only
+the candidate pool / slot vocabulary differs.
 
 ## Robustness
 
-The agent never raises out of `async_process`. If an intent fires but
-its action raises (entity doesn't exist, integration is down, etc.),
-the agent logs the failure and returns `NO_INTENT_MATCH` — the entity
-stays alive and ready for the next utterance.
+The agent never raises out of `async_process`. If matching fails
+unexpectedly, it falls through to passthrough; if forwarding to the
+base agent fails, it returns `NO_INTENT_MATCH`. The entity stays
+alive and ready for the next utterance.
 
 ## License
 

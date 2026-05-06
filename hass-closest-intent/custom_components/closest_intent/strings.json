@@ -1,8 +1,43 @@
 {
   "config": {
+    "step": {
+      "user": {
+        "title": "Closest Intent",
+        "description": "Fuzzy-match user speech against your conversation intents and forward the canonical sentence to a base conversation agent.",
+        "data": {
+          "threshold": "Match threshold (higher = stricter)",
+          "expansion_cap": "Pattern expansion cap (0 disables [...] / (a|b))",
+          "allowlist": "Limit matching to these intent names (empty = all)",
+          "slot_extraction": "Extract slot values from user speech",
+          "include_builtins": "Also fuzzy-match Home Assistant's built-in intents (HassTurnOn etc.) — large pool, slower",
+          "base_agent": "Forward canonical sentence to this conversation agent"
+        }
+      }
+    },
     "abort": {
-      "yaml_only": "Closest Intent is configured via YAML — see the README.",
       "already_configured": "Closest Intent is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Closest Intent options",
+        "description": "Tweak any setting live. If you originally configured via YAML, options set here override YAML on a per-key basis.",
+        "data": {
+          "threshold": "Match threshold (higher = stricter)",
+          "expansion_cap": "Pattern expansion cap (0 disables [...] / (a|b))",
+          "allowlist": "Limit matching to these intent names (empty = all)",
+          "slot_extraction": "Extract slot values from user speech",
+          "include_builtins": "Also fuzzy-match Home Assistant's built-in intents (HassTurnOn etc.) — large pool, slower",
+          "base_agent": "Forward canonical sentence to this conversation agent"
+        }
+      }
+    }
+  },
+  "services": {
+    "dump_candidates": {
+      "name": "Dump candidates",
+      "description": "Log the current candidate pool, expansion rules, and slot lists for every loaded Closest Intent agent."
     }
   }
 }

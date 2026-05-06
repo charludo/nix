@@ -2,43 +2,80 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Iterable
 
 from homeassistant.components import conversation
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import intent as intent_helper
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_call_later
 
-from .const import (
-    CONF_ALLOWLIST,
-    CONF_BASE_AGENT,
-    CONF_EXPANSION_CAP,
-    CONF_INCLUDE_BUILTINS,
-    CONF_SLOT_EXTRACTION,
-    CONF_THRESHOLD,
-    DEFAULT_BASE_AGENT,
-    DEFAULT_EXPANSION_CAP,
-    DEFAULT_INCLUDE_BUILTINS,
-    DEFAULT_SLOT_EXTRACTION,
-    DEFAULT_THRESHOLD,
-    DOMAIN,
-    KEY_CONVERSATION_EXPANSION_RULES,
-    KEY_CONVERSATION_INTENTS,
-    KEY_CONVERSATION_LISTS,
-)
-from .matching import (
-    Candidate,
-    Resolver,
-    build_canonical,
-    expand_pattern,
-    extract_slots,
-    find_best,
-    score,
-)
+# Importable both as part of the package and as a standalone module (tests).
+try:
+    from .const import (
+        CONF_ALLOWLIST,
+        CONF_BASE_AGENT,
+        CONF_EXPANSION_CAP,
+        CONF_INCLUDE_BUILTINS,
+        CONF_SLOT_EXTRACTION,
+        CONF_THRESHOLD,
+        DEFAULT_BASE_AGENT,
+        DEFAULT_EXPANSION_CAP,
+        DEFAULT_INCLUDE_BUILTINS,
+        DEFAULT_SLOT_EXTRACTION,
+        DEFAULT_THRESHOLD,
+        DOMAIN,
+        KEY_AGENT_INSTANCES,
+        KEY_CONVERSATION_EXPANSION_RULES,
+        KEY_CONVERSATION_INTENTS,
+        KEY_CONVERSATION_LISTS,
+    )
+    from .matching import (
+        Candidate,
+        Resolver,
+        build_canonical,
+        expand_pattern,
+        extract_slots,
+        find_best,
+        score,
+    )
+except ImportError:  # pragma: no cover
+    from const import (  # type: ignore
+        CONF_ALLOWLIST,
+        CONF_BASE_AGENT,
+        CONF_EXPANSION_CAP,
+        CONF_INCLUDE_BUILTINS,
+        CONF_SLOT_EXTRACTION,
+        CONF_THRESHOLD,
+        DEFAULT_BASE_AGENT,
+        DEFAULT_EXPANSION_CAP,
+        DEFAULT_INCLUDE_BUILTINS,
+        DEFAULT_SLOT_EXTRACTION,
+        DEFAULT_THRESHOLD,
+        DOMAIN,
+        KEY_AGENT_INSTANCES,
+        KEY_CONVERSATION_EXPANSION_RULES,
+        KEY_CONVERSATION_INTENTS,
+        KEY_CONVERSATION_LISTS,
+    )
+    from matching import (  # type: ignore
+        Candidate,
+        Resolver,
+        build_canonical,
+        expand_pattern,
+        extract_slots,
+        find_best,
+        score,
+    )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Coalesce bursts of registry updates (HA emits one event per item in a
+# bulk import) into a single rebuild.
+_REGISTRY_REBUILD_DEBOUNCE_S = 2.0
 
 
 async def async_setup_entry(
@@ -60,8 +97,37 @@ async def async_setup_entry(
         include_builtins=opt(CONF_INCLUDE_BUILTINS, DEFAULT_INCLUDE_BUILTINS),
         slot_extraction=opt(CONF_SLOT_EXTRACTION, DEFAULT_SLOT_EXTRACTION),
         base_agent_id=opt(CONF_BASE_AGENT, DEFAULT_BASE_AGENT),
+        entry_id=entry.entry_id,
     )
+    hass.data.setdefault(DOMAIN, {}).setdefault(KEY_AGENT_INSTANCES, {})[
+        entry.entry_id
+    ] = agent
+
+    # Pick up live option changes without an HA restart.
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     async_add_entities([agent])
+
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    agent: ClosestIntentAgent | None = (
+        hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {}).get(entry.entry_id)
+    )
+    if agent is None:
+        return
+    options = entry.options or {}
+    data = entry.data
+
+    def opt(key, default):
+        return options.get(key, data.get(key, default))
+
+    agent.apply_options(
+        threshold=opt(CONF_THRESHOLD, DEFAULT_THRESHOLD),
+        expansion_cap=opt(CONF_EXPANSION_CAP, DEFAULT_EXPANSION_CAP),
+        allowlist=opt(CONF_ALLOWLIST, None),
+        include_builtins=opt(CONF_INCLUDE_BUILTINS, DEFAULT_INCLUDE_BUILTINS),
+        slot_extraction=opt(CONF_SLOT_EXTRACTION, DEFAULT_SLOT_EXTRACTION),
+        base_agent_id=opt(CONF_BASE_AGENT, DEFAULT_BASE_AGENT),
+    )
 
 
 class ClosestIntentAgent(conversation.ConversationEntity):
@@ -79,6 +145,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         include_builtins: bool,
         slot_extraction: bool,
         base_agent_id: str,
+        entry_id: str,
     ) -> None:
         self.hass = hass
         self._threshold = threshold
@@ -87,8 +154,16 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         self._include_builtins = include_builtins
         self._slot_extraction = slot_extraction
         self._base_agent_id = base_agent_id
-        self._candidates: list[Candidate] = []
-        self._resolver: Resolver = Resolver()
+        self._entry_id = entry_id
+
+        # Per-language pools: built lazily on first request for that
+        # language. A user with multiple Assist pipelines in different
+        # languages gets a fresh pool for each one.
+        self._pools: dict[str, tuple[Resolver, list[Candidate]]] = {}
+        self._pool_locks: dict[str, asyncio.Lock] = {}
+        self._rebuild_handle = None  # async_call_later cancel handle
+        self._unsub_listeners: list = []
+
         self._attr_unique_id = "closest_intent_agent"
 
     @property
@@ -97,15 +172,133 @@ class ClosestIntentAgent(conversation.ConversationEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
-        # Build expansion data + candidates on a worker thread: package
-        # data IO and registry walks happen synchronously.
-        await self.hass.async_add_executor_job(self._rebuild)
+        # Pre-warm with HA's configured default language so first user
+        # utterance doesn't pay the build cost.
+        default_lang = self.hass.config.language or "en"
+        await self._async_get_pool(default_lang)
+
+        # Registry changes (areas, floors, exposed entities) invalidate
+        # the slot-value pools. Subscribe and rebuild on a debounce.
+        bus = self.hass.bus
+        for event_name in (
+            "area_registry_updated",
+            "entity_registry_updated",
+            "floor_registry_updated",
+        ):
+            self._unsub_listeners.append(
+                bus.async_listen(event_name, self._on_registry_event)
+            )
+
+    async def async_will_remove_from_hass(self) -> None:
+        for unsub in self._unsub_listeners:
+            unsub()
+        self._unsub_listeners.clear()
+        if self._rebuild_handle is not None:
+            self._rebuild_handle()
+            self._rebuild_handle = None
+        self.hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {}).pop(
+            self._entry_id, None
+        )
+        await super().async_will_remove_from_hass()
+
+    # ------------------------------------------------------------------
+    # Options live-update
+    # ------------------------------------------------------------------
+
+    def apply_options(
+        self,
+        *,
+        threshold: int,
+        expansion_cap: int,
+        allowlist: list[str] | None,
+        include_builtins: bool,
+        slot_extraction: bool,
+        base_agent_id: str,
+    ) -> None:
+        self._threshold = threshold
+        self._expansion_cap = expansion_cap
+        self._allowlist = set(allowlist) if allowlist else None
+        self._include_builtins = include_builtins
+        self._slot_extraction = slot_extraction
+        self._base_agent_id = base_agent_id
+        # Anything affecting candidate composition invalidates the pools.
+        self._pools.clear()
+
+    # ------------------------------------------------------------------
+    # Registry change → debounced rebuild
+    # ------------------------------------------------------------------
+
+    @callback
+    def _on_registry_event(self, _event) -> None:
+        if self._rebuild_handle is not None:
+            self._rebuild_handle()  # cancels the pending call
+        self._rebuild_handle = async_call_later(
+            self.hass, _REGISTRY_REBUILD_DEBOUNCE_S, self._do_debounced_rebuild
+        )
+
+    async def _do_debounced_rebuild(self, _now) -> None:
+        self._rebuild_handle = None
+        # Rebuild every language we've seen so far. New languages will
+        # still build lazily on first request.
+        languages = list(self._pools.keys())
+        self._pools.clear()
+        for lang in languages:
+            try:
+                await self._async_get_pool(lang)
+            except Exception:  # pragma: no cover
+                _LOGGER.exception("closest_intent: rebuild for %s failed", lang)
+
+    # ------------------------------------------------------------------
+    # Pool building (per language, cached, executor-offloaded)
+    # ------------------------------------------------------------------
+
+    async def _async_get_pool(self, language: str) -> tuple[Resolver, list[Candidate]]:
+        cached = self._pools.get(language)
+        if cached is not None:
+            return cached
+        lock = self._pool_locks.setdefault(language, asyncio.Lock())
+        async with lock:
+            cached = self._pools.get(language)
+            if cached is not None:
+                return cached
+            pool = await self.hass.async_add_executor_job(self._build_pool, language)
+            self._pools[language] = pool
+            return pool
+
+    def _build_pool(self, language: str) -> tuple[Resolver, list[Candidate]]:
+        custom_docs = self._load_custom_sentences(language)
+        resolver = self._build_resolver(language, custom_docs)
+        intents = self._gather_intents(language, custom_docs)
+
+        candidates: list[Candidate] = []
+        for intent_name, patterns in intents.items():
+            for idx, pat in enumerate(patterns):
+                for text, slot_names in expand_pattern(
+                    pat, self._expansion_cap, resolver=resolver
+                ):
+                    candidates.append(
+                        Candidate(
+                            intent=intent_name,
+                            pattern_idx=idx,
+                            text=text,
+                            slot_names=slot_names,
+                        )
+                    )
+
+        _LOGGER.info(
+            "closest_intent[%s]: built %d candidates across %d intents (builtins=%s)",
+            language,
+            len(candidates),
+            len(intents),
+            self._include_builtins,
+        )
+        return (resolver, candidates)
 
     # ------------------------------------------------------------------
     # Resolver building
     # ------------------------------------------------------------------
 
-    def _load_custom_sentences(self) -> list[dict]:
+    def _load_custom_sentences(self, language: str) -> list[dict]:
         """Walk ``<configDir>/custom_sentences/<language>/*.yaml`` and load each.
 
         Files written by ``hass.voice.custom_sentences`` (or hand-placed
@@ -121,7 +314,6 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             _LOGGER.debug("PyYAML not importable; skipping custom_sentences")
             return []
 
-        language = self.hass.config.language or "en"
         base = self.hass.config.path("custom_sentences", language)
         if not os.path.isdir(base):
             return []
@@ -141,7 +333,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 docs.append(doc)
         return docs
 
-    def _build_resolver(self, custom_docs: list[dict]) -> Resolver:
+    def _build_resolver(self, language: str, custom_docs: list[dict]) -> Resolver:
         """Pre-compute expansion-rule expansions + slot-list values.
 
         Two sources, merged into one ``Resolver``:
@@ -157,8 +349,6 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         """
         resolver = Resolver()
 
-        language = self.hass.config.language or "en"
-
         # ---- Source A: Hassil static data ---------------------------------
         try:
             from home_assistant_intents import get_intents  # type: ignore
@@ -168,14 +358,23 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 TextSlotList,
             )
             from hassil.sample import sample_expression  # type: ignore
-        except ImportError:
-            _LOGGER.debug("hassil/home_assistant_intents not importable; resolver stays empty")
-            return resolver
 
-        try:
-            raw = get_intents(language)
-        except Exception:  # pragma: no cover
-            raw = None
+            hassil_available = True
+        except ImportError:
+            _LOGGER.debug("hassil/home_assistant_intents not importable; skipping language pack")
+            hassil_available = False
+            get_intents = None  # type: ignore
+            Intents = None  # type: ignore
+            RangeSlotList = None  # type: ignore
+            TextSlotList = None  # type: ignore
+            sample_expression = None  # type: ignore
+
+        raw = None
+        if hassil_available:
+            try:
+                raw = get_intents(language)  # type: ignore[misc]
+            except Exception:  # pragma: no cover
+                raw = None
 
         # Layer the user's `conversation.lists` / `conversation.expansion_rules`
         # on top of the language pack's defaults. Custom lists / rules referenced
@@ -198,9 +397,9 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             raw.setdefault("intents", {})
             raw.setdefault("language", language)
 
-        if raw:
+        if hassil_available and raw:
             try:
-                intents = Intents.from_dict(raw)
+                intents = Intents.from_dict(raw)  # type: ignore[union-attr]
             except Exception:  # pragma: no cover
                 _LOGGER.exception("closest_intent: failed to parse intents for %s", language)
                 intents = None
@@ -269,8 +468,9 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         except Exception:
             _LOGGER.debug("closest_intent: failed to read entity registry", exc_info=True)
 
-        _LOGGER.info(
-            "closest_intent: resolver has %d expansion rules, %d slot lists",
+        _LOGGER.debug(
+            "closest_intent[%s]: resolver has %d expansion rules, %d slot lists",
+            language,
             len(resolver.expansion_rules),
             len(resolver.slot_values),
         )
@@ -280,7 +480,9 @@ class ClosestIntentAgent(conversation.ConversationEntity):
     # Candidate building
     # ------------------------------------------------------------------
 
-    def _gather_intents(self, custom_docs: list[dict]) -> dict[str, list[str]]:
+    def _gather_intents(
+        self, language: str, custom_docs: list[dict]
+    ) -> dict[str, list[str]]:
         gathered: dict[str, list[str]] = {}
 
         conv_intents = self.hass.data.get(DOMAIN, {}).get(KEY_CONVERSATION_INTENTS, {})
@@ -302,7 +504,6 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             try:
                 from home_assistant_intents import get_intents  # type: ignore
 
-                language = self.hass.config.language or "en"
                 builtin = get_intents(language) or {}
                 for name, payload in (builtin.get("intents") or {}).items():
                     if name in gathered:
@@ -323,34 +524,6 @@ class ClosestIntentAgent(conversation.ConversationEntity):
 
         return gathered
 
-    def _rebuild(self) -> None:
-        """Build the resolver, then expand intent patterns into candidates."""
-        custom_docs = self._load_custom_sentences()
-        self._resolver = self._build_resolver(custom_docs)
-        self._candidates.clear()
-        intents = self._gather_intents(custom_docs)
-
-        for intent_name, patterns in intents.items():
-            for idx, pat in enumerate(patterns):
-                for text, slot_names in expand_pattern(
-                    pat, self._expansion_cap, resolver=self._resolver
-                ):
-                    self._candidates.append(
-                        Candidate(
-                            intent=intent_name,
-                            pattern_idx=idx,
-                            text=text,
-                            slot_names=slot_names,
-                        )
-                    )
-
-        _LOGGER.info(
-            "closest_intent: built %d candidates across %d intents (builtins=%s)",
-            len(self._candidates),
-            len(intents),
-            self._include_builtins,
-        )
-
     # ------------------------------------------------------------------
     # async_process
     # ------------------------------------------------------------------
@@ -358,8 +531,19 @@ class ClosestIntentAgent(conversation.ConversationEntity):
     async def async_process(
         self, user_input: conversation.ConversationInput
     ) -> conversation.ConversationResult:
+        # `user_input.language` reflects the Assist pipeline's language;
+        # fall back to HA's configured default if the caller left it blank.
+        language = user_input.language or self.hass.config.language or "en"
         try:
-            canonical = self._best_canonical(user_input)
+            resolver, candidates = await self._async_get_pool(language)
+        except Exception:  # pragma: no cover
+            _LOGGER.exception(
+                "closest_intent: failed to build pool for language %s", language
+            )
+            resolver, candidates = Resolver(), []
+
+        try:
+            canonical = self._best_canonical(user_input, resolver, candidates)
         except Exception:  # pragma: no cover
             _LOGGER.exception(
                 "closest_intent: unexpected error matching %r", user_input.text
@@ -384,9 +568,12 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             return _no_match(user_input)
 
     def _best_canonical(
-        self, user_input: conversation.ConversationInput
+        self,
+        user_input: conversation.ConversationInput,
+        resolver: Resolver,
+        candidates: list[Candidate],
     ) -> str | None:
-        match = find_best(user_input.text, self._candidates, self._threshold)
+        match = find_best(user_input.text, candidates, self._threshold)
         if match is None:
             _LOGGER.debug(
                 "closest_intent: no match for %r above %d, passthrough",
@@ -410,7 +597,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 # same intent in descending score order and pick the
                 # first one whose fixed parts genuinely align.
                 fallback = self._best_extractable_sibling(
-                    user_input.text, candidate.intent
+                    user_input.text, candidate.intent, candidates
                 )
                 if fallback is None:
                     _LOGGER.debug(
@@ -423,7 +610,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         else:
             captured = []
 
-        canonical = build_canonical(candidate, captured, resolver=self._resolver)
+        canonical = build_canonical(candidate, captured, resolver=resolver)
         _LOGGER.info(
             "closest_intent: %r → %s (score=%d, captured=%s) → forwarding %r to %s",
             user_input.text,
@@ -436,12 +623,15 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         return canonical
 
     def _best_extractable_sibling(
-        self, user_text: str, intent_name: str
+        self,
+        user_text: str,
+        intent_name: str,
+        candidates: list[Candidate],
     ) -> tuple[Candidate, list[str], int] | None:
         """Among same-intent expansions, return the highest-scoring one
         whose slots actually extract."""
         scored: list[tuple[int, Candidate]] = []
-        for c in self._candidates:
+        for c in candidates:
             if c.intent != intent_name or not c.has_slots:
                 continue
             scored.append((score(user_text, c.text), c))
@@ -453,6 +643,38 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             if captured is not None:
                 return (c, captured, s)
         return None
+
+    # ------------------------------------------------------------------
+    # Diagnostic dump
+    # ------------------------------------------------------------------
+
+    def dump_state(self) -> dict:
+        """Return a plain-data snapshot of pools for the diagnostic service."""
+        out: dict = {
+            "entry_id": self._entry_id,
+            "threshold": self._threshold,
+            "expansion_cap": self._expansion_cap,
+            "include_builtins": self._include_builtins,
+            "slot_extraction": self._slot_extraction,
+            "base_agent_id": self._base_agent_id,
+            "allowlist": sorted(self._allowlist) if self._allowlist else None,
+            "languages": {},
+        }
+        for lang, (resolver, candidates) in self._pools.items():
+            by_intent: dict[str, list[str]] = {}
+            for c in candidates:
+                by_intent.setdefault(c.intent, []).append(c.text)
+            out["languages"][lang] = {
+                "candidate_count": len(candidates),
+                "intents": by_intent,
+                "expansion_rules": {
+                    k: v for k, v in resolver.expansion_rules.items()
+                },
+                "slot_values": {
+                    k: v for k, v in resolver.slot_values.items()
+                },
+            }
+        return out
 
 
 # ---------------------------------------------------------------------------

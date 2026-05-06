@@ -11,13 +11,14 @@ phrase exactly.
 
 from __future__ import annotations
 
+import json
 import logging
 
 import voluptuous as vol
 
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
@@ -34,9 +35,11 @@ from .const import (
     DEFAULT_SLOT_EXTRACTION,
     DEFAULT_THRESHOLD,
     DOMAIN,
+    KEY_AGENT_INSTANCES,
     KEY_CONVERSATION_EXPANSION_RULES,
     KEY_CONVERSATION_INTENTS,
     KEY_CONVERSATION_LISTS,
+    SERVICE_DUMP_CANDIDATES,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,6 +96,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         conv.get("expansion_rules") or {}
     )
 
+    _async_register_services(hass)
+
     if DOMAIN not in config:
         return True
 
@@ -119,3 +124,53 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
+
+
+# ---------------------------------------------------------------------------
+# Diagnostic service
+# ---------------------------------------------------------------------------
+
+
+def _async_register_services(hass: HomeAssistant) -> None:
+    """Register the developer-facing dump_candidates service.
+
+    Called once during ``async_setup``; the service is a no-op until
+    at least one config entry has been loaded.
+    """
+    if hass.services.has_service(DOMAIN, SERVICE_DUMP_CANDIDATES):
+        return
+
+    async def _dump(call: ServiceCall) -> None:
+        agents = (
+            hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {})
+        )
+        if not agents:
+            _LOGGER.warning(
+                "closest_intent.dump_candidates: no agent instances registered yet"
+            )
+            return
+
+        for entry_id, agent in agents.items():
+            state = agent.dump_state()
+            # Pretty-print at DEBUG so users can paste a single block when
+            # filing issues. INFO line is a one-liner pointer.
+            _LOGGER.info(
+                "closest_intent.dump_candidates[%s]: %d candidate(s) across %d language(s); see DEBUG for details",
+                entry_id,
+                sum(
+                    lang_state["candidate_count"]
+                    for lang_state in state["languages"].values()
+                ),
+                len(state["languages"]),
+            )
+            try:
+                pretty = json.dumps(state, indent=2, ensure_ascii=False)
+            except Exception:  # pragma: no cover
+                pretty = repr(state)
+            _LOGGER.debug(
+                "closest_intent.dump_candidates[%s] full state:\n%s",
+                entry_id,
+                pretty,
+            )
+
+    hass.services.async_register(DOMAIN, SERVICE_DUMP_CANDIDATES, _dump)
