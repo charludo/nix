@@ -236,6 +236,86 @@ def _normalise(s: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+# Slot patterns: how far from the relevant edge of the user text a
+# fixed anchor is allowed to land before we start charging penalty.
+# One token of leading STT-noise is fine (``"ähm setze brot..."``);
+# beyond that, the candidate's fixed prefix doesn't actually anchor
+# the user phrase and we must downscore.
+_ANCHOR_NOISE_TOLERANCE_TOKENS = 1
+# Penalty per misaligned token. Two extra tokens before/after a fixed
+# anchor enough to push a 100-scoring candidate below the default 70
+# threshold.
+_ANCHOR_MISALIGN_PENALTY_PER_TOKEN = 25
+# When a non-empty leading/trailing anchor doesn't appear in user text
+# at all (no alignment passes this score), candidate is structurally
+# wrong: charge a flat penalty equivalent to ~2 misaligned tokens.
+_ANCHOR_ABSENT_PENALTY = 50
+_ANCHOR_ALIGNMENT_MIN_SCORE = 60
+
+
+def _anchor_offset_tokens(
+    anchor: str, user_norm: str, *, from_end: bool
+) -> int | None:
+    """Return token count between ``anchor``'s alignment and the
+    relevant edge of ``user_norm``, or ``None`` if no usable alignment.
+
+    ``from_end=False`` measures tokens before the anchor (leading anchor
+    case); ``from_end=True`` measures tokens after the anchor's end
+    (trailing anchor case).
+    """
+    if not anchor:
+        return 0
+    if not user_norm:
+        return None
+    align = fuzz.partial_ratio_alignment(anchor, user_norm)
+    if align is None or align.score < _ANCHOR_ALIGNMENT_MIN_SCORE:
+        return None
+    if from_end:
+        tail = user_norm[align.dest_end :]
+        return len(tail.split())
+    head = user_norm[: align.dest_start]
+    return len(head.split())
+
+
+def _anchor_penalty(parts: list[str], user_norm: str) -> int:
+    """Sum of edge-anchor misalignment penalties for a slot pattern.
+
+    A pattern like ``"einkaufsliste {item}"`` requires "einkaufsliste"
+    at (or very near) the start of user input. If it lands several
+    tokens deep (``"füge dosenmais zur einkaufsliste hinzu"`` —
+    "einkaufsliste" sits at token 4 of 5), the candidate doesn't
+    actually fit the user text shape, even though the substring is
+    present and ``partial_ratio`` happily scores 100.
+
+    Same idea at the trailing edge for ``"{item} auf die Einkaufsliste"``.
+
+    Patterns with a slot at the boundary (empty leading/trailing fixed
+    text) are unconstrained at that edge, since the slot can soak up
+    arbitrary content there.
+    """
+    leading = parts[0].strip() if parts else ""
+    trailing = parts[-1].strip() if len(parts) > 1 else ""
+    penalty = 0
+
+    if leading:
+        offset = _anchor_offset_tokens(leading, user_norm, from_end=False)
+        if offset is None:
+            penalty += _ANCHOR_ABSENT_PENALTY
+        else:
+            extra = max(0, offset - _ANCHOR_NOISE_TOLERANCE_TOKENS)
+            penalty += extra * _ANCHOR_MISALIGN_PENALTY_PER_TOKEN
+
+    if trailing:
+        offset = _anchor_offset_tokens(trailing, user_norm, from_end=True)
+        if offset is None:
+            penalty += _ANCHOR_ABSENT_PENALTY
+        else:
+            extra = max(0, offset - _ANCHOR_NOISE_TOLERANCE_TOKENS)
+            penalty += extra * _ANCHOR_MISALIGN_PENALTY_PER_TOKEN
+
+    return penalty
+
+
 def score(user_text: str, candidate_text: str) -> int:
     """Similarity 0..100 with the slot wildcard ignored.
 
@@ -247,11 +327,16 @@ def score(user_text: str, candidate_text: str) -> int:
       (e.g. ``"shuffl an"`` ↔ ``"shuffle an"``).
 
     - **With slots**: ``partial_ratio`` on the candidate's *fixed parts*
-      against the full user text. Finds the best contiguous window of
-      the fixed parts within the user input, so whatever the user said
-      in the slot position(s) doesn't drag the score down. Critical when
-      the slot value is multi-token (``"Wohn Zimmern"``) or has typos in
-      the fixed parts (``"tst zwei im Wohnzimmer"``).
+      against the full user text, minus an edge-anchor misalignment
+      penalty (see ``_anchor_penalty``). Finds the best contiguous window
+      of the fixed parts within the user input — but rejects matches
+      where the leading/trailing fixed anchor doesn't actually sit at
+      the corresponding edge of the user phrase. Critical when the slot
+      value is multi-token (``"Wohn Zimmern"``) or has typos in the
+      fixed parts (``"tst zwei im Wohnzimmer"``), and prevents a
+      structurally-wrong candidate (``"einkaufsliste {item}"`` matched
+      against ``"füge X zur einkaufsliste hinzu"``) from winning by
+      virtue of its short fixed string substring-matching anywhere.
     """
     user_norm = _normalise(user_text)
     cand_stripped = re.sub(
@@ -261,7 +346,10 @@ def score(user_text: str, candidate_text: str) -> int:
     if SLOT_WILDCARD in candidate_text:
         if not cand_stripped:
             return 0
-        return int(fuzz.partial_ratio(user_norm, cand_stripped))
+        base = int(fuzz.partial_ratio(user_norm, cand_stripped))
+        parts = candidate_text.split(SLOT_WILDCARD)
+        penalty = _anchor_penalty(parts, user_norm)
+        return max(0, base - penalty)
 
     return int(fuzz.token_sort_ratio(user_norm, cand_stripped))
 

@@ -422,3 +422,129 @@ def test_resolver_canonicalises_typo_d_area() -> None:
     assert captured is not None
     canonical = build_canonical(match[0], captured, resolver=resolver)
     assert canonical == "test zwei im wohnzimmer"
+
+
+# ---------------------------------------------------------------------------
+# Regression — real-world misfires reported by users
+# ---------------------------------------------------------------------------
+
+
+def _full_einkauf_todo_pool() -> list[Candidate]:
+    """Both the Einkauf and ToDo intent groups in one pool — needed to
+    reproduce reports where the wrong pattern wins across intents."""
+    patterns = {
+        "Einkauf_Add": [
+            "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste",
+            "{item} auf die Einkaufsliste",
+            "Einkaufsliste {item}",
+            "Füge {item} zur Einkaufsliste hinzu",
+        ],
+        "ToDo_Add": [
+            "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste",
+            "{item} auf die ToDo-Liste",
+            "ToDo-Liste {item}",
+        ],
+    }
+    out: list[Candidate] = []
+    for intent_name, pats in patterns.items():
+        for idx, pat in enumerate(pats):
+            for text, slots in expand_pattern(pat, EXPANSION_CAP):
+                out.append(
+                    Candidate(
+                        intent=intent_name,
+                        pattern_idx=idx,
+                        text=text,
+                        slot_names=slots,
+                    )
+                )
+    return out
+
+
+def _agent_match(
+    user: str, candidates: list[Candidate]
+) -> tuple[str, list[str]] | None:
+    """Mimic the agent's full match → extract → fallback flow without
+    booting the conversation entity. Returns (intent, captured) or None."""
+    match = find_best(user, candidates, threshold=THRESHOLD)
+    if match is None:
+        return None
+    candidate, _ = match
+    if not candidate.has_slots:
+        return (candidate.intent, [])
+    captured = extract_slots(user, candidate)
+    if captured is None:
+        # walk same-intent siblings in score order until one extracts
+        scored = sorted(
+            ((c, find_best(user, [c], 0)[1]) for c in candidates  # type: ignore
+             if c.intent == candidate.intent and c.has_slots),
+            key=lambda kv: -kv[1],
+        )
+        for c, s in scored:
+            if s < THRESHOLD:
+                break
+            captured = extract_slots(user, c)
+            if captured is not None:
+                candidate = c
+                break
+        else:
+            return None
+    return (candidate.intent, captured)
+
+
+def test_regression_tudu_liste_does_not_capture_short_alternation() -> None:
+    """Bug: 'Setze Arzt anrufen auf meine Tudu-Liste' resolved to ToDo
+    with item='tu', because the short ``tu`` alternation in
+    ``(setze|pack|tu|schreib)`` aligned its 2-char prefix to the ``tu``
+    *inside* "Tudu-Liste" and out-scored the structurally-correct
+    ``setze`` expansion via ``partial_ratio``. The anchor penalty makes
+    a leading ``tu`` that isn't actually at the start of user text
+    cost more than the score it gains."""
+    user = "setze arzt anrufen auf meine tudu-liste"
+    result = _agent_match(user, _full_einkauf_todo_pool())
+    assert result is not None
+    intent, captured = result
+    assert intent == "ToDo_Add", f"matched wrong intent: {intent}"
+    assert captured == ["arzt anrufen"], f"bad capture: {captured!r}"
+
+
+def test_regression_setze_dosenmais_einkaufsliste_variants() -> None:
+    """Bug: 'Setze Dosenmais auf meine Einkaufsliste' (and STT variants
+    'meiner einkaufsliste', 'meiner einkauflöste') previously got
+    NO_INTENT_MATCH because ``Einkaufsliste {item}`` scored 100 via
+    substring partial_ratio, captured an empty slot, and produced a
+    canonical that the base agent rejected. The anchor penalty
+    reduces ``Einkaufsliste {item}`` (whose leading anchor sits 4
+    tokens deep in the user text) below threshold, letting the
+    structurally-correct ``setze {item} auf meine einkaufsliste``
+    expansion win."""
+    pool = _full_einkauf_todo_pool()
+    for user in [
+        "setze dosenmais auf meine einkaufsliste",
+        "setze dosenmais auf meiner einkaufsliste",
+        "setze dosenmais auf meiner einkauflöste",
+    ]:
+        result = _agent_match(user, pool)
+        assert result is not None, f"no match for {user!r}"
+        intent, captured = result
+        assert intent == "Einkauf_Add", (
+            f"{user!r}: matched wrong intent {intent}"
+        )
+        assert captured == ["dosenmais"], (
+            f"{user!r}: bad capture {captured!r}"
+        )
+
+
+def test_regression_fuege_hinzu_does_not_match_einkaufsliste_only() -> None:
+    """Bug: 'Füge Dosenmais zur Einkaufsliste hinzu' added 'hinzu' to
+    the shopping list because ``Einkaufsliste {item}`` matched at 100
+    via substring partial_ratio and captured the trailing ``hinzu``
+    as the slot. The anchor penalty rejects that candidate (its
+    leading anchor sits 3 tokens deep) and the proper
+    ``Füge {item} zur Einkaufsliste hinzu`` pattern wins, capturing
+    'dosenmais'."""
+    user = "füge dosenmais zur einkaufsliste hinzu"
+    result = _agent_match(user, _full_einkauf_todo_pool())
+    assert result is not None
+    intent, captured = result
+    assert intent == "Einkauf_Add"
+    assert captured == ["dosenmais"], f"bad capture: {captured!r}"
