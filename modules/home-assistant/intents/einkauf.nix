@@ -36,7 +36,7 @@
 
   hass.voice.intent_scripts = {
     Einkauf_Add = {
-      speech.text = "{{ item }} ist auf der Einkaufsliste.";
+      speech.text = ''"{{ item }}" hinzugefügt.'';
       action = {
         service = "todo.add_item";
         data.item = "{{ item }}";
@@ -44,7 +44,7 @@
       };
     };
     ToDo_Add = {
-      speech.text = "{{ item }} ist auf der ToDo-Liste.";
+      speech.text = ''"{{ item }}" hinzugefügt.'';
       action = {
         service = "todo.add_item";
         data.item = "{{ item }}";

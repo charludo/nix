@@ -123,8 +123,7 @@ in
     ];
     WDR_Aktuell = [
       "(Spiele|Spiel|Starte) WDR (Aktuell|aktuell)"
-      "WDR (Aktuell|aktuell)"
-      "WDR Nachrichten"
+      "WDR (Aktuell|Nachrichten)"
     ];
     Nachrichten = [
       "(Spiele|Spiel|Starte) [die ]Nachrichten"
@@ -136,18 +135,18 @@ in
   hass.voice.intent_scripts = {
     Tagesschau = {
       action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "play") ];
-      speech.text = "Spiele Tagesschau.";
+      speech.text = "VOn der Tagesschau.";
     };
     WDR_Aktuell = {
       action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "play") ];
-      speech.text = "Spiele WDR Aktuell.";
+      speech.text = "Von WDR Aktuell.";
     };
     Nachrichten = {
       action = prepare ++ [
         (playLocal "tagesschau_100s.mp3" "play")
         (playLocal "wdr_aktuell.mp3" "add")
       ];
-      speech.text = "Spiele Nachrichten.";
+      speech.text = "Hier ist deine tägliche Zusammenfassung.";
     };
   };
 }

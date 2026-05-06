@@ -36,24 +36,27 @@ in
     ];
     Botty_Ende = [
       "(Beende|Stoppe) [die ]Reinigung"
-      "Reinigung (beenden|stoppen|fertig)"
-      "Botty (zurück|nach Hause|zur Basis|fertig)"
+      "Reinigung (beenden|stoppen)"
+      "Botty (zurück|nach Hause|zur Basis|stop)"
     ];
     Botty_Wohnzimmer = [
       "(Reinige|Sauge) [im|das] Wohnzimmer"
+      "Botty [ins] Wohnzimmer"
       "Wohnzimmer (reinigen|saugen)"
     ];
     Botty_Buero = [
-      "(Reinige|Sauge) [im|das] Büro"
-      "Büro (reinigen|saugen)"
+      "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
+      "Botty [ins] (Büro|Arbeitszimmer)"
+      "(Büro|Arbeitszimmer) (reinigen|saugen)"
     ];
     Botty_Kueche = [
       "(Reinige|Sauge) [in der|die] Küche"
+      "Botty [in die] Küche"
       "Küche (reinigen|saugen)"
     ];
     Botty_Sofa = [
-      "(Reinige|Sauge) [vor|unter|am] [dem] Sofa"
-      "Sofa (reinigen|saugen)"
+      "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
+      "[Botty] [vorm|vor dem] [Sofa|Fernseher] (reinigen|saugen)"
     ];
   };
 
@@ -64,7 +67,7 @@ in
     };
     Botty_Ende = {
       action = [ { action = e.script.botty_zurueckkehren; } ];
-      speech.text = "Botty kehrt zurück.";
+      speech.text = "Reinigung beendet.";
     };
     Botty_Wohnzimmer = {
       action = cleanRoom rooms.Wohnzimmer;

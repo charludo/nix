@@ -1,4 +1,4 @@
-{ lib, config, ... }:
+{ config, ... }:
 let
   e = config.hass.entities;
 in
@@ -6,11 +6,11 @@ in
   hass.voice.intents = {
     PumpeAn = [
       "(Aktiviere|Schalte) [die ][Wasser]Pumpe [an|ein]"
-      "Pumpe an"
+      "[Wasser]Pumpe an"
     ];
     PumpeAus = [
       "(Deaktiviere|Schalte) [die ][Wasser]Pumpe (aus|ab)"
-      "Pumpe aus"
+      "[Wasser]Pumpe aus"
     ];
   };
 

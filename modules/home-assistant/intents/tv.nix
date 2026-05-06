@@ -2,18 +2,12 @@
 {
   hass.voice.intents = {
     TV_Hell = [
-      "(Mache|Setze|Stelle) (den TV|den Fernseher|das Bild) hell"
-      "(TV|Fernseher|Bild|Bildschirm) hell"
-      "(Mache|Stelle) (TV|Fernseher) heller"
-      "(Mache|Stelle) (TV|Fernseher) auf Tag"
-      "Tagmodus"
+      "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) hell[er]"
+      "[Fernseher] Tagmodus"
     ];
     TV_Dunkel = [
-      "(Mache|Setze|Stelle) (den TV|den Fernseher|das Bild) dunkel"
-      "(TV|Fernseher|Bild|Bildschirm) dunkel"
-      "(Mache|Stelle) (TV|Fernseher) dunkler"
-      "(Mache|Stelle) (TV|Fernseher) auf Nacht"
-      "(Nachtmodus|Kinomodus)"
+      "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) (dunkel|dunkler)"
+      "[Fernseher] Nachtmodus"
     ];
   };
 

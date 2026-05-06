@@ -34,29 +34,31 @@ in
       "Was ist die Höchsttemperatur heute"
     ];
     RegenHeute = [
-      "Regnet es [heute|noch heute]"
+      "Regnet es [heute|heute noch]"
       "Wird es heute regnen"
+      "Gibt es heute Regen"
     ];
     RegenStunde = [
       "Regnet es um {timer_hours:hours} Uhr"
       "Wird es um {timer_hours:hours} Uhr regnen"
+      "Gibt es um {timer_hours:hours} Uhr Regen"
     ];
   };
 
   hass.voice.intent_scripts = {
     WetterHeute.speech.text = ''
-      Aktuell sind es {{ states('${s.openweathermap_temperatur}') | round(0) }} Grad draußen, gefühlt {{ states('${s.openweathermap_gefuhlte_temperatur}') | round(0) }}.
+      Aktuell sind es draußen {{ (states('${s.openweathermap_temperatur}') | float | round(1) | string).replace('.', ',') }} Grad, gefühlt {{ states('${s.openweathermap_gefuhlte_temperatur}') | float | round(0) | int }} Grad.
     '';
 
     WetterMorgen.speech.text = ''
       {% set f = state_attr('${w}', 'forecast')[1] %}
-      Morgen werden es {{ f.temperature | round(0) }} Grad mit einer Tiefsttemperatur von {{ f.templow | round(0) }} Grad. Niederschlag: {{ f.precipitation | default(0) }} Millimeter.
+      Morgen werden es {{ (f.temperature | float | round(1) | string).replace('.', ',') }} Grad mit einer Tiefsttemperatur von {{ (f.templow | float | round(1) | string).replace('.', ',') }} Grad. Niederschlag: {{ (f.precipitation | float | round(1) | string).replace('.', ',') }} Millimeter.
     '';
 
     WetterWoche.speech.text = ''
       {% set f = state_attr('${w}', 'forecast') %}
       {% for d in f[:7] -%}
-        {{ as_timestamp(d.datetime) | timestamp_custom('%A') }}: {{ d.temperature | round(0) }} Grad, Tief {{ d.templow | round(0) }}.
+        {{ as_timestamp(d.datetime) | timestamp_custom('%A') }}: {{ (f.templow | float | round(1) | string).replace('.', ',') }} bis {{ (f.temperature | float | round(1) | string).replace('.', ',') }} Grad..
       {% endfor %}
     '';
 
@@ -75,7 +77,7 @@ in
         {% set match = entries | selectattr('datetime', 'match', '.*T' ~ '%02d' | format(h) ~ ':') | list %}
         {% if match %}
           {% set m = match[0] %}
-          Um {{ h }} Uhr werden es {{ m.temperature | round(0) }} Grad bei {{ m.condition }}, Niederschlag {{ m.precipitation | default(0) }} Millimeter mit {{ m.precipitation_probability | default(0) }} Prozent Wahrscheinlichkeit.
+          Um {{ h }} Uhr werden es {{ (m.temperature | float | round(1) | string).replace('.', ',') }} Grad bei {{ m.condition }}, Niederschlag {{ m.precipitation | default(0) }} Millimeter mit {{ m.precipitation_probability | default(0) }} Prozent Wahrscheinlichkeit.
         {% else %}
           Für {{ h }} Uhr habe ich keine Vorhersage.
         {% endif %}
@@ -83,25 +85,25 @@ in
     };
 
     WindAktuell.speech.text = ''
-      Aktuell weht der Wind mit {{ states('${s.openweathermap_windgeschwindigkeit}') }} Kilometer pro Stunde, mit Böen bis {{ states('${s.openweathermap_windboengeschwindigkeit}') }}.
+      Aktuell weht der Wind mit {{ (states('${s.openweathermap_windgeschwindigkeit}') | float | round(1) | string).replace('.', ',') }} Kilometer pro Stunde, bei Böen bis {{ (states('${s.openweathermap_windboengeschwindigkeit}') | float | round(1) | string).replace('.', ',') }}.
     '';
 
     WindHeuteNacht.speech.text = ''
       {% set f = state_attr('${w}', 'forecast')[0] %}
-      Heute Nacht etwa {{ f.wind_speed | default(0) | round(0) }} Kilometer pro Stunde.
+      Heute Nacht etwa {{ (f.wind_speed | default(0) | float | round(0) | string).replace('.', ',') }} Kilometer pro Stunde.
     '';
 
     TemperaturMaxHeute.speech.text = ''
       {% set f = state_attr('${w}', 'forecast')[0] %}
-      Heute werden es bis zu {{ f.temperature | round(0) }} Grad bei einer Tiefsttemperatur von {{ f.templow | round(0) }}.
+      Heute werden es bis zu {{ (f.temperature | float | round(1) | string).replace('.', ',') }} Grad bei einer Tiefsttemperatur von {{ (f.templow | float | round(1) | string).replace('.', ',') }}.
     '';
 
     RegenHeute.speech.text = ''
       {% set f = state_attr('${w}', 'forecast')[0] %}
-      {% set p = f.precipitation | default(0) %}
-      {% set prob = f.precipitation_probability | default(0) %}
+      {% set p = (f.precipitation | default(0) | float | round(0) | string).replace('.', ',') %}
+      {% set prob = (f.precipitation_probability | default(0) | float | round(0) | string).replace('.', ',') %}
       {% if p > 0 or prob > 30 %}
-        Heute sind {{ p }} Millimeter Regen mit {{ prob }} Prozent Wahrscheinlichkeit erwartet.
+        Heute sind {{ p }} Millimeter Regen mit einer Wahrscheinlichkeit von {{ prob }} Prozent erwartet.
       {% else %}
         Heute regnet es voraussichtlich nicht.
       {% endif %}
@@ -122,8 +124,8 @@ in
         {% set match = entries | selectattr('datetime', 'match', '.*T' ~ '%02d' | format(h) ~ ':') | list %}
         {% if match %}
           {% set m = match[0] %}
-          {% set p = m.precipitation | default(0) %}
-          {% set prob = m.precipitation_probability | default(0) %}
+          {% set p = (m.precipitation | default(0) | float | round(0) | string).replace('.', ',') %}
+          {% set prob = (m.precipitation_probability | default(0) | float | round(0) | string).replace('.', ',') %}
           Um {{ h }} Uhr: {{ p }} Millimeter Regen mit {{ prob }} Prozent Wahrscheinlichkeit.
         {% else %}
           Für {{ h }} Uhr habe ich keine Regenvorhersage.

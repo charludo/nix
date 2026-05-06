@@ -13,8 +13,8 @@ let
   mkIntent = areaName: _: {
     name = intentName areaName;
     value = [
-      "Wie (warm ist es|ist die Temperatur) im ${areaName}"
-      "Welche Temperatur (haben wir|ist) im ${areaName}"
+      "Wie (warm ist es|ist die Temperatur|feucht ist es) im ${areaName}"
+      "Welche [Temperatur|Luftfeuchtigkeit] (haben wir|ist) im ${areaName}"
       "Wie ist das Klima im ${areaName}"
     ];
   };
@@ -22,7 +22,7 @@ let
   mkScript = areaName: area: {
     name = intentName areaName;
     value.speech.text = ''
-      Im ${areaName} sind es {{ states('${area.temperatureEntity}') | round(1) }} Grad bei {{ states('${area.humidityEntity}') | round(0) }} Prozent Luftfeuchtigkeit.
+      Im ${areaName} sind es {{ (states('${area.temperatureEntity}') | float | round(1) | string).replace('.', ',') }} Grad bei {{ states('${area.humidityEntity}') | float | round(0) | int }} Prozent Luftfeuchtigkeit.
     '';
   };
 in

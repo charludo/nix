@@ -46,7 +46,7 @@ in
       "Zufallswiedergabe (aus|ab|deaktivieren)"
     ];
     PlayerNeustart = [
-      "(Player|Spieler) (neu starten|neustarten|resetten)"
+      "(Player|Spieler|Sonos) (neu starten|neustarten|resetten)"
       "Restart Player"
     ];
     ZufaelligesAlbum = [
@@ -60,13 +60,14 @@ in
       "Random Artist"
     ];
     NeueMusik = [
-      "(Spiele|Spiel) [die ]neue[n] (Musik|Tracks|Titel|Lieder)"
+      "(Spiele|Spiel) [die ]neue[sten|n] (Musik|Tracks|Titel|Lieder)"
       "(Spiele|Spiel) [die ]Playlist (neue Musik|Neue Tracks|Recently Added)"
       "Recently Added"
     ];
     KuerzlichGespielt = [
       "(Spiele|Spiel) [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
       "Recently Played"
+      "Spiel die selben Songs nochmal"
     ];
   };
 
