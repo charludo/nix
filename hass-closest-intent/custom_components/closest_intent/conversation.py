@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from homeassistant.components import conversation
 from homeassistant.config_entries import ConfigEntry
@@ -99,9 +99,7 @@ async def async_setup_entry(
         base_agent_id=opt(CONF_BASE_AGENT, DEFAULT_BASE_AGENT),
         entry_id=entry.entry_id,
     )
-    hass.data.setdefault(DOMAIN, {}).setdefault(KEY_AGENT_INSTANCES, {})[
-        entry.entry_id
-    ] = agent
+    hass.data.setdefault(DOMAIN, {}).setdefault(KEY_AGENT_INSTANCES, {})[entry.entry_id] = agent
 
     # Pick up live option changes without an HA restart.
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -185,9 +183,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             "entity_registry_updated",
             "floor_registry_updated",
         ):
-            self._unsub_listeners.append(
-                bus.async_listen(event_name, self._on_registry_event)
-            )
+            self._unsub_listeners.append(bus.async_listen(event_name, self._on_registry_event))
 
     async def async_will_remove_from_hass(self) -> None:
         for unsub in self._unsub_listeners:
@@ -196,9 +192,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         if self._rebuild_handle is not None:
             self._rebuild_handle()
             self._rebuild_handle = None
-        self.hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {}).pop(
-            self._entry_id, None
-        )
+        self.hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {}).pop(self._entry_id, None)
         await super().async_will_remove_from_hass()
 
     # ------------------------------------------------------------------
@@ -273,9 +267,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         candidates: list[Candidate] = []
         for intent_name, patterns in intents.items():
             for idx, pat in enumerate(patterns):
-                for text, slot_names in expand_pattern(
-                    pat, self._expansion_cap, resolver=resolver
-                ):
+                for text, slot_names in expand_pattern(pat, self._expansion_cap, resolver=resolver):
                     candidates.append(
                         Candidate(
                             intent=intent_name,
@@ -308,6 +300,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         sees the same vocabulary HA's default agent does.
         """
         import os
+
         try:
             import yaml  # type: ignore
         except ImportError:
@@ -324,7 +317,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 continue
             path = os.path.join(base, fname)
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     doc = yaml.safe_load(f)
             except Exception:
                 _LOGGER.warning("closest_intent: failed to load %s", path, exc_info=True)
@@ -351,13 +344,13 @@ class ClosestIntentAgent(conversation.ConversationEntity):
 
         # ---- Source A: Hassil static data ---------------------------------
         try:
-            from home_assistant_intents import get_intents  # type: ignore
             from hassil.intents import (  # type: ignore
                 Intents,
                 RangeSlotList,
                 TextSlotList,
             )
             from hassil.sample import sample_expression  # type: ignore
+            from home_assistant_intents import get_intents  # type: ignore
 
             hassil_available = True
         except ImportError:
@@ -416,7 +409,9 @@ class ClosestIntentAgent(conversation.ConversationEntity):
 
                 # Slot lists → list of acceptable values.
                 for name, lst in (intents.slot_lists or {}).items():
-                    values = _slot_list_values(lst, intents, sample_expression, TextSlotList, RangeSlotList)
+                    values = _slot_list_values(
+                        lst, intents, sample_expression, TextSlotList, RangeSlotList
+                    )
                     if values:
                         resolver.slot_values[name] = values
 
@@ -424,7 +419,11 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         try:
             from homeassistant.helpers import (
                 area_registry as ar,
+            )
+            from homeassistant.helpers import (
                 entity_registry as er,
+            )
+            from homeassistant.helpers import (
                 floor_registry as fr,
             )
         except ImportError:
@@ -480,9 +479,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
     # Candidate building
     # ------------------------------------------------------------------
 
-    def _gather_intents(
-        self, language: str, custom_docs: list[dict]
-    ) -> dict[str, list[str]]:
+    def _gather_intents(self, language: str, custom_docs: list[dict]) -> dict[str, list[str]]:
         gathered: dict[str, list[str]] = {}
 
         conv_intents = self.hass.data.get(DOMAIN, {}).get(KEY_CONVERSATION_INTENTS, {})
@@ -495,7 +492,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         for doc in custom_docs:
             for name, payload in (doc.get("intents") or {}).items():
                 sentences: list[str] = []
-                for block in (payload.get("data") or []):
+                for block in payload.get("data") or []:
                     sentences.extend(block.get("sentences") or [])
                 if sentences:
                     gathered.setdefault(name, []).extend(sentences)
@@ -537,17 +534,13 @@ class ClosestIntentAgent(conversation.ConversationEntity):
         try:
             resolver, candidates = await self._async_get_pool(language)
         except Exception:  # pragma: no cover
-            _LOGGER.exception(
-                "closest_intent: failed to build pool for language %s", language
-            )
+            _LOGGER.exception("closest_intent: failed to build pool for language %s", language)
             resolver, candidates = Resolver(), []
 
         try:
             canonical = self._best_canonical(user_input, resolver, candidates)
         except Exception:  # pragma: no cover
-            _LOGGER.exception(
-                "closest_intent: unexpected error matching %r", user_input.text
-            )
+            _LOGGER.exception("closest_intent: unexpected error matching %r", user_input.text)
             canonical = None
 
         forwarded_text = canonical if canonical is not None else user_input.text
@@ -562,9 +555,7 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 agent_id=self._base_agent_id,
             )
         except Exception:
-            _LOGGER.exception(
-                "closest_intent: forwarding to %s failed", self._base_agent_id
-            )
+            _LOGGER.exception("closest_intent: forwarding to %s failed", self._base_agent_id)
             return _no_match(user_input)
 
     def _best_canonical(
@@ -601,7 +592,8 @@ class ClosestIntentAgent(conversation.ConversationEntity):
                 )
                 if fallback is None:
                     _LOGGER.debug(
-                        "closest_intent: matched %s (score=%d) but no expansion extracted, passthrough",
+                        "closest_intent: matched %s (score=%d) but no expansion extracted, "
+                        "passthrough",
                         candidate.intent,
                         score_value,
                     )
@@ -667,12 +659,8 @@ class ClosestIntentAgent(conversation.ConversationEntity):
             out["languages"][lang] = {
                 "candidate_count": len(candidates),
                 "intents": by_intent,
-                "expansion_rules": {
-                    k: v for k, v in resolver.expansion_rules.items()
-                },
-                "slot_values": {
-                    k: v for k, v in resolver.slot_values.items()
-                },
+                "expansion_rules": {k: v for k, v in resolver.expansion_rules.items()},
+                "slot_values": {k: v for k, v in resolver.slot_values.items()},
             }
         return out
 

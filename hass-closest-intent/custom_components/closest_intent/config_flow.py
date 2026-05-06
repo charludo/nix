@@ -19,7 +19,6 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.helpers import selector
@@ -118,9 +117,7 @@ def _build_schema(
             vol.Required(
                 CONF_BASE_AGENT,
                 default=base_agent_default,
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="conversation")
-            ),
+            ): selector.EntitySelector(selector.EntitySelectorConfig(domain="conversation")),
         }
     )
 
@@ -174,7 +171,7 @@ class ClosestIntentConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         config_entry: config_entries.ConfigEntry,
-    ) -> "ClosestIntentOptionsFlow":
+    ) -> ClosestIntentOptionsFlow:
         return ClosestIntentOptionsFlow(config_entry)
 
 

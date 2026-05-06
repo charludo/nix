@@ -17,9 +17,7 @@ import types
 from pathlib import Path
 from unittest.mock import MagicMock
 
-PKG_DIR = (
-    Path(__file__).resolve().parent.parent / "custom_components" / "closest_intent"
-)
+PKG_DIR = Path(__file__).resolve().parent.parent / "custom_components" / "closest_intent"
 if str(PKG_DIR) not in sys.path:
     sys.path.insert(0, str(PKG_DIR))
 
@@ -51,23 +49,21 @@ ha_const = _ensure_module("homeassistant.const")
 ha_core = _ensure_module("homeassistant.core")
 ha_helpers = _ensure_module("homeassistant.helpers")
 ha_helpers_intent = _ensure_module("homeassistant.helpers.intent")
-ha_helpers_entity_platform = _ensure_module(
-    "homeassistant.helpers.entity_platform"
-)
+ha_helpers_entity_platform = _ensure_module("homeassistant.helpers.entity_platform")
 ha_helpers_event = _ensure_module("homeassistant.helpers.event")
 ha_helpers_typing = _ensure_module("homeassistant.helpers.typing")
 ha_helpers_cv = _ensure_module("homeassistant.helpers.config_validation")
 ha_helpers_selector = _ensure_module("homeassistant.helpers.selector")
 # Registry stubs — tests overwrite ``async_get`` per case to return
 # whatever fake registry contents they want.
-_ensure_module("homeassistant.helpers.area_registry").async_get = (
-    lambda hass: types.SimpleNamespace(async_list_areas=lambda: [])
+_ensure_module("homeassistant.helpers.area_registry").async_get = lambda hass: (
+    types.SimpleNamespace(async_list_areas=lambda: [])
 )
-_ensure_module("homeassistant.helpers.floor_registry").async_get = (
-    lambda hass: types.SimpleNamespace(async_list_floors=lambda: [])
+_ensure_module("homeassistant.helpers.floor_registry").async_get = lambda hass: (
+    types.SimpleNamespace(async_list_floors=lambda: [])
 )
-_ensure_module("homeassistant.helpers.entity_registry").async_get = (
-    lambda hass: types.SimpleNamespace(entities={})
+_ensure_module("homeassistant.helpers.entity_registry").async_get = lambda hass: (
+    types.SimpleNamespace(entities={})
 )
 
 
@@ -127,9 +123,7 @@ ha_components_conversation.async_converse = _async_converse
 # --- conversation.const -----------------------------------------------------
 
 
-ha_components_conversation_const = _ensure_module(
-    "homeassistant.components.conversation.const"
-)
+ha_components_conversation_const = _ensure_module("homeassistant.components.conversation.const")
 ha_components_conversation_const.DOMAIN = "conversation"
 
 

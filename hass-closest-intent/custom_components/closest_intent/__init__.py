@@ -14,12 +14,11 @@ from __future__ import annotations
 import json
 import logging
 
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
@@ -55,17 +54,11 @@ CONFIG_SCHEMA = vol.Schema(
                     vol.Coerce(int), vol.Range(min=0)
                 ),
                 # Restrict matching to specific intent names. Default = all.
-                vol.Optional(CONF_ALLOWLIST, default=None): vol.Any(
-                    None, [cv.string]
-                ),
+                vol.Optional(CONF_ALLOWLIST, default=None): vol.Any(None, [cv.string]),
                 # Also fuzzy-match HA's built-in intent patterns
                 # (HassTurnOn etc.) loaded from `home_assistant_intents`.
-                vol.Optional(
-                    CONF_INCLUDE_BUILTINS, default=DEFAULT_INCLUDE_BUILTINS
-                ): cv.boolean,
-                vol.Optional(
-                    CONF_SLOT_EXTRACTION, default=DEFAULT_SLOT_EXTRACTION
-                ): cv.boolean,
+                vol.Optional(CONF_INCLUDE_BUILTINS, default=DEFAULT_INCLUDE_BUILTINS): cv.boolean,
+                vol.Optional(CONF_SLOT_EXTRACTION, default=DEFAULT_SLOT_EXTRACTION): cv.boolean,
                 # Conversation entity to forward the canonical sentence to
                 # after a fuzzy match. Default is HA's bundled agent.
                 vol.Optional(CONF_BASE_AGENT, default=DEFAULT_BASE_AGENT): cv.string,
@@ -88,13 +81,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     of the language pack's defaults.
     """
     conv = config.get("conversation") or {}
-    hass.data.setdefault(DOMAIN, {})[KEY_CONVERSATION_INTENTS] = dict(
-        conv.get("intents") or {}
-    )
+    hass.data.setdefault(DOMAIN, {})[KEY_CONVERSATION_INTENTS] = dict(conv.get("intents") or {})
     hass.data[DOMAIN][KEY_CONVERSATION_LISTS] = dict(conv.get("lists") or {})
-    hass.data[DOMAIN][KEY_CONVERSATION_EXPANSION_RULES] = dict(
-        conv.get("expansion_rules") or {}
-    )
+    hass.data[DOMAIN][KEY_CONVERSATION_EXPANSION_RULES] = dict(conv.get("expansion_rules") or {})
 
     _async_register_services(hass)
 
@@ -141,13 +130,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
         return
 
     async def _dump(call: ServiceCall) -> None:
-        agents = (
-            hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {})
-        )
+        agents = hass.data.get(DOMAIN, {}).get(KEY_AGENT_INSTANCES, {})
         if not agents:
-            _LOGGER.warning(
-                "closest_intent.dump_candidates: no agent instances registered yet"
-            )
+            _LOGGER.warning("closest_intent.dump_candidates: no agent instances registered yet")
             return
 
         for entry_id, agent in agents.items():
@@ -155,12 +140,10 @@ def _async_register_services(hass: HomeAssistant) -> None:
             # Pretty-print at DEBUG so users can paste a single block when
             # filing issues. INFO line is a one-liner pointer.
             _LOGGER.info(
-                "closest_intent.dump_candidates[%s]: %d candidate(s) across %d language(s); see DEBUG for details",
+                "closest_intent.dump_candidates[%s]: %d candidate(s) across %d language(s); "
+                "see DEBUG for details",
                 entry_id,
-                sum(
-                    lang_state["candidate_count"]
-                    for lang_state in state["languages"].values()
-                ),
+                sum(lang_state["candidate_count"] for lang_state in state["languages"].values()),
                 len(state["languages"]),
             )
             try:

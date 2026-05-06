@@ -264,6 +264,41 @@ unexpectedly, it falls through to passthrough; if forwarding to the
 base agent fails, it returns `NO_INTENT_MATCH`. The entity stays
 alive and ready for the next utterance.
 
+## Development
+
+Two equivalent ways to get a working dev environment, depending on
+your preference. Both end up with the same toolchain (`pytest`,
+`ruff`, `mypy`).
+
+### With Nix
+
+```bash
+nix develop          # drops you in a shell with everything wired up
+pytest tests/        # run the test suite
+ruff check .         # lint
+ruff format .        # format
+nix flake check      # CI-style: runs lint + tests in a sandbox
+```
+
+### Without Nix
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+pytest tests/
+ruff check .
+ruff format .
+```
+
+The `pyproject.toml` is the source of truth for non-Nix
+contributors; `flake.nix` mirrors the same dependency list from
+nixpkgs. Keep them in sync when adding deps.
+
+The test suite stubs `homeassistant.*` modules in `tests/conftest.py`
+so it runs without a Home Assistant install — fast (under a second),
+hermetic, no HA boot.
+
 ## License
 
 MIT

@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+# closest_intent is a Home Assistant custom_component, not a pip package.
+# This pyproject.toml exists for two reasons:
+#
+#   1. Declare the development & test toolchain so contributors who
+#      don't use Nix can `pip install -e ".[dev]"` and have the same
+#      environment.
+#   2. Configure ruff, pytest, and mypy in one place.
+#
+# Runtime dependencies are duplicated in `manifest.json` (which is what
+# Home Assistant / HACS actually reads at install time). Keep the two
+# in sync.
+
+[project]
+name = "closest_intent"
+version = "0.1.0"
+description = "Fuzzy-fallback conversation agent for Home Assistant — closes the gap between STT noise and Hassil's strict matching."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "Charlotte Hartmann Paludo" }]
+dependencies = [
+    "rapidfuzz>=3.5.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+    "pytest-asyncio>=0.21",
+    "pyyaml>=6",
+    "voluptuous>=0.13",
+]
+dev = [
+    "closest_intent[test]",
+    "ruff>=0.6",
+    "mypy>=1.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/charludo/hass-closest-intent"
+Issues = "https://github.com/charludo/hass-closest-intent/issues"
+
+# No installable Python package — Home Assistant picks up the component
+# by symlink/copy of `custom_components/closest_intent/` into its config
+# directory. setuptools needs an explicit empty package list to not
+# guess wrongly.
+[tool.setuptools]
+packages = []
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+]
+ignore = [
+    # Allow `lambda` for tiny inline callbacks in tests.
+    "E731",
+    # `B008` (function call in default arg) trips on dataclass field()
+    # idioms; we don't use mutable defaults the dangerous way.
+    "B008",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests intentionally do unusual sys.path tricks and import-after-config.
+"tests/**" = ["E402", "F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "strict"
+filterwarnings = [
+    "error",
+    # rapidfuzz emits DeprecationWarning on some platforms; ignore.
+    "ignore::DeprecationWarning:rapidfuzz",
+]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+# Custom_components rely on heavily-dynamic Home Assistant APIs; full
+# strict mode would be noise. Stay pragmatic.
+disallow_untyped_defs = false
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true

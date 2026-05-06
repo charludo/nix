@@ -18,15 +18,10 @@ from pathlib import Path
 
 sys.path.insert(
     0,
-    str(
-        Path(__file__).resolve().parent.parent
-        / "custom_components"
-        / "closest_intent"
-    ),
+    str(Path(__file__).resolve().parent.parent / "custom_components" / "closest_intent"),
 )
 
 import pytest  # noqa: E402
-
 from matching import (  # type: ignore  # noqa: E402
     Candidate,
     Resolver,
@@ -35,7 +30,6 @@ from matching import (  # type: ignore  # noqa: E402
     extract_slots,
     find_best,
 )
-
 
 THRESHOLD = 70
 EXPANSION_CAP = 32
@@ -251,26 +245,46 @@ CORPUS: dict[str, list[str]] = {
 # captured slot value is right.
 SLOT_CORPUS: list[tuple[str, str, str, list[str]]] = [
     # (intent, pattern, user_text, expected_slots)
-    ("WetterStunde", "Wie ist das Wetter um {timer_hours:hours} Uhr",
-        "wie ist das wetter um zwölf uhr", ["zwölf"]),
-    ("WetterStunde", "Wie wird das Wetter um {timer_hours:hours} Uhr",
-        "wie wird das wetter um 14 uhr", ["14"]),
-    ("RegenStunde", "Regnet es um {timer_hours:hours} Uhr",
-        "regnet es um 18 uhr", ["18"]),
-    ("Test_Area", "Test zwei im {area}",
-        "test zwei im wohnzimmer", ["wohnzimmer"]),
-    ("Test_Name", "Test drei mit {name}",
-        "test drei mit charlotte", ["charlotte"]),
-    ("Einkauf_Add", "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste",
-        "schreib brot auf die einkaufsliste", ["brot"]),
-    ("Einkauf_Add", "{item} auf die Einkaufsliste",
-        "salami auf die einkaufsliste", ["salami"]),
-    ("Einkauf_Add", "Füge {item} zur Einkaufsliste hinzu",
-        "füge milch zur einkaufsliste hinzu", ["milch"]),
-    ("ToDo_Add", "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste",
-        "schreib termin auf die todo-liste", ["termin"]),
-    ("MusikPlaylist", "(Spiele|Spiel|Starte) [die ]Playlist {playlist}",
-        "spiele playlist sea shanties", ["sea shanties"]),
+    (
+        "WetterStunde",
+        "Wie ist das Wetter um {timer_hours:hours} Uhr",
+        "wie ist das wetter um zwölf uhr",
+        ["zwölf"],
+    ),
+    (
+        "WetterStunde",
+        "Wie wird das Wetter um {timer_hours:hours} Uhr",
+        "wie wird das wetter um 14 uhr",
+        ["14"],
+    ),
+    ("RegenStunde", "Regnet es um {timer_hours:hours} Uhr", "regnet es um 18 uhr", ["18"]),
+    ("Test_Area", "Test zwei im {area}", "test zwei im wohnzimmer", ["wohnzimmer"]),
+    ("Test_Name", "Test drei mit {name}", "test drei mit charlotte", ["charlotte"]),
+    (
+        "Einkauf_Add",
+        "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste",
+        "schreib brot auf die einkaufsliste",
+        ["brot"],
+    ),
+    ("Einkauf_Add", "{item} auf die Einkaufsliste", "salami auf die einkaufsliste", ["salami"]),
+    (
+        "Einkauf_Add",
+        "Füge {item} zur Einkaufsliste hinzu",
+        "füge milch zur einkaufsliste hinzu",
+        ["milch"],
+    ),
+    (
+        "ToDo_Add",
+        "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste",
+        "schreib termin auf die todo-liste",
+        ["termin"],
+    ),
+    (
+        "MusikPlaylist",
+        "(Spiele|Spiel|Starte) [die ]Playlist {playlist}",
+        "spiele playlist sea shanties",
+        ["sea shanties"],
+    ),
 ]
 
 
@@ -323,13 +337,13 @@ def test_corpus_clean_phrase_matches(intent_name: str, phrase: str) -> None:
 # A handful of representative typo'd / abbreviated cases — check the
 # fuzzy matcher actually delivers value over a strict matcher.
 TYPO_CASES = [
-    ("Botty_Start", "starte rinigung"),         # one-char typo
-    ("PumpeAn", "pumpr an"),                    # one-char typo
-    ("MusikShuffleAn", "shuffl an"),            # truncation
-    ("MusikPause", "pausir die musik"),         # typo + alternation
-    ("UhrZeit", "wie sät ist es"),              # one-char drop
-    ("WetterHeute", "wie warm ist es draussn"), # one-char typo
-    ("Tagesschau", "spiel tagesshau"),          # one-char typo
+    ("Botty_Start", "starte rinigung"),  # one-char typo
+    ("PumpeAn", "pumpr an"),  # one-char typo
+    ("MusikShuffleAn", "shuffl an"),  # truncation
+    ("MusikPause", "pausir die musik"),  # typo + alternation
+    ("UhrZeit", "wie sät ist es"),  # one-char drop
+    ("WetterHeute", "wie warm ist es draussn"),  # one-char typo
+    ("Tagesschau", "spiel tagesshau"),  # one-char typo
 ]
 
 
@@ -347,9 +361,7 @@ def test_corpus_typo_matches(intent_name: str, phrase: str) -> None:
 
 @pytest.mark.parametrize(
     "intent_name,pattern,user_text,expected",
-    [
-        pytest.param(*row, id=f"{row[0]}::{row[2]}") for row in SLOT_CORPUS
-    ],
+    [pytest.param(*row, id=f"{row[0]}::{row[2]}") for row in SLOT_CORPUS],
 )
 def test_slot_corpus_extracts(
     intent_name: str,
@@ -460,9 +472,7 @@ def _full_einkauf_todo_pool() -> list[Candidate]:
     return out
 
 
-def _agent_match(
-    user: str, candidates: list[Candidate]
-) -> tuple[str, list[str]] | None:
+def _agent_match(user: str, candidates: list[Candidate]) -> tuple[str, list[str]] | None:
     """Mimic the agent's full match → extract → fallback flow without
     booting the conversation entity. Returns (intent, captured) or None."""
     match = find_best(user, candidates, threshold=THRESHOLD)
@@ -475,8 +485,11 @@ def _agent_match(
     if captured is None:
         # walk same-intent siblings in score order until one extracts
         scored = sorted(
-            ((c, find_best(user, [c], 0)[1]) for c in candidates  # type: ignore
-             if c.intent == candidate.intent and c.has_slots),
+            (
+                (c, find_best(user, [c], 0)[1])
+                for c in candidates  # type: ignore
+                if c.intent == candidate.intent and c.has_slots
+            ),
             key=lambda kv: -kv[1],
         )
         for c, s in scored:
@@ -526,12 +539,8 @@ def test_regression_setze_dosenmais_einkaufsliste_variants() -> None:
         result = _agent_match(user, pool)
         assert result is not None, f"no match for {user!r}"
         intent, captured = result
-        assert intent == "Einkauf_Add", (
-            f"{user!r}: matched wrong intent {intent}"
-        )
-        assert captured == ["dosenmais"], (
-            f"{user!r}: bad capture {captured!r}"
-        )
+        assert intent == "Einkauf_Add", f"{user!r}: matched wrong intent {intent}"
+        assert captured == ["dosenmais"], f"{user!r}: bad capture {captured!r}"
 
 
 def test_regression_fuege_hinzu_does_not_match_einkaufsliste_only() -> None:

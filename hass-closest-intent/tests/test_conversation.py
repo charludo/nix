@@ -27,22 +27,19 @@ import pytest
 
 # conftest already extended sys.path; re-confirm in case of nondeterministic
 # load order under odd test runners.
-PKG_DIR = (
-    Path(__file__).resolve().parent.parent / "custom_components" / "closest_intent"
-)
+PKG_DIR = Path(__file__).resolve().parent.parent / "custom_components" / "closest_intent"
 if str(PKG_DIR) not in sys.path:
     sys.path.insert(0, str(PKG_DIR))
 
 
 import conversation as agent_module  # type: ignore  # noqa: E402
-from conversation import ClosestIntentAgent  # type: ignore  # noqa: E402
 from const import (  # type: ignore  # noqa: E402
     DOMAIN,
     KEY_CONVERSATION_EXPANSION_RULES,
     KEY_CONVERSATION_INTENTS,
     KEY_CONVERSATION_LISTS,
 )
-
+from conversation import ClosestIntentAgent  # type: ignore  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Fake hass
@@ -54,13 +51,13 @@ class FakeBus:
         self.listeners: dict[str, list] = {}
 
     def async_listen(self, event_name: str, cb):
+        import contextlib
+
         self.listeners.setdefault(event_name, []).append(cb)
 
         def _unsub() -> None:
-            try:
+            with contextlib.suppress(ValueError):
                 self.listeners[event_name].remove(cb)
-            except ValueError:
-                pass
 
         return _unsub
 
@@ -173,9 +170,7 @@ def _capture_async_converse(monkeypatch):
 
         return ConversationResult(response={"forwarded": kwargs["text"]})
 
-    monkeypatch.setattr(
-        "homeassistant.components.conversation.async_converse", _fake
-    )
+    monkeypatch.setattr("homeassistant.components.conversation.async_converse", _fake)
     yield captured
 
 
@@ -214,6 +209,7 @@ async def test_slot_extraction_and_resolution(hass, _capture_async_converse):
     """Slot pattern matched + captured text fuzz-resolved against registry."""
     # Seed area registry. Stub area_registry to feed our resolver.
     import sys as _sys
+
     fake_ar = _sys.modules.setdefault(
         "homeassistant.helpers.area_registry", type(_sys)("homeassistant.helpers.area_registry")
     )
@@ -263,9 +259,7 @@ async def test_sibling_fallback(hass, _capture_async_converse):
     agent = _make_agent(hass, threshold=70)
     await agent.async_added_to_hass()
 
-    await agent.async_process(
-        _conversation_input("setze brot auf die einkaufsliste")
-    )
+    await agent.async_process(_conversation_input("setze brot auf die einkaufsliste"))
     forwarded = _capture_async_converse["text"]
     assert "brot" in forwarded
     assert "auf die einkaufsliste" in forwarded
@@ -286,9 +280,7 @@ async def test_registry_change_triggers_rebuild(hass, _capture_async_converse):
     fake_er = _sys.modules.setdefault(
         "homeassistant.helpers.entity_registry", type(_sys)("homeassistant.helpers.entity_registry")
     )
-    fake_ar.async_get = lambda hass: SimpleNamespace(
-        async_list_areas=lambda: list(areas)
-    )
+    fake_ar.async_get = lambda hass: SimpleNamespace(async_list_areas=lambda: list(areas))
     fake_fr.async_get = lambda hass: SimpleNamespace(async_list_floors=lambda: [])
     fake_er.async_get = lambda hass: SimpleNamespace(entities={})
 
@@ -332,9 +324,7 @@ async def test_per_language_pools(hass, _capture_async_converse):
 
 
 @pytest.mark.asyncio
-async def test_slot_extraction_disabled_falls_back_to_passthrough(
-    hass, _capture_async_converse
-):
+async def test_slot_extraction_disabled_falls_back_to_passthrough(hass, _capture_async_converse):
     """slot_extraction=false: matches with slots are skipped, original text forwarded."""
     hass.data.setdefault(DOMAIN, {})[KEY_CONVERSATION_INTENTS] = {
         "Test_Area": ["Test zwei im {area}"],
@@ -372,9 +362,7 @@ async def test_custom_sentences_loaded(hass, _capture_async_converse, tmp_path):
     agent = _make_agent(hass, threshold=70)
     await agent.async_added_to_hass()
 
-    await agent.async_process(
-        _conversation_input("schreib salami auf die einkaufsliste")
-    )
+    await agent.async_process(_conversation_input("schreib salami auf die einkaufsliste"))
     forwarded = _capture_async_converse["text"]
     assert "salami" in forwarded
     assert "einkaufsliste" in forwarded

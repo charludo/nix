@@ -26,7 +26,6 @@ from matching import (  # type: ignore  # noqa: E402
     score,
 )
 
-
 # ---------------------------------------------------------------------------
 # expand_pattern
 # ---------------------------------------------------------------------------
@@ -341,10 +340,12 @@ def test_resolver_inlines_simple_rule() -> None:
 
 
 def test_resolver_inlines_recursively() -> None:
-    r = Resolver(expansion_rules={
-        "outer": ["<inner> da", "anders"],
-        "inner": ["hier", "dort"],
-    })
+    r = Resolver(
+        expansion_rules={
+            "outer": ["<inner> da", "anders"],
+            "inner": ["hier", "dort"],
+        }
+    )
     out = r.inline_rules("<outer>")
     assert out == "((hier|dort) da|anders)"
 

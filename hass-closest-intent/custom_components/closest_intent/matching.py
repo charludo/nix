@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Optional
 
 from rapidfuzz import fuzz
 
@@ -68,9 +68,7 @@ class Resolver:
         seen_in_chain: set[str] = set()
         return self._inline_rules_inner(pattern, seen_in_chain, depth=0)
 
-    def _inline_rules_inner(
-        self, pattern: str, seen: set[str], depth: int
-    ) -> str:
+    def _inline_rules_inner(self, pattern: str, seen: set[str], depth: int) -> str:
         if depth > 10:
             return pattern  # cycle guard
 
@@ -86,9 +84,7 @@ class Resolver:
 
         return _RULE_RE.sub(sub, pattern)
 
-    def resolve_slot(
-        self, captured: str, list_name: Optional[str], threshold: int = 70
-    ) -> str:
+    def resolve_slot(self, captured: str, list_name: str | None, threshold: int = 70) -> str:
         """Fuzz-match ``captured`` against the ``list_name`` values.
 
         Returns the closest known value if it scores above ``threshold``;
@@ -108,7 +104,7 @@ class Resolver:
             if v.lower() == captured_norm:
                 return v
 
-        best: Optional[str] = None
+        best: str | None = None
         best_score = 0
         for v in values:
             s = int(fuzz.token_sort_ratio(captured_norm, v.lower()))
@@ -155,7 +151,7 @@ class Candidate:
 def expand_pattern(
     pattern: str,
     cap: int,
-    resolver: Optional[Resolver] = None,
+    resolver: Resolver | None = None,
 ) -> list[tuple[str, list[str]]]:
     """Expand a Hassil-style pattern into ``[(text, slot_lists), …]``.
 
@@ -199,10 +195,7 @@ def expand_pattern(
                 continue
             changed = True
             before, after = v[: chosen.start()], v[chosen.end() :]
-            if chosen is m_alt:
-                opts = chosen.group(1).split("|")
-            else:  # optional
-                opts = ["", chosen.group(1)]
+            opts = chosen.group(1).split("|") if chosen is m_alt else ["", chosen.group(1)]
             for o in opts:
                 new_variants.append(before + o + after)
             if len(new_variants) >= cap:
@@ -253,9 +246,7 @@ _ANCHOR_ABSENT_PENALTY = 50
 _ANCHOR_ALIGNMENT_MIN_SCORE = 60
 
 
-def _anchor_offset_tokens(
-    anchor: str, user_norm: str, *, from_end: bool
-) -> int | None:
+def _anchor_offset_tokens(anchor: str, user_norm: str, *, from_end: bool) -> int | None:
     """Return token count between ``anchor``'s alignment and the
     relevant edge of ``user_norm``, or ``None`` if no usable alignment.
 
@@ -339,9 +330,7 @@ def score(user_text: str, candidate_text: str) -> int:
       virtue of its short fixed string substring-matching anywhere.
     """
     user_norm = _normalise(user_text)
-    cand_stripped = re.sub(
-        r"\s+", " ", candidate_text.replace(SLOT_WILDCARD, " ")
-    ).strip()
+    cand_stripped = re.sub(r"\s+", " ", candidate_text.replace(SLOT_WILDCARD, " ")).strip()
 
     if SLOT_WILDCARD in candidate_text:
         if not cand_stripped:
@@ -392,11 +381,22 @@ _FIXED_PART_ALIGNMENT_THRESHOLD = 60
 #   2. A small known-noise vocabulary catches the 2-3-char garbles
 #      (``"ste"``, ``"se"``, ``"te"``, ``"ähm"``) that aren't single
 #      letters but are consistently STT artefacts in our usage.
-_STT_NOISE_TOKENS = frozenset({
-    "se", "te", "ne", "ge", "be",
-    "ste", "ehm", "uhm",
-    "äh", "ähm", "uh", "hmm",
-})
+_STT_NOISE_TOKENS = frozenset(
+    {
+        "se",
+        "te",
+        "ne",
+        "ge",
+        "be",
+        "ste",
+        "ehm",
+        "uhm",
+        "äh",
+        "ähm",
+        "uh",
+        "hmm",
+    }
+)
 
 
 def _is_noise_token(t: str) -> bool:
@@ -431,9 +431,7 @@ def _word_boundary_ends(sub: str, s: int, max_words: int = _MAX_BOUNDARY_LOOKAHE
     return out
 
 
-def _align_fixed_part(
-    fixed: str, user: str, start: int
-) -> tuple[int, int] | None:
+def _align_fixed_part(fixed: str, user: str, start: int) -> tuple[int, int] | None:
     """Find where ``fixed`` approximately occurs in ``user[start:]``.
 
     Two-stage alignment:
@@ -519,7 +517,7 @@ def extract_slots(user_text: str, candidate: Candidate) -> list[str] | None:
 def build_canonical(
     candidate: Candidate,
     captured: list[str],
-    resolver: Optional[Resolver] = None,
+    resolver: Resolver | None = None,
     slot_resolution_threshold: int = 70,
 ) -> str:
     """Reconstruct a clean sentence from ``candidate`` with slot values.
@@ -535,9 +533,7 @@ def build_canonical(
     parts = candidate.text.split(SLOT_WILDCARD)
     out: list[str] = [parts[0]]
     for i, raw in enumerate(captured):
-        list_name = (
-            candidate.slot_names[i] if i < len(candidate.slot_names) else None
-        )
+        list_name = candidate.slot_names[i] if i < len(candidate.slot_names) else None
         if resolver is not None:
             value = resolver.resolve_slot(raw, list_name, slot_resolution_threshold)
         else:
