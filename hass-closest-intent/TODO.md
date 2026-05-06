@@ -26,6 +26,7 @@ For HACS users without Nix, expose:
 - `include_builtins` toggle (with a warning about cost).
 
 Options flow so settings can be changed live without re-importing YAML.
+IMPORTANT: configuration through YAML MUST remain possible!!
 
 ## 3. README
 
@@ -56,6 +57,8 @@ gets one of them broken.
 - Fall back to `hass.config.language` only when `user_input.language` is
   unset.
 
+IMPORTANT: this should just be used for finding intents to match on; the custom component and its matching itself MUST remain completely language agnostic.
+
 ## 5. Tests for `conversation.py` glue
 
 Only `matching.py` has unit tests. The bugs hit during development —
@@ -68,12 +71,15 @@ integration test with a tiny mock `hass`.
   registry change → rebuild.
 - Run on the existing `pytest` fixture (no HA boot).
 
+The matching unit tests should also be significantly expanded, at least covering everything defined in modules/home-assistant/intents/.
+
 ## 6. Diagnostic service
 
 Developer-facing service: `closest_intent.dump_candidates`.
 
 - Logs the current candidate pool, resolver expansion rules, and slot-list
-  values to the journal at INFO.
+  values to the journal at DEBUG.
+- Logs the actual correction taken (what intent, what slot values selected and passed on to hassil) at INFO.
 - Saves a lot of "why didn't this match" cycles when users file issues —
   ask them to call it and paste the log.
 

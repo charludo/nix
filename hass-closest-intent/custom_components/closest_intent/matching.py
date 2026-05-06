@@ -287,17 +287,84 @@ def find_best(
 
 _FIXED_PART_ALIGNMENT_THRESHOLD = 60
 
+# A wildcard slot at the start of a pattern has no fixed prefix to
+# anchor on, so ``extract_slots`` greedily captures everything between
+# user-text-start and the next fixed part. STT noise (mis-transcribed
+# glottal stops, half-heard articles, filler words) ends up swept into
+# the slot value. Without a slot list to validate against, the only
+# defence is stripping known/likely-noise tokens at capture time.
+#
+# Two rules, both applied to leading and trailing tokens of the slot:
+#
+#   1. Any *single alphabetic character* is treated as noise. No real
+#      shopping item is one letter; STT routinely emits ``"e "`` for
+#      glottal stops at the start of an utterance, ``"r "`` from a
+#      half-heard ``"der"``, etc. Digits (``"5"``) are preserved in
+#      case the user shouts a count.
+#   2. A small known-noise vocabulary catches the 2-3-char garbles
+#      (``"ste"``, ``"se"``, ``"te"``, ``"ähm"``) that aren't single
+#      letters but are consistently STT artefacts in our usage.
+_STT_NOISE_TOKENS = frozenset({
+    "se", "te", "ne", "ge", "be",
+    "ste", "ehm", "uhm",
+    "äh", "ähm", "uh", "hmm",
+})
+
+
+def _is_noise_token(t: str) -> bool:
+    return (len(t) == 1 and t.isalpha()) or t.lower() in _STT_NOISE_TOKENS
+
+
+def _strip_stt_noise(s: str) -> str:
+    tokens = s.split()
+    while tokens and _is_noise_token(tokens[0]):
+        tokens.pop(0)
+    while tokens and _is_noise_token(tokens[-1]):
+        tokens.pop()
+    return " ".join(tokens)
+
+
+_MAX_BOUNDARY_LOOKAHEAD = 8
+
+
+def _word_boundary_ends(sub: str, s: int, max_words: int = _MAX_BOUNDARY_LOOKAHEAD) -> list[int]:
+    """End positions in ``sub[s:]`` that fall on word boundaries (each
+    space, plus end-of-string). Capped at ``max_words`` so search stays
+    cheap regardless of input length."""
+    pos = s
+    out: list[int] = []
+    while pos < len(sub) and len(out) < max_words:
+        next_space = sub.find(" ", pos)
+        if next_space == -1:
+            out.append(len(sub))
+            break
+        out.append(next_space)
+        pos = next_space + 1
+    return out
+
 
 def _align_fixed_part(
     fixed: str, user: str, start: int
 ) -> tuple[int, int] | None:
     """Find where ``fixed`` approximately occurs in ``user[start:]``.
 
-    Uses ``partial_ratio_alignment`` for character-level alignment, which
-    tolerates merged tokens (``"im büro"`` → ``"imbüro"``), split tokens
-    (``"wohnzimmer"`` → ``"wohn zimmer"``) and per-character typos in the
-    fixed parts. Returns ``(begin, end)`` offsets into ``user`` of the
-    matched span, or ``None`` if no decent alignment exists.
+    Two-stage alignment:
+
+      1. ``partial_ratio_alignment`` finds a starting point — char-level
+         so it tolerates merged tokens (``"im büro"`` → ``"imbüro"``),
+         split tokens (``"wohnzimmer"`` → ``"wohn zimmer"``) and
+         per-character typos in the fixed parts.
+      2. We then enumerate word-boundary end positions in the input
+         and pick the one with the highest ``fuzz.ratio`` against
+         ``fixed``. This recovers from the case where STT splits a
+         token in two (e.g. ``"Einkaufsliste"`` → ``"einkaufslis ste"``):
+         partial_ratio stops at ``"einkaufslis"`` (score 91.7), but
+         extending the alignment to include the orphan ``"ste"``
+         fragment yields a higher ratio (92.9) and keeps that
+         fragment out of the slot capture.
+
+    Slot captures end up on token boundaries unless the input is
+    genuinely mid-word (rare with realistic patterns).
     """
     sub = user[start:]
     if not fixed:
@@ -307,7 +374,14 @@ def _align_fixed_part(
     alignment = fuzz.partial_ratio_alignment(fixed, sub)
     if alignment is None or alignment.score < _FIXED_PART_ALIGNMENT_THRESHOLD:
         return None
-    return (start + alignment.dest_start, start + alignment.dest_end)
+    s = alignment.dest_start
+    best_end = alignment.dest_end
+    best_score = fuzz.ratio(fixed, sub[s:best_end])
+    for cand_end in _word_boundary_ends(sub, s):
+        score = fuzz.ratio(fixed, sub[s:cand_end])
+        if score > best_score:
+            best_end, best_score = cand_end, score
+    return (start + s, start + best_end)
 
 
 def extract_slots(user_text: str, candidate: Candidate) -> list[str] | None:
@@ -348,7 +422,7 @@ def extract_slots(user_text: str, candidate: Candidate) -> list[str] | None:
         else:
             slot_end = len(user)
 
-        captured.append(user[end_pos:slot_end].strip())
+        captured.append(_strip_stt_noise(user[end_pos:slot_end].strip()))
         cursor = slot_end
 
     return captured

@@ -203,6 +203,92 @@ def test_extract_slots_multi_token_slot_value() -> None:
     assert extract_slots("test zwei im wohn zimmern", cand) == ["wohn zimmern"]
 
 
+def test_extract_slots_recovers_from_stt_split_token() -> None:
+    """STT sometimes breaks a single word into two tokens in transit
+    (``"Einkaufsliste"`` → ``"einkaufslis ste"``). The fragment must be
+    absorbed into the prefix match, not leaked into the slot capture.
+    """
+    cand = Candidate(
+        intent="Einkauf_Add",
+        pattern_idx=0,
+        text=f"einkaufsliste {SLOT_WILDCARD}",
+        slot_names=["item"],
+    )
+    # Pre-fix this would have captured "ste veganes hack".
+    assert extract_slots("einkaufslis ste veganes hack", cand) == ["veganes hack"]
+    # Two-token split with different fragment.
+    assert extract_slots("einkaufsli ste salami", cand) == ["salami"]
+    # Single-token typo where partial_ratio stops mid-word: STT
+    # produced "einkaufslüsste" instead of "einkaufsliste". Without
+    # the word-boundary search, alignment ends at char 13 mid-word
+    # and "e veganes hack" leaks into the slot.
+    assert extract_slots("einkaufslüsste veganes hack", cand) == ["veganes hack"]
+    # Suffix variant: pattern's fixed part is at the end and gets split.
+    cand2 = Candidate(
+        intent="Einkauf_Add",
+        pattern_idx=0,
+        text=f"{SLOT_WILDCARD} auf die einkaufsliste",
+        slot_names=["item"],
+    )
+    assert extract_slots("salami auf die einkaufslis ste", cand2) == ["salami"]
+
+
+def test_extract_slots_word_boundary_alignment() -> None:
+    """Regression: slot boundaries land on whitespace, not mid-word.
+
+    There's no good reason for ``"Einkaufsliste salami"`` to be split
+    into ``"Einkaufslist"`` (prefix) and ``"e salami"`` (slot) — the
+    fixed prefix matches a whole token, so the slot should start at
+    the next token.
+    """
+    cand = Candidate(
+        intent="X",
+        pattern_idx=0,
+        text=f"einkaufsliste {SLOT_WILDCARD}",
+        slot_names=["item"],
+    )
+    assert extract_slots("einkaufsliste salami", cand) == ["salami"]
+    # Even with a one-letter typo in the fixed prefix the boundary
+    # stays at the space.
+    assert extract_slots("einkaufsliste vollmilch", cand) == ["vollmilch"]
+    # Suffix variant: slot at start of pattern.
+    cand2 = Candidate(
+        intent="X",
+        pattern_idx=0,
+        text=f"{SLOT_WILDCARD} auf die einkaufsliste",
+        slot_names=["item"],
+    )
+    assert extract_slots("salami auf die einkaufsliste", cand2) == ["salami"]
+    assert extract_slots("vollmilch auf die einkaufsliste", cand2) == ["vollmilch"]
+
+
+def test_extract_slots_strips_stt_noise_prefix() -> None:
+    """STT often prepends single-letter or 2-3-char garbles (``"e "``,
+    ``"ste "``, ``"r "``) at the start of an utterance. They get swept
+    into wildcard slot captures otherwise — strip them so the slot
+    value is clean."""
+    cand = Candidate(
+        intent="Einkauf_Add",
+        pattern_idx=0,
+        text=f"{SLOT_WILDCARD} auf die einkaufsliste",
+        slot_names=["item"],
+    )
+    assert extract_slots("e milch auf die einkaufsliste", cand) == ["milch"]
+    assert extract_slots("ste hefe auf die einkaufsliste", cand) == ["hefe"]
+    assert extract_slots("r tortellini auf die einkaufsliste", cand) == ["tortellini"]
+    assert extract_slots("se butter auf die einkaufsliste", cand) == ["butter"]
+    # Trailing noise also stripped.
+    assert extract_slots("milch e auf die einkaufsliste", cand) == ["milch"]
+    # Non-noise content with leading "e" letter (Eier) survives.
+    assert extract_slots("eier auf die einkaufsliste", cand) == ["eier"]
+    # Generalised rule: any single-letter token is treated as noise,
+    # not just letters in a hand-picked set.
+    assert extract_slots("x mango auf die einkaufsliste", cand) == ["mango"]
+    assert extract_slots("z senf auf die einkaufsliste", cand) == ["senf"]
+    # Digits survive (might be a count).
+    assert extract_slots("5 äpfel auf die einkaufsliste", cand) == ["5 äpfel"]
+
+
 def test_extract_slots_two_slots() -> None:
     cand = Candidate(
         intent="X",
