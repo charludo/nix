@@ -135,7 +135,7 @@ in
   hass.voice.intent_scripts = {
     Tagesschau = {
       action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "play") ];
-      speech.text = "VOn der Tagesschau.";
+      speech.text = "Von der Tagesschau.";
     };
     WDR_Aktuell = {
       action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "play") ];

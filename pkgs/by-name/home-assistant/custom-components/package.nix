@@ -1,4 +1,8 @@
-{ stdenv, fetchFromGitHub }:
+{
+  stdenv,
+  fetchFromGitHub,
+  hass-closest-intent-src,
+}:
 let
   mkComponent =
     {
@@ -57,10 +61,13 @@ let
     };
 in
 {
+  # Sourced from the `hass-closest-intent` flake input (a local path while the
+  # repo isn't published). Swap to `mkComponent` with fetchFromGitHub once it
+  # lives upstream.
   closest_intent = mkLocalComponent {
     pname = "closest_intent";
     version = "0.1.0";
-    src = ../../../../hass-closest-intent;
+    src = hass-closest-intent-src;
   };
 
   grocery_categorize = mkLocalComponent {

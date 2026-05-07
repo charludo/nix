@@ -895,6 +895,19 @@
         "type": "github"
       }
     },
+    "hass-closest-intent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1778224227,
+        "narHash": "sha256-/hcV2cyFAaeGjbIi8XJmrx5jAbC4qLBIrWMmSlfoIbw=",
+        "path": "/home/charlotte/Projekte/hass-closest-intent",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/charlotte/Projekte/hass-closest-intent",
+        "type": "path"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -1549,6 +1562,7 @@
         "agenix-rekey": "agenix-rekey",
         "eso-reshade": "eso-reshade",
         "firefox-addons": "firefox-addons",
+        "hass-closest-intent": "hass-closest-intent",
         "home-manager": "home-manager_2",
         "idagio": "idagio",
         "jovian": "jovian",

@@ -8,6 +8,10 @@
 # Adjust the `target.entity_id` values to match your actual todo entities
 # (Settings → Devices & services → To-do lists).
 {
+  hass.voice.custom_sentences.general = {
+    language = "de";
+    skip_words = [ ];
+  };
   hass.voice.custom_sentences.einkauf = {
     language = "de";
     intents = {

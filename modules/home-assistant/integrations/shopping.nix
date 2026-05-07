@@ -6,9 +6,7 @@
 }:
 let
   cfg = config.hass.shopping;
-  customComponents =
-    pkgs.callPackage ../../../pkgs/by-name/home-assistant/custom-components/package.nix
-      { };
+  customComponents = pkgs.ours.home-assistant.custom-components;
 in
 {
   options.hass.shopping = {

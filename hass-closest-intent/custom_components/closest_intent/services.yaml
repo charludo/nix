@@ -1,7 +1,0 @@
-dump_candidates:
-  name: Dump candidates
-  description: >-
-    Log the current candidate pool, expansion rules, and slot lists for
-    every loaded Closest Intent agent. INFO-level summary, DEBUG-level
-    full JSON dump. Useful when asking users to provide diagnostics for
-    "why didn't my phrase match?" issues.
