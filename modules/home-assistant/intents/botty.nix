@@ -11,9 +11,6 @@ let
 
   allRoomBools = lib.attrValues rooms;
 
-  # For a room-specific intent: clear all toggles, set the requested
-  # one, then start the cleaning script. This matches the spoken
-  # semantic "clean ONLY this room", regardless of dashboard state.
   cleanRoom = roomBool: [
     {
       action = "input_boolean.turn_off";
@@ -27,63 +24,77 @@ let
   ];
 in
 {
-  hass.voice.intents = {
-    Botty_Start = [
-      "(Starte|Beginne) [die ]Reinigung"
-      "Reinigung starten"
-      "Botty (los|reinigen|saugen|saug)"
-      "Sauge"
-    ];
-    Botty_Ende = [
-      "(Beende|Stoppe) [die ]Reinigung"
-      "Reinigung (beenden|stoppen)"
-      "Botty (zurück|nach Hause|zur Basis|stop)"
-    ];
-    Botty_Wohnzimmer = [
-      "(Reinige|Sauge) [im|das] Wohnzimmer"
-      "Botty [ins] Wohnzimmer"
-      "Wohnzimmer (reinigen|saugen)"
-    ];
-    Botty_Buero = [
-      "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
-      "Botty [ins] (Büro|Arbeitszimmer)"
-      "(Büro|Arbeitszimmer) (reinigen|saugen)"
-    ];
-    Botty_Kueche = [
-      "(Reinige|Sauge) [in der|die] Küche"
-      "Botty [in die] Küche"
-      "Küche (reinigen|saugen)"
-    ];
-    Botty_Sofa = [
-      "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
-      "[Botty] [vorm|vor dem] [Sofa|Fernseher] (reinigen|saugen)"
-    ];
-  };
-
-  hass.voice.intent_scripts = {
+  hass.voice = {
     Botty_Start = {
-      action = [ { action = e.script.botty_reinigung; } ];
-      speech.text = "Reinigung gestartet.";
+      sentences = [
+        "(Starte|Beginne) [die ]Reinigung"
+        "Reinigung starten"
+        "Botty (starten|los|reinigen|saugen|saug)"
+        "Sauge"
+      ];
+      script = {
+        action = [ { action = e.script.botty_reinigung; } ];
+        speech.text = "Reinigung gestartet.";
+      };
     };
+
     Botty_Ende = {
-      action = [ { action = e.script.botty_zurueckkehren; } ];
-      speech.text = "Reinigung beendet.";
+      sentences = [
+        "(Beende|Stoppe) [die ]Reinigung"
+        "Reinigung (beenden|stoppen)"
+        "Botty (zurück|nach Hause|zur Basis|stop)"
+      ];
+      script = {
+        action = [ { action = e.script.botty_zurueckkehren; } ];
+        speech.text = "Reinigung beendet.";
+      };
     };
+
     Botty_Wohnzimmer = {
-      action = cleanRoom rooms.Wohnzimmer;
-      speech.text = "Reinige Wohnzimmer.";
+      sentences = [
+        "(Reinige|Sauge) [im|das] Wohnzimmer"
+        "Botty [ins] Wohnzimmer"
+        "Wohnzimmer (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Wohnzimmer;
+        speech.text = "Reinige Wohnzimmer.";
+      };
     };
+
     Botty_Buero = {
-      action = cleanRoom rooms.Buero;
-      speech.text = "Reinige Büro.";
+      sentences = [
+        "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
+        "Botty [ins] (Büro|Arbeitszimmer)"
+        "(Büro|Arbeitszimmer) (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Buero;
+        speech.text = "Reinige Büro.";
+      };
     };
+
     Botty_Kueche = {
-      action = cleanRoom rooms.Kueche;
-      speech.text = "Reinige Küche.";
+      sentences = [
+        "(Reinige|Sauge) [in der|die] Küche"
+        "Botty [in die] Küche"
+        "[Botty] Küche (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Kueche;
+        speech.text = "Reinige Küche.";
+      };
     };
+
     Botty_Sofa = {
-      action = cleanRoom rooms.Sofa;
-      speech.text = "Reinige Sofa.";
+      sentences = [
+        "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
+        "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Sofa;
+        speech.text = "Reinige Sofa.";
+      };
     };
   };
 }

@@ -1,4 +1,4 @@
-{ lib, supermarkets }:
+{ lib, supermarkets, todoEntity }:
 let
   ha = lib.ha;
 
@@ -48,7 +48,7 @@ let
     name: spec:
     mkBigBtn {
       inherit name;
-      icon = "mdi:cart-outline";
+      icon = spec.icon;
       color = spec.color;
       fg = "var(--black)";
       tapAction = {
@@ -90,7 +90,39 @@ in
   path = "einkaufsliste";
   icon = "mdi:cart";
   header = {
-    card = ha.mkTitleCard "Einkaufsliste";
+    card = ha.mkBadgeTitleCard {
+      name = "Einkaufsliste";
+      badgeCard = {
+        type = "custom:button-card";
+        name = ''[[[ return states["${todoEntity}"].state + " Einträge"; ]]]'';
+        show_icon = false;
+        entity = todoEntity;
+        tap_action = {
+          action = "navigate";
+          navigation_path = "/todo?entity_id=${todoEntity}";
+          haptic = "medium";
+        };
+        styles =
+          (ha.mkStyles {
+            card = {
+              padding = "6px 10px";
+              "font-size" = "12px";
+              "line-height" = "18px";
+              "font-weight" = 500;
+              background = "var(--contrast20)";
+            };
+            name = {
+              color = "var(--contrast1)";
+            };
+          })
+          // {
+            grid = ha.mkStyleProp {
+              "grid-template-areas" = ''"n"'';
+              "grid-template-rows" = "min-content";
+            };
+          };
+      };
+    };
   };
   sections = [
     {

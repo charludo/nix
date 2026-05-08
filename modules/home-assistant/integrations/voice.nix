@@ -9,80 +9,164 @@ let
   haDir = config.services.home-assistant.configDir;
   yamlFormat = pkgs.formats.yaml { };
 
+  reservedKeys = [
+    "defaultLanguage"
+    "extraConfig"
+  ];
+
+  intents = removeAttrs cfg reservedKeys;
+
+  intentList = lib.mapAttrsToList (
+    name: i:
+    {
+      inherit name;
+      language = if i.language != null then i.language else cfg.defaultLanguage;
+    }
+    // {
+      inherit (i)
+        sentences
+        script
+        lists
+        expansionRules
+        responses
+        ;
+    }
+  ) intents;
+
+  languages = lib.unique (map (i: i.language) intentList);
+
+  mergeForLang =
+    lang:
+    let
+      forLang = lib.filter (i: i.language == lang) intentList;
+    in
+    lib.foldl'
+      (
+        acc: i:
+        {
+          intents =
+            acc.intents
+            // lib.optionalAttrs (i.sentences != [ ]) {
+              ${i.name}.data = [ { sentences = i.sentences; } ];
+            };
+          lists = acc.lists // i.lists;
+          expansion_rules = acc.expansion_rules // i.expansionRules;
+          responses = acc.responses // i.responses;
+        }
+      )
+      {
+        intents = { };
+        lists = { };
+        expansion_rules = { };
+        responses = { };
+      }
+      forLang;
+
+  mkLangYaml =
+    lang:
+    let
+      m = mergeForLang lang;
+      extra = cfg.extraConfig.${lang} or { };
+    in
+    { language = lang; }
+    // (lib.optionalAttrs (m.intents != { }) { inherit (m) intents; })
+    // (lib.optionalAttrs (m.lists != { }) { inherit (m) lists; })
+    // (lib.optionalAttrs (m.expansion_rules != { }) { inherit (m) expansion_rules; })
+    // (lib.optionalAttrs (m.responses != { }) { inherit (m) responses; })
+    // extra;
+
   sentencesDir = pkgs.runCommand "hass-custom-sentences" { } (
     lib.concatStringsSep "\n" (
       [ "mkdir -p $out" ]
-      ++ lib.mapAttrsToList (name: spec: ''
-        mkdir -p $out/${spec.language}
-        cp ${yamlFormat.generate "${name}.yaml" spec} $out/${spec.language}/${name}.yaml
-      '') cfg.custom_sentences
+      ++ map (lang: ''
+        mkdir -p $out/${lang}
+        cp ${yamlFormat.generate "nix.yaml" (mkLangYaml lang)} $out/${lang}/nix.yaml
+      '') languages
     )
   );
+
+  scripts = lib.mapAttrs (_: i: i.script) (lib.filterAttrs (_: i: i.script != null) intents);
+
+  intentType = lib.types.submodule {
+    options = {
+      sentences = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = ''
+          Sentence patterns for this intent. Patterns may reference
+          Hassil expansion rules (``<rule>``), built-in HA slot lists
+          (``{name}``, ``{area}``, ``{timer_hours:hours}``), or custom
+          slot lists declared via the sibling ``lists`` option.
+        '';
+      };
+      script = lib.mkOption {
+        type = lib.types.nullOr lib.types.anything;
+        default = null;
+        description = ''
+          ``intent_script`` body for this intent — usually
+          ``{ speech.text = ...; action = [ ... ]; }``.
+        '';
+      };
+      language = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
+        description = "Language code; falls back to ``hass.voice.defaultLanguage``.";
+      };
+      lists = lib.mkOption {
+        type = yamlFormat.type;
+        default = { };
+        description = ''
+          Hassil slot lists merged into this language's custom_sentences
+          file. Supports ``{ values = [...]; }``, ``{ wildcard = true; }``,
+          and ``{ range.from = N; range.to = M; }``.
+        '';
+      };
+      expansionRules = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = { };
+        description = "Hassil expansion rules merged into this language's custom_sentences file.";
+      };
+      responses = lib.mkOption {
+        type = yamlFormat.type;
+        default = { };
+        description = "Hassil ``responses`` merged into this language's custom_sentences file.";
+      };
+    };
+  };
 in
 {
-  options.hass.voice = {
-    intents = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.listOf lib.types.str);
-      default = { };
-      description = ''
-        Conversation intents keyed by name; values are sentence-pattern
-        strings. Patterns may reference Hassil expansion rules (``<rule>``)
-        and slot lists (``{list}`` or ``{list:capture}``) — either built
-        into HA's language pack or declared in ``hass.voice.custom_sentences``.
-
-        Goes via HA's ``conversation.intents`` YAML key — convenient but
-        cannot reference custom lists/rules. For those, use
-        ``hass.voice.custom_sentences``.
-      '';
-      example = lib.literalExpression ''
-        {
-          WetterHeute = [
-            "Wie ist das Wetter (heute|jetzt|gerade)"
-          ];
-        }
-      '';
-    };
-
-    intent_scripts = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = { };
-      description = "intent_script entries keyed by intent name";
-    };
-
-    custom_sentences = lib.mkOption {
-      type = lib.types.attrsOf (
-        lib.types.submodule {
-          freeformType = yamlFormat.type;
-          options.language = lib.mkOption {
-            type = lib.types.str;
-            description = "Language code (e.g. \"de\"). Determines the directory the file lands in.";
-          };
-        }
-      );
-      default = { };
-      description = ''
-        Hassil ``custom_sentences/<lang>/<name>.yaml`` files. The full
-        Hassil document format is supported: ``intents`` (with ``data``
-        blocks), ``lists`` (text/range/wildcard), ``expansion_rules``,
-        ``responses``, ``skip_words``. Files are written to
-        ``${haDir}/custom_sentences/<language>/<name>.yaml``.
-
-        Use this route when patterns need custom slot lists,
-        wildcards, or expansion rules — those don't work via
-        ``hass.voice.intents`` because HA's strict ``conversation:``
-        schema rejects ``lists``/``expansion_rules`` keys.
-      '';
-      example = lib.literalExpression ''
-        {
-          einkauf = {
-            language = "de";
-            intents.Einkauf_Add.data = [{
-              sentences = [ "Setze {item} auf die Einkaufsliste" ];
-            }];
-            lists.item.wildcard = true;
-          };
-        }
-      '';
+  options.hass.voice = lib.mkOption {
+    default = { };
+    description = ''
+      Voice intents. Set ``hass.voice.<IntentName>`` to an attrset with
+      ``sentences`` and/or ``script`` (plus optional ``language``,
+      ``lists``, ``expansionRules``, ``responses``). All intents are
+      grouped by language and emitted as a single
+      ``custom_sentences/<lang>/nix.yaml`` file.
+    '';
+    type = lib.types.submodule {
+      freeformType = lib.types.attrsOf intentType;
+      options = {
+        defaultLanguage = lib.mkOption {
+          type = lib.types.str;
+          default = "en";
+          description = "Fallback language for intents that don't set ``language``.";
+        };
+        extraConfig = lib.mkOption {
+          type = lib.types.attrsOf yamlFormat.type;
+          default = { };
+          description = ''
+            Extra top-level keys merged into the per-language
+            custom_sentences file, keyed by language code. Use for
+            things like ``skip_words`` that apply to the whole file
+            rather than a single intent.
+          '';
+          example = lib.literalExpression ''
+            { de.skip_words = [ "bitte" "mal" ]; }
+          '';
+        };
+      };
     };
   };
 
@@ -95,16 +179,11 @@ in
       "todo"
     ];
 
-    services.home-assistant.config = lib.mkMerge [
-      (lib.mkIf (cfg.intents != { }) {
-        conversation.intents = cfg.intents;
-      })
-      (lib.mkIf (cfg.intent_scripts != { }) {
-        intent_script = cfg.intent_scripts;
-      })
-    ];
+    services.home-assistant.config = lib.mkIf (scripts != { }) {
+      intent_script = scripts;
+    };
 
-    systemd.tmpfiles.settings = lib.mkIf (cfg.custom_sentences != { }) {
+    systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
       "10-hass-custom-sentences"."${haDir}/custom_sentences" = {
         "L+".argument = "${sentencesDir}";
       };

@@ -6,9 +6,11 @@
     ./garden.nix
     ./music.nix
     ./news.nix
-    ./testing.nix
     ./time.nix
     ./tv.nix
     ./weather.nix
   ];
+
+  hass.voice.defaultLanguage = "de";
+  hass.voice.extraConfig.de.skip_words = [ ];
 }

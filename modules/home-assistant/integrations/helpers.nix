@@ -40,6 +40,40 @@ in
           }
         ];
       }
+      {
+        trigger = [
+          { platform = "homeassistant"; event = "start"; }
+          { platform = "time_pattern"; minutes = "/15"; }
+        ];
+        action = [
+          {
+            action = "weather.get_forecasts";
+            target.entity_id = e.weather.openweathermap;
+            data.type = "daily";
+            response_variable = "daily";
+          }
+          {
+            action = "weather.get_forecasts";
+            target.entity_id = e.weather.openweathermap;
+            data.type = "hourly";
+            response_variable = "hourly";
+          }
+        ];
+        sensor = [
+          {
+            name = "OpenWeatherMap Forecast Daily";
+            unique_id = "openweathermap_forecast_daily";
+            state = "{{ now().isoformat() }}";
+            attributes.forecast = "{{ daily['${e.weather.openweathermap}'].forecast }}";
+          }
+          {
+            name = "OpenWeatherMap Forecast Hourly";
+            unique_id = "openweathermap_forecast_hourly";
+            state = "{{ now().isoformat() }}";
+            attributes.forecast = "{{ hourly['${e.weather.openweathermap}'].forecast }}";
+          }
+        ];
+      }
     ];
   };
 }

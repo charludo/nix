@@ -107,7 +107,7 @@ in
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "2min";
-      OnUnitActiveSec = "15min";
+      OnUnitActiveSec = "45min";
       Persistent = true;
     };
   };
@@ -115,38 +115,43 @@ in
   # ---------------------------------------------------------------------
   # Voice intents
   # ---------------------------------------------------------------------
-  hass.voice.intents = {
-    Tagesschau = [
-      "(Spiele|Spiel|Starte) [die ]Tagesschau"
-      "(Spiele|Spiel) Tagesschau in (hundert|100) Sekunden"
-      "Tagesschau"
-    ];
-    WDR_Aktuell = [
-      "(Spiele|Spiel|Starte) WDR (Aktuell|aktuell)"
-      "WDR (Aktuell|Nachrichten)"
-    ];
-    Nachrichten = [
-      "(Spiele|Spiel|Starte) [die ]Nachrichten"
-      "Nachrichten"
-      "Tägliche Zusammenfassung"
-    ];
-  };
-
-  hass.voice.intent_scripts = {
-    Tagesschau = {
-      action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "play") ];
-      speech.text = "Von der Tagesschau.";
-    };
-    WDR_Aktuell = {
-      action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "play") ];
-      speech.text = "Von WDR Aktuell.";
-    };
-    Nachrichten = {
-      action = prepare ++ [
-        (playLocal "tagesschau_100s.mp3" "play")
-        (playLocal "wdr_aktuell.mp3" "add")
+  hass.voice = {
+    News_Tagesschau = {
+      sentences = [
+        "(Spiele|Spiel|Starte) [die ]Tagesschau"
+        "(Spiele|Spiel) Tagesschau in (hundert|100) Sekunden"
+        "Tagesschau"
       ];
-      speech.text = "Hier ist deine tägliche Zusammenfassung.";
+      script = {
+        action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "replace") ];
+        speech.text = "Von der Tagesschau.";
+      };
+    };
+
+    News_WDRAktuell = {
+      sentences = [
+        "(Spiele|Spiel|Starte) WDR (Aktuell|aktuell)"
+        "WDR[ Aktuell| Nachrichten]"
+      ];
+      script = {
+        action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "replace") ];
+        speech.text = "Von WDR Aktuell.";
+      };
+    };
+
+    News_TaeglicheZusammenfassung = {
+      sentences = [
+        "(Spiele|Spiel|Starte) [die |meine ][Nachrichten|tägliche Zusammenfassung]"
+        "Nachrichten"
+        "Tägliche Zusammenfassung"
+      ];
+      script = {
+        action = prepare ++ [
+          (playLocal "tagesschau_100s.mp3" "replace")
+          (playLocal "wdr_aktuell.mp3" "add")
+        ];
+        speech.text = "Hier ist deine tägliche Zusammenfassung.";
+      };
     };
   };
 }

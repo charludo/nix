@@ -189,6 +189,8 @@ in
       openweathermap_bewolkung = { };
       openweathermap_regenintensitat = { };
       openweathermap_windboengeschwindigkeit = { };
+      openweathermap_forecast_daily = { };
+      openweathermap_forecast_hourly = { };
       weather_wind_gust.area = "Terrasse";
       sun_next_dawn = { };
       sun_next_dusk = { };
@@ -445,6 +447,7 @@ in
     supermarkets = {
       REWE = {
         color = "var(--red)";
+        icon = "mdi:cart";
         categories = [
           "Obst"
           "Gemüse"
@@ -484,6 +487,7 @@ in
 
       Edeka = {
         color = "var(--yellow)";
+        icon = "mdi:cart";
         categories = [
           "Gemüse"
           "Obst"
@@ -523,6 +527,7 @@ in
 
       Baumarkt = {
         color = "var(--green)";
+        icon = "mdi:excavator";
         categories = [
           "Gartencenter&Baumarkt"
           "Sonstiges"
@@ -531,6 +536,7 @@ in
 
       Asiamarkt = {
         color = "var(--blue)";
+        icon = "mdi:rice";
         categories = [
           "Asia"
           "Mexiko"
@@ -539,6 +545,7 @@ in
 
       Apotheke = {
         color = "var(--white)";
+        icon = "mdi:pill-multiple";
         categories = [
           "Apotheke"
         ];

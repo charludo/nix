@@ -43,6 +43,14 @@ in
                 works (``"var(--blue)"``, ``"#ff8800"`` etc.).
               '';
             };
+            icon = lib.mkOption {
+              type = lib.types.str;
+              default = "mdi:cart-outline";
+              description = ''
+                MDI icon shown on the supermarket's button on the
+                shopping-list dashboard view.
+              '';
+            };
           };
         }
       );
