@@ -1,0 +1,19 @@
+Use config('app.name') for the visible brand in the page header instead of
+hardcoding "cabbage.gay". The "prefix.suffix" styling (green prefix, default
+suffix) is preserved by splitting on the first dot.
+
+--- a/resources/views/components/header.blade.php
++++ b/resources/views/components/header.blade.php
+@@ -13,7 +13,11 @@
+     </div>
+     <div class="text-center px-3 md:px-10">
+         <a href="{{ route('home') }}" class="text-4xl">
+-            <span class="text-green-700">cabbage</span>.gay
++            @php
++                $parts = explode('.', config('app.name'), 2);
++            @endphp
++            <span class="text-green-700">{{ $parts[0] }}</span>{{
++                isset($parts[1]) ? '.' . $parts[1] : '' }}
+         </a>
+     </div>
+ </header>
