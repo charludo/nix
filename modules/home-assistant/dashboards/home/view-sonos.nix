@@ -208,7 +208,7 @@ in
           show_name = false;
           tap_action = {
             action = "navigate";
-            navigation_path = "/music-assistant";
+            navigation_path = "/music_assistant";
           };
           custom_fields.info.card = {
             type = "custom:button-card";
@@ -217,7 +217,7 @@ in
             entity_picture = "[[[ return states['${e.media_player.alle}'].attributes.entity_picture ]]]";
             tap_action = {
               action = "navigate";
-              navigation_path = "/music-assistant";
+              navigation_path = "/music_assistant";
             };
             name = ''
               [[[

@@ -41,7 +41,7 @@ let
       data.is_volume_muted = false;
       continue_on_error = true;
     }
-    { delay.seconds = 2; }
+    { delay.seconds = 1; }
   ];
 
   # Direct URL into HA's `www/` (served at `/local/`, no auth required).
@@ -148,6 +148,14 @@ in
       script = {
         action = prepare ++ [
           (playLocal "tagesschau_100s.mp3" "replace")
+          {
+            wait_template = "{{ is_state('${sonos}', 'playing') }}";
+            timeout.seconds = 10;
+          }
+          {
+            wait_template = "{{ not is_state('${sonos}', 'playing') }}";
+            timeout.minutes = 5;
+          }
           (playLocal "wdr_aktuell.mp3" "add")
         ];
         speech.text = "Hier ist deine tägliche Zusammenfassung.";
