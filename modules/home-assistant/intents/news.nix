@@ -73,6 +73,7 @@ in
       curl
       gnugrep
       coreutils
+      ffmpeg-headless
     ];
     script = ''
       set -u
@@ -99,6 +100,20 @@ in
           fetch_latest ${lib.escapeShellArg feed} ${lib.escapeShellArg "${newsDir}/${filename}"} || true
         '') feeds
       )}
+
+      # Combined "tägliche Zusammenfassung": Tagesschau then WDR Aktuell
+      # (boosted ~15% to match Tagesschau's louder mix). Single file
+      # because Sonos's HA integration refuses to reliably queue two
+      # arbitrary HTTP-URL tracks.
+      if [ -f "${newsDir}/tagesschau_100s.mp3" ] && [ -f "${newsDir}/wdr_aktuell.mp3" ]; then
+        ffmpeg -y -loglevel error \
+          -i "${newsDir}/tagesschau_100s.mp3" \
+          -i "${newsDir}/wdr_aktuell.mp3" \
+          -filter_complex "[0:a]volume=1.0[a0];[1:a]volume=1.15[a1];[a0][a1]concat=n=2:v=0:a=1[out]" \
+          -map "[out]" -c:a libmp3lame -b:a 128k \
+          "${newsDir}/zusammenfassung.tmp.mp3" \
+          && mv "${newsDir}/zusammenfassung.tmp.mp3" "${newsDir}/zusammenfassung.mp3"
+      fi
     '';
   };
 
@@ -146,18 +161,7 @@ in
         "Tägliche Zusammenfassung"
       ];
       script = {
-        action = prepare ++ [
-          (playLocal "tagesschau_100s.mp3" "replace")
-          {
-            wait_template = "{{ is_state('${sonos}', 'playing') }}";
-            timeout.seconds = 10;
-          }
-          {
-            wait_template = "{{ not is_state('${sonos}', 'playing') }}";
-            timeout.minutes = 5;
-          }
-          (playLocal "wdr_aktuell.mp3" "add")
-        ];
+        action = prepare ++ [ (playLocal "zusammenfassung.mp3" "replace") ];
         speech.text = "Hier ist deine tägliche Zusammenfassung.";
       };
     };
