@@ -46,14 +46,17 @@ in
           icon = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "MDI icon for the area";
           };
           humidityEntity = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "Entity ID for the area's humidity sensor";
           };
           temperatureEntity = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "Entity ID for the area's temperature sensor";
           };
         };
       }

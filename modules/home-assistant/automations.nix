@@ -6,26 +6,34 @@
     type = lib.types.attrsOf (
       lib.types.submodule {
         options = {
-          alias = lib.mkOption { type = lib.types.str; };
+          alias = lib.mkOption {
+            type = lib.types.str;
+            description = "Human-readable name shown in the UI";
+          };
           description = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "Longer description of what the automation does";
           };
           trigger = lib.mkOption {
             type = lib.types.listOf lib.types.anything;
             default = [ ];
+            description = "Triggers that fire the automation";
           };
           condition = lib.mkOption {
             type = lib.types.listOf lib.types.anything;
             default = [ ];
+            description = "Conditions that must hold when a trigger fires";
           };
           action = lib.mkOption {
             type = lib.types.listOf lib.types.anything;
             default = [ ];
+            description = "Sequence of actions executed when the automation runs";
           };
           mode = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "Execution mode (single, restart, queued, parallel)";
           };
         };
       }

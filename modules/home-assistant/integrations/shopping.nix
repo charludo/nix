@@ -12,21 +12,12 @@ in
     todo_entity = lib.mkOption {
       type = lib.types.str;
       default = "todo.einkaufsliste";
-      description = ''
-        HA todo entity ID to read uncompleted items from. Items with
-        ``status = "needs_action"`` are categorised; completed ones are
-        ignored.
-      '';
+      description = "HA todo entity ID to read uncompleted items from";
     };
 
     supermarkets = lib.mkOption {
       default = { };
-      description = ''
-        Map from supermarket display name → ``{ color, categories }``.
-        ``grocery_categorize.refresh`` writes into the single
-        ``sensor.einkaufsliste`` whose ``markdown`` attribute the
-        dashboard markdown card reads.
-      '';
+      description = "Map of supermarket display name → categories shown on the shopping dashboard";
       example = lib.literalExpression ''
         {
           ALDI.categories = [ "Obst" "Gemüse" "Milchprodukte" ];
@@ -41,23 +32,17 @@ in
           options = {
             categories = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              description = ''
-                Ordered list of category names (matching
-                ``custom_components/grocery_categorize/categories.py``).
-                Order = store aisle sequence. Categories not listed are
-                silently dropped from this supermarket's view; ``Sonstiges``
-                is always rendered last when non-empty.
-              '';
+              description = "Ordered list of category names; order = store aisle sequence";
             };
             color = lib.mkOption {
               type = lib.types.str;
               default = "var(--green)";
-              description = "CSS colour expression for the supermarket's button.";
+              description = "CSS colour expression for the supermarket's button";
             };
             icon = lib.mkOption {
               type = lib.types.str;
               default = "mdi:cart-outline";
-              description = "MDI icon shown on the supermarket's button.";
+              description = "MDI icon shown on the supermarket's button";
             };
           };
         }

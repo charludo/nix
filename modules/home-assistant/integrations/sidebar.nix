@@ -33,14 +33,17 @@ in
           name = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default = null;
+            description = "Override the display name shown in the sidebar";
           };
           hide = lib.mkOption {
             type = lib.types.bool;
             default = false;
+            description = "Hide this item from the sidebar entirely";
           };
           divider = lib.mkOption {
             type = lib.types.bool;
             default = false;
+            description = "Add a divider below this item";
           };
         };
       }

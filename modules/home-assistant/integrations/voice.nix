@@ -95,7 +95,7 @@ let
           Sentence patterns for this intent. Patterns may reference
           Hassil expansion rules (``<rule>``), built-in HA slot lists
           (``{name}``, ``{area}``, ``{timer_hours:hours}``), or custom
-          slot lists declared via the sibling ``lists`` option.
+          slot lists declared via the sibling ``lists`` option
         '';
       };
       script = lib.mkOption {
@@ -103,14 +103,14 @@ let
         default = null;
         description = ''
           ``intent_script`` body for this intent — usually
-          ``{ speech.text = ...; action = [ ... ]; }``.
+          ``{ speech.text = ...; action = [ ... ]; }``
         '';
       };
       language = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
         defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
-        description = "Language code; falls back to ``hass.voice.defaultLanguage``.";
+        description = "Language code; falls back to ``hass.voice.defaultLanguage``";
       };
       lists = lib.mkOption {
         type = yamlFormat.type;
@@ -118,18 +118,18 @@ let
         description = ''
           Hassil slot lists merged into this language's custom_sentences
           file. Supports ``{ values = [...]; }``, ``{ wildcard = true; }``,
-          and ``{ range.from = N; range.to = M; }``.
+          and ``{ range.from = N; range.to = M; }``
         '';
       };
       expansionRules = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         default = { };
-        description = "Hassil expansion rules merged into this language's custom_sentences file.";
+        description = "Hassil expansion rules merged into this language's custom_sentences file";
       };
       responses = lib.mkOption {
         type = yamlFormat.type;
         default = { };
-        description = "Hassil ``responses`` merged into this language's custom_sentences file.";
+        description = "Hassil ``responses`` merged into this language's custom_sentences file";
       };
     };
   };
@@ -142,7 +142,7 @@ in
       ``sentences`` and/or ``script`` (plus optional ``language``,
       ``lists``, ``expansionRules``, ``responses``). All intents are
       grouped by language and emitted as a single
-      ``custom_sentences/<lang>/nix.yaml`` file.
+      ``custom_sentences/<lang>/nix.yaml`` file
     '';
     type = lib.types.submodule {
       freeformType = lib.types.attrsOf intentType;
@@ -150,7 +150,7 @@ in
         defaultLanguage = lib.mkOption {
           type = lib.types.str;
           default = "en";
-          description = "Fallback language for intents that don't set ``language``.";
+          description = "Fallback language for intents that don't set ``language``";
         };
         extraConfig = lib.mkOption {
           type = lib.types.attrsOf yamlFormat.type;
@@ -159,7 +159,7 @@ in
             Extra top-level keys merged into the per-language
             custom_sentences file, keyed by language code. Use for
             things like ``skip_words`` that apply to the whole file
-            rather than a single intent.
+            rather than a single intent
           '';
           example = lib.literalExpression ''
             { de.skip_words = [ "bitte" "mal" ]; }

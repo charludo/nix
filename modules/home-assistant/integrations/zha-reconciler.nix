@@ -49,6 +49,7 @@ in
     url = lib.mkOption {
       type = lib.types.str;
       default = "http://127.0.0.1:8123";
+      description = "Base URL of the local Home Assistant instance";
     };
 
     tokenPath = lib.mkOption {
