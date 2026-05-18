@@ -73,9 +73,9 @@ in
 
   weather-radar-card = mkCard {
     pname = "weather-radar-card";
-    version = "3.1.2-beta-1";
-    url = "https://github.com/Makin-Things/weather-radar-card/releases/download/v3.1.2-beta-1/weather-radar-card.js";
-    sha256 = "sha256-dQSNzFLXnuVMstH3iE8VPHq/ZRyTvb2gXPTO/mIW+FQ=";
+    version = "3.6.0";
+    url = "https://github.com/Makin-Things/weather-radar-card/releases/download/v3.6.0/weather-radar-card.js";
+    sha256 = "sha256-Pvwb7sKBG5fWOUmMv+8qKZ/wLCy0HvI0mkgVh1MLD3w=";
   };
 
   google-fonts-quicksand = mkFontLoader {
