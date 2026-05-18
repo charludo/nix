@@ -42,8 +42,14 @@ in
       }
       {
         trigger = [
-          { platform = "homeassistant"; event = "start"; }
-          { platform = "time_pattern"; minutes = "/15"; }
+          {
+            platform = "homeassistant";
+            event = "start";
+          }
+          {
+            platform = "time_pattern";
+            minutes = "/15";
+          }
         ];
         action = [
           {

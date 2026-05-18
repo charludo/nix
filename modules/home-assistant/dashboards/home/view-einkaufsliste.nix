@@ -1,4 +1,8 @@
-{ lib, supermarkets, todoEntity }:
+{
+  lib,
+  supermarkets,
+  todoEntity,
+}:
 let
   ha = lib.ha;
 
@@ -75,11 +79,9 @@ let
   # itself doesn't accept a `columns` field — when too many buttons
   # share one HStack the cells get squished — so we chunk into
   # multiple HStacks of fixed width.
-  chunk = perRow: list:
-    if list == [ ] then
-      [ ]
-    else
-      [ (lib.take perRow list) ] ++ chunk perRow (lib.drop perRow list);
+  chunk =
+    perRow: list:
+    if list == [ ] then [ ] else [ (lib.take perRow list) ] ++ chunk perRow (lib.drop perRow list);
 
   allButtons = lib.mapAttrsToList mkSupermarketButton supermarkets ++ [ printButton ];
   buttonRows = map ha.mkHStack (chunk 3 allButtons);

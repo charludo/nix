@@ -41,19 +41,16 @@ let
       forLang = lib.filter (i: i.language == lang) intentList;
     in
     lib.foldl'
-      (
-        acc: i:
-        {
-          intents =
-            acc.intents
-            // lib.optionalAttrs (i.sentences != [ ]) {
-              ${i.name}.data = [ { sentences = i.sentences; } ];
-            };
-          lists = acc.lists // i.lists;
-          expansion_rules = acc.expansion_rules // i.expansionRules;
-          responses = acc.responses // i.responses;
-        }
-      )
+      (acc: i: {
+        intents =
+          acc.intents
+          // lib.optionalAttrs (i.sentences != [ ]) {
+            ${i.name}.data = [ { sentences = i.sentences; } ];
+          };
+        lists = acc.lists // i.lists;
+        expansion_rules = acc.expansion_rules // i.expansionRules;
+        responses = acc.responses // i.responses;
+      })
       {
         intents = { };
         lists = { };
@@ -68,7 +65,9 @@ let
       m = mergeForLang lang;
       extra = cfg.extraConfig.${lang} or { };
     in
-    { language = lang; }
+    {
+      language = lang;
+    }
     // (lib.optionalAttrs (m.intents != { }) { inherit (m) intents; })
     // (lib.optionalAttrs (m.lists != { }) { inherit (m) lists; })
     // (lib.optionalAttrs (m.expansion_rules != { }) { inherit (m) expansion_rules; })

@@ -16,7 +16,9 @@ let
     "{{ {'sunny':'sonnig','clear-night':'klar','cloudy':'bewölkt','partlycloudy':'teilweise bewölkt','rainy':'regnerisch','pouring':'stark regnerisch','lightning':'gewittrig','lightning-rainy':'gewittrig mit Regen','snowy':'schneit','snowy-rainy':'Schneeregen','fog':'neblig','hail':'Hagel','windy':'windig','windy-variant':'windig','exceptional':'außergewöhnlich'}.get(${expr}, ${expr}) }}";
 
   # German weekday name from an ISO datetime string.
-  weekday = expr: "{{ ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][as_datetime(${expr}).weekday()] }}";
+  weekday =
+    expr:
+    "{{ ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][as_datetime(${expr}).weekday()] }}";
 
   hoursList.lists.hours.range = {
     from = 0;

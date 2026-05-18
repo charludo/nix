@@ -13,6 +13,7 @@
     ./sonos.nix
     ./voice.nix
     ./xiaomi.nix
+    ./zha-reconciler.nix
     ./zigbee.nix
   ];
 }
