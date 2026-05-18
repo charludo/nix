@@ -277,7 +277,7 @@ in
                   "grid-template-columns" = "min-content 24px 1fr";
                   "grid-template-rows" = "min-content";
                 };
-                custom_fields = ha.mkCustomFieldStyles {
+                custom_fields = ha.mkStyles {
                   image = {
                     "--mdc-ripple-press-opacity" = 0.5;
                   };

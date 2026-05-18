@@ -57,102 +57,71 @@ in
           type = "grid";
           columns = 1;
           cards = [
-            (ha.mkConditional [ (ha.stateIs e.media_player.alle "playing") ] {
-              type = "custom:button-card";
-              icon = "mdi:pause";
-              entity = e.media_player.alle;
-              name = "Musik anhalten";
-              label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
-              show_label = true;
-              tap_action = {
-                action = "perform-action";
+            (ha.mkConditional [ (ha.stateIs e.media_player.alle "playing") ] (
+              ha.mkActionCard {
+                name = "Musik anhalten";
+                icon = "mdi:pause";
+                entity = e.media_player.alle;
+                label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
+                service = e.script.sonos_play_pause;
                 haptic = "medium";
-                perform_action = e.script.sonos_play_pause;
-              };
-              styles = ha.mkActionCardStyles {
                 cardBg = "var(--yellow)";
                 iconColor = "var(--black)";
                 nameColor = "var(--black)";
-                extraCardProps = {
-                  "margin-top" = "24px";
+                extraCardProps."margin-top" = "24px";
+              }
+            ))
+            (ha.mkConditional [ (ha.stateIs e.binary_sensor.tursensor.opening "on") ] (
+              ha.mkActionCard {
+                name = "Wohnungstür offen";
+                icon = "mdi:door-open";
+                entity = e.binary_sensor.tursensor.opening;
+                label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
+                service = e.script.botty_zurueckkehren;
+                holdAction = {
+                  action = "more-info";
+                  haptic = "medium";
                 };
-              };
-            })
-            (ha.mkConditional [ (ha.stateIs e.binary_sensor.tursensor.opening "on") ] {
-              type = "custom:button-card";
-              icon = "mdi:door-open";
-              name = "Wohnungstür offen";
-              entity = e.binary_sensor.tursensor.opening;
-              label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
-              show_label = true;
-              tap_action = {
-                action = "perform-action";
-                perform_action = e.script.botty_zurueckkehren;
-                haptic = "success";
-              };
-              hold_action = {
-                action = "more-info";
-                haptic = "medium";
-              };
-              styles = ha.mkActionCardStyles {
                 cardBg = "var(--red)";
                 iconColor = "var(--contrast1)";
                 nameColor = "var(--contrast1)";
                 zIndex = 1;
-                extraCardProps = {
-                  "margin-top" = "24px";
+                extraCardProps."margin-top" = "24px";
+              }
+            ))
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.turalarm_persistent "on") ] (
+              ha.mkActionCard {
+                name = "Wohnungstür wurde geöffnet";
+                icon = "mdi:door-open";
+                entity = e.binary_sensor.tursensor.opening;
+                label = ''[[[return "letzte Änderung: " + states["${e.sensor.tursensor_last_changed}"].state + ", jetzt: " + states["${e.binary_sensor.tursensor.opening}"].state ]]]'';
+                service = "input_boolean.turn_off";
+                serviceData.entity_id = e.input_boolean.turalarm_persistent;
+                holdAction = {
+                  action = "more-info";
+                  haptic = "medium";
                 };
-              };
-            })
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.turalarm_persistent "on") ] {
-              type = "custom:button-card";
-              icon = "mdi:door-open";
-              name = "Wohnungstür wurde geöffnet";
-              entity = e.binary_sensor.tursensor.opening;
-              label = ''[[[return "letzte Änderung: " + states["${e.sensor.tursensor_last_changed}"].state + ", jetzt: " + states["${e.binary_sensor.tursensor.opening}"].state ]]]'';
-              show_label = true;
-              hold_action = {
-                action = "more-info";
-                haptic = "medium";
-              };
-              tap_action = {
-                action = "perform-action";
-                perform_action = "input_boolean.turn_off";
-                data.entity_id = e.input_boolean.turalarm_persistent;
-                haptic = "success";
-              };
-              confirmation.text = "Sicher, dass du die Warnung deaktivieren möchtest?";
-              styles = ha.mkActionCardStyles {
+                confirmation = "Sicher, dass du die Warnung deaktivieren möchtest?";
                 cardBg = "var(--red)";
                 iconColor = "var(--contrast1)";
                 nameColor = "var(--contrast1)";
                 zIndex = 1;
-                extraCardProps = {
-                  "margin-top" = "24px";
-                };
-              };
-            })
-            (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] {
-              type = "custom:button-card";
-              icon = "mdi:robot-vacuum";
-              name = "Botty anhalten";
-              label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
-              show_label = true;
-              tap_action = {
-                action = "perform-action";
-                perform_action = e.script.botty_pausieren;
-                haptic = "success";
-              };
-              styles = ha.mkActionCardStyles {
+                extraCardProps."margin-top" = "24px";
+              }
+            ))
+            (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] (
+              ha.mkActionCard {
+                name = "Botty anhalten";
+                icon = "mdi:robot-vacuum";
+                label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
+                service = e.script.botty_pausieren;
                 cardBg = "var(--blue)";
                 iconColor = "var(--contrast1)";
                 nameColor = "var(--contrast1)";
                 zIndex = 1;
-                extraCardProps = {
-                  "margin-top" = "24px";
-                };
-              };
-            })
+                extraCardProps."margin-top" = "24px";
+              }
+            ))
           ];
         }
 
@@ -275,7 +244,7 @@ in
                     "grid-template-columns" = "1fr min-content";
                     "grid-template-rows" = "1fr min-content min-content";
                   };
-                  custom_fields = ha.mkCustomFieldStyles {
+                  custom_fields = ha.mkStyles {
                     uren = {
                       "font-size" = "12px";
                       color = "var(--contrast9)";

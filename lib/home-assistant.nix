@@ -40,11 +40,8 @@ rec {
   mkStyleProp = lib.mapAttrsToList (k: v: { ${k} = v; });
 
   # { card = { height = "84px"; }; icon = { color = "var(--black)"; }; }
-  # → { card = [...]; icon = [...]; }
+  # → { card = [{ height = "84px"; }]; icon = [{ color = "var(--black)"; }]; }
   mkStyles = lib.mapAttrs (_: mkStyleProp);
-
-  # Same as mkStyles but for custom_fields sub-styles
-  mkCustomFieldStyles = lib.mapAttrs (_: mkStyleProp);
 
   # ---------------------------------------------------------------------------
   # Condition builders (for conditional cards)
@@ -104,11 +101,9 @@ rec {
         // lib.optionalAttrs (nameColor != null) { name.color = nameColor; };
     in
     lib.filterAttrs (_: v: v != null) {
-      inherit value;
+      inherit value name icon;
       operator = _stateOperator value;
       styles = mkStyles (convenienceStyles // styles);
-      name = name;
-      icon = icon;
     };
 
   # ---------------------------------------------------------------------------
@@ -343,9 +338,17 @@ rec {
     };
 
   # ---------------------------------------------------------------------------
-  # Sections view helpers
+  # Stacks and sections
   # ---------------------------------------------------------------------------
 
+  mkHStack = cards: {
+    type = "horizontal-stack";
+    inherit cards;
+  };
+  mkVStack = cards: {
+    type = "vertical-stack";
+    inherit cards;
+  };
   mkGridSection = cards: {
     type = "grid";
     inherit cards;
@@ -475,6 +478,57 @@ rec {
         "justify-self" = "start";
         color = labelColor;
         "font-size" = "12px";
+      };
+    };
+
+  # button-card calling a service via perform-action, styled with
+  # mkActionCardStyles. Optional fields are dropped from the result.
+  mkActionCard =
+    {
+      name,
+      icon,
+      service,
+      label ? null,
+      entity ? null,
+      state ? null,
+      serviceData ? null,
+      holdAction ? null,
+      confirmation ? null,
+      haptic ? "success",
+      cardBg ? "var(--contrast2)",
+      iconColor ? "var(--contrast8)",
+      nameColor ? "var(--contrast8)",
+      labelColor ? "var(--contrast5)",
+      zIndex ? null,
+      extraCardProps ? { },
+    }:
+    lib.filterAttrs (_: v: v != null) {
+      type = "custom:button-card";
+      inherit
+        name
+        icon
+        label
+        entity
+        state
+        ;
+      show_label = if label != null then true else null;
+      tap_action = {
+        inherit haptic;
+        action = "perform-action";
+        perform_action = service;
+      }
+      // lib.optionalAttrs (serviceData != null) { data = serviceData; };
+      hold_action = holdAction;
+      confirmation = if confirmation == null then null else { text = confirmation; };
+      styles = mkActionCardStyles {
+        inherit
+          cardBg
+          iconColor
+          nameColor
+          labelColor
+          zIndex
+          extraCardProps
+          ;
       };
     };
 
@@ -709,7 +763,7 @@ rec {
         })
         // {
           grid = mkStyleProp { "grid-template-areas" = ''"n" "badge"''; };
-          custom_fields = mkCustomFieldStyles {
+          custom_fields = mkStyles {
             badge = {
               margin = badgeMargin;
               "--mdc-ripple-press-opacity" = 0.5;
@@ -767,7 +821,7 @@ rec {
             "grid-template-areas" = ''"n eenheid" "l l"'';
             "grid-template-columns" = "min-content min-content";
           };
-          custom_fields = mkCustomFieldStyles {
+          custom_fields = mkStyles {
             eenheid = {
               "font-size" = "12px";
               color = "var(--contrast9)";
@@ -777,15 +831,6 @@ rec {
           };
         };
     };
-
-  mkHStack = cards: {
-    type = "horizontal-stack";
-    inherit cards;
-  };
-  mkVStack = cards: {
-    type = "vertical-stack";
-    inherit cards;
-  };
 
   robotIcon = "[[[ return entity?.state === 'on' ? 'mdi:robot-happy' : 'mdi:robot-dead'; ]]]";
 }

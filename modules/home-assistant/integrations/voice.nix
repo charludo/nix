@@ -6,15 +6,12 @@
 }:
 let
   cfg = config.hass.voice;
-  haDir = config.services.home-assistant.configDir;
   yamlFormat = pkgs.formats.yaml { };
 
-  reservedKeys = [
+  intents = removeAttrs cfg [
     "defaultLanguage"
     "extraConfig"
   ];
-
-  intents = removeAttrs cfg reservedKeys;
 
   intentList = lib.mapAttrsToList (
     name: i:
@@ -183,7 +180,7 @@ in
     };
 
     systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
-      "10-hass-custom-sentences"."${haDir}/custom_sentences" = {
+      "10-hass-custom-sentences"."${config.services.home-assistant.configDir}/custom_sentences" = {
         "L+".argument = "${sentencesDir}";
       };
     };

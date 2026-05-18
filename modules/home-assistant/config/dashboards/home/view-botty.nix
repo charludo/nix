@@ -131,59 +131,48 @@ in
             name = "Sofa";
             icon = "mdi:sofa-single";
           })
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] {
-            type = "custom:button-card";
-            icon = "mdi:numeric-1-box";
-            entity = e.input_number.botty_wiederholungen;
-            name = "Anzahl";
-            label = "Wiederholungen";
-            show_label = true;
-            state = [
-              {
-                value = "1.0";
-                icon = "mdi:numeric-1-box";
-              }
-              {
-                value = "2.0";
-                icon = "mdi:numeric-2-box";
-              }
-              {
-                value = "3.0";
-                icon = "mdi:numeric-3-box";
-              }
-            ];
-            tap_action = {
-              action = "perform-action";
-              perform_action = e.script.botty_wiederholungen;
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] (
+            ha.mkActionCard {
+              name = "Anzahl";
+              icon = "mdi:numeric-1-box";
+              label = "Wiederholungen";
+              entity = e.input_number.botty_wiederholungen;
+              service = e.script.botty_wiederholungen;
               haptic = "medium";
-            };
-            styles = ha.mkActionCardStyles {
+              state = [
+                {
+                  value = "1.0";
+                  icon = "mdi:numeric-1-box";
+                }
+                {
+                  value = "2.0";
+                  icon = "mdi:numeric-2-box";
+                }
+                {
+                  value = "3.0";
+                  icon = "mdi:numeric-3-box";
+                }
+              ];
               cardBg = "var(--contrast20)";
               iconColor = "var(--contrast1)";
               nameColor = "var(--contrast1)";
               labelColor = "var(--contrast1)";
               zIndex = 1;
-            };
-          })
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] {
-            type = "custom:button-card";
-            icon = "mdi:robot-vacuum";
-            name = "Reinigung";
-            label = "starten";
-            show_label = true;
-            tap_action = {
-              action = "perform-action";
-              perform_action = e.script.botty_reinigung;
-              haptic = "success";
-            };
-            styles = ha.mkActionCardStyles {
+            }
+          ))
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] (
+            ha.mkActionCard {
+              name = "Reinigung";
+              icon = "mdi:robot-vacuum";
+              label = "starten";
+              service = e.script.botty_reinigung;
               cardBg = "var(--green)";
               iconColor = "var(--black)";
               nameColor = "var(--black)";
               labelColor = "var(--black)";
               zIndex = 1;
-            };
-          })
+            }
+          ))
           (ha.mkConditional
             [
               (ha.orConditions [
@@ -191,63 +180,45 @@ in
                 (ha.stateIs e.vacuum.botty "cleaning")
               ])
             ]
-            {
-              type = "custom:button-card";
-              icon = "mdi:pause";
-              name = "Pausieren";
-              label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
-              show_label = true;
-              tap_action = {
-                action = "perform-action";
-                perform_action = e.script.botty_pausieren;
-                haptic = "success";
-              };
-              styles = ha.mkActionCardStyles {
+            (
+              ha.mkActionCard {
+                name = "Pausieren";
+                icon = "mdi:pause";
+                label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
+                service = e.script.botty_pausieren;
                 cardBg = "var(--white)";
                 iconColor = "var(--black)";
                 nameColor = "var(--black)";
                 labelColor = "var(--contrast7)";
                 zIndex = 1;
-              };
-            }
+              }
+            )
           )
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "paused") ] {
-            type = "custom:button-card";
-            icon = "mdi:play";
-            name = "Fortsetzen";
-            label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
-            show_label = true;
-            tap_action = {
-              action = "perform-action";
-              perform_action = e.script.botty_fortsetzen;
-              haptic = "success";
-            };
-            styles = ha.mkActionCardStyles {
+          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "paused") ] (
+            ha.mkActionCard {
+              name = "Fortsetzen";
+              icon = "mdi:play";
+              label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
+              service = e.script.botty_fortsetzen;
               cardBg = "var(--white)";
               iconColor = "var(--black)";
               nameColor = "var(--black)";
               labelColor = "var(--contrast7)";
               zIndex = 1;
-            };
-          })
-          (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] {
-            type = "custom:button-card";
-            icon = "mdi:home";
-            name = "Beenden";
-            label = ''[[[return states["${e.sensor.botty_aktueller_reinigungsbereich}"].state + "m² gereinigt"]]]'';
-            show_label = true;
-            tap_action = {
-              action = "perform-action";
-              perform_action = e.script.botty_zurueckkehren;
-              haptic = "success";
-            };
-            styles = ha.mkActionCardStyles {
+            }
+          ))
+          (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] (
+            ha.mkActionCard {
+              name = "Beenden";
+              icon = "mdi:home";
+              label = ''[[[return states["${e.sensor.botty_aktueller_reinigungsbereich}"].state + "m² gereinigt"]]]'';
+              service = e.script.botty_zurueckkehren;
               cardBg = "var(--red)";
               iconColor = "var(--contrast1)";
               nameColor = "var(--contrast1)";
               zIndex = 1;
-            };
-          })
+            }
+          ))
         ])
 
         # Brush remaining counters row 1
