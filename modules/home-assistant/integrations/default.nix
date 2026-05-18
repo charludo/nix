@@ -9,6 +9,7 @@
     ./music-assistant.nix
     ./oidc.nix
     ./openweathermap.nix
+    ./persons.nix
     ./shopping.nix
     ./sonos.nix
     ./voice.nix

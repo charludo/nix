@@ -11,13 +11,43 @@ let
 
   # [{ ieee, name, area_slug }]; ieees are normalised to lowercase for
   # case-insensitive matching against whatever ZHA returns.
-  manifest = lib.mapAttrsToList (deviceName: dev: {
+  zhaManifest = lib.mapAttrsToList (deviceName: dev: {
     ieee = lib.toLower dev.id;
     name = deviceName;
     area_slug = mkSlug dev.area;
   }) cfg.devices.zigbee;
 
-  manifestFile = pkgs.writeText "zha-reconciler-manifest.json" (builtins.toJSON manifest);
+  # [{ entity_id, area_slug }]: every non-zigbee declared device that has
+  # an area, addressed by its predictable entity_id. The reconciler will
+  # prefer to set area on the owning device when one exists, otherwise
+  # fall back to entity-level area assignment.
+  entityManifest =
+    let
+      collect =
+        domain: attrs:
+        lib.mapAttrsToList (slug: v: {
+          entity_id = "${domain}.${slug}";
+          area_slug = mkSlug v.area;
+        }) (lib.filterAttrs (_: v: v.area != null) attrs);
+      # Mobile-app phones don't have an `area` field in their submodule,
+      # so they're naturally excluded. If you ever want phone areas, add
+      # `area` to the mobile_apps submodule and include them here as
+      # device_tracker.<slug>.
+    in
+    lib.concatLists [
+      (collect "input_boolean" cfg.devices.input_booleans)
+      (collect "input_number" cfg.devices.input_numbers)
+      (collect "media_player" cfg.devices.media_players)
+      (collect "vacuum" cfg.devices.vacuums)
+      (collect "fan" cfg.devices.fans)
+      (collect "image" cfg.devices.images)
+      (collect "sun" cfg.devices.suns)
+      (collect "weather" cfg.devices.weathers)
+      (collect "sensor" cfg.devices.sensors)
+    ];
+
+  zhaManifestFile = pkgs.writeText "zha-reconciler-zha.json" (builtins.toJSON zhaManifest);
+  entityManifestFile = pkgs.writeText "zha-reconciler-entities.json" (builtins.toJSON entityManifest);
 
   reconciler = pkgs.ours.home-assistant.zha-reconciler;
 in
@@ -58,7 +88,8 @@ in
       # Re-run whenever the manifest or script hash changes (i.e. whenever
       # devices.zigbee changes), via switch-to-configuration restart logic.
       restartTriggers = [
-        manifestFile
+        zhaManifestFile
+        entityManifestFile
         reconciler
       ];
       serviceConfig = {
@@ -78,7 +109,8 @@ in
         exec ${reconciler}/bin/zha-reconciler \
           --url ${lib.escapeShellArg rcfg.url} \
           --token-file "$CREDENTIALS_DIRECTORY/token" \
-          --manifest ${manifestFile}
+          --manifest ${zhaManifestFile} \
+          --entity-manifest ${entityManifestFile}
       '';
     };
   };

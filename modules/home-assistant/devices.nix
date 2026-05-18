@@ -181,6 +181,13 @@ let
     script = lib.mapAttrs (slug: _: "script.${slug}") cfg.scripts;
     automation = lib.mapAttrs (slug: _: "automation.${slug}") cfg.automations;
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
+    person = lib.mapAttrs' (
+      name: _:
+      let
+        slug = mkSlug name;
+      in
+      lib.nameValuePair slug "person.${slug}"
+    ) (cfg.persons or { });
 
     # Mobile-app phones produce notify-service strings, slugified from their
     # human-readable name (the Companion-app device name in HA).
@@ -190,6 +197,17 @@ let
         slug = mkSlug name;
       in
       lib.nameValuePair slug "notify.mobile_app_${slug}"
+    ) cfg.devices.mobile_apps;
+
+    # The mobile_app integration also creates a device_tracker entity per
+    # paired phone, named after the same slug. Exposed here so persons can
+    # reference it as e.device_tracker.<slug>.
+    device_tracker = lib.mapAttrs' (
+      name: _:
+      let
+        slug = mkSlug name;
+      in
+      lib.nameValuePair slug "device_tracker.${slug}"
     ) cfg.devices.mobile_apps;
   };
 
