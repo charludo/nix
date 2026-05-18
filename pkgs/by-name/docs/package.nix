@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   nixosOptionsDoc,
   mdbook,
   stdenv,
@@ -11,6 +12,7 @@ let
     lib.evalModules {
       modules = [
         module
+        { _module.args.pkgs = pkgs; }
         ({ config._module.check = false; } // extraConfig)
       ];
     };
