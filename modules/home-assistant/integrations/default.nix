@@ -2,18 +2,11 @@
   imports = [
     ./areas.nix
     ./closest_intent.nix
-    ./helpers.nix
-    ./sidebar.nix
-    ./lgtv.nix
-    ./lights.nix
-    ./music-assistant.nix
-    ./oidc.nix
     ./openweathermap.nix
     ./persons.nix
     ./shopping.nix
-    ./sonos.nix
+    ./sidebar.nix
     ./voice.nix
-    ./xiaomi.nix
     ./zha-reconciler.nix
     ./zigbee.nix
   ];

@@ -1,0 +1,295 @@
+{
+  hass.devices = {
+    mobile_apps = {
+      "Phone Charlotte" = { };
+      "Phone Marie" = { };
+    };
+
+    media_players = {
+      alle = { };
+      living_room.area = "Wohnzimmer";
+      office.area = "Büro";
+      lg_c4.area = "Wohnzimmer";
+    };
+
+    vacuums.botty.area = "Wohnzimmer";
+
+    fans.xiaomi_smart_fan.area = "Wohnzimmer";
+
+    images.botty_live_map.area = "Wohnzimmer";
+
+    suns.sun = { };
+
+    weathers.openweathermap = { };
+
+    sensors = {
+      cumulative_rain_8h.area = "Terrasse";
+      cumulative_rain_24h.area = "Terrasse";
+      botty_current_clean_area.area = "Wohnzimmer";
+      botty_aktuelle_reinigungsdauer.area = "Wohnzimmer";
+      botty_aktueller_reinigungsbereich.area = "Wohnzimmer";
+      botty_restkapazitat_der_hauptburste.area = "Wohnzimmer";
+      botty_restkapazitat_der_seitenburste.area = "Wohnzimmer";
+      botty_filter_restkapazitat.area = "Wohnzimmer";
+      botty_bis_sensorreinigung_verbleibend.area = "Wohnzimmer";
+      delayed_thermometer_gewachshaus_temperature.area = "Terrasse";
+      tursensor_last_changed.area = "Wohnzimmer";
+      openweathermap_gefuhlte_temperatur = { };
+      openweathermap_temperatur = { };
+      openweathermap_windgeschwindigkeit = { };
+      openweathermap_bewolkung = { };
+      openweathermap_regenintensitat = { };
+      openweathermap_windboengeschwindigkeit = { };
+      openweathermap_forecast_daily = { };
+      openweathermap_forecast_hourly = { };
+      weather_wind_gust.area = "Terrasse";
+      sun_next_dawn = { };
+      sun_next_dusk = { };
+    };
+
+    input_booleans = {
+      settings_garten_anzucht = {
+        name = "Garten: Anzucht";
+        icon = "mdi:sprout";
+        area = "Terrasse";
+      };
+      settings_garten_bewasserung = {
+        name = "Garten: Bewässerung";
+        icon = "mdi:water";
+        area = "Terrasse";
+      };
+      settings_garten_heizung = {
+        name = "Garten: Heizung";
+        icon = "mdi:radiator";
+        area = "Terrasse";
+      };
+      turalarm = {
+        name = "Türalarm";
+        area = "Wohnzimmer";
+      };
+      turalarm_persistent = {
+        name = "Türalarm (dauerhaft)";
+        area = "Wohnzimmer";
+      };
+      botty_wohnzimmer_reinigen = {
+        name = "Botty: Wohnzimmer reinigen";
+        area = "Wohnzimmer";
+      };
+      botty_buro_reinigen = {
+        name = "Botty: Büro reinigen";
+        area = "Wohnzimmer";
+      };
+      botty_kueche_reinigen = {
+        name = "Botty: Küche reinigen";
+        area = "Wohnzimmer";
+      };
+      botty_sofa_reinigen = {
+        name = "Botty: Sofa reinigen";
+        area = "Wohnzimmer";
+      };
+    };
+
+    input_numbers = {
+      botty_wiederholungen = {
+        name = "Botty: Wiederholungen";
+        min = 1;
+        max = 3;
+        step = 1;
+        initial = 1;
+        area = "Wohnzimmer";
+      };
+      stunden_sonnenlicht_setzlinge = {
+        name = "Sonnenlicht-Stunden (Setzlinge)";
+        min = 1;
+        max = 24;
+        step = 1;
+        initial = 14;
+        area = "Terrasse";
+      };
+    };
+
+    zigbee = {
+      "Bewegungsmelder" = {
+        id = "00:12:4b:00:2a:64:f5:1f";
+        binary_sensor = [ "motion" ];
+        diagnostic = [ "battery" ];
+        area = "Schlafzimmer";
+      };
+
+      "Steckdose Serverschrank" = {
+        id = "a4:c1:38:a7:09:97:ff:85";
+        sensor = [
+          "current"
+          "power"
+          "summation_delivered"
+          "voltage"
+        ];
+        switch = [
+          "child_lock"
+          "switch"
+        ];
+        select = [
+          "backlight_mode"
+          "power_on_state"
+        ];
+        area = "Büro";
+      };
+
+      "Steckdose Gewächshaus Heizung" = {
+        id = "a4:c1:38:e4:68:4c:2e:f8";
+        sensor = [
+          "current"
+          "power"
+          "summation_delivered"
+          "voltage"
+        ];
+        switch = [
+          "child_lock"
+          "switch"
+        ];
+        select = [
+          "backlight_mode"
+          "power_on_state"
+        ];
+        area = "Terrasse";
+      };
+
+      "Steckdose Wasserpumpe" = {
+        id = "a4:c1:38:7a:85:ae:fb:a3";
+        sensor = [
+          "current"
+          "power"
+          "summation_delivered"
+          "voltage"
+        ];
+        switch = [
+          "child_lock"
+          "switch"
+        ];
+        select = [
+          "backlight_mode"
+          "power_on_state"
+        ];
+        area = "Terrasse";
+      };
+
+      "Thermometer Badezimmer" = {
+        id = "00:12:4b:00:2a:5d:46:ac";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Badezimmer";
+      };
+
+      "Thermometer Büro" = {
+        id = "00:12:4b:00:2a:5c:b0:a1";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Büro";
+      };
+
+      "Thermometer Filamentbox" = {
+        id = "00:12:4b:00:2a:5d:1c:3e";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Büro";
+      };
+
+      "Thermometer Schlafzimmer" = {
+        id = "00:12:4b:00:2a:5c:b4:14";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Schlafzimmer";
+      };
+
+      "Thermometer Serverschrank" = {
+        id = "00:12:4b:00:2a:5d:0e:3e";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Büro";
+      };
+
+      "Thermometer Wohnzimmer" = {
+        id = "00:12:4b:00:2a:5d:23:0b";
+        sensor = [
+          "humidity"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Wohnzimmer";
+      };
+
+      "Thermometer Gewächshaus" = {
+        id = "00:15:8d:00:09:45:19:da";
+        sensor = [
+          "humidity"
+          "pressure"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Terrasse";
+      };
+
+      "Thermometer Terrasse" = {
+        id = "00:15:8d:00:09:45:18:3a";
+        sensor = [
+          "humidity"
+          "pressure"
+          "temperature"
+        ];
+        diagnostic = [ "battery" ];
+        area = "Terrasse";
+      };
+
+      "Türsensor" = {
+        id = "00:12:4b:00:2a:64:f5:20";
+        binary_sensor = [ "opening" ];
+        diagnostic = [ "battery" ];
+        area = "Wohnzimmer";
+      };
+
+      "Steckdose Pflanzenlicht" = {
+        id = "a4:c1:38:e4:68:4c:2e:01";
+        sensor = [
+          "current"
+          "power"
+          "summation_delivered"
+          "voltage"
+        ];
+        switch = [
+          "child_lock"
+          "switch"
+        ];
+        select = [
+          "backlight_mode"
+          "power_on_state"
+        ];
+        area = "Terrasse";
+      };
+
+      "Strahler" = {
+        id = "00:17:88:01:08:5b:76:98";
+        light = [ "light" ];
+        number = [
+          "start_up_color_temperature"
+          "start_up_current_level"
+        ];
+        area = "Wohnzimmer";
+      };
+    };
+  };
+}

@@ -7,6 +7,7 @@
     ./music.nix
     ./news.nix
     ./time.nix
+    ./test_en.nix
     ./tv.nix
     ./weather.nix
   ];
