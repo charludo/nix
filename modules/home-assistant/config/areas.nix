@@ -1,35 +1,31 @@
 { config, ... }:
+let
+  thermo = name: {
+    temperatureEntity = config.hass.entities.sensor.${name}.temperature;
+    humidityEntity = config.hass.entities.sensor.${name}.humidity;
+  };
+in
 {
   hass.areas = {
-    "Terrasse" = {
+    "Terrasse" = thermo "thermometer_terrasse" // {
       order = 1;
       icon = "mdi:sprout";
-      temperatureEntity = config.hass.entities.sensor.thermometer_terrasse.temperature;
-      humidityEntity = config.hass.entities.sensor.thermometer_terrasse.humidity;
     };
-    "Wohnzimmer" = {
+    "Wohnzimmer" = thermo "thermometer_wohnzimmer" // {
       order = 2;
       icon = "mdi:sofa";
-      temperatureEntity = config.hass.entities.sensor.thermometer_wohnzimmer.temperature;
-      humidityEntity = config.hass.entities.sensor.thermometer_wohnzimmer.humidity;
     };
-    "Büro" = {
+    "Büro" = thermo "thermometer_buro" // {
       order = 3;
       icon = "mdi:desktop-classic";
-      temperatureEntity = config.hass.entities.sensor.thermometer_buro.temperature;
-      humidityEntity = config.hass.entities.sensor.thermometer_buro.humidity;
     };
-    "Schlafzimmer" = {
+    "Schlafzimmer" = thermo "thermometer_schlafzimmer" // {
       order = 4;
       icon = "mdi:bed-king";
-      temperatureEntity = config.hass.entities.sensor.thermometer_schlafzimmer.temperature;
-      humidityEntity = config.hass.entities.sensor.thermometer_schlafzimmer.humidity;
     };
-    "Badezimmer" = {
+    "Badezimmer" = thermo "thermometer_badezimmer" // {
       order = 5;
       icon = "mdi:shower";
-      temperatureEntity = config.hass.entities.sensor.thermometer_badezimmer.temperature;
-      humidityEntity = config.hass.entities.sensor.thermometer_badezimmer.humidity;
     };
     "Flur" = {
       order = 6;

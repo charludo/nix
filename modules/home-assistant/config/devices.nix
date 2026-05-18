@@ -1,3 +1,42 @@
+let
+  thermometer = id: area: {
+    inherit id area;
+    sensor = [
+      "humidity"
+      "temperature"
+    ];
+    diagnostic = [ "battery" ];
+  };
+
+  thermometerPressure =
+    id: area:
+    (thermometer id area)
+    // {
+      sensor = [
+        "humidity"
+        "pressure"
+        "temperature"
+      ];
+    };
+
+  steckdose = id: area: {
+    inherit id area;
+    sensor = [
+      "current"
+      "power"
+      "summation_delivered"
+      "voltage"
+    ];
+    switch = [
+      "child_lock"
+      "switch"
+    ];
+    select = [
+      "backlight_mode"
+      "power_on_state"
+    ];
+  };
+in
 {
   hass.devices = {
     mobile_apps = {
@@ -13,13 +52,9 @@
     };
 
     vacuums.botty.area = "Wohnzimmer";
-
     fans.xiaomi_smart_fan.area = "Wohnzimmer";
-
     images.botty_live_map.area = "Wohnzimmer";
-
     suns.sun = { };
-
     weathers.openweathermap = { };
 
     sensors = {
@@ -111,185 +146,42 @@
     zigbee = {
       "Bewegungsmelder" = {
         id = "00:12:4b:00:2a:64:f5:1f";
+        area = "Schlafzimmer";
         binary_sensor = [ "motion" ];
         diagnostic = [ "battery" ];
-        area = "Schlafzimmer";
-      };
-
-      "Steckdose Serverschrank" = {
-        id = "a4:c1:38:a7:09:97:ff:85";
-        sensor = [
-          "current"
-          "power"
-          "summation_delivered"
-          "voltage"
-        ];
-        switch = [
-          "child_lock"
-          "switch"
-        ];
-        select = [
-          "backlight_mode"
-          "power_on_state"
-        ];
-        area = "Büro";
-      };
-
-      "Steckdose Gewächshaus Heizung" = {
-        id = "a4:c1:38:e4:68:4c:2e:f8";
-        sensor = [
-          "current"
-          "power"
-          "summation_delivered"
-          "voltage"
-        ];
-        switch = [
-          "child_lock"
-          "switch"
-        ];
-        select = [
-          "backlight_mode"
-          "power_on_state"
-        ];
-        area = "Terrasse";
-      };
-
-      "Steckdose Wasserpumpe" = {
-        id = "a4:c1:38:7a:85:ae:fb:a3";
-        sensor = [
-          "current"
-          "power"
-          "summation_delivered"
-          "voltage"
-        ];
-        switch = [
-          "child_lock"
-          "switch"
-        ];
-        select = [
-          "backlight_mode"
-          "power_on_state"
-        ];
-        area = "Terrasse";
-      };
-
-      "Thermometer Badezimmer" = {
-        id = "00:12:4b:00:2a:5d:46:ac";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Badezimmer";
-      };
-
-      "Thermometer Büro" = {
-        id = "00:12:4b:00:2a:5c:b0:a1";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Büro";
-      };
-
-      "Thermometer Filamentbox" = {
-        id = "00:12:4b:00:2a:5d:1c:3e";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Büro";
-      };
-
-      "Thermometer Schlafzimmer" = {
-        id = "00:12:4b:00:2a:5c:b4:14";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Schlafzimmer";
-      };
-
-      "Thermometer Serverschrank" = {
-        id = "00:12:4b:00:2a:5d:0e:3e";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Büro";
-      };
-
-      "Thermometer Wohnzimmer" = {
-        id = "00:12:4b:00:2a:5d:23:0b";
-        sensor = [
-          "humidity"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Wohnzimmer";
-      };
-
-      "Thermometer Gewächshaus" = {
-        id = "00:15:8d:00:09:45:19:da";
-        sensor = [
-          "humidity"
-          "pressure"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Terrasse";
-      };
-
-      "Thermometer Terrasse" = {
-        id = "00:15:8d:00:09:45:18:3a";
-        sensor = [
-          "humidity"
-          "pressure"
-          "temperature"
-        ];
-        diagnostic = [ "battery" ];
-        area = "Terrasse";
       };
 
       "Türsensor" = {
         id = "00:12:4b:00:2a:64:f5:20";
+        area = "Wohnzimmer";
         binary_sensor = [ "opening" ];
         diagnostic = [ "battery" ];
-        area = "Wohnzimmer";
-      };
-
-      "Steckdose Pflanzenlicht" = {
-        id = "a4:c1:38:e4:68:4c:2e:01";
-        sensor = [
-          "current"
-          "power"
-          "summation_delivered"
-          "voltage"
-        ];
-        switch = [
-          "child_lock"
-          "switch"
-        ];
-        select = [
-          "backlight_mode"
-          "power_on_state"
-        ];
-        area = "Terrasse";
       };
 
       "Strahler" = {
         id = "00:17:88:01:08:5b:76:98";
+        area = "Wohnzimmer";
         light = [ "light" ];
         number = [
           "start_up_color_temperature"
           "start_up_current_level"
         ];
-        area = "Wohnzimmer";
       };
+
+      "Thermometer Badezimmer" = thermometer "00:12:4b:00:2a:5d:46:ac" "Badezimmer";
+      "Thermometer Büro" = thermometer "00:12:4b:00:2a:5c:b0:a1" "Büro";
+      "Thermometer Filamentbox" = thermometer "00:12:4b:00:2a:5d:1c:3e" "Büro";
+      "Thermometer Schlafzimmer" = thermometer "00:12:4b:00:2a:5c:b4:14" "Schlafzimmer";
+      "Thermometer Serverschrank" = thermometer "00:12:4b:00:2a:5d:0e:3e" "Büro";
+      "Thermometer Wohnzimmer" = thermometer "00:12:4b:00:2a:5d:23:0b" "Wohnzimmer";
+
+      "Thermometer Gewächshaus" = thermometerPressure "00:15:8d:00:09:45:19:da" "Terrasse";
+      "Thermometer Terrasse" = thermometerPressure "00:15:8d:00:09:45:18:3a" "Terrasse";
+
+      "Steckdose Serverschrank" = steckdose "a4:c1:38:a7:09:97:ff:85" "Büro";
+      "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" "Terrasse";
+      "Steckdose Wasserpumpe" = steckdose "a4:c1:38:7a:85:ae:fb:a3" "Terrasse";
+      "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:e4:68:4c:2e:01" "Terrasse";
     };
   };
 }

@@ -1,81 +1,52 @@
 { lib, config, ... }:
 let
   cfg = config.hass;
-  mkSlug = lib.ha.mkSlug;
+  inherit (lib.ha) mkSlug;
 
   areaOption = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
-    description = "Home Assistant area name this entity belongs to";
   };
 
-  withAreaSubmodule = lib.types.submodule {
-    options.area = areaOption;
+  strList = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+  };
+
+  withAreaSubmodule = lib.types.submodule { options.area = areaOption; };
+
+  withAreaList = lib.mkOption {
+    type = lib.types.attrsOf withAreaSubmodule;
+    default = { };
   };
 
   zigbeeDeviceSubmodule = lib.types.submodule {
     options = {
       id = lib.mkOption {
         type = lib.types.str;
-        description = "Zigbee MAC address in colon-separated form, e.g. 00:15:8d:00:09:45:19:da";
+        description = "Zigbee IEEE address, colon-separated (e.g. 00:15:8d:00:09:45:19:da)";
       };
-      area = lib.mkOption {
-        type = lib.types.str;
-        description = "Home Assistant area this device belongs to";
-      };
-      binary_sensor = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Binary sensor sub-entity names exposed by the device";
-      };
-      diagnostic = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Diagnostic sensor names (battery etc.); generated under the sensor domain";
-      };
-      light = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Light sub-entity names exposed by the device";
-      };
-      number = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Number sub-entity names exposed by the device";
-      };
-      select = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Select sub-entity names exposed by the device";
-      };
-      sensor = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Sensor sub-entity names exposed by the device";
-      };
-      switch = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Switch sub-entity names exposed by the device";
-      };
+      area = lib.mkOption { type = lib.types.str; };
+      binary_sensor = strList;
+      diagnostic = strList;
+      light = strList;
+      number = strList;
+      select = strList;
+      sensor = strList;
+      switch = strList;
     };
   };
 
   inputBooleanSubmodule = lib.types.submodule {
     options = {
-      name = lib.mkOption {
-        type = lib.types.str;
-        description = "Friendly name displayed in the UI";
-      };
+      name = lib.mkOption { type = lib.types.str; };
       icon = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "MDI icon for the input boolean";
       };
       initial = lib.mkOption {
         type = lib.types.nullOr lib.types.bool;
         default = null;
-        description = "Initial state on Home Assistant startup";
       };
       area = areaOption;
     };
@@ -83,44 +54,30 @@ let
 
   inputNumberSubmodule = lib.types.submodule {
     options = {
-      name = lib.mkOption {
-        type = lib.types.str;
-        description = "Friendly name displayed in the UI";
-      };
-      min = lib.mkOption {
-        type = lib.types.number;
-        description = "Minimum allowed value";
-      };
-      max = lib.mkOption {
-        type = lib.types.number;
-        description = "Maximum allowed value";
-      };
+      name = lib.mkOption { type = lib.types.str; };
+      min = lib.mkOption { type = lib.types.number; };
+      max = lib.mkOption { type = lib.types.number; };
       step = lib.mkOption {
         type = lib.types.number;
         default = 1;
-        description = "Step size used by sliders and increment/decrement actions";
       };
       initial = lib.mkOption {
         type = lib.types.nullOr lib.types.number;
         default = null;
-        description = "Initial value on Home Assistant startup";
       };
       icon = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "MDI icon for the input number";
       };
       unit_of_measurement = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
-        description = "Unit suffix shown next to the value";
       };
       area = areaOption;
     };
   };
 
-  # Maps the nix-side zigbee device sub-key to its HA entity domain.
-  # `diagnostic` (battery, etc.) emits entities under the `sensor.` domain.
+  # diagnostic sub-entities live under the sensor domain in HA.
   zigbeeDomainMap = {
     binary_sensor = "binary_sensor";
     diagnostic = "sensor";
@@ -149,7 +106,6 @@ let
       if device.${nixKey} == [ ] then acc else acc // { ${haDomain} = existing // entries; }
     ) { } (lib.attrNames zigbeeDomainMap);
 
-  # Aggregate: domain -> deviceSlug -> { device, <subEntities> }
   zigbeeEntities = lib.foldl' (
     domainAcc: deviceName:
     let
@@ -167,58 +123,37 @@ let
     ) domainAcc (lib.attrNames perDomain)
   ) { } (lib.attrNames cfg.devices.zigbee);
 
-  # Simple, single-entity "devices": each slug maps to a plain entity ID string.
+  # Slug used directly as the entity name (input_boolean.<slug> etc.) — for
+  # attrsets whose keys are already valid entity-id slugs.
+  byKey = domain: lib.mapAttrs (slug: _: "${domain}.${slug}");
+
+  # Human-readable keys (e.g. "Phone Charlotte") get slugified into the
+  # entity_id (`device_tracker.phone_charlotte`).
+  bySlugifiedKey =
+    domain: lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) "${domain}.${mkSlug name}");
+
   simpleEntities = {
-    input_boolean = lib.mapAttrs (slug: _: "input_boolean.${slug}") cfg.devices.input_booleans;
-    input_number = lib.mapAttrs (slug: _: "input_number.${slug}") cfg.devices.input_numbers;
-    media_player = lib.mapAttrs (slug: _: "media_player.${slug}") cfg.devices.media_players;
-    vacuum = lib.mapAttrs (slug: _: "vacuum.${slug}") cfg.devices.vacuums;
-    fan = lib.mapAttrs (slug: _: "fan.${slug}") cfg.devices.fans;
-    image = lib.mapAttrs (slug: _: "image.${slug}") cfg.devices.images;
-    sun = lib.mapAttrs (slug: _: "sun.${slug}") cfg.devices.suns;
-    weather = lib.mapAttrs (slug: _: "weather.${slug}") cfg.devices.weathers;
-    sensor = lib.mapAttrs (slug: _: "sensor.${slug}") cfg.devices.sensors;
-    script = lib.mapAttrs (slug: _: "script.${slug}") cfg.scripts;
-    automation = lib.mapAttrs (slug: _: "automation.${slug}") cfg.automations;
+    input_boolean = byKey "input_boolean" cfg.devices.input_booleans;
+    input_number = byKey "input_number" cfg.devices.input_numbers;
+    media_player = byKey "media_player" cfg.devices.media_players;
+    vacuum = byKey "vacuum" cfg.devices.vacuums;
+    fan = byKey "fan" cfg.devices.fans;
+    image = byKey "image" cfg.devices.images;
+    sun = byKey "sun" cfg.devices.suns;
+    weather = byKey "weather" cfg.devices.weathers;
+    sensor = byKey "sensor" cfg.devices.sensors;
+    script = byKey "script" cfg.scripts;
+    automation = byKey "automation" cfg.automations;
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
-    person = lib.mapAttrs' (
-      name: _:
-      let
-        slug = mkSlug name;
-      in
-      lib.nameValuePair slug "person.${slug}"
-    ) (cfg.persons or { });
-
-    # Mobile-app phones produce notify-service strings, slugified from their
-    # human-readable name (the Companion-app device name in HA).
+    person = bySlugifiedKey "person" (cfg.persons or { });
+    device_tracker = bySlugifiedKey "device_tracker" cfg.devices.mobile_apps;
+    # mobile_app keys map to the notify-service id, not the device_tracker.
     mobile_app = lib.mapAttrs' (
-      name: _:
-      let
-        slug = mkSlug name;
-      in
-      lib.nameValuePair slug "notify.mobile_app_${slug}"
-    ) cfg.devices.mobile_apps;
-
-    # The mobile_app integration also creates a device_tracker entity per
-    # paired phone, named after the same slug. Exposed here so persons can
-    # reference it as e.device_tracker.<slug>.
-    device_tracker = lib.mapAttrs' (
-      name: _:
-      let
-        slug = mkSlug name;
-      in
-      lib.nameValuePair slug "device_tracker.${slug}"
+      name: _: lib.nameValuePair (mkSlug name) "notify.mobile_app_${mkSlug name}"
     ) cfg.devices.mobile_apps;
   };
 
-  # Final entities tree: zigbee (with sub-entities) and simple entities coexist
-  # in the same domain (e.g. e.sensor has both attrset entries from zigbee
-  # devices and string entries from extra sensors).
   allDomains = lib.unique ((lib.attrNames zigbeeEntities) ++ (lib.attrNames simpleEntities));
-
-  mergedEntities = lib.genAttrs allDomains (
-    domain: (zigbeeEntities.${domain} or { }) // (simpleEntities.${domain} or { })
-  );
 in
 {
   options.hass = {
@@ -226,58 +161,23 @@ in
       zigbee = lib.mkOption {
         type = lib.types.attrsOf zigbeeDeviceSubmodule;
         default = { };
-        description = "Zigbee devices managed by ZHA, keyed by human-readable name";
       };
       input_booleans = lib.mkOption {
         type = lib.types.attrsOf inputBooleanSubmodule;
         default = { };
-        description = "Declarative input_boolean helpers keyed by slug";
       };
       input_numbers = lib.mkOption {
         type = lib.types.attrsOf inputNumberSubmodule;
         default = { };
-        description = "Declarative input_number helpers keyed by slug";
       };
-      media_players = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known media_player entities keyed by slug";
-      };
-      vacuums = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known vacuum entities keyed by slug";
-      };
-      fans = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known fan entities keyed by slug";
-      };
-      images = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known image entities keyed by slug";
-      };
-      suns = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known sun entities keyed by slug";
-      };
-      weathers = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Known weather entities keyed by slug";
-      };
-      sensors = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Extra sensors (template, statistics, integration-provided) referenced by slug";
-      };
-      mobile_apps = lib.mkOption {
-        type = lib.types.attrsOf withAreaSubmodule;
-        default = { };
-        description = "Companion-app phones keyed by human-readable name, exposed as e.mobile_app.<slug> notify-service strings";
-      };
+      media_players = withAreaList;
+      vacuums = withAreaList;
+      fans = withAreaList;
+      images = withAreaList;
+      suns = withAreaList;
+      weathers = withAreaList;
+      sensors = withAreaList;
+      mobile_apps = withAreaList;
     };
 
     entities = lib.mkOption {
@@ -288,14 +188,13 @@ in
   };
 
   config = {
-    hass.entities = mergedEntities;
+    hass.entities = lib.genAttrs allDomains (
+      domain: (zigbeeEntities.${domain} or { }) // (simpleEntities.${domain} or { })
+    );
 
     services.home-assistant.config = {
       input_boolean = lib.mapAttrs (
-        _: v:
-        lib.filterAttrs (_: x: x != null) {
-          inherit (v) name icon initial;
-        }
+        _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon initial; }
       ) cfg.devices.input_booleans;
 
       input_number = lib.mapAttrs (

@@ -6,7 +6,6 @@
 }:
 let
   cfg = config.hass.shopping;
-  customComponents = pkgs.ours.home-assistant.custom-components;
 in
 {
   options.hass.shopping = {
@@ -21,6 +20,22 @@ in
     };
 
     supermarkets = lib.mkOption {
+      default = { };
+      description = ''
+        Map from supermarket display name → ``{ color, categories }``.
+        ``grocery_categorize.refresh`` writes into the single
+        ``sensor.einkaufsliste`` whose ``markdown`` attribute the
+        dashboard markdown card reads.
+      '';
+      example = lib.literalExpression ''
+        {
+          ALDI.categories = [ "Obst" "Gemüse" "Milchprodukte" ];
+          REWE = {
+            color = "var(--red)";
+            categories = [ "Obst" "Aufschnitt" ];
+          };
+        }
+      '';
       type = lib.types.attrsOf (
         lib.types.submodule {
           options = {
@@ -37,51 +52,26 @@ in
             color = lib.mkOption {
               type = lib.types.str;
               default = "var(--green)";
-              description = ''
-                Background colour for the supermarket's button on the
-                shopping-list dashboard view. Any CSS colour expression
-                works (``"var(--blue)"``, ``"#ff8800"`` etc.).
-              '';
+              description = "CSS colour expression for the supermarket's button.";
             };
             icon = lib.mkOption {
               type = lib.types.str;
               default = "mdi:cart-outline";
-              description = ''
-                MDI icon shown on the supermarket's button on the
-                shopping-list dashboard view.
-              '';
+              description = "MDI icon shown on the supermarket's button.";
             };
           };
         }
       );
-      default = { };
-      example = lib.literalExpression ''
-        {
-          ALDI = {
-            color = "var(--blue)";
-            categories = [ "Obst" "Gemüse" "Backwaren" "Milchprodukte" ];
-          };
-          REWE = {
-            color = "var(--red)";
-            categories = [ "Obst" "Gemüse" "Aufschnitt" ];
-          };
-        }
-      '';
-      description = ''
-        Map from supermarket display name → ``{ color, categories }``.
-        ``grocery_categorize.refresh`` writes into the single
-        ``sensor.einkaufsliste`` whose ``markdown`` attribute the
-        dashboard markdown card reads.
-      '';
     };
   };
 
   config = lib.mkIf (cfg.supermarkets != { }) {
-    services.home-assistant.customComponents = [ customComponents.grocery_categorize ];
+    services.home-assistant.customComponents = [
+      pkgs.ours.home-assistant.custom-components.grocery_categorize
+    ];
 
     # rapidfuzz + numpy only — the component pulls them in via
-    # manifest.json, but HA on NixOS doesn't auto-resolve, so wire
-    # them in explicitly.
+    # manifest.json, but HA on NixOS doesn't auto-resolve.
     services.home-assistant.extraPackages = py: [
       py.rapidfuzz
       py.numpy
@@ -89,9 +79,9 @@ in
     ];
 
     services.home-assistant.config.grocery_categorize = {
-      todo_entity = cfg.todo_entity;
-      # Component only cares about the category order, not the colour.
-      supermarkets = lib.mapAttrs (_: spec: spec.categories) cfg.supermarkets;
+      inherit (cfg) todo_entity;
+      # Component only cares about category order, not the colour.
+      supermarkets = lib.mapAttrs (_: s: s.categories) cfg.supermarkets;
     };
   };
 }
