@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, ... }:
 {
   imports = [
     ../modules/home-assistant
@@ -59,5 +59,6 @@
     openFirewall = true;
   };
 
-  environment.systemPackages = [ pkgs.lsusb ];
+  environment.systemPackages = [ pkgs.usbutils ];
+  # proxmox.qemuExtraConf.usb0 = "host=10c4:ea60,usb3=1";
 }

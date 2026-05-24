@@ -17,5 +17,6 @@
     ./sonos.nix
     ./timers.nix
     ./xiaomi.nix
+    ./zigbee.nix
   ];
 }

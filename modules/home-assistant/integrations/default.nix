@@ -8,6 +8,5 @@
     ./sidebar.nix
     ./voice.nix
     ./zha-reconciler.nix
-    ./zigbee.nix
   ];
 }
