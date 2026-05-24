@@ -9,12 +9,44 @@ let
   rcfg = cfg.zha.reconciler;
   inherit (lib.ha) mkSlug;
 
+  # Mirrors zigbeeDomainMap in modules/home-assistant/devices.nix.
+  # Several nix-level keys (sensor, diagnostic) collapse to the same
+  # HA-level domain (sensor).
+  zigbeeDomainMap = {
+    binary_sensor = "binary_sensor";
+    diagnostic = "sensor";
+    light = "light";
+    number = "number";
+    select = "select";
+    sensor = "sensor";
+    switch = "switch";
+  };
+
+  # `{ light = ["light"]; sensor = ["humidity", "temperature", "battery"]; }`
+  # for one device, after merging nix's `sensor` + `diagnostic` into HA's
+  # single `sensor` domain.
+  declaredEntitiesByDomain =
+    dev:
+    lib.foldl' (
+      acc: nixKey:
+      let
+        haDomain = zigbeeDomainMap.${nixKey};
+        suffixes = dev.${nixKey} or [ ];
+      in
+      if suffixes == [ ] then acc else acc // { ${haDomain} = (acc.${haDomain} or [ ]) ++ suffixes; }
+    ) { } (lib.attrNames zigbeeDomainMap);
+
   # ieees are normalised to lowercase for case-insensitive matching
-  # against whatever ZHA returns.
+  # against whatever ZHA returns. `entities` is the authoritative list
+  # of expected entity-name suffixes per HA domain: the reconciler uses
+  # it to match HA entities (by translation_key or device_class) and
+  # derive the desired entity_id, instead of slugifying HA's localized
+  # display names.
   zhaManifest = lib.mapAttrsToList (deviceName: dev: {
     ieee = lib.toLower dev.id;
     name = deviceName;
     area_slug = mkSlug dev.area;
+    entities = declaredEntitiesByDomain dev;
   }) cfg.devices.zigbee;
 
   # Every non-zigbee declared device that has an area, addressed by its
@@ -86,20 +118,23 @@ in
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        Restart = "on-failure";
-        RestartSec = 30;
         DynamicUser = true;
         SupplementaryGroups = [ "hass" ];
         # Exposes the token at $CREDENTIALS_DIRECTORY/token without the
         # unit user needing direct access to the agenix path.
         LoadCredential = [ "token:${rcfg.tokenPath}" ];
       };
+      # Swallow non-zero exits so a partial reconcile (e.g. a device
+      # offline because its battery is dead) doesn't fail activation.
+      # The script logs each per-device failure; check the journal if
+      # something looks off.
       script = ''
-        exec ${pkgs.ours.home-assistant.zha-reconciler}/bin/zha-reconciler \
+        ${pkgs.ours.home-assistant.zha-reconciler}/bin/zha-reconciler \
           --url ${lib.escapeShellArg rcfg.url} \
           --token-file "$CREDENTIALS_DIRECTORY/token" \
           --manifest ${zhaManifestFile} \
-          --entity-manifest ${entityManifestFile}
+          --entity-manifest ${entityManifestFile} \
+          || true
       '';
     };
   };

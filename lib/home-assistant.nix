@@ -4,32 +4,27 @@ rec {
   # Slug helper (shared with areas and devices)
   # ---------------------------------------------------------------------------
 
+  # Mirrors Home Assistant's `homeassistant.util.slugify`:
+  #   1. transliterate German umlauts → ASCII
+  #   2. lowercase
+  #   3. replace any run of non-[a-z0-9] with a single "_"
+  #   4. strip leading/trailing "_"
+  # Keep this in sync with the `slugify()` in zha-reconciler/zha_reconciler.py
+  # so dashboard entity_ids and the entity_ids the reconciler renames to match.
   mkSlug =
     name:
-    lib.toLower (
-      lib.replaceStrings
-        [
-          "ä"
-          "ö"
-          "ü"
-          "Ä"
-          "Ö"
-          "Ü"
-          "ß"
-          " "
-        ]
-        [
-          "a"
-          "o"
-          "u"
-          "a"
-          "o"
-          "u"
-          "ss"
-          "_"
-        ]
-        name
-    );
+    let
+      transliterated =
+        lib.replaceStrings
+          [ "ä" "ö" "ü" "Ä" "Ö" "Ü" "ß" ]
+          [ "a" "o" "u" "a" "o" "u" "ss" ]
+          name;
+      lowered = lib.toLower transliterated;
+      pieces = builtins.filter (p: builtins.isString p && p != "") (
+        builtins.split "[^a-z0-9]+" lowered
+      );
+    in
+    lib.concatStringsSep "_" pieces;
 
   # ---------------------------------------------------------------------------
   # Style helpers

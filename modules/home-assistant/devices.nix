@@ -140,7 +140,13 @@ let
       acc: nixKey:
       let
         haDomain = zigbeeDomainMap.${nixKey};
-        entries = lib.genAttrs device.${nixKey} (e: "${haDomain}.${slug}_${e}");
+        # ZHA's primary entity in a domain has no per-entity suffix
+        # (e.g. `light.strahler`, not `light.strahler_light`). We model
+        # that by stripping the suffix when the user-declared name
+        # equals the HA domain.
+        entries = lib.genAttrs device.${nixKey} (
+          e: if e == haDomain then "${haDomain}.${slug}" else "${haDomain}.${slug}_${e}"
+        );
         existing = acc.${haDomain} or { device = slug; };
       in
       if device.${nixKey} == [ ] then acc else acc // { ${haDomain} = existing // entries; }
