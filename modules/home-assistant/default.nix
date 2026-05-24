@@ -55,4 +55,12 @@
     owner = "hass";
     group = "hass";
   };
+
+  age.secrets.hass-reconciler-token = {
+    rekeyFile = secrets.hass-reconciler-token;
+    owner = "hass";
+    group = "hass";
+  };
+
+  hass.zha.reconciler.enable = true;
 }
