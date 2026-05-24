@@ -1,3 +1,4 @@
+{ pkgs }:
 {
   imports = [
     ../modules/home-assistant
@@ -57,4 +58,6 @@
     enable = true;
     openFirewall = true;
   };
+
+  environment.systemPackages = [ pkgs.lsusb ];
 }

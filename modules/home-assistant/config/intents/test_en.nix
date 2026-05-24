@@ -335,6 +335,25 @@
       script.speech.text = "Picture is now dark.";
     };
 
+    EN_TV_Aus = {
+      language = "en";
+      sentences = [
+        "(turn|switch) off [the ](tv|television)"
+        "(tv|television) (off|turn off)"
+      ];
+      script.speech.text = "Television turned off.";
+    };
+
+    EN_TV_Stumm = {
+      language = "en";
+      sentences = [
+        "mute [the ](tv|television)"
+        "(tv|television) (mute|silence)"
+        "(make|set) [the ](tv|television) (silent|quiet)"
+      ];
+      script.speech.text = "Television muted.";
+    };
+
     # ----- weather -----
     EN_Wetter_Heute = {
       language = "en";

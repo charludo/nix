@@ -15,6 +15,7 @@
     ./oidc.nix
     ./shopping.nix
     ./sonos.nix
+    ./timers.nix
     ./xiaomi.nix
   ];
 }

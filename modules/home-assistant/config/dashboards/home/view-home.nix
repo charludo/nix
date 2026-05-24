@@ -15,6 +15,28 @@ let
       inherit entity name onColor;
       icon = ha.robotIcon;
     };
+
+  # One status banner per timer in the pool, visible only while running.
+  # Tapping cancels the timer (with confirmation). Label shows end time;
+  # it refreshes when the timer state changes.
+  timerBanner =
+    timer:
+    ha.mkConditional [ (ha.stateIs timer "active") ] (
+      ha.mkActionCard {
+        name = "Timer";
+        icon = "mdi:timer-sand";
+        label = "[[[ const f = new Date(states['${timer}'].attributes.finishes_at); return 'Endet um ' + f.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); ]]]";
+        service = "timer.cancel";
+        serviceData.entity_id = timer;
+        confirmation = "Timer wirklich abbrechen?";
+        cardBg = "var(--yellow)";
+        iconColor = "var(--black)";
+        nameColor = "var(--black)";
+        labelColor = "var(--black)";
+        zIndex = 1;
+        extraCardProps."margin-top" = "24px";
+      }
+    );
 in
 {
   type = "sections";
@@ -122,7 +144,8 @@ in
                 extraCardProps."margin-top" = "24px";
               }
             ))
-          ];
+          ]
+          ++ map timerBanner (builtins.attrValues e.timer);
         }
 
         # Licht & Co grid

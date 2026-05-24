@@ -184,6 +184,7 @@ let
     sensor = byKey "sensor" cfg.devices.sensors;
     script = byKey "script" cfg.scripts;
     automation = byKey "automation" cfg.automations;
+    timer = byKey "timer" cfg.timers;
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
     person = bySlugifiedKey "person" (cfg.persons or { });
     device_tracker = bySlugifiedKey "device_tracker" cfg.devices.mobile_apps;

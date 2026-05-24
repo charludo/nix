@@ -9,6 +9,7 @@
     ./devices.nix
     ./integrations
     ./scripts.nix
+    ./timers.nix
   ];
 
   services.home-assistant = {

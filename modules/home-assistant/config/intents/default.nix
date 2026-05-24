@@ -6,8 +6,9 @@
     ./garden.nix
     ./music.nix
     ./news.nix
-    ./time.nix
     ./test_en.nix
+    ./time.nix
+    ./timer.nix
     ./tv.nix
     ./weather.nix
   ];
