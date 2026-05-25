@@ -36,9 +36,12 @@ let
               upper_bound = "~30";
               lower_bound_secondary = "~0";
               upper_bound_secondary = "~25";
-              extraConfig.show = {
-                legend = false;
-                extrema = true;
+              extraConfig = {
+                show = {
+                  legend = false;
+                  extrema = true;
+                };
+                grid_options.columns = "full";
               };
             })
             (ha.mkHStack [

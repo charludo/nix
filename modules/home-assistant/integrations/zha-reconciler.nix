@@ -116,8 +116,12 @@ in
         pkgs.ours.home-assistant.zha-reconciler
       ];
       serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
+        # Type=simple so the unit is reported "active" the moment the script
+        # is exec'd. With Type=oneshot the unit stays "activating" until the
+        # script returns, which makes switch-to-configuration block on long
+        # reconciles (e.g. an unreachable battery device) and time out the
+        # whole rebuild.
+        Type = "simple";
         DynamicUser = true;
         SupplementaryGroups = [ "hass" ];
         # Exposes the token at $CREDENTIALS_DIRECTORY/token without the

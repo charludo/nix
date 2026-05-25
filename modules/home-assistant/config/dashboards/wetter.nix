@@ -49,16 +49,50 @@ let
           ])
           (ha.mkGridSection [
             (ha.mkMushTitle "Echtzeit (Lokal)")
-
-            # Wetterstation (Terrasse) — full sensor graphs.
             {
               type = "sensor";
               entity = e.sensor.wetterstation.temperature;
               name = "Temperatur";
               graph = "line";
               detail = 2;
-              column_span = 2;
+              grid_options.columns = "full";
             }
+            (ha.mkHStack [
+              {
+                type = "sensor";
+                entity = e.sensor.wetterstation.wind_speed;
+                name = "Windgeschwindigkeit";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:weather-windy";
+              }
+              {
+                type = "sensor";
+                entity = e.sensor.wetterstation.wind_gust_speed;
+                name = "Böengeschwindigkeit";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:weather-dust";
+              }
+            ])
+            (ha.mkHStack [
+              {
+                type = "sensor";
+                entity = e.sensor.wetterstation.precipitation;
+                name = "Niederschlag";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:weather-pouring";
+              }
+              {
+                type = "sensor";
+                entity = e.sensor.wetterstation.wind_direction;
+                name = "Windrichtung";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:compass-outline";
+              }
+            ])
             (ha.mkHStack [
               {
                 type = "sensor";
@@ -70,52 +104,16 @@ let
               {
                 type = "sensor";
                 entity = e.sensor.wetterstation.pressure;
-                name = "Druck";
+                name = "Luftdruck";
                 graph = "line";
                 detail = 2;
-              }
-            ])
-            (ha.mkHStack [
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.wind_speed;
-                name = "Wind";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-windy";
-              }
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.wind_gust_speed;
-                name = "Böen";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-dust";
-              }
-            ])
-            (ha.mkHStack [
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.wind_direction;
-                name = "Windrichtung";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:compass-outline";
-              }
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.precipitation;
-                name = "Niederschlag";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-pouring";
               }
             ])
             (ha.mkHStack [
               {
                 type = "sensor";
                 entity = e.sensor.wetterstation.illuminance;
-                name = "Beleuchtung";
+                name = "Helligkeit";
                 graph = "line";
                 detail = 2;
                 icon = "mdi:white-balance-sunny";
@@ -165,7 +163,7 @@ let
               name = "Temperatur";
               graph = "line";
               detail = 2;
-              column_span = 2;
+              grid_options.columns = "full";
             }
             (ha.mkHStack [
               {
@@ -177,26 +175,26 @@ let
               }
               {
                 type = "sensor";
-                entity = e.sensor.openweathermap_bewolkung;
-                name = "Wolkendecke";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:clouds";
-              }
-            ])
-            (ha.mkHStack [
-              {
-                type = "sensor";
                 entity = e.sensor.weather_wind_gust;
                 name = "Böengeschwindigkeit";
                 graph = "line";
                 detail = 2;
                 icon = "mdi:weather-dust";
               }
+            ])
+            (ha.mkHStack [
+              {
+                type = "sensor";
+                entity = e.sensor.openweathermap_bewolkung;
+                name = "Wolkendecke";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:clouds";
+              }
               {
                 type = "sensor";
                 entity = e.sensor.openweathermap_regenintensitat;
-                name = "Regenmenge";
+                name = "Niederschlag";
                 graph = "line";
                 detail = 2;
               }
