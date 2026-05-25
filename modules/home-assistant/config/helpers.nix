@@ -8,14 +8,14 @@ in
       {
         platform = "statistics";
         name = "Cumulative Rain 24h";
-        entity_id = e.sensor.openweathermap_regenintensitat;
+        entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "sum";
         max_age.hours = 24;
       }
       {
         platform = "statistics";
         name = "Cumulative Rain 8h";
-        entity_id = e.sensor.openweathermap_regenintensitat;
+        entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "sum";
         max_age.hours = 8;
       }

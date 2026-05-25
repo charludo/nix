@@ -59,11 +59,12 @@ in
             centeredSlidesBounds = true;
             slidesPerView = "auto";
             spaceBetween = 16;
-            initialSlide = 1;
+            initialSlide = 2;
           };
           cards = [
+            (ha.mkTempTile "Terrasse" e.sensor.thermometer_nordseite.temperature)
             (ha.mkTempTile "Gewächshaus" e.sensor.thermometer_gewachshaus.temperature)
-            (ha.mkTempTile "Terrasse" e.sensor.thermometer_terrasse.temperature)
+            (ha.mkTempTile "Wetterstation" e.sensor.wetterstation.temperature)
             (ha.mkTempTile "Wohnzimmer" e.sensor.thermometer_wohnzimmer.temperature)
             (ha.mkTempTile "Schlafzimmer" e.sensor.thermometer_schlafzimmer.temperature)
             (ha.mkTempTile "Badezimmer" e.sensor.thermometer_badezimmer.temperature)

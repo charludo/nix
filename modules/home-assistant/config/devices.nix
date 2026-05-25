@@ -173,6 +173,24 @@ in
         ];
       };
 
+      "Wetterstation" = {
+        id = "08:b9:5f:ff:fe:d4:0f:1f";
+        area = "Terrasse";
+        binary_sensor = [ "moisture" ];
+        sensor = [
+          "humidity"
+          "illuminance"
+          "pressure"
+          "precipitation"
+          "temperature"
+          "uv_index"
+          "wind_direction"
+          "wind_gust_speed"
+          "wind_speed"
+        ];
+        diagnostic = [ "battery" ];
+      };
+
       "Thermometer Badezimmer" = thermometer "00:12:4b:00:2a:5d:46:ac" "Badezimmer";
       "Thermometer Büro" = thermometer "00:12:4b:00:2a:5c:b0:a1" "Büro";
       "Thermometer Filamentbox" = thermometer "00:12:4b:00:2a:5d:1c:3e" "Büro";
@@ -181,7 +199,7 @@ in
       "Thermometer Wohnzimmer" = thermometer "00:12:4b:00:2a:5d:23:0b" "Wohnzimmer";
 
       "Thermometer Gewächshaus" = thermometerPressure "00:15:8d:00:09:45:19:da" "Terrasse";
-      "Thermometer Terrasse" = thermometerPressure "00:15:8d:00:09:45:18:3a" "Terrasse";
+      "Thermometer Nordseite" = thermometerPressure "00:15:8d:00:09:45:18:3a" "Terrasse";
 
       "Steckdose Serverschrank" = steckdose "a4:c1:38:5a:fc:f5:62:61" "Büro";
       "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" "Terrasse";

@@ -7,7 +7,7 @@ let
 in
 {
   hass.areas = {
-    "Terrasse" = thermo "thermometer_terrasse" // {
+    "Terrasse" = thermo "wetterstation" // {
       order = 1;
       icon = "mdi:sprout";
     };

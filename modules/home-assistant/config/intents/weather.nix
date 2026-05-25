@@ -5,6 +5,8 @@ let
   w = e.weather.openweathermap;
   daily = s.openweathermap_forecast_daily;
   hourly = s.openweathermap_forecast_hourly;
+  # Local Wetterstation (Sonoff, Terrasse) — preferred for "current" queries.
+  local = s.wetterstation;
 
   # `num e` formats `e` to one decimal with German comma; `pct e` rounds to a whole percent.
   num = expr: "{{ (${expr} | float(0) | round(1) | string).replace('.', ',') }}";
@@ -63,11 +65,14 @@ in
   hass.voice = {
     Wetter_Heute = {
       sentences = [
-        "Wie ist das Wetter (heute|jetzt|gerade|draußen|aktuell)"
+        "Wie ist das Wetter (gerade|draußen|aktuell)"
         "Wie warm ist es (draußen|gerade|jetzt)"
       ];
+      # Temperature, humidity, pressure straight from the local Wetterstation;
+      # condition string comes from OWM (categorical, not measured locally),
+      # gefühlte Temperatur stays OWM-derived.
       script.speech.text = ''
-        Aktuell ist es ${cond "states('${w}')"} bei ${num "states('${s.openweathermap_temperatur}')"} Grad, gefühlt ${num "states('${s.openweathermap_gefuhlte_temperatur}')"} Grad.
+        Aktuell ist es ${cond "states('${w}')"} bei ${num "states('${local.temperature}')"} Grad, gefühlt ${num "states('${s.openweathermap_gefuhlte_temperatur}')"} Grad.
       '';
     };
 
@@ -118,7 +123,7 @@ in
         "Wie stark weht der Wind"
       ];
       script.speech.text = ''
-        Aktuell weht der Wind mit ${num "states('${s.openweathermap_windgeschwindigkeit}')"} Kilometern pro Stunde, bei Böen bis ${num "states('${s.openweathermap_windboengeschwindigkeit}')"} km/h.
+        Aktuell weht der Wind mit ${num "states('${local.wind_speed}')"} Kilometern pro Stunde, bei Böen bis ${num "states('${local.wind_gust_speed}')"} km/h.
       '';
     };
 

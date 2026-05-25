@@ -26,7 +26,7 @@ let
                   state_adaptive_color = true;
                 }
                 {
-                  entity = e.sensor.thermometer_terrasse.temperature;
+                  entity = e.sensor.wetterstation.temperature;
                   show_state = true;
                   show_indicator = true;
                   state_adaptive_color = true;
@@ -43,6 +43,13 @@ let
             })
             (ha.mkHStack [
               (ha.mkTempHumGraph {
+                name = "Wetterstation";
+                tempEntity = e.sensor.wetterstation.temperature;
+                humEntity = e.sensor.wetterstation.humidity;
+                lowerBound = "~0";
+                upperBound = "~30";
+              })
+              (ha.mkTempHumGraph {
                 name = "Gewächshaus";
                 tempEntity = e.sensor.thermometer_gewachshaus.temperature;
                 humEntity = e.sensor.thermometer_gewachshaus.humidity;
@@ -50,9 +57,9 @@ let
                 upperBound = "~30";
               })
               (ha.mkTempHumGraph {
-                name = "Terrasse";
-                tempEntity = e.sensor.thermometer_terrasse.temperature;
-                humEntity = e.sensor.thermometer_terrasse.humidity;
+                name = "Nordseite";
+                tempEntity = e.sensor.thermometer_nordseite.temperature;
+                humEntity = e.sensor.thermometer_nordseite.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
@@ -112,7 +119,7 @@ let
         sections = [
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
-              title = "Gewächshaus vs Terrasse";
+              title = "Gewächshaus vs Wetterstation";
               entities = [
                 {
                   entity = e.sensor.thermometer_gewachshaus.temperature;
@@ -123,8 +130,8 @@ let
                   };
                 }
                 {
-                  entity = e.sensor.thermometer_terrasse.temperature;
-                  name = "Terrasse";
+                  entity = e.sensor.wetterstation.temperature;
+                  name = "Wetterstation";
                   line = {
                     color = "orange";
                     width = 2;
@@ -133,6 +140,20 @@ let
                 }
               ];
               yRange = [
+                (-5)
+                20
+              ];
+            })
+          ])
+          (ha.mkGridSection [
+            (ha.mkPlotlyGraph {
+              title = "Wetterstation";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.wetterstation.humidity e.sensor.wetterstation.temperature;
+              yRange = [
+                0
+                100
+              ];
+              y2Range = [
                 (-5)
                 20
               ];
@@ -154,8 +175,8 @@ let
           ])
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
-              title = "Terrasse";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_terrasse.humidity e.sensor.thermometer_terrasse.temperature;
+              title = "Nordseite";
+              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_nordseite.humidity e.sensor.thermometer_nordseite.temperature;
               yRange = [
                 0
                 100

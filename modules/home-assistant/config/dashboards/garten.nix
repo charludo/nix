@@ -18,7 +18,7 @@ let
           (ha.mkGridSection [
             (ha.mkMushTitle "Temperatur & Wetter")
             (ha.mkMiniGraph {
-              name = "Gewächshaus vs Terrasse";
+              name = "Gewächshaus vs Wetterstation";
               entities = [
                 {
                   entity = e.sensor.thermometer_gewachshaus.temperature;
@@ -26,7 +26,7 @@ let
                   state_adaptive_color = true;
                 }
                 {
-                  entity = e.sensor.thermometer_terrasse.temperature;
+                  entity = e.sensor.wetterstation.temperature;
                   show_state = true;
                   show_indicator = true;
                   state_adaptive_color = true;
@@ -50,9 +50,9 @@ let
                 upperBound = "~30";
               })
               (ha.mkTempHumGraph {
-                name = "Terrasse";
-                tempEntity = e.sensor.thermometer_terrasse.temperature;
-                humEntity = e.sensor.thermometer_terrasse.humidity;
+                name = "Wetterstation";
+                tempEntity = e.sensor.wetterstation.temperature;
+                humEntity = e.sensor.wetterstation.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
