@@ -178,9 +178,18 @@ let
   bySlugifiedKey =
     domain: lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) "${domain}.${mkSlug name}");
 
+  # Slug → canonical zigbee device name. Lets call sites refer to a
+  # device without re-typing its name (used by `hass.buttons` to point
+  # at a `hass.devices.zigbee` entry; the helper resolves IEEE/area
+  # from there).
+  zigbeeDevices = lib.mapAttrs' (
+    name: _: lib.nameValuePair (mkSlug name) name
+  ) cfg.devices.zigbee;
+
   simpleEntities = {
     input_boolean = byKey "input_boolean" cfg.devices.input_booleans;
     input_number = byKey "input_number" cfg.devices.input_numbers;
+    zigbee = zigbeeDevices;
     media_player = byKey "media_player" cfg.devices.media_players;
     vacuum = byKey "vacuum" cfg.devices.vacuums;
     fan = byKey "fan" cfg.devices.fans;
@@ -239,7 +248,12 @@ in
     };
 
     entities = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+      # lazyAttrsOf at both levels so that accessing one sub-tree (e.g.
+      # `e.zigbee.button_sofa` used as an attribute key in
+      # `hass.buttons`) doesn't force the other sub-trees. Otherwise
+      # `e.automation = byKey "automation" cfg.automations` is touched
+      # transitively and forms a cycle through buttons → automations.
+      type = lib.types.lazyAttrsOf (lib.types.lazyAttrsOf lib.types.anything);
       readOnly = true;
       description = "Type-safe entity ID tree indexed by HA domain then device/entity slug";
     };

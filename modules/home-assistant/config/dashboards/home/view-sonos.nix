@@ -366,7 +366,7 @@ in
             tapAction = {
               action = "perform-action";
               haptic = "medium";
-              perform_action = "media_player.media_previous_track";
+              perform_action = "media_player.media_next_track";
               data.entity_id = e.media_player.alle;
             };
           })

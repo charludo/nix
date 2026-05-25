@@ -36,6 +36,11 @@ let
       "power_on_state"
     ];
   };
+
+  button = id: area: {
+    inherit id area;
+    diagnostic = [ "battery" ];
+  };
 in
 {
   hass.devices = {
@@ -178,10 +183,14 @@ in
       "Thermometer Gewächshaus" = thermometerPressure "00:15:8d:00:09:45:19:da" "Terrasse";
       "Thermometer Terrasse" = thermometerPressure "00:15:8d:00:09:45:18:3a" "Terrasse";
 
-      "Steckdose Serverschrank" = steckdose "a4:c1:38:a7:09:97:ff:85" "Büro";
+      "Steckdose Serverschrank" = steckdose "a4:c1:38:5a:fc:f5:62:61" "Büro";
       "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" "Terrasse";
       "Steckdose Wasserpumpe" = steckdose "a4:c1:38:7a:85:ae:fb:a3" "Terrasse";
       "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:e4:68:4c:2e:01" "Terrasse";
+
+      "Button Sofa" = button "f0:44:d3:ff:fe:f9:8a:60" "Wohnzimmer";
+      "Button Gewächshaus" = button "f0:44:d3:ff:fe:f9:86:c4" "Terrasse";
+      "Button Büro" = button "f0:44:d3:ff:fe:f6:9e:0c" "Büro";
     };
   };
 }

@@ -10,6 +10,7 @@
     ./time.nix
     ./timer.nix
     ./tv.nix
+    ./ventilator.nix
     ./weather.nix
   ];
 

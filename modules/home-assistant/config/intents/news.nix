@@ -28,7 +28,10 @@ let
 
   # Sonos UPnP can briefly time out on rapid state changes (stop → play
   # against a still-syncing group), so the prep steps tolerate failure
-  # and we give the speaker a beat before kicking off playback.
+  # and we give the speaker a beat before kicking off playback. The
+  # unmute + volume reset guarantees a consistent listening experience
+  # regardless of the speaker's previous state (e.g. left muted by the
+  # Büro button's long-press).
   prepare = [
     {
       action = "media_player.media_stop";
@@ -41,8 +44,16 @@ let
       data.is_volume_muted = false;
       continue_on_error = true;
     }
+    {
+      action = "media_player.volume_set";
+      target.entity_id = sonos;
+      data.volume_level = 0.33;
+      continue_on_error = true;
+    }
     { delay.seconds = 1; }
   ];
+
+  dailySummarySequence = prepare ++ [ (playLocal "zusammenfassung.mp3" "replace") ];
 
   # Direct URL into HA's `www/` (served at `/local/`, no auth required).
   playLocal = filename: enqueue: {
@@ -161,9 +172,18 @@ in
         "Tägliche Zusammenfassung"
       ];
       script = {
-        action = prepare ++ [ (playLocal "zusammenfassung.mp3" "replace") ];
+        action = dailySummarySequence;
         speech.text = "Hier ist deine tägliche Zusammenfassung.";
       };
     };
+  };
+
+  # Same sequence exposed as a script so non-voice triggers (e.g.
+  # button long-presses) can run it via `script.turn_on`.
+  hass.scripts.daily_summary = {
+    alias = "Tägliche Zusammenfassung";
+    icon = "mdi:newspaper-variant";
+    sequence = dailySummarySequence;
+    mode = "restart";
   };
 }

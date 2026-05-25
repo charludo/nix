@@ -6,6 +6,7 @@
 {
   imports = [
     ./automations.nix
+    ./buttons.nix
     ./devices.nix
     ./integrations
     ./scripts.nix

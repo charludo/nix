@@ -8,6 +8,7 @@
     ./areas.nix
     ./base.nix
     ./botty.nix
+    ./buttons.nix
     ./devices.nix
     ./helpers.nix
     ./lgtv.nix
