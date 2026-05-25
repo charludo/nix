@@ -9,15 +9,17 @@ in
         platform = "statistics";
         name = "Cumulative Rain 24h";
         entity_id = e.sensor.wetterstation.precipitation;
-        state_characteristic = "sum";
+        state_characteristic = "change";
         max_age.hours = 24;
+        sampling_size = 200;
       }
       {
         platform = "statistics";
         name = "Cumulative Rain 8h";
         entity_id = e.sensor.wetterstation.precipitation;
-        state_characteristic = "sum";
+        state_characteristic = "change";
         max_age.hours = 8;
+        sampling_size = 100;
       }
     ];
 
