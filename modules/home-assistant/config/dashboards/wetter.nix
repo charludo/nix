@@ -109,7 +109,7 @@ let
               entity = e.sensor.wetterstation.uv_index;
               name = "UV-Index";
               min = 0;
-              max = 11;
+              max = 13;
               needle = true;
               segments = [
                 {
@@ -118,22 +118,22 @@ let
                   label = "niedrig";
                 }
                 {
-                  from = 3;
+                  from = 2.5;
                   color = "#f6c700";
                   label = "mittel";
                 }
                 {
-                  from = 6;
+                  from = 5.5;
                   color = "#f08000";
                   label = "hoch";
                 }
                 {
-                  from = 8;
+                  from = 7.5;
                   color = "#d6001c";
                   label = "sehr hoch";
                 }
                 {
-                  from = 11;
+                  from = 10.5;
                   color = "#7a2bb5";
                   label = "extrem";
                 }
