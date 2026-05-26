@@ -90,7 +90,7 @@ in
               target.entity_id = e.switch.steckdose_wasserpumpe.switch;
             }
             {
-              action = e.mobile_app.phone_charlotte;
+              action = e.persons.Charlotte.notify;
               data.message = "Disabled pump due to rain in the past 16 hours.";
             }
           ];
@@ -105,7 +105,7 @@ in
               target.entity_id = e.switch.steckdose_wasserpumpe.switch;
             }
             {
-              action = e.mobile_app.phone_charlotte;
+              action = e.persons.Charlotte.notify;
               data.message = "Re-activated pump.";
             }
           ];

@@ -31,7 +31,7 @@ in
         }
       ];
       action = [
-        (notify e.mobile_app.phone_charlotte {
+        (notify e.persons.Charlotte.notify {
           title = "Temperaturwarnung";
           message = "Extremtemperatur im Gewächshaus";
         })
@@ -54,11 +54,11 @@ in
         }
       ];
       action = [
-        (notify e.mobile_app.phone_charlotte {
+        (notify e.persons.Charlotte.notify {
           title = "Luftfeuchtigkeit im Badezimmer zu hoch";
           message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
         })
-        (notify e.mobile_app.phone_marie {
+        (notify e.persons.Marie.notify {
           title = "Luftfeuchtigkeit im Badezimmer zu hoch";
           message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
         })
@@ -81,11 +81,11 @@ in
         }
       ];
       action = [
-        (notify e.mobile_app.phone_charlotte {
+        (notify e.persons.Charlotte.notify {
           title = "Was da los?!";
           message = "Hohe Temperatur im Serverschrank";
         })
-        (notify e.mobile_app.phone_marie {
+        (notify e.persons.Marie.notify {
           title = "Was da los?!";
           message = "Hohe Temperatur im Serverschrank";
         })
@@ -112,11 +112,11 @@ in
         }
       ];
       action = [
-        (notify e.mobile_app.phone_charlotte {
+        (notify e.persons.Charlotte.notify {
           title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
           message = "Zeit zu Lüften!";
         })
-        (notify e.mobile_app.phone_marie {
+        (notify e.persons.Marie.notify {
           title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
           message = "Zeit zu Lüften!";
         })
@@ -146,11 +146,11 @@ in
         }
       ];
       action = [
-        (notify e.mobile_app.phone_charlotte {
+        (notify e.persons.Charlotte.notify {
           title = "Wohnungstür ist seit 3 Sekunden offen";
           message = "WOHNUNGSTÜR WURDE GEÖFFNET";
         })
-        (notify e.mobile_app.phone_marie {
+        (notify e.persons.Marie.notify {
           title = "Wohnungstür ist seit 3 Sekunden offen";
           message = "WOHNUNGSTÜR WURDE GEÖFFNET";
         })

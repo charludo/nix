@@ -202,11 +202,20 @@ let
     timer = byKey "timer" cfg.timers;
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
     person = bySlugifiedKey "person" (cfg.persons or { });
-    device_tracker = bySlugifiedKey "device_tracker" cfg.devices.mobile_apps;
-    # mobile_app keys map to the notify-service id, not the device_tracker.
-    mobile_app = lib.mapAttrs' (
-      name: _: lib.nameValuePair (mkSlug name) "notify.mobile_app_${mkSlug name}"
-    ) cfg.devices.mobile_apps;
+    # Per-person handles derived from hass.persons.<Name>.phone, the
+    # device name the companion app reports to HA. The mobile_app
+    # integration registers `notify.mobile_app_<phone-slug>` and
+    # `device_tracker.<phone-slug>` under that slug.
+    persons = lib.mapAttrs (
+      _: p:
+      let
+        slug = if p.phone == null then null else mkSlug p.phone;
+      in
+      {
+        notify = if slug == null then null else "notify.mobile_app_${slug}";
+        device_tracker = if slug == null then null else "device_tracker.${slug}";
+      }
+    ) (cfg.persons or { });
   };
 
   allDomains = lib.unique ((lib.attrNames zigbeeEntities) ++ (lib.attrNames simpleEntities));
@@ -244,7 +253,6 @@ in
       suns = withAreaList "Known sun entities keyed by slug";
       weathers = withAreaList "Known weather entities keyed by slug";
       sensors = withAreaList "Sensor entities (template, statistics, integration-provided) keyed by slug";
-      mobile_apps = withAreaList "Companion-app phones keyed by display name";
     };
 
     entities = lib.mkOption {

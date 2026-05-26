@@ -36,10 +36,11 @@ in
           trackers = lib.mkOption {
             type = lib.types.listOf (lib.types.strMatching "^device_tracker\\..+");
             default = [ ];
-            example = lib.literalExpression "[ e.device_tracker.phone_charlotte ]";
+            example = lib.literalExpression "[ e.persons.Charlotte.device_tracker ]";
             description = ''
-              device_tracker entity_ids linked to this person. Pass via the
-              type-safe e.* tree, e.g. e.device_tracker.phone_charlotte
+              device_tracker entity_ids linked to this person. The mobile
+              app registers one under the phone's device-name slug, which
+              is exposed as e.persons.<Name>.device_tracker.
             '';
           };
           picture = lib.mkOption {
@@ -51,6 +52,17 @@ in
             type = lib.types.nullOr lib.types.str;
             default = null;
             description = "HA user UUID to associate with";
+          };
+          phone = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            example = "xiaomi_15";
+            description = ''
+              Mobile App device name as it appears in HA's mobile_app
+              integration (Settings → Devices & services → Mobile App).
+              Used to derive the per-person notify service id available
+              as e.persons.<Name>.notify (= notify.mobile_app_<slug>).
+            '';
           };
         };
       }

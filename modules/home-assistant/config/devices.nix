@@ -43,12 +43,12 @@ let
   };
 in
 {
-  hass.devices = {
-    mobile_apps = {
-      "Phone Charlotte" = { };
-      "Phone Marie" = { };
-    };
+  hass.persons = {
+    Charlotte.phone = "xiaomi_15";
+    Marie.phone = "smartiphone";
+  };
 
+  hass.devices = {
     media_players = {
       alle = { };
       living_room.area = "Wohnzimmer";
