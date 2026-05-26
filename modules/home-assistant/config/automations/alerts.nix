@@ -1,6 +1,7 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
+  inherit (lib.ha) lowBatteryThreshold;
 
   notify =
     target:
@@ -159,6 +160,50 @@ in
           target.entity_id = e.input_boolean.turalarm_persistent;
         }
       ];
+    };
+
+    # Watches the min-battery group sensor (see helpers.nix) and pings
+    # both phones with the names of all devices currently below 10%.
+    # `expand` walks the group's members at firing time, so the list of
+    # batteries stays driven by hass.devices.zigbee — no second source
+    # of truth here.
+    zigbee_low_battery = {
+      alias = "Zigbee niedriger Akku";
+      mode = "single";
+      trigger = [
+        {
+          platform = "numeric_state";
+          entity_id = e.sensor.zigbee_min_battery;
+          below = lowBatteryThreshold;
+          for = {
+            hours = 0;
+            minutes = 5;
+            seconds = 0;
+          };
+        }
+      ];
+      action =
+        let
+          message = ''
+            {% set ns = namespace(names=[]) %}
+            {%- for s in expand('${e.sensor.zigbee_min_battery}') -%}
+              {%- if s.state not in ['unknown', 'unavailable'] and (s.state | float(100)) < ${toString lowBatteryThreshold} -%}
+                {%- set ns.names = ns.names + [s.name + ' (' + s.state + '%)'] -%}
+              {%- endif -%}
+            {%- endfor -%}
+            Niedriger Akku: {{ ns.names | join(', ') }}
+          '';
+        in
+        [
+          (notify e.persons.Charlotte.notify {
+            title = "Zigbee: Akku schwach";
+            inherit message;
+          })
+          (notify e.persons.Marie.notify {
+            title = "Zigbee: Akku schwach";
+            inherit message;
+          })
+        ];
     };
   };
 }

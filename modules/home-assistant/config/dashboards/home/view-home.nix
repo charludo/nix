@@ -60,6 +60,8 @@ in
             slidesPerView = "auto";
             spaceBetween = 16;
             initialSlide = 2;
+            touchAngle = 65;
+            threshold = 8;
           };
           cards = [
             (ha.mkTempTile "Terrasse" e.sensor.thermometer_nordseite.temperature)
@@ -132,6 +134,54 @@ in
                 extraCardProps."margin-top" = "24px";
               }
             ))
+            # Driven by sensor.zigbee_min_battery (a min-aggregation
+            # group sensor over all zigbee battery entities; see
+            # config/helpers.nix). Threshold lives in lib.ha so this
+            # condition can't drift from the alerting automation.
+            (ha.mkConditional
+              [
+                {
+                  condition = "numeric_state";
+                  entity = e.sensor.zigbee_min_battery;
+                  below = ha.lowBatteryThreshold;
+                }
+              ]
+              (
+                ha.mkActionCard {
+                  name = "Zigbee Akku schwach";
+                  icon = "mdi:battery-alert";
+                  entity = e.sensor.zigbee_min_battery;
+                  label = ''
+                    [[[
+                      const names = [];
+                      for (const id of Object.keys(states)) {
+                        if (!id.endsWith('_battery')) continue;
+                        const s = states[id];
+                        const v = parseFloat(s.state);
+                        if (!isNaN(v) && v < ${toString ha.lowBatteryThreshold}) {
+                          names.push((s.attributes.friendly_name || id) + ' (' + s.state + '%)');
+                        }
+                      }
+                      return names.join(', ');
+                    ]]]
+                  '';
+                  # mkActionCard requires a service for tap; refreshing the
+                  # group is harmless and a long-press still opens more-info.
+                  service = "homeassistant.update_entity";
+                  serviceData.entity_id = e.sensor.zigbee_min_battery;
+                  holdAction = {
+                    action = "more-info";
+                    haptic = "medium";
+                  };
+                  cardBg = "var(--red)";
+                  iconColor = "var(--contrast1)";
+                  nameColor = "var(--contrast1)";
+                  labelColor = "var(--contrast1)";
+                  zIndex = 1;
+                  extraCardProps."margin-top" = "24px";
+                }
+              )
+            )
             (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] (
               ha.mkActionCard {
                 name = "Botty anhalten";
@@ -412,6 +462,11 @@ in
                 freeMode = true;
                 centerInsufficientSlides = true;
                 snapToSlideEdge = true;
+                # See the carousel above — restrict the swipe to a
+                # narrower horizontal cone so diagonal/vertical gestures
+                # don't get captured.
+                touchAngle = 30;
+                threshold = 8;
               };
               cards = map (
                 nv:

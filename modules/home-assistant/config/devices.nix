@@ -66,6 +66,7 @@ in
       cumulative_rain_8h.area = "Terrasse";
       cumulative_rain_24h.area = "Terrasse";
       cumulative_rain_1h.area = "Terrasse";
+      zigbee_min_battery = { };
       botty_current_clean_area.area = "Wohnzimmer";
       botty_aktuelle_reinigungsdauer.area = "Wohnzimmer";
       botty_aktueller_reinigungsbereich.area = "Wohnzimmer";

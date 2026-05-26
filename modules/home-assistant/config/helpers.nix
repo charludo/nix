@@ -1,6 +1,15 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
+
+  # Every zigbee device that declares a "battery" diagnostic entity,
+  # mapped to its `sensor.<slug>_battery` entity id. Picked up below as
+  # the membership of the `sensor.zigbee_min_battery` group so we don't
+  # have to maintain a parallel hardcoded list.
+  zigbeeBatteryEntities = lib.pipe config.hass.devices.zigbee [
+    (lib.filterAttrs (_: dev: lib.elem "battery" (dev.diagnostic or [ ])))
+    (lib.mapAttrsToList (name: _: e.sensor.${lib.ha.mkSlug name}.battery))
+  ];
 in
 {
   services.home-assistant.config = {
@@ -28,6 +37,15 @@ in
         state_characteristic = "change";
         max_age.hours = 1;
         sampling_size = 60;
+      }
+      {
+        platform = "group";
+        unique_id = "sensor.zigbee_min_battery";
+        name = "Zigbee Min Battery";
+        type = "min";
+        ignore_non_numeric = true;
+        device_class = "battery";
+        entities = zigbeeBatteryEntities;
       }
     ];
 

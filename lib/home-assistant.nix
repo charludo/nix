@@ -1,5 +1,10 @@
 { lib }:
 rec {
+  # Single source of truth for the "battery is low" threshold, used by
+  # both the alert automation and the dashboard warning card so the
+  # number doesn't drift between them.
+  lowBatteryThreshold = 10;
+
   # ---------------------------------------------------------------------------
   # Slug helper (shared with areas and devices)
   # ---------------------------------------------------------------------------
