@@ -61,6 +61,13 @@ in
             spaceBetween = 16;
             initialSlide = 2;
             touchAngle = 65;
+            # Recalculate slide widths when the carousel's DOM
+            # (re)attaches on view switch — without these, Swiper
+            # measures the container before HA finishes sizing it and
+            # snaps to the last reachable position.
+            observer = true;
+            observeParents = true;
+            observeSlideChildren = true;
           };
           cards = [
             (ha.mkTempTile "Terrasse" e.sensor.thermometer_nordseite.temperature)

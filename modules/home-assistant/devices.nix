@@ -200,7 +200,14 @@ let
     script = byKey "script" cfg.scripts;
     automation = byKey "automation" cfg.automations;
     timer = byKey "timer" cfg.timers;
+    # e.area.<slug>      → the slug (for URL paths and HA area refs).
+    # e.areaName.<slug>  → the original capitalised key in hass.areas
+    #                      (e.g. "Wohnzimmer"), the form `area = ...`
+    #                      fields on devices expect. Lets call sites use
+    #                      the type-safe e.* tree instead of hardcoded
+    #                      strings.
     area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
+    areaName = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) name) cfg.areas;
     person = bySlugifiedKey "person" (cfg.persons or { });
     # Per-person handles derived from hass.persons.<Name>.phone, the
     # device name the companion app reports to HA. The mobile_app
