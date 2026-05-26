@@ -41,7 +41,10 @@ let
                   legend = false;
                   extrema = true;
                 };
-                grid_options.columns = "full";
+                grid_options = {
+                  columns = "full";
+                  rows = 2;
+                };
               };
             })
             (ha.mkHStack [

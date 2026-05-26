@@ -78,6 +78,13 @@ in
     sha256 = "sha256-Pvwb7sKBG5fWOUmMv+8qKZ/wLCy0HvI0mkgVh1MLD3w=";
   };
 
+  windrose-card = mkCard {
+    pname = "windrose-card";
+    version = "2.4.1";
+    url = "https://github.com/aukedejong/lovelace-windrose-card/releases/download/v2.4.1/windrose-card.js";
+    sha256 = "14fkjm8asqzvw1fhcm3qn22m9v3gcpj9bmbccfy58139pj2is3jr";
+  };
+
   google-fonts-quicksand = mkFontLoader {
     pname = "google-fonts-quicksand";
     url = "https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap";

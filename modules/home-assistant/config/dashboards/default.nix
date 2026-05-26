@@ -68,6 +68,7 @@ in
         xiaomi-vacuum-map-card
         layout-card
         weather-radar-card
+        windrose-card
         google-fonts-quicksand
       ];
 
