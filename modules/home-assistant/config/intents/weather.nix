@@ -123,7 +123,7 @@ in
         "Wie stark weht der Wind"
       ];
       script.speech.text = ''
-        Aktuell weht der Wind mit ${num "states('${local.wind_speed}')"} Kilometern pro Stunde, bei Böen bis ${num "states('${local.wind_gust}')"} km/h.
+        Aktuell weht der Wind mit ${num "states('${local.wind_speed}')"} Kilometern pro Stunde, bei Böen bis ${num "states('${local.gust_speed}')"} km/h.
       '';
     };
 

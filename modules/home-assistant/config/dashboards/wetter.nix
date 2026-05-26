@@ -202,7 +202,7 @@ let
               }
               {
                 type = "sensor";
-                entity = e.sensor.wetterstation.wind_gust;
+                entity = e.sensor.wetterstation.gust_speed;
                 name = "Böengeschwindigkeit";
                 graph = "line";
                 detail = 2;
@@ -229,14 +229,14 @@ let
                   windspeed_bar_full = false;
                   bar_render_scale = "percentage_relative";
                 }
-                # {
-                #   entity = e.sensor.wetterstation.wind_gust;
-                #   name = "Böen";
-                #   output_speed_unit = "kph";
-                #   speed_range_beaufort = false;
-                #   current_speed_arrow = true;
-                #   bar_render_scale = "windspeed_relative";
-                # }
+                {
+                  entity = e.sensor.wetterstation.gust_speed;
+                  name = "Böen";
+                  output_speed_unit = "mps";
+                  speed_range_beaufort = false;
+                  current_speed_arrow = true;
+                  bar_render_scale = "windspeed_relative";
+                }
               ];
               buttons_config = {
                 location = "top";

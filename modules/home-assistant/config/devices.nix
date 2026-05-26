@@ -157,8 +157,8 @@ in
       };
 
       "Türsensor" = {
-        id = "00:12:4b:00:2a:64:f5:20";
-        area = "Wohnzimmer";
+        id = "00:12:4b:00:2f:b4:9d:20";
+        area = "Flur";
         binary_sensor = [ "opening" ];
         diagnostic = [ "battery" ];
       };
@@ -178,6 +178,7 @@ in
         area = "Terrasse";
         binary_sensor = [ "moisture" ];
         sensor = [
+          "gust_speed"
           "humidity"
           "illuminance"
           "pressure"
@@ -185,7 +186,6 @@ in
           "temperature"
           "uv_index"
           "wind_direction"
-          "wind_gust"
           "wind_speed"
         ];
         diagnostic = [ "battery" ];
@@ -201,10 +201,10 @@ in
       "Thermometer Gewächshaus" = thermometerPressure "00:15:8d:00:09:45:19:da" "Terrasse";
       "Thermometer Nordseite" = thermometerPressure "00:15:8d:00:09:45:18:3a" "Terrasse";
 
-      "Steckdose Serverschrank" = steckdose "a4:c1:38:5a:fc:f5:62:61" "Büro";
+      "Steckdose Serverschrank" = steckdose "a4:c1:38:a7:09:97:ff:85" "Büro";
       "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" "Terrasse";
       "Steckdose Wasserpumpe" = steckdose "a4:c1:38:7a:85:ae:fb:a3" "Terrasse";
-      "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:e4:68:4c:2e:01" "Terrasse";
+      "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:5a:fc:f5:62:61" "Wohnzimmer";
 
       "Button Sofa" = button "f0:44:d3:ff:fe:f9:8a:60" "Wohnzimmer";
       "Button Gewächshaus" = button "f0:44:d3:ff:fe:f9:86:c4" "Terrasse";

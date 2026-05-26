@@ -17,22 +17,6 @@ let
         sections = [
           (ha.mkGridSection [
             (ha.mkPowerStack {
-              title = "Terrasse 1";
-              switchEntity = e.switch.steckdose_gewachshaus_heizung.switch;
-              powerEntity = e.sensor.steckdose_gewachshaus_heizung.power;
-              currentEntity = e.sensor.steckdose_gewachshaus_heizung.current;
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPowerStack {
-              title = "Wasserpumpe";
-              switchEntity = e.switch.steckdose_wasserpumpe.switch;
-              powerEntity = e.sensor.steckdose_wasserpumpe.power;
-              currentEntity = e.sensor.steckdose_wasserpumpe.current;
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPowerStack {
               title = "Serverschrank";
               switchEntity = e.switch.steckdose_serverschrank.switch;
               historyEntity = e.select.steckdose_serverschrank.power_on_state;
@@ -67,6 +51,28 @@ let
                   ];
                 }
               ];
+            })
+          ])
+          (ha.mkGridSection [
+            (ha.mkPowerStack {
+              title = "Gewächshaus (Wasserpumpe)";
+              switchEntity = e.switch.steckdose_wasserpumpe.switch;
+              powerEntity = e.sensor.steckdose_wasserpumpe.power;
+              currentEntity = e.sensor.steckdose_wasserpumpe.current;
+            })
+            (ha.mkPowerStack {
+              title = "Gewächshaus (Heizung)";
+              switchEntity = e.switch.steckdose_gewachshaus_heizung.switch;
+              powerEntity = e.sensor.steckdose_gewachshaus_heizung.power;
+              currentEntity = e.sensor.steckdose_gewachshaus_heizung.current;
+            })
+          ])
+          (ha.mkGridSection [
+            (ha.mkPowerStack {
+              title = "Pflanzlicht";
+              switchEntity = e.switch.steckdose_pflanzenlicht.switch;
+              powerEntity = e.sensor.steckdose_pflanzenlicht.power;
+              currentEntity = e.sensor.steckdose_pflanzenlicht.current;
             })
           ])
         ];
