@@ -65,6 +65,7 @@ in
     sensors = {
       cumulative_rain_8h.area = "Terrasse";
       cumulative_rain_24h.area = "Terrasse";
+      cumulative_rain_1h.area = "Terrasse";
       botty_current_clean_area.area = "Wohnzimmer";
       botty_aktuelle_reinigungsdauer.area = "Wohnzimmer";
       botty_aktueller_reinigungsbereich.area = "Wohnzimmer";
@@ -82,7 +83,6 @@ in
       openweathermap_windboengeschwindigkeit = { };
       openweathermap_forecast_daily = { };
       openweathermap_forecast_hourly = { };
-      weather_wind_gust.area = "Terrasse";
       sun_next_dawn = { };
       sun_next_dusk = { };
     };
@@ -185,7 +185,7 @@ in
           "temperature"
           "uv_index"
           "wind_direction"
-          "wind_gust_speed"
+          "wind_gust"
           "wind_speed"
         ];
         diagnostic = [ "battery" ];

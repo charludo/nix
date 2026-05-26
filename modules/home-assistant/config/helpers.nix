@@ -21,6 +21,14 @@ in
         max_age.hours = 8;
         sampling_size = 100;
       }
+      {
+        platform = "statistics";
+        name = "Cumulative Rain 1h";
+        entity_id = e.sensor.wetterstation.precipitation;
+        state_characteristic = "change";
+        max_age.hours = 1;
+        sampling_size = 60;
+      }
     ];
 
     template = [

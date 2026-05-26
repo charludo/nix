@@ -7,6 +7,7 @@
 let
   ha = lib.ha;
   e = config.hass.entities;
+
   cfg = (pkgs.formats.yaml { }).generate "dashboard-umwelt-details.yaml" {
     views = [
       {
@@ -64,11 +65,12 @@ let
             (ha.mkHStack [
               {
                 type = "sensor";
-                entity = e.sensor.wetterstation.precipitation;
+                entity = e.sensor.cumulative_rain_1h;
                 name = "Niederschlag";
                 graph = "line";
                 detail = 2;
                 icon = "mdi:weather-pouring";
+                unit = "mm/h";
               }
               {
                 type = "sensor";
@@ -98,7 +100,7 @@ let
               {
                 type = "sensor";
                 entity = e.sensor.wetterstation.illuminance;
-                name = "Beleuchtungsstärke";
+                name = "Lichtintensität";
                 graph = "line";
                 detail = 2;
                 icon = "mdi:white-balance-sunny";
@@ -108,6 +110,28 @@ let
               type = "gauge";
               entity = e.sensor.wetterstation.uv_index;
               name = "UV-Index";
+              card_mod.style = {
+                "." = ''
+                  ha-card {
+                    padding-top: 32px !important;
+                    position: relative;
+                  }
+                  .title {
+                    position: absolute !important;
+                    top: 12px;
+                    left: 16px;
+                    font-size: var(--ha-font-size-l) !important;
+                    color: var(--secondary-text-color) !important;
+                    margin: 0 !important;
+                    text-align: left !important;
+                  }
+                '';
+                "ha-gauge"."$" = ''
+                  .value-text {
+                    font-size: var(--ha-font-size-xs) !important;
+                  }
+                '';
+              };
               min = 0;
               max = 13;
               needle = true;
@@ -171,14 +195,14 @@ let
             (ha.mkHStack [
               {
                 type = "sensor";
-                entity = e.sensor.openweathermap_windgeschwindigkeit;
+                entity = e.sensor.wetterstation.wind_speed;
                 name = "Windgeschwindigkeit";
                 graph = "line";
                 detail = 2;
               }
               {
                 type = "sensor";
-                entity = e.sensor.weather_wind_gust;
+                entity = e.sensor.wetterstation.wind_gust;
                 name = "Böengeschwindigkeit";
                 graph = "line";
                 detail = 2;
@@ -188,16 +212,58 @@ let
             {
               type = "custom:windrose-card";
               title = "Windrichtung";
-              hide_windspeed_bar = true;
+              card_mod.style."ha-card"."$" = ''
+                .card-header {
+                  font-size: var(--ha-font-size-l) !important;
+                  color: var(--secondary-text-color) !important;
+                }
+              '';
               refresh_interval = 300;
-              data_period.period_back = "-24h";
               wind_direction_entity.entity = e.sensor.wetterstation.wind_direction;
               windspeed_entities = [
                 {
                   entity = e.sensor.wetterstation.wind_speed;
                   name = "Wind";
+                  use_for_windrose = true;
+                  current_speed_arrow = true;
+                  windspeed_bar_full = false;
+                  bar_render_scale = "percentage_relative";
                 }
+                # {
+                #   entity = e.sensor.wetterstation.wind_gust;
+                #   name = "Böen";
+                #   output_speed_unit = "kph";
+                #   speed_range_beaufort = false;
+                #   current_speed_arrow = true;
+                #   bar_render_scale = "windspeed_relative";
+                # }
               ];
+              buttons_config = {
+                location = "top";
+                buttons = [
+                  {
+                    type = "period_selector";
+                    button_text = "10min";
+                    period_back = "-10mi";
+                  }
+                  {
+                    type = "period_selector";
+                    button_text = "1h";
+                    period_back = "-1h";
+                  }
+                  {
+                    type = "period_selector";
+                    button_text = "8h";
+                    period_back = "-8h";
+                    active = true;
+                  }
+                  {
+                    type = "period_selector";
+                    button_text = "1d";
+                    period_back = "-1d";
+                  }
+                ];
+              };
               current_direction.show_arrow = true;
               direction_labels.cardinal_direction_letters = "NOSW";
               actions.windrose = {
