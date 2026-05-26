@@ -48,7 +48,7 @@ let
             }
           ])
           (ha.mkGridSection [
-            (ha.mkMushTitle "Echtzeit (Lokal)")
+            (ha.mkMushTitle "Messwerte")
             {
               type = "sensor";
               entity = e.sensor.wetterstation.temperature;
@@ -72,53 +72,14 @@ let
               }
               {
                 type = "sensor";
-                entity = e.sensor.wetterstation.illuminance;
-                name = "Beleuchtungsstärke";
+                entity = e.sensor.openweathermap_bewolkung;
+                name = "Wolkendecke (OWM)";
                 graph = "line";
                 detail = 2;
-                icon = "mdi:white-balance-sunny";
+                icon = "mdi:clouds";
               }
             ])
-            (ha.mkHStack [
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.wind_speed;
-                name = "Windgeschwindigkeit";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-windy";
-              }
-              {
-                type = "sensor";
-                entity = e.sensor.wetterstation.wind_gust_speed;
-                name = "Böengeschwindigkeit";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-dust";
-              }
-            ])
-            {
-              type = "custom:windrose-card";
-              title = "Windrichtung";
-              hide_windspeed_bar = true;
-              refresh_interval = 300;
-              data_period.period_back = "-24h";
-              wind_direction_entity.entity = e.sensor.wetterstation.wind_direction;
-              windspeed_entities = [
-                {
-                  entity = e.sensor.wetterstation.wind_speed;
-                  name = "Wind";
-                }
-              ];
-              current_direction.show_arrow = true;
-              direction_labels.cardinal_direction_letters = "NOSW";
-              actions.windrose = {
-                tap_action = {
-                  action = "more-info";
-                  entity = e.sensor.wetterstation.wind_direction;
-                };
-              };
-            }
+
             (ha.mkHStack [
               {
                 type = "sensor";
@@ -134,46 +95,50 @@ let
                 graph = "line";
                 detail = 2;
               }
-            ])
-            (ha.mkHStack [
-
               {
-                type = "gauge";
-                entity = e.sensor.wetterstation.uv_index;
-                name = "UV-Index";
-                min = 0;
-                max = 11;
-                needle = true;
-                segments = [
-                  {
-                    from = 0;
-                    color = "#4eb84e";
-                    label = "niedrig";
-                  }
-                  {
-                    from = 3;
-                    color = "#f6c700";
-                    label = "mittel";
-                  }
-                  {
-                    from = 6;
-                    color = "#f08000";
-                    label = "hoch";
-                  }
-                  {
-                    from = 8;
-                    color = "#d6001c";
-                    label = "sehr hoch";
-                  }
-                  {
-                    from = 11;
-                    color = "#7a2bb5";
-                    label = "extrem";
-                  }
-                ];
+                type = "sensor";
+                entity = e.sensor.wetterstation.illuminance;
+                name = "Beleuchtungsstärke";
+                graph = "line";
+                detail = 2;
+                icon = "mdi:white-balance-sunny";
               }
             ])
-
+            {
+              type = "gauge";
+              entity = e.sensor.wetterstation.uv_index;
+              name = "UV-Index";
+              min = 0;
+              max = 11;
+              needle = true;
+              segments = [
+                {
+                  from = 0;
+                  color = "#4eb84e";
+                  label = "niedrig";
+                }
+                {
+                  from = 3;
+                  color = "#f6c700";
+                  label = "mittel";
+                }
+                {
+                  from = 6;
+                  color = "#f08000";
+                  label = "hoch";
+                }
+                {
+                  from = 8;
+                  color = "#d6001c";
+                  label = "sehr hoch";
+                }
+                {
+                  from = 11;
+                  color = "#7a2bb5";
+                  label = "extrem";
+                }
+              ];
+            }
             {
               type = "glance";
               title = "Nordseite";
@@ -202,37 +167,7 @@ let
             }
           ])
           (ha.mkGridSection [
-            (ha.mkMushTitle "Echtzeit (OpenWeather)")
-            {
-              type = "sensor";
-              entity = e.sensor.openweathermap_temperatur;
-              name = "Temperatur";
-              graph = "line";
-              detail = 2;
-              grid_options = {
-                columns = "full";
-                rows = 3;
-              };
-              card_mod.style = "ha-card { height: 100% !important; }";
-            }
-            (ha.mkHStack [
-              {
-                type = "sensor";
-                entity = e.sensor.openweathermap_regenintensitat;
-                name = "Niederschlag";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:weather-pouring";
-              }
-              {
-                type = "sensor";
-                entity = e.sensor.openweathermap_bewolkung;
-                name = "Wolkendecke";
-                graph = "line";
-                detail = 2;
-                icon = "mdi:clouds";
-              }
-            ])
+            (ha.mkMushTitle "Wind")
             (ha.mkHStack [
               {
                 type = "sensor";
@@ -250,6 +185,28 @@ let
                 icon = "mdi:weather-dust";
               }
             ])
+            {
+              type = "custom:windrose-card";
+              title = "Windrichtung";
+              hide_windspeed_bar = true;
+              refresh_interval = 300;
+              data_period.period_back = "-24h";
+              wind_direction_entity.entity = e.sensor.wetterstation.wind_direction;
+              windspeed_entities = [
+                {
+                  entity = e.sensor.wetterstation.wind_speed;
+                  name = "Wind";
+                }
+              ];
+              current_direction.show_arrow = true;
+              direction_labels.cardinal_direction_letters = "NOSW";
+              actions.windrose = {
+                tap_action = {
+                  action = "more-info";
+                  entity = e.sensor.wetterstation.wind_direction;
+                };
+              };
+            }
             {
               type = "custom:weather-radar-card";
               data_source = "RainViewer-DarkSky";
