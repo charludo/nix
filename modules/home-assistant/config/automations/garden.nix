@@ -43,20 +43,20 @@ in
       ];
     };
 
-    deaktiviere_pumpe_nach_regen = {
-      alias = "Deaktiviere Pumpe nach Regen";
+    wasserpumpe_an = {
+      alias = "Wasserpumpe an";
       mode = "single";
       trigger = [
         {
-          at = "06:30:00";
+          at = "06:52:00";
           trigger = "time";
         }
         {
-          at = "14:30:00";
+          at = "14:52:00";
           trigger = "time";
         }
         {
-          at = "22:30:00";
+          at = "22:52:00";
           trigger = "time";
         }
       ];
@@ -81,40 +81,77 @@ in
           ];
           "then" = [
             {
-              condition = "state";
-              entity_id = e.switch.steckdose_wasserpumpe.switch;
-              state = "on";
-            }
-            {
-              action = "switch.turn_off";
-              target.entity_id = e.switch.steckdose_wasserpumpe.switch;
-            }
-            {
               action = e.persons.Charlotte.notify;
-              data.message = "Disabled pump due to rain in the past 16 hours.";
+              data.message = ''
+                {% set r8 = states('${e.sensor.cumulative_rain_8h}') | float(0) %}
+                {% if r8 > 4 %}
+                  Pumpe nicht aktiviert: {{ '%.1f' | format(r8) }}mm Regen in den letzten 8h.
+                {% else %}
+                  Pumpe nicht aktiviert: {{ '%.1f' | format(states('${e.sensor.cumulative_rain_24h}') | float(0)) }}mm Regen in den letzten 24h.
+                {% endif %}
+              '';
+            }
+            {
+              action = "input_boolean.turn_on";
+              target.entity_id = e.input_boolean.pumpe_uebersprungen;
             }
           ];
           "else" = [
-            {
-              condition = "state";
-              entity_id = e.switch.steckdose_wasserpumpe.switch;
-              state = "off";
-            }
             {
               action = "switch.turn_on";
               target.entity_id = e.switch.steckdose_wasserpumpe.switch;
             }
             {
-              action = e.persons.Charlotte.notify;
-              data.message = "Re-activated pump.";
+              "if" = [
+                {
+                  condition = "state";
+                  entity_id = e.input_boolean.pumpe_uebersprungen;
+                  state = "on";
+                }
+              ];
+              "then" = [
+                {
+                  action = e.persons.Charlotte.notify;
+                  data.message = "Pumpe reaktiviert.";
+                }
+                {
+                  action = "input_boolean.turn_off";
+                  target.entity_id = e.input_boolean.pumpe_uebersprungen;
+                }
+              ];
             }
           ];
         }
       ];
     };
 
-    pflanzenlicht = {
-      alias = "Pflanzenlicht an/aus";
+    wasserpumpe_aus = {
+      alias = "Wasserpumpe aus";
+      mode = "single";
+      trigger = [
+        {
+          at = "07:08:00";
+          trigger = "time";
+        }
+        {
+          at = "15:08:00";
+          trigger = "time";
+        }
+        {
+          at = "23:08:00";
+          trigger = "time";
+        }
+      ];
+      action = [
+        {
+          action = "switch.turn_off";
+          target.entity_id = e.switch.steckdose_wasserpumpe.switch;
+        }
+      ];
+    };
+
+    pflanzenlicht_automatik = {
+      alias = "Pflanzenlicht Automatik";
       mode = "single";
       trigger = [
         {

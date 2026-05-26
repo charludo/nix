@@ -61,7 +61,6 @@ in
             spaceBetween = 16;
             initialSlide = 2;
             touchAngle = 65;
-            threshold = 8;
           };
           cards = [
             (ha.mkTempTile "Terrasse" e.sensor.thermometer_nordseite.temperature)
@@ -243,7 +242,7 @@ in
             ))
             (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] {
               type = "custom:button-card";
-              entity = e.automation.pflanzenlicht;
+              entity = e.automation.pflanzenlicht_automatik;
               name = "Pflanzlicht-Automatik";
               icon = ha.robotIcon;
               tap_action = {
@@ -271,7 +270,7 @@ in
                     card = {
                       height = "16px";
                       padding = "0 8px";
-                      background = "[[[ return states['${e.automation.pflanzenlicht}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
+                      background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
                     };
                     track = {
                       overflow = "visible";
@@ -279,7 +278,7 @@ in
                     };
                     progress.background = "none";
                     thumb = {
-                      background = "[[[ return states['${e.automation.pflanzenlicht}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
+                      background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
                       top = "2px";
                       right = "-6px";
                       height = "12px";
@@ -348,23 +347,40 @@ in
                 onColor = "var(--blue)";
               }
             ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (mkAutoToggle {
-              entity = e.automation.deaktiviere_pumpe_nach_regen;
-              name = "Bewässerungs-Automatik";
-              onColor = "var(--blue)";
-            }))
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (
+              # Card shows wasserpumpe_an's enabled state, but tap toggles
+              # both halves of the watering cycle at once so they stay in
+              # sync — leaving the off-automation enabled while the
+              # on-automation is disabled would be a footgun.
+              (mkAutoToggle {
+                entity = e.automation.wasserpumpe_an;
+                name = "Bewässerungs-Automatik";
+                onColor = "var(--blue)";
+              })
+              // {
+                tap_action = {
+                  action = "perform-action";
+                  perform_action = "automation.toggle";
+                  haptic = "medium";
+                  data.entity_id = [
+                    e.automation.wasserpumpe_an
+                    e.automation.wasserpumpe_aus
+                  ];
+                };
+              }
+            ))
             (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (
               ha.mkToggleCard {
                 entity = e.switch.steckdose_gewachshaus_heizung.switch;
                 name = "Gewächshaus Heizung";
                 icon = "mdi:radiator";
-                onColor = "var(--red)";
+                onColor = "var(--yellow)";
               }
             ))
             (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (mkAutoToggle {
               entity = e.automation.heat_greenhouse;
               name = "Heizungs-Automatik";
-              onColor = "var(--red)";
+              onColor = "var(--yellow)";
             }))
           ];
         }

@@ -41,10 +41,6 @@ let
                   legend = false;
                   extrema = true;
                 };
-                grid_options = {
-                  columns = "full";
-                  rows = 2;
-                };
               };
             })
             (ha.mkHStack [
@@ -89,10 +85,11 @@ let
             {
               type = "entities";
               entities = [
-                { entity = e.automation.deaktiviere_pumpe_nach_regen; }
+                { entity = e.automation.wasserpumpe_an; }
+                { entity = e.automation.wasserpumpe_aus; }
                 { entity = e.automation.warnung_temperatur_gewachshaus; }
                 { entity = e.automation.heat_greenhouse; }
-                { entity = e.automation.pflanzenlicht; }
+                { entity = e.automation.pflanzenlicht_automatik; }
               ];
             }
             {

@@ -18,7 +18,7 @@ let
           (ha.mkGridSection [
             (ha.mkMushTitle "Draußen")
             (ha.mkMiniGraph {
-              name = "Gewächshaus vs Terrasse";
+              name = "Gewächshaus vs Wetterstation";
               entities = [
                 {
                   entity = e.sensor.thermometer_gewachshaus.temperature;

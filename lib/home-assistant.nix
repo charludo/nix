@@ -423,7 +423,9 @@ rec {
   # Dashboard navigation link (uses mushroom-entity-card as a nav button)
   mkNavCard = name: path: {
     type = "custom:mushroom-entity-card";
-    entity = "person.paki";
+    # mushroom-entity-card requires *some* entity; we don't render its
+    # state, so just pin to sun.sun which the suns module always defines.
+    entity = "sun.sun";
     inherit name;
     fill_container = true;
     secondary_info = "none";

@@ -104,6 +104,13 @@ in
         icon = "mdi:radiator";
         area = "Terrasse";
       };
+      # Latches when the watering window was skipped due to rain; the
+      # next non-skipped run notifies on resumption and clears it.
+      pumpe_uebersprungen = {
+        name = "Pumpe übersprungen (Regen)";
+        icon = "mdi:weather-rainy";
+        area = "Terrasse";
+      };
       turalarm = {
         name = "Türalarm";
         area = "Wohnzimmer";
