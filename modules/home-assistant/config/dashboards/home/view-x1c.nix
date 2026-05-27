@@ -543,7 +543,13 @@ let
   # only invoked while the print is running/paused; idle/finish/etc.
   # render a muted, no-op chip.
   controlButton =
-    { name, icon, action, bg, fg ? "var(--contrast1)" }:
+    {
+      name,
+      icon,
+      action,
+      bg,
+      fg ? "var(--contrast1)",
+    }:
     {
       type = "custom:button-card";
       inherit name icon;
@@ -664,6 +670,9 @@ in
 
     # ── Middle column: live controls. ──────────────────────────────
     (ha.mkGridSection [
+      # `select.x1c_druckgeschwindigkeit` is only "available" while the
+      # printer is actively printing; pills stay visible but will throw
+      # "entity not available" warnings on idle taps, which is fine.
       (ha.mkMushTitle "Geschwindigkeit")
       (ha.mkHStack [
         (speedPill "silent" "Silent" "mdi:speedometer-slow")
@@ -675,58 +684,112 @@ in
       (ha.mkMushTitle "Druck")
       # Pause/Resume only relevant while running or paused; show as
       # one merged button via state-driven name/icon swap.
-      (ha.mkConditional
-        [ (ha.orConditions [
-            (ha.stateIs ent.status "running")
-            (ha.stateIs ent.status "pause")
-          ]) ]
-        (ha.mkHStack [
-          {
-            type = "custom:button-card";
-            entity = ent.status;
-            name = "[[[ return entity.state === 'running' ? 'Pause' : 'Fortsetzen'; ]]]";
-            icon = "[[[ return entity.state === 'running' ? 'mdi:pause' : 'mdi:play'; ]]]";
-            tap_action = {
-              action = "perform-action";
-              perform_action = "button.press";
-              haptic = "medium";
-              target.entity_id = "[[[ return entity.state === 'running' ? '${ent.btnPause}' : '${ent.btnResume}'; ]]]";
+      # (ha.mkConditional
+      # [
+      # (ha.orConditions [
+      # (ha.stateIs ent.status "running")
+      # (ha.stateIs ent.status "pause")
+      # ])
+      # ]
+      (ha.mkHStack [
+        {
+          type = "custom:button-card";
+          entity = ent.status;
+          name = "[[[ return entity.state === 'running' ? 'Pause' : 'Fortsetzen'; ]]]";
+          icon = "[[[ return entity.state === 'running' ? 'mdi:pause' : 'mdi:play'; ]]]";
+          tap_action = {
+            action = "perform-action";
+            perform_action = "button.press";
+            haptic = "medium";
+            target.entity_id = "[[[ return entity.state === 'running' ? '${ent.btnPause}' : '${ent.btnResume}'; ]]]";
+          };
+          styles = ha.mkStyles {
+            card = {
+              background = "var(--orange)";
+              "border-radius" = "16px";
+              padding = "12px";
+              height = "72px";
             };
-            styles = ha.mkStyles {
-              card = {
-                background = "var(--orange)";
-                "border-radius" = "16px";
-                padding = "12px";
-                height = "72px";
-              };
-              icon.color = "var(--black)";
-              name = { color = "var(--black)"; "font-size" = "14px"; };
+            icon.color = "var(--black)";
+            name = {
+              color = "var(--black)";
+              "font-size" = "14px";
             };
-          }
-          (controlButton {
+          };
+        }
+        (
+          controlButton {
             name = "Abbruch";
             icon = "mdi:stop-circle";
             action = ent.btnStop;
             bg = "var(--red)";
-          } // {
+          }
+          // {
             confirmation.text = "Druck wirklich abbrechen?";
-          })
-        ]))
+          }
+        )
+      ]
+        # )
+      )
 
       (ha.mkMushTitle "Soll-Temperaturen")
+      # Mushroom-number sliders. `icon_color = "--yellow"` paints the slider
+      # fill and the icon when target > 0; card_mod knocks the slider
+      # *track* back to a neutral grey (mushroom's default is the icon
+      # colour at low opacity, which reads as washed-out yellow) and
+      # forces the disabled-state icon colour to grey too.
+      # Tapping the icon toggles: > 0 → 0 (off); = 0 → the recall value
+      # (PLA defaults). HA evaluates Jinja in service-call data, so the
+      # ternary picks the right value at call time.
       {
         type = "custom:mushroom-number-card";
         entity = ent.nozzleTargetNum;
         name = "Düse";
+        icon = "mdi:printer-3d-nozzle-heat";
+        icon_color = "--yellow";
         layout = "horizontal";
-        display_mode = "buttons";
+        display_mode = "slider";
+        fill_container = false;
+        tap_action = {
+          action = "perform-action";
+          perform_action = "number.set_value";
+          haptic = "medium";
+          target.entity_id = ent.nozzleTargetNum;
+          data.value = "{{ 0 if states('${ent.nozzleTargetNum}') | float(0) > 0 else 220 }}";
+        };
+        card_mod.style = ''
+          mushroom-slider {
+            --slider-bg: var(--contrast4);
+          }
+          mushroom-shape-icon {
+            --shape-color-disabled: var(--contrast4);
+          }
+        '';
       }
       {
         type = "custom:mushroom-number-card";
         entity = ent.bedTargetNum;
         name = "Bett";
+        icon = "mdi:heating-coil";
+        icon_color = "--yellow";
         layout = "horizontal";
-        display_mode = "buttons";
+        display_mode = "slider";
+        fill_container = false;
+        tap_action = {
+          action = "perform-action";
+          perform_action = "number.set_value";
+          haptic = "medium";
+          target.entity_id = ent.bedTargetNum;
+          data.value = "{{ 0 if states('${ent.bedTargetNum}') | float(0) > 0 else 60 }}";
+        };
+        card_mod.style = ''
+          mushroom-slider {
+            --slider-bg: var(--contrast4);
+          }
+          mushroom-shape-icon {
+            --shape-color-disabled: var(--contrast4);
+          }
+        '';
       }
 
       (ha.mkMushTitle "Lüfter")
@@ -734,6 +797,7 @@ in
         type = "custom:mushroom-fan-card";
         entity = ent.coolingFan;
         name = "Bauteilkühlung";
+        icon_color = "--blue";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
@@ -743,37 +807,74 @@ in
         type = "custom:mushroom-fan-card";
         entity = ent.chamberFan;
         name = "Kammer";
+        icon_color = "--blue";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
         layout = "horizontal";
       }
+      # Hotend fan: tap_action explicitly bound to toggle so the icon
+      # area toggles instead of latching to 100% (the integration's
+      # default fan behaviour on this entity falls through to
+      # set_percentage on plain taps).
       {
         type = "custom:mushroom-fan-card";
         entity = ent.auxFan;
         name = "Hotend";
+        icon_color = "--blue";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
         layout = "horizontal";
-      }
-
-      (ha.mkMushTitle "Beleuchtung")
-      {
-        type = "custom:mushroom-light-card";
-        entity = ent.light;
-        name = "Kammerlicht";
-        icon = "mdi:lightbulb";
-        layout = "horizontal";
+        tap_action = {
+          action = "toggle";
+          haptic = "medium";
+        };
       }
 
       (ha.mkMushTitle "System")
       {
         type = "entities";
         entities = [
-          { entity = ent.cameraSwitch; name = "Kamera"; }
-          { entity = ent.timelapse; name = "Zeitraffer-Aufnahme"; }
-          { entity = ent.btnRefresh; name = "Daten neu laden"; }
+          {
+            entity = ent.cameraSwitch;
+            name = "Kamera";
+          }
+          {
+            entity = ent.btnRefresh;
+            name = "Daten neu laden";
+          }
+        ];
+      }
+
+      (ha.mkMushTitle "Druckauftrag")
+      {
+        type = "entities";
+        entities = [
+          {
+            entity = ent.gcodeFile;
+            name = "Datei";
+          }
+          {
+            entity = ent.printType;
+            name = "Typ";
+          }
+          {
+            entity = ent.printWeight;
+            name = "Gewicht";
+          }
+          {
+            entity = ent.printLength;
+            name = "Filamentlänge";
+          }
+          {
+            entity = ent.objectsPrintable;
+            name = "Objekte";
+          }
+          {
+            entity = ent.objectsSkipped;
+            name = "Übersprungen";
+          }
         ];
       }
     ])
@@ -849,9 +950,21 @@ in
       {
         type = "entities";
         entities = [
-          { entity = ent.coolingFanRpm; name = "Bauteilkühlung"; icon = "mdi:fan"; }
-          { entity = ent.chamberFanRpm; name = "Kammer"; icon = "mdi:fan"; }
-          { entity = ent.auxFanRpm; name = "Hotend"; icon = "mdi:fan"; }
+          {
+            entity = ent.coolingFanRpm;
+            name = "Bauteilkühlung";
+            icon = "mdi:fan";
+          }
+          {
+            entity = ent.chamberFanRpm;
+            name = "Kammer";
+            icon = "mdi:fan";
+          }
+          {
+            entity = ent.auxFanRpm;
+            name = "Hotend";
+            icon = "mdi:fan";
+          }
         ];
       }
 
@@ -906,28 +1019,41 @@ in
         ];
       }
 
-      (ha.mkMushTitle "Druckauftrag")
-      {
-        type = "entities";
-        entities = [
-          { entity = ent.gcodeFile; name = "Datei"; }
-          { entity = ent.printType; name = "Typ"; }
-          { entity = ent.printWeight; name = "Gewicht"; }
-          { entity = ent.printLength; name = "Filamentlänge"; }
-          { entity = ent.objectsPrintable; name = "Objekte"; }
-          { entity = ent.objectsSkipped; name = "Übersprungen"; }
-        ];
-      }
-
       (ha.mkMushTitle "Hardware")
       {
         type = "entities";
         entities = [
-          { entity = ent.nozzleType; name = "Düsentyp"; }
-          { entity = ent.nozzleSize; name = "Düsengröße"; }
-          { entity = ent.bedType; name = "Druckbett"; }
-          { entity = ent.sdStatus; name = "SD-Karte"; }
-          { entity = ent.totalUsage; name = "Gesamtnutzung"; }
+          {
+            entity = ent.nozzleType;
+            name = "Düsentyp";
+          }
+          {
+            entity = ent.nozzleSize;
+            name = "Düsengröße";
+          }
+          {
+            entity = ent.bedType;
+            name = "Druckbett";
+          }
+          {
+            entity = ent.sdStatus;
+            name = "SD-Karte";
+          }
+          {
+            entity = ent.totalUsage;
+            name = "Gesamtnutzung";
+          }
+        ];
+      }
+
+      (ha.mkMushTitle "Zeitraffer")
+      {
+        type = "entities";
+        entities = [
+          {
+            entity = ent.timelapse;
+            name = "Aufnahme aktiv";
+          }
         ];
       }
 
@@ -935,16 +1061,46 @@ in
       {
         type = "entities";
         entities = [
-          { entity = ent.wifi; name = "WLAN"; }
-          { entity = ent.online; name = "Online"; }
-          { entity = ent.firmware; name = "Firmware-Update"; }
-          { entity = ent.ipAddress; name = "IP"; }
-          { entity = ent.serial; name = "Seriennummer"; }
-          { entity = ent.printerName; name = "Druckername"; }
-          { entity = ent.mqttMode; name = "MQTT"; }
-          { entity = ent.devLan; name = "Entwickler-LAN"; }
-          { entity = ent.extruderFilament; name = "Extruder-Filament"; }
-          { entity = ent.printError; name = "Druckfehler"; }
+          {
+            entity = ent.wifi;
+            name = "WLAN";
+          }
+          {
+            entity = ent.online;
+            name = "Online";
+          }
+          {
+            entity = ent.firmware;
+            name = "Firmware-Update";
+          }
+          {
+            entity = ent.ipAddress;
+            name = "IP";
+          }
+          {
+            entity = ent.serial;
+            name = "Seriennummer";
+          }
+          {
+            entity = ent.printerName;
+            name = "Druckername";
+          }
+          {
+            entity = ent.mqttMode;
+            name = "MQTT";
+          }
+          {
+            entity = ent.devLan;
+            name = "Entwickler-LAN";
+          }
+          {
+            entity = ent.extruderFilament;
+            name = "Extruder-Filament";
+          }
+          {
+            entity = ent.printError;
+            name = "Druckfehler";
+          }
         ];
       }
     ])

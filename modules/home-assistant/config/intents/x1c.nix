@@ -1,7 +1,5 @@
-{ config, ... }:
+_:
 let
-  e = config.hass.entities;
-
   status = "sensor.x1c_druckstatus";
   remaining = "sensor.x1c_verbleibende_zeit";
   layer = "sensor.x1c_aktuelle_schicht";

@@ -106,7 +106,8 @@ in
                 nameColor = "var(--black)";
                 labelColor = "var(--black)";
                 extraCardProps."margin-top" = "24px";
-              }) // {
+              })
+              // {
                 tap_action = {
                   action = "navigate";
                   navigation_path = "/lovelace/x1c";
