@@ -46,7 +46,9 @@
   # referencing `e.automation.<key>` resolves to a non-existent entity.
   config.services.home-assistant.config = lib.mkMerge (
     lib.mapAttrsToList (name: auto: {
-      "automation ${name}" = auto // { id = name; };
+      "automation ${name}" = auto // {
+        id = name;
+      };
     }) config.hass.automations
   );
 }

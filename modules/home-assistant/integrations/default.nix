@@ -1,6 +1,7 @@
 {
   imports = [
     ./areas.nix
+    ./bambu.nix
     ./closest_intent.nix
     ./openweathermap.nix
     ./persons.nix

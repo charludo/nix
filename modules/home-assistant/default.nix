@@ -64,4 +64,5 @@
   };
 
   hass.zha.reconciler.enable = true;
+  hass.bambu.enable = true;
 }

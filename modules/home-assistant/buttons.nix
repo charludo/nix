@@ -56,7 +56,8 @@ let
             sequence = actions;
           }
         ];
-      branches = branchFor "single" btn.single ++ branchFor "double" btn.double ++ branchFor "long" btn.long;
+      branches =
+        branchFor "single" btn.single ++ branchFor "double" btn.double ++ branchFor "long" btn.long;
     in
     {
       alias = "Button: ${name}";

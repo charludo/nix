@@ -182,9 +182,7 @@ let
   # device without re-typing its name (used by `hass.buttons` to point
   # at a `hass.devices.zigbee` entry; the helper resolves IEEE/area
   # from there).
-  zigbeeDevices = lib.mapAttrs' (
-    name: _: lib.nameValuePair (mkSlug name) name
-  ) cfg.devices.zigbee;
+  zigbeeDevices = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) name) cfg.devices.zigbee;
 
   simpleEntities = {
     input_boolean = byKey "input_boolean" cfg.devices.input_booleans;

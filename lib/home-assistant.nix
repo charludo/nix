@@ -21,13 +21,27 @@ rec {
     let
       transliterated =
         lib.replaceStrings
-          [ "ä" "ö" "ü" "Ä" "Ö" "Ü" "ß" ]
-          [ "a" "o" "u" "a" "o" "u" "ss" ]
+          [
+            "ä"
+            "ö"
+            "ü"
+            "Ä"
+            "Ö"
+            "Ü"
+            "ß"
+          ]
+          [
+            "a"
+            "o"
+            "u"
+            "a"
+            "o"
+            "u"
+            "ss"
+          ]
           name;
       lowered = lib.toLower transliterated;
-      pieces = builtins.filter (p: builtins.isString p && p != "") (
-        builtins.split "[^a-z0-9]+" lowered
-      );
+      pieces = builtins.filter (p: builtins.isString p && p != "") (builtins.split "[^a-z0-9]+" lowered);
     in
     lib.concatStringsSep "_" pieces;
 

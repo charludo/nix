@@ -85,6 +85,15 @@ in
     sha256 = "sha256-ZYJD0PVh2E07cdY1a7uxSxdooAMz78HwJpwr4uWofZM=";
   };
 
+  bambu_lab = mkComponent {
+    pname = "bambu_lab";
+    version = "2.2.22";
+    owner = "greghesp";
+    repo = "ha-bambulab";
+    rev = "v2.2.22";
+    sha256 = "sha256-JRJ+tfllDuMrtz+5VQL2l5nkhJQXRoNvsvFnrReSZHE=";
+  };
+
   xiaomi_cloud_map_extractor = mkComponent {
     pname = "xiaomi_cloud_map_extractor";
     version = "3.0.0-alpha-24";
