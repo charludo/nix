@@ -29,9 +29,39 @@ let
     nozzleTarget = "sensor.${p}_zieltemperatur_der_duse";
     bedTarget = "sensor.${p}_zieltemperatur_vom_druckbett";
 
-    coolingFan = "sensor.${p}_bauteillufterdrehzahl";
-    chamberFan = "sensor.${p}_druckraumlufterdrehzahl";
-    auxFan = "sensor.${p}_hotendlufterdrehzahl";
+    # Read-only RPM sensors.
+    coolingFanRpm = "sensor.${p}_bauteillufterdrehzahl";
+    chamberFanRpm = "sensor.${p}_druckraumlufterdrehzahl";
+    auxFanRpm = "sensor.${p}_hotendlufterdrehzahl";
+    # Writable fan entities (developer mode required on the printer).
+    coolingFan = "fan.${p}_bauteillufter";
+    chamberFan = "fan.${p}_druckraumlufter";
+    auxFan = "fan.${p}_druckkopflufter";
+    # Writable target-temp numbers + speed select.
+    nozzleTargetNum = "number.${p}_zieltemperatur_der_duse";
+    bedTargetNum = "number.${p}_zieltemperatur_des_druckbett";
+    speedSelect = "select.${p}_druckgeschwindigkeit";
+    # Print-control buttons.
+    btnPause = "button.${p}_druckvorgang_anhalten";
+    btnResume = "button.${p}_druckvorgang_fortsetzen";
+    btnStop = "button.${p}_druckvorgang_beenden";
+    btnRefresh = "button.${p}_aktualisierung_der_daten_erzwingen";
+    # Extra info sensors (dev-mode).
+    gcodeFile = "sensor.${p}_gcode_dateiname";
+    nozzleType = "sensor.${p}_dusentyp";
+    nozzleSize = "sensor.${p}_dusengrosse";
+    bedType = "sensor.${p}_druckbett_typ";
+    printType = "sensor.${p}_drucktyp";
+    printWeight = "sensor.${p}_gewicht_des_drucks";
+    printLength = "sensor.${p}_drucklange";
+    objectsPrintable = "sensor.${p}_druckbare_objekte";
+    objectsSkipped = "sensor.${p}_ubersprungene_objekte";
+    sdStatus = "sensor.${p}_sd_kartenstatus";
+    totalUsage = "sensor.${p}_gesamtnutzung";
+    ipAddress = "sensor.${p}_ip_adresse";
+    serial = "sensor.${p}_seriennummer";
+    printerName = "sensor.${p}_name_des_druckers";
+    mqttMode = "sensor.${p}_mqtt_verbindungsmodus";
 
     wifi = "sensor.${p}_wi_fi_signalqualitat";
     light = "light.${p}_druckraumbeleuchtung";
@@ -44,6 +74,9 @@ let
     door = "binary_sensor.${p}_gehausetur";
     online = "binary_sensor.${p}_online";
     printError = "binary_sensor.${p}_druckfehler";
+    timelapse = "binary_sensor.${p}_aufnahme_von_zeitraffern";
+    extruderFilament = "binary_sensor.${p}_extruder_filament_status";
+    devLan = "binary_sensor.${p}_entwickler_lan_modus";
 
     # ── AMS ───────────────────────────────────────────────────────
     amsActive = "binary_sensor.${ams}_aktiv";
@@ -465,6 +498,75 @@ let
         }
       '';
     };
+
+  # ── Middle-column control helpers ─────────────────────────────────
+  # Speed-mode pill: tinted yellow when the active speed matches the
+  # option. Mirrors the speed selector from x1_carbon-control.yaml.
+  speedPill = option: name: icon: {
+    type = "custom:button-card";
+    entity = ent.speedSelect;
+    inherit name icon;
+    tap_action = {
+      action = "perform-action";
+      perform_action = "select.select_option";
+      haptic = "medium";
+      data.option = option;
+      target.entity_id = ent.speedSelect;
+    };
+    state = [
+      (ha.mkStateStyle option {
+        card.background = "var(--yellow)";
+        icon.color = "var(--black)";
+        name.color = "var(--black)";
+      })
+    ];
+    styles = ha.mkStyles {
+      card = {
+        background = "var(--contrast2)";
+        "border-radius" = "16px";
+        padding = "12px";
+        height = "72px";
+      };
+      icon = {
+        color = "var(--contrast20)";
+        width = "24px";
+      };
+      name = {
+        color = "var(--contrast20)";
+        "font-size" = "12px";
+        "margin-top" = "4px";
+      };
+    };
+  };
+
+  # Coloured pause/resume/cancel button. Backing button-card service is
+  # only invoked while the print is running/paused; idle/finish/etc.
+  # render a muted, no-op chip.
+  controlButton =
+    { name, icon, action, bg, fg ? "var(--contrast1)" }:
+    {
+      type = "custom:button-card";
+      inherit name icon;
+      tap_action = {
+        action = "perform-action";
+        perform_action = "button.press";
+        haptic = "medium";
+        target.entity_id = action;
+      };
+      styles = ha.mkStyles {
+        card = {
+          background = bg;
+          "border-radius" = "16px";
+          padding = "12px";
+          height = "72px";
+        };
+        icon.color = fg;
+        name = {
+          color = fg;
+          "font-size" = "13px";
+        };
+      };
+    };
 in
 {
   type = "sections";
@@ -560,8 +662,121 @@ in
       )
     ])
 
-    # ── Middle column: reserved for later. ──────────────────────────
-    (ha.mkGridSection [ ])
+    # ── Middle column: live controls. ──────────────────────────────
+    (ha.mkGridSection [
+      (ha.mkMushTitle "Geschwindigkeit")
+      (ha.mkHStack [
+        (speedPill "silent" "Silent" "mdi:speedometer-slow")
+        (speedPill "standard" "Standard" "mdi:speedometer-medium")
+        (speedPill "sport" "Sport" "mdi:speedometer")
+        (speedPill "ludicrous" "Ludicrous" "mdi:rocket-launch")
+      ])
+
+      (ha.mkMushTitle "Druck")
+      # Pause/Resume only relevant while running or paused; show as
+      # one merged button via state-driven name/icon swap.
+      (ha.mkConditional
+        [ (ha.orConditions [
+            (ha.stateIs ent.status "running")
+            (ha.stateIs ent.status "pause")
+          ]) ]
+        (ha.mkHStack [
+          {
+            type = "custom:button-card";
+            entity = ent.status;
+            name = "[[[ return entity.state === 'running' ? 'Pause' : 'Fortsetzen'; ]]]";
+            icon = "[[[ return entity.state === 'running' ? 'mdi:pause' : 'mdi:play'; ]]]";
+            tap_action = {
+              action = "perform-action";
+              perform_action = "button.press";
+              haptic = "medium";
+              target.entity_id = "[[[ return entity.state === 'running' ? '${ent.btnPause}' : '${ent.btnResume}'; ]]]";
+            };
+            styles = ha.mkStyles {
+              card = {
+                background = "var(--orange)";
+                "border-radius" = "16px";
+                padding = "12px";
+                height = "72px";
+              };
+              icon.color = "var(--black)";
+              name = { color = "var(--black)"; "font-size" = "14px"; };
+            };
+          }
+          (controlButton {
+            name = "Abbruch";
+            icon = "mdi:stop-circle";
+            action = ent.btnStop;
+            bg = "var(--red)";
+          } // {
+            confirmation.text = "Druck wirklich abbrechen?";
+          })
+        ]))
+
+      (ha.mkMushTitle "Soll-Temperaturen")
+      {
+        type = "custom:mushroom-number-card";
+        entity = ent.nozzleTargetNum;
+        name = "Düse";
+        layout = "horizontal";
+        display_mode = "buttons";
+      }
+      {
+        type = "custom:mushroom-number-card";
+        entity = ent.bedTargetNum;
+        name = "Bett";
+        layout = "horizontal";
+        display_mode = "buttons";
+      }
+
+      (ha.mkMushTitle "Lüfter")
+      {
+        type = "custom:mushroom-fan-card";
+        entity = ent.coolingFan;
+        name = "Bauteilkühlung";
+        icon_animation = true;
+        show_percentage_control = true;
+        fill_container = false;
+        layout = "horizontal";
+      }
+      {
+        type = "custom:mushroom-fan-card";
+        entity = ent.chamberFan;
+        name = "Kammer";
+        icon_animation = true;
+        show_percentage_control = true;
+        fill_container = false;
+        layout = "horizontal";
+      }
+      {
+        type = "custom:mushroom-fan-card";
+        entity = ent.auxFan;
+        name = "Hotend";
+        icon_animation = true;
+        show_percentage_control = true;
+        fill_container = false;
+        layout = "horizontal";
+      }
+
+      (ha.mkMushTitle "Beleuchtung")
+      {
+        type = "custom:mushroom-light-card";
+        entity = ent.light;
+        name = "Kammerlicht";
+        icon = "mdi:lightbulb";
+        layout = "horizontal";
+      }
+
+      (ha.mkMushTitle "System")
+      {
+        type = "entities";
+        entities = [
+          { entity = ent.cameraSwitch; name = "Kamera"; }
+          { entity = ent.timelapse; name = "Zeitraffer-Aufnahme"; }
+          { entity = ent.btnRefresh; name = "Daten neu laden"; }
+        ];
+      }
+    ])
 
     # ── Right column: details, top-to-bottom. ───────────────────────
     (ha.mkGridSection [
@@ -630,25 +845,13 @@ in
         ];
       }
 
-      (ha.mkMushTitle "Lüfter")
+      (ha.mkMushTitle "Lüfterdrehzahlen")
       {
         type = "entities";
         entities = [
-          {
-            entity = ent.coolingFan;
-            name = "Bauteilkühlung";
-            icon = "mdi:fan";
-          }
-          {
-            entity = ent.chamberFan;
-            name = "Kammer";
-            icon = "mdi:fan";
-          }
-          {
-            entity = ent.auxFan;
-            name = "Hotend";
-            icon = "mdi:fan";
-          }
+          { entity = ent.coolingFanRpm; name = "Bauteilkühlung"; icon = "mdi:fan"; }
+          { entity = ent.chamberFanRpm; name = "Kammer"; icon = "mdi:fan"; }
+          { entity = ent.auxFanRpm; name = "Hotend"; icon = "mdi:fan"; }
         ];
       }
 
@@ -703,34 +906,45 @@ in
         ];
       }
 
+      (ha.mkMushTitle "Druckauftrag")
+      {
+        type = "entities";
+        entities = [
+          { entity = ent.gcodeFile; name = "Datei"; }
+          { entity = ent.printType; name = "Typ"; }
+          { entity = ent.printWeight; name = "Gewicht"; }
+          { entity = ent.printLength; name = "Filamentlänge"; }
+          { entity = ent.objectsPrintable; name = "Objekte"; }
+          { entity = ent.objectsSkipped; name = "Übersprungen"; }
+        ];
+      }
+
+      (ha.mkMushTitle "Hardware")
+      {
+        type = "entities";
+        entities = [
+          { entity = ent.nozzleType; name = "Düsentyp"; }
+          { entity = ent.nozzleSize; name = "Düsengröße"; }
+          { entity = ent.bedType; name = "Druckbett"; }
+          { entity = ent.sdStatus; name = "SD-Karte"; }
+          { entity = ent.totalUsage; name = "Gesamtnutzung"; }
+        ];
+      }
+
       (ha.mkMushTitle "Diagnose")
       {
         type = "entities";
         entities = [
-          {
-            entity = ent.wifi;
-            name = "WLAN";
-          }
-          {
-            entity = ent.online;
-            name = "Online";
-          }
-          {
-            entity = ent.firmware;
-            name = "Firmware-Update";
-          }
-          {
-            entity = ent.light;
-            name = "Kammerlicht";
-          }
-          {
-            entity = ent.cameraSwitch;
-            name = "Kamera";
-          }
-          {
-            entity = ent.printError;
-            name = "Druckfehler";
-          }
+          { entity = ent.wifi; name = "WLAN"; }
+          { entity = ent.online; name = "Online"; }
+          { entity = ent.firmware; name = "Firmware-Update"; }
+          { entity = ent.ipAddress; name = "IP"; }
+          { entity = ent.serial; name = "Seriennummer"; }
+          { entity = ent.printerName; name = "Druckername"; }
+          { entity = ent.mqttMode; name = "MQTT"; }
+          { entity = ent.devLan; name = "Entwickler-LAN"; }
+          { entity = ent.extruderFilament; name = "Extruder-Filament"; }
+          { entity = ent.printError; name = "Druckfehler"; }
         ];
       }
     ])
