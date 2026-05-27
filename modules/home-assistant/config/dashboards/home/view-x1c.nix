@@ -69,15 +69,10 @@ let
     inherit conditions elements;
   };
 
-  wifiColor = e: ''
-    [[[
-      const s = states['${e}']?.state;
-      if (s > -50) return 'var(--green)';
-      if (s > -60) return 'var(--yellow)';
-      if (s > -67) return 'var(--orange)';
-      return 'var(--red)';
-    ]]]
-  '';
+  # config-template-card evaluates `${…}` (not `[[[ … ]]]`) inside its
+  # child element's style block. Kept on a single line — config-template
+  # has been spotty with multiline templates inside style values.
+  wifiColor = e: "\${states['${e}'].state > -67 ? 'var(--blue)' : 'var(--red)'}";
 
   # Picture-elements *element* (state-icon, state-label, conditional...)
   # styles are CSS-prop maps in the YAML; pass them through unchanged.
@@ -100,35 +95,25 @@ let
       }
     '';
     elements = [
-      # WiFi signal icon, hidden when printer is offline.
-      (mkElementConditional
-        [ (ha.stateNot ent.status "offline") ]
-        [
-          {
-            type = "custom:config-template-card";
-            entities = [ ent.wifi ];
-            element = {
-              type = "state-icon";
-              entity = ent.wifi;
-              icon = ''
-                ''${states['${ent.wifi}'].state > -50 ? 'mdi:wifi-strength-4' :
-                  states['${ent.wifi}'].state > -60 ? 'mdi:wifi-strength-3' :
-                  states['${ent.wifi}'].state > -67 ? 'mdi:wifi-strength-2' :
-                  states['${ent.wifi}'].state > -70 ? 'mdi:wifi-strength-1-alert' :
-                  'mdi:wifi-strength-outline'}
-              '';
-            };
-            style = {
-              left = "67%";
-              top = "13.2%";
-              color = "rgba(0,0,0,0)";
-              "--paper-item-icon-color" = wifiColor ent.wifi;
-              "--icon-primary-color" = wifiColor ent.wifi;
-              "--state-icon-color" = wifiColor ent.wifi;
-            };
-          }
-        ]
-      )
+      # WiFi signal — circular state-badge in the same visual style as
+      # the nozzle/bed/chamber badges below, with the circle border
+      # tinted blue/red by signal strength.
+      {
+        type = "custom:config-template-card";
+        entities = [ ent.wifi ];
+        element = {
+          type = "state-badge";
+          entity = ent.wifi;
+          tap_action.action = "none";
+        };
+        style = {
+          left = "88%";
+          top = "14%";
+          "font-size" = "0.8em";
+          color = "rgba(0,0,0,0)";
+          "--label-badge-red" = wifiColor ent.wifi;
+        };
+      }
 
       # Chamber light toggle (centred on the printer's light bay).
       {
@@ -238,7 +223,7 @@ let
             type = "state-badge";
             entity = ent.chamberTemp;
             style = {
-              top = "31.75%";
+              top = "32.25%";
               left = "19%";
               "font-size" = "0.8em";
               color = "rgba(0,0,0,0)";
@@ -347,7 +332,7 @@ let
                 icon = "\${'local:humidity-level-dark-' + states['${ent.amsHumidityIx}'].state + '#fullcolor'}";
               };
               style = {
-                top = "44.5%";
+                top = "42.5%";
                 left = "92.5%";
                 background-color = "#1c1c1c";
                 border-radius = "50px";
@@ -559,12 +544,12 @@ in
           entity = ent.bedTemp;
           max = 110;
         })
+        (tempGauge {
+          name = "Kammer";
+          entity = ent.chamberTemp;
+          max = 60;
+        })
       ])
-      (tempGauge {
-        name = "Kammer";
-        entity = ent.chamberTemp;
-        max = 60;
-      })
       {
         type = "entities";
         entities = [
