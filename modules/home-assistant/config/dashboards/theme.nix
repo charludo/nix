@@ -34,6 +34,22 @@ let
     red = "rgb(255, 145, 138)";
     purple = "rgb(239, 177, 255)";
 
+    # Comma-separated RGB triplets — same hues as the brand colours
+    # above. Mushroom cards (and a few HA internals) read these via
+    # `var(--rgb-<name>)` and assemble `rgb(<triplet>)` themselves, so
+    # writing `icon_color = "yellow"` on a mushroom card resolves to
+    # our brand yellow instead of mushroom's default.
+    rgb-blue = "144, 191, 255";
+    rgb-green = "206, 245, 149";
+    rgb-yellow = "255, 218, 120";
+    rgb-orange = "255, 181, 129";
+    rgb-red = "255, 145, 138";
+    rgb-purple = "239, 177, 255";
+    rgb-white = "255, 255, 255";
+    rgb-black = "0, 0, 0";
+    rgb-grey = "119, 122, 131"; # = contrast10
+    rgb-disabled = "28, 31, 39"; # = contrast4
+
     # Tints (alpha 0.15)
     blue-tint = "rgba(144, 191, 255, 0.15)";
     green-tint = "rgba(206, 245, 149, 0.15)";
@@ -170,6 +186,35 @@ in
   orange = colors.orange;
   red = colors.red;
   purple = colors.purple;
+
+  # Mushroom cards build their colours from these triplets; without
+  # overriding, mushroom uses its own defaults instead of our brand
+  # hues even though `icon_color = "yellow"` is written.
+  rgb-blue = colors.rgb-blue;
+  rgb-green = colors.rgb-green;
+  rgb-yellow = colors.rgb-yellow;
+  rgb-orange = colors.rgb-orange;
+  rgb-red = colors.rgb-red;
+  rgb-purple = colors.rgb-purple;
+  rgb-white = colors.rgb-white;
+  rgb-black = colors.rgb-black;
+  rgb-grey = colors.rgb-grey;
+  rgb-disabled = colors.rgb-disabled;
+
+  # Entity-state-driven mushroom colours — these are what
+  # state-coloured cards (light, switch, fan, climate, …) actually
+  # render with. Mapping each to one of our brand triplets keeps the
+  # palette consistent even without explicit icon_color overrides.
+  rgb-state-light = colors.rgb-yellow;
+  rgb-state-switch = colors.rgb-green;
+  rgb-state-fan = colors.rgb-blue;
+  rgb-state-climate-cooling = colors.rgb-blue;
+  rgb-state-climate-heating = colors.rgb-red;
+  rgb-state-media-player = colors.rgb-blue;
+  rgb-state-number = colors.rgb-blue;
+  rgb-state-vacuum = colors.rgb-blue;
+  rgb-state-cover = colors.rgb-blue;
+  rgb-state-default = colors.rgb-blue;
 
   blue-tint = colors.blue-tint;
   green-tint = colors.green-tint;

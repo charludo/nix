@@ -601,7 +601,7 @@ in
             return "Druckt · noch " + rem + " min" + layers;
           }
           if (st === "pause") return "Pausiert · noch " + rem + " min";
-          if (st === "idle" || st === "finish") return "Leerlauf";
+          if (st === "idle" || st === "finish") return "Idle";
           if (st === "prepare") return "Vorbereitung";
           if (st === "offline") return "Offline";
           if (st === "failed") return "Fehler";
@@ -640,6 +640,10 @@ in
         entities = [
           {
             entity = ent.light;
+            tap_action.action = "toggle";
+          }
+          {
+            entity = ent.cameraSwitch;
             tap_action.action = "toggle";
           }
           { entity = ent.door; }
@@ -733,63 +737,21 @@ in
       )
 
       (ha.mkMushTitle "Soll-Temperaturen")
-      # Mushroom-number sliders. `icon_color = "--yellow"` paints the slider
-      # fill and the icon when target > 0; card_mod knocks the slider
-      # *track* back to a neutral grey (mushroom's default is the icon
-      # colour at low opacity, which reads as washed-out yellow) and
-      # forces the disabled-state icon colour to grey too.
-      # Tapping the icon toggles: > 0 → 0 (off); = 0 → the recall value
-      # (PLA defaults). HA evaluates Jinja in service-call data, so the
-      # ternary picks the right value at call time.
       {
         type = "custom:mushroom-number-card";
         entity = ent.nozzleTargetNum;
         name = "Düse";
-        icon = "mdi:printer-3d-nozzle-heat";
-        icon_color = "--yellow";
+        icon_color = "yellow";
         layout = "horizontal";
         display_mode = "slider";
-        fill_container = false;
-        tap_action = {
-          action = "perform-action";
-          perform_action = "number.set_value";
-          haptic = "medium";
-          target.entity_id = ent.nozzleTargetNum;
-          data.value = "{{ 0 if states('${ent.nozzleTargetNum}') | float(0) > 0 else 220 }}";
-        };
-        card_mod.style = ''
-          mushroom-slider {
-            --slider-bg: var(--contrast4);
-          }
-          mushroom-shape-icon {
-            --shape-color-disabled: var(--contrast4);
-          }
-        '';
       }
       {
         type = "custom:mushroom-number-card";
         entity = ent.bedTargetNum;
         name = "Bett";
-        icon = "mdi:heating-coil";
-        icon_color = "--yellow";
+        icon_color = "yellow";
         layout = "horizontal";
         display_mode = "slider";
-        fill_container = false;
-        tap_action = {
-          action = "perform-action";
-          perform_action = "number.set_value";
-          haptic = "medium";
-          target.entity_id = ent.bedTargetNum;
-          data.value = "{{ 0 if states('${ent.bedTargetNum}') | float(0) > 0 else 60 }}";
-        };
-        card_mod.style = ''
-          mushroom-slider {
-            --slider-bg: var(--contrast4);
-          }
-          mushroom-shape-icon {
-            --shape-color-disabled: var(--contrast4);
-          }
-        '';
       }
 
       (ha.mkMushTitle "Lüfter")
@@ -797,7 +759,7 @@ in
         type = "custom:mushroom-fan-card";
         entity = ent.coolingFan;
         name = "Bauteilkühlung";
-        icon_color = "--blue";
+        icon_color = "var(--blue)";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
@@ -807,44 +769,29 @@ in
         type = "custom:mushroom-fan-card";
         entity = ent.chamberFan;
         name = "Kammer";
-        icon_color = "--blue";
+        icon_color = "var(--blue)";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
         layout = "horizontal";
       }
-      # Hotend fan: tap_action explicitly bound to toggle so the icon
-      # area toggles instead of latching to 100% (the integration's
-      # default fan behaviour on this entity falls through to
-      # set_percentage on plain taps).
+      # Hotend (printhead) fan: the bambu_lab integration exposes it as
+      # percentage-only — `fan.toggle` maps to `set_percentage(100)`
+      # instead of true on/off — so we route the icon tap to more-info
+      # and let the user drag the slider for control.
       {
         type = "custom:mushroom-fan-card";
         entity = ent.auxFan;
         name = "Hotend";
-        icon_color = "--blue";
+        icon_color = "var(--blue)";
         icon_animation = true;
         show_percentage_control = true;
         fill_container = false;
         layout = "horizontal";
         tap_action = {
-          action = "toggle";
+          action = "more-info";
           haptic = "medium";
         };
-      }
-
-      (ha.mkMushTitle "System")
-      {
-        type = "entities";
-        entities = [
-          {
-            entity = ent.cameraSwitch;
-            name = "Kamera";
-          }
-          {
-            entity = ent.btnRefresh;
-            name = "Daten neu laden";
-          }
-        ];
       }
 
       (ha.mkMushTitle "Druckauftrag")
@@ -874,6 +821,10 @@ in
           {
             entity = ent.objectsSkipped;
             name = "Übersprungen";
+          }
+          {
+            entity = ent.timelapse;
+            name = "Aufnahme aktiv";
           }
         ];
       }
@@ -1046,17 +997,6 @@ in
         ];
       }
 
-      (ha.mkMushTitle "Zeitraffer")
-      {
-        type = "entities";
-        entities = [
-          {
-            entity = ent.timelapse;
-            name = "Aufnahme aktiv";
-          }
-        ];
-      }
-
       (ha.mkMushTitle "Diagnose")
       {
         type = "entities";
@@ -1100,6 +1040,10 @@ in
           {
             entity = ent.printError;
             name = "Druckfehler";
+          }
+          {
+            entity = ent.btnRefresh;
+            name = "Daten neu laden";
           }
         ];
       }
