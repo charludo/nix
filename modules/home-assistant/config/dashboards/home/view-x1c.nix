@@ -108,7 +108,7 @@ let
         };
         style = {
           left = "88%";
-          top = "14%";
+          top = "14.75%";
           "font-size" = "0.8em";
           color = "rgba(0,0,0,0)";
           "--label-badge-red" = wifiColor ent.wifi;

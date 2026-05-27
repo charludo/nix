@@ -34,6 +34,12 @@ in
     # required), so just having `custom_icons:` in configuration.yaml is
     # enough — and saves the UI add-integration dance.
     services.home-assistant.config.custom_icons = { };
+    services.home-assistant.config.ffmpeg = { };
+    services.home-assistant.config.stream = {
+      ll_hls = true;
+      segment_duration = 2;
+      part_duration = 0.2;
+    };
     # ha-bambulab's pybambu imports `paho.mqtt.client` directly, but its
     # manifest.json doesn't list paho-mqtt under `requirements`, so
     # nothing else pulls it into HA's Python env. Without this the
