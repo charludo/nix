@@ -2,23 +2,15 @@
 let
   ha = lib.ha;
 
-  # Entity ids the Bambu Lab integration produces with this HA setup
-  # (friendly names translated to German → slugified). Keeping the
-  # mapping in one place so the view itself stays readable; if you ever
-  # switch HA back to English friendly names or rename the devices,
-  # only this block needs updating.
   p = "x1c";
   ams = "x1c_ams";
   spool = "x1c_external_spool";
 
-  # Cloudflare keys by full URL and honours HA's 31-day Cache-Control,
-  # so a stale 404 can hang around for a month. Bump this every time
-  # the asset files change and CF will treat it as a new URL.
-  assetV = "1";
+  assetV = "2";
   img = name: "/local/bambu/${name}.png?v=${assetV}";
 
   ent = {
-    # ── Printer ─────────────────────────────────────────────────────
+    # ── Printer ────────────────────────────────────────────────────
     status = "sensor.${p}_druckstatus";
     progress = "sensor.${p}_druckfortschritt";
     remaining = "sensor.${p}_verbleibende_zeit";
@@ -53,22 +45,395 @@ let
     online = "binary_sensor.${p}_online";
     printError = "binary_sensor.${p}_druckfehler";
 
-    # ── AMS ────────────────────────────────────────────────────────
+    # ── AMS ───────────────────────────────────────────────────────
     amsActive = "binary_sensor.${ams}_aktiv";
+    amsId = "sensor.${ams}_aktiv"; # there's no sensor.<ams>_id in this install; use the activity sensor as label source
     amsHumidityIx = "sensor.${ams}_index_der_luftfeuchtigkeit";
     amsHumidity = "sensor.${ams}_luftfeuchtigkeit";
     amsTemp = "sensor.${ams}_temperatur";
     amsSlot = i: "sensor.${ams}_slot_${toString i}";
 
-    # ── External spool ─────────────────────────────────────────────
+    # ── External spool ────────────────────────────────────────────
     spoolSensor = "sensor.${spool}_externe_spule";
     spoolActive = "binary_sensor.${spool}_aktiv";
   };
 
-  isActive = ha.orConditions [
-    (ha.stateIs ent.status "running")
-    (ha.stateIs ent.status "pause")
-  ];
+  # Translate the original YAML's HA-color names into our theme vars so
+  # the badges/overlays match the rest of the dashboard. Used inline.
+  # picture-elements has its own conditional element type, which uses
+  # `elements: [...]` instead of the Lovelace `conditional` card's
+  # singular `card:`. ha.mkConditional emits the latter, hence a
+  # standalone helper here.
+  mkElementConditional = conditions: elements: {
+    type = "conditional";
+    inherit conditions elements;
+  };
+
+  wifiColor = e: ''
+    [[[
+      const s = states['${e}']?.state;
+      if (s > -50) return 'var(--green)';
+      if (s > -60) return 'var(--yellow)';
+      if (s > -67) return 'var(--orange)';
+      return 'var(--red)';
+    ]]]
+  '';
+
+  # Picture-elements *element* (state-icon, state-label, conditional...)
+  # styles are CSS-prop maps in the YAML; pass them through unchanged.
+
+  # ── x1_carbon_printer.yaml ────────────────────────────────────────
+  printerCard = {
+    type = "picture-elements";
+    image = img "on";
+    entity = ent.light;
+    state_image = {
+      "on" = img "on";
+      "off" = img "off";
+      "unavailable" = img "off";
+    };
+    card_mod.style = ''
+      ha-card {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+    '';
+    elements = [
+      # WiFi signal icon, hidden when printer is offline.
+      (mkElementConditional
+        [ (ha.stateNot ent.status "offline") ]
+        [
+          {
+            type = "custom:config-template-card";
+            entities = [ ent.wifi ];
+            element = {
+              type = "state-icon";
+              entity = ent.wifi;
+              icon = ''
+                ''${states['${ent.wifi}'].state > -50 ? 'mdi:wifi-strength-4' :
+                  states['${ent.wifi}'].state > -60 ? 'mdi:wifi-strength-3' :
+                  states['${ent.wifi}'].state > -67 ? 'mdi:wifi-strength-2' :
+                  states['${ent.wifi}'].state > -70 ? 'mdi:wifi-strength-1-alert' :
+                  'mdi:wifi-strength-outline'}
+              '';
+            };
+            style = {
+              left = "67%";
+              top = "13.2%";
+              color = "rgba(0,0,0,0)";
+              "--paper-item-icon-color" = wifiColor ent.wifi;
+              "--icon-primary-color" = wifiColor ent.wifi;
+              "--state-icon-color" = wifiColor ent.wifi;
+            };
+          }
+        ]
+      )
+
+      # Chamber light toggle (centred on the printer's light bay).
+      {
+        type = "state-icon";
+        entity = ent.light;
+        style = {
+          top = "46%";
+          left = "18%";
+          "--mdc-icon-size" = "2.6em";
+        };
+        tap_action.action = "toggle";
+      }
+
+      # Status label across the top.
+      {
+        type = "state-label";
+        entity = ent.status;
+        style = {
+          top = "8.6%";
+          left = "32.8%";
+          "font-size" = "1.2em";
+          color = "var(--contrast20)";
+        };
+      }
+
+      # Cover image overlay + progress badge while a job is active.
+      (mkElementConditional
+        [
+          {
+            entity = ent.status;
+            state = [
+              "running"
+              "pause"
+            ];
+          }
+        ]
+        [
+          (mkElementConditional
+            [
+              {
+                entity = ent.coverImage;
+                state_not = "unavailable";
+              }
+            ]
+            [
+              {
+                type = "custom:hui-element";
+                card_type = "picture-entity";
+                show_name = false;
+                show_state = false;
+                entity = ent.coverImage;
+                style = {
+                  top = "50%";
+                  left = "50%";
+                  transform = "translate(-45%, -40%) scale(75%, 75%)";
+                  "--ha-card-border-width" = "0px";
+                  "--ha-card-background" = "none";
+                };
+              }
+            ]
+          )
+          {
+            type = "state-badge";
+            entity = ent.progress;
+            tap_action.action = "none";
+            style = {
+              top = "18.5%";
+              left = "81%";
+              "font-size" = "1em";
+              color = "rgba(0,0,0,0)";
+              "--label-badge-red" = "var(--blue)";
+            };
+          }
+        ]
+      )
+
+      # Nozzle / bed / chamber temperature badges over their hardware.
+      {
+        type = "state-badge";
+        entity = ent.nozzleTemp;
+        style = {
+          top = "31%";
+          left = "51%";
+          "font-size" = "0.8em";
+          color = "rgba(0,0,0,0)";
+        };
+      }
+      {
+        type = "state-badge";
+        entity = ent.bedTemp;
+        style = {
+          top = "84%";
+          left = "51%";
+          "font-size" = "0.8em";
+          color = "rgba(0,0,0,0)";
+        };
+      }
+      (mkElementConditional
+        [
+          {
+            entity = ent.chamberTemp;
+            state_not = "unavailable";
+          }
+        ]
+        [
+          {
+            type = "state-badge";
+            entity = ent.chamberTemp;
+            style = {
+              top = "31.75%";
+              left = "19%";
+              "font-size" = "0.8em";
+              color = "rgba(0,0,0,0)";
+            };
+          }
+        ]
+      )
+    ];
+  };
+
+  # ── ams_ams.yaml ─────────────────────────────────────────────────
+  # One slot overlay = the filament icon (with tinted background) on top
+  # of the AMS image and a state-label below showing the filament type.
+  amsSlotOverlay =
+    idx: iconLeftPct: labelLeftPct:
+    let
+      e = ent.amsSlot idx;
+      colorVar = "--tray-${toString idx}-color";
+      bgVar = "--tray-${toString idx}-bg";
+    in
+    [
+      {
+        type = "custom:config-template-card";
+        entities = [ e ];
+        element = {
+          type = "state-icon";
+          entity = e;
+          icon = "\${states['${e}'].state.toLowerCase() != 'empty' ? 'local:filament-2' : 'mdi:tray' }";
+        };
+        style = {
+          top = "28%";
+          left = "${iconLeftPct}%";
+          "--paper-item-icon-color" = "var(${colorVar})";
+          "--icon-primary-color" = "var(${colorVar})";
+          "--state-icon-color" = "var(${colorVar})";
+          background-color = "rgba(0,0,0,0.5)";
+          box-shadow = "0 0 5px 5px var(${bgVar})";
+          border-radius = "50px";
+          "--mdc-icon-size" = "2.4em";
+        };
+      }
+      {
+        type = "state-label";
+        entity = e;
+        attribute = "type";
+        tap_action.action = "none";
+        style = {
+          top = "77%";
+          left = "${labelLeftPct}%";
+          text-align = "center";
+          "font-size" = "1em";
+          background-color = "rgba(0,0,0,0.4)";
+          box-shadow = "0 0 5px 5px rgba(0, 0, 0, 0.4)";
+          border-radius = "50px";
+          pointer-events = "none";
+          color = "var(--contrast20)";
+        };
+      }
+    ];
+
+  amsCard = {
+    type = "picture-elements";
+    image = img "ams";
+    elements =
+      (amsSlotOverlay 1 "21.4" "21")
+      ++ (amsSlotOverlay 2 "39.7" "40")
+      ++ (amsSlotOverlay 3 "59.7" "60")
+      ++ (amsSlotOverlay 4 "79.6" "79.6")
+      ++ [
+        # AMS temperature badge — only when reading.
+        (mkElementConditional
+          [
+            (ha.stateNot ent.status "offline")
+            {
+              entity = ent.amsTemp;
+              state_not = "unavailable";
+            }
+            {
+              entity = ent.amsTemp;
+              state_not = "unknown";
+            }
+          ]
+          [
+            {
+              type = "state-badge";
+              entity = ent.amsTemp;
+              style = {
+                top = "50.75%";
+                left = "8%";
+                "font-size" = "0.75em";
+                color = "rgba(0,0,0,0)";
+              };
+            }
+          ]
+        )
+        # Humidity index icon top-right.
+        (mkElementConditional
+          [ (ha.stateNot ent.status "offline") ]
+          [
+            {
+              type = "custom:config-template-card";
+              entities = [ ent.amsHumidityIx ];
+              element = {
+                type = "state-icon";
+                entity = ent.amsHumidityIx;
+                icon = "\${'local:humidity-level-dark-' + states['${ent.amsHumidityIx}'].state + '#fullcolor'}";
+              };
+              style = {
+                top = "44.5%";
+                left = "92.5%";
+                background-color = "#1c1c1c";
+                border-radius = "50px";
+                border = "0.12em solid var(--humidity-border-color)";
+                "--mdc-icon-size" = "2.05em";
+              };
+            }
+          ]
+        )
+      ];
+    card_mod.style = ''
+      ha-card {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        --humidity-border-color: {% if states('${ent.amsHumidityIx}') != 'unavailable' and states('${ent.amsHumidityIx}') | int > 3 %} var(--red); {% elif states('${ent.amsHumidityIx}') != 'unavailable' and states('${ent.amsHumidityIx}') | int > 2 %} var(--orange); {% elif states('${ent.amsHumidityIx}') != 'unavailable' and states('${ent.amsHumidityIx}') | int > 1 %} var(--yellow); {% else %} var(--green); {% endif %}
+        --tray-1-color: {% if is_state_attr('${ent.amsSlot 1}', 'color', '#00000000') %} var(--contrast20); {% else %} {{ state_attr('${ent.amsSlot 1}', 'color') }}; {% endif %}
+        --tray-2-color: {% if is_state_attr('${ent.amsSlot 2}', 'color', '#00000000') %} var(--contrast20); {% else %} {{ state_attr('${ent.amsSlot 2}', 'color') }}; {% endif %}
+        --tray-3-color: {% if is_state_attr('${ent.amsSlot 3}', 'color', '#00000000') %} var(--contrast20); {% else %} {{ state_attr('${ent.amsSlot 3}', 'color') }}; {% endif %}
+        --tray-4-color: {% if is_state_attr('${ent.amsSlot 4}', 'color', '#00000000') %} var(--contrast20); {% else %} {{ state_attr('${ent.amsSlot 4}', 'color') }}; {% endif %}
+        --tray-1-bg: {% if is_state_attr('${ent.amsSlot 1}', 'active', true) %} rgba(255, 255, 126, 0.5); {% else %} rgba(0,0,0,0.5); {% endif %}
+        --tray-2-bg: {% if is_state_attr('${ent.amsSlot 2}', 'active', true) %} rgba(255, 255, 126, 0.5); {% else %} rgba(0,0,0,0.5); {% endif %}
+        --tray-3-bg: {% if is_state_attr('${ent.amsSlot 3}', 'active', true) %} rgba(255, 255, 126, 0.5); {% else %} rgba(0,0,0,0.5); {% endif %}
+        --tray-4-bg: {% if is_state_attr('${ent.amsSlot 4}', 'active', true) %} rgba(255, 255, 126, 0.5); {% else %} rgba(0,0,0,0.5); {% endif %}
+      }
+    '';
+  };
+
+  # ── x1_carbon_external_spool.yaml ───────────────────────────────
+  spoolCard = {
+    type = "picture-elements";
+    image = img "spool";
+    elements = [
+      {
+        type = "custom:config-template-card";
+        entities = [ ent.spoolSensor ];
+        element = {
+          type = "state-icon";
+          entity = ent.spoolSensor;
+          icon = "\${states['${ent.spoolSensor}'].state.toLowerCase() != 'empty' ? 'local:filament-2' : 'mdi:tray' }";
+        };
+        style = {
+          top = "50%";
+          left = "50%";
+          transform = "translate(-50%, -50%) scale(200%)";
+          "--paper-item-icon-color" = "var(--spool-color)";
+          "--icon-primary-color" = "var(--spool-color)";
+          "--state-icon-color" = "var(--spool-color)";
+          background-color = "rgba(0,0,0,0.5)";
+          box-shadow = "0 0 5px 5px var(--spool-bg)";
+          border-radius = "50px";
+          "--mdc-icon-size" = "1.8em";
+        };
+      }
+      {
+        type = "state-label";
+        entity = ent.spoolSensor;
+        attribute = "type";
+        tap_action.action = "none";
+        style = {
+          top = "50%";
+          left = "85%";
+          text-align = "center";
+          "font-size" = "1em";
+          background-color = "rgba(0,0,0,0.4)";
+          box-shadow = "0 0 5px 5px rgba(0, 0, 0, 0.4)";
+          border-radius = "50px";
+          pointer-events = "none";
+          color = "var(--contrast20)";
+        };
+      }
+    ];
+    card_mod.style = ''
+      ha-card {
+        margin-left: auto;
+        margin-right: auto;
+        width: 60%;
+        height: 60%;
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        --spool-color: {{ state_attr('${ent.spoolSensor}', 'color') or 'var(--contrast20)' }};
+        --spool-bg: {% if is_state_attr('${ent.spoolSensor}', 'active', true) %} rgba(255, 255, 126, 0.5); {% else %} rgba(0,0,0,0.5); {% endif %};
+      }
+    '';
+  };
 
   tempGauge =
     {
@@ -99,152 +464,34 @@ let
           color = "var(--red)";
         }
       ];
-      card_mod.style = {
-        "." = ''
-          ha-card {
-            padding-top: 32px !important;
-            position: relative;
-          }
-          .title {
-            position: absolute !important;
-            top: 12px;
-            left: 16px;
-            font-size: var(--ha-font-size-l) !important;
-            color: var(--secondary-text-color) !important;
-            margin: 0 !important;
-            text-align: left !important;
-          }
-        '';
-        "ha-gauge"."$" = ''
-          .value-text {
-            font-size: var(--ha-font-size-xs) !important;
-          }
-        '';
-      };
+      card_mod.style = ''
+        ha-card {
+          padding-top: 32px !important;
+          position: relative;
+        }
+        .title {
+          position: absolute !important;
+          top: 12px;
+          left: 16px;
+          font-size: var(--ha-font-size-l) !important;
+          color: var(--secondary-text-color) !important;
+          margin: 0 !important;
+          text-align: left !important;
+        }
+      '';
     };
-
-  # AMS slot tile. Background tints with the configured filament colour
-  # (attribute keys come from pybambu, so they stay English: `color`,
-  # `type`, `active`).
-  amsSlotCard =
-    idx:
-    let
-      e = ent.amsSlot idx;
-    in
-    {
-      type = "custom:mushroom-template-card";
-      entity = e;
-      primary = "Slot ${toString idx}";
-      secondary = "{{ state_attr('${e}', 'type') or states('${e}') }}";
-      icon = "{% if states('${e}') | lower != 'empty' %}mdi:spool{% else %}mdi:tray{% endif %}";
-      icon_color = "{{ state_attr('${e}', 'color') or 'disabled' }}";
-      fill_container = true;
-      layout = "vertical";
-      badge_icon = "{% if is_state_attr('${e}', 'active', true) %}mdi:check-circle{% endif %}";
-      badge_color = "var(--yellow)";
-    };
-
-  humidityCard = {
-    type = "custom:mushroom-template-card";
-    entity = ent.amsHumidityIx;
-    primary = "AMS Feuchte";
-    secondary = "Index {{ states('${ent.amsHumidityIx}') }} / 5";
-    icon = "mdi:water-percent";
-    icon_color = ''
-      {% set v = states('${ent.amsHumidityIx}') | int(0) %}
-      {% if v >= 4 %}red
-      {% elif v >= 3 %}orange
-      {% elif v >= 2 %}yellow
-      {% else %}green
-      {% endif %}
-    '';
-    fill_container = true;
-  };
 in
 {
   type = "sections";
-  max_columns = 2;
+  max_columns = 3;
   icon = "mdi:printer-3d-nozzle";
   path = "x1c";
   header.card = ha.mkTitleCard "X1 Carbon";
 
   sections = [
-    # ── Status & quick actions ──────────────────────────────────────
+    # ── Left column: live view, AMS, printer image, external spool ──
     (ha.mkGridSection [
-      (ha.mkMushTitle "Status")
-
-      (ha.mkConditional [ (ha.stateIs ent.status "offline") ] (
-        ha.mkActionCard {
-          name = "Drucker offline";
-          icon = "mdi:printer-off";
-          service = "homeassistant.update_entity";
-          serviceData.entity_id = ent.status;
-          cardBg = "var(--contrast4)";
-          iconColor = "var(--contrast20)";
-          nameColor = "var(--contrast20)";
-          extraCardProps."margin-top" = "24px";
-        }
-      ))
-
-      (ha.mkConditional [ isActive ] (
-        ha.mkActionCard {
-          name = "Druckt";
-          icon = "mdi:printer-3d-nozzle";
-          entity = ent.progress;
-          label = "[[[ const pct = states['${ent.progress}']?.state ?? '?'; const rem = states['${ent.remaining}']?.state ?? '?'; const stage = states['${ent.stage}']?.state ?? ''; return pct + '% · noch ' + rem + ' min · ' + stage; ]]]";
-          service = "homeassistant.update_entity";
-          serviceData.entity_id = ent.progress;
-          cardBg = "var(--blue)";
-          iconColor = "var(--contrast1)";
-          nameColor = "var(--contrast1)";
-          labelColor = "var(--contrast1)";
-          extraCardProps."margin-top" = "24px";
-        }
-      ))
-
-      (ha.mkConditional [ (ha.stateIs ent.hms "on") ] (
-        ha.mkActionCard {
-          name = "HMS-Meldung";
-          icon = "mdi:alert";
-          entity = ent.hms;
-          service = "homeassistant.update_entity";
-          serviceData.entity_id = ent.hms;
-          cardBg = "var(--red)";
-          iconColor = "var(--contrast1)";
-          nameColor = "var(--contrast1)";
-          extraCardProps."margin-top" = "24px";
-        }
-      ))
-
-      # The integration in this install only exposes the printing speed
-      # as a read-only sensor (no select.* registered). Show it as a
-      # mushroom tile; enable the writable select in HA's entity dialog
-      # and we can swap this back to the four-pill selector.
-      {
-        type = "custom:mushroom-entity-card";
-        entity = ent.speedProfile;
-        name = "Geschwindigkeit";
-        icon = "mdi:speedometer";
-        fill_container = true;
-      }
-    ])
-
-    # ── Live view (printer hero + camera + cover image) ─────────────
-    (ha.mkGridSection [
-      (ha.mkMushTitle "Live")
-      {
-        type = "picture-entity";
-        entity = ent.light;
-        show_name = false;
-        show_state = false;
-        tap_action.action = "toggle";
-        image = (img "on");
-        state_image = {
-          "on" = (img "on");
-          "off" = (img "off");
-          "unavailable" = (img "off");
-        };
-      }
+      (ha.mkMushTitle "Live-View")
       {
         type = "picture-glance";
         camera_view = "live";
@@ -259,78 +506,47 @@ in
           { entity = ent.chamberTemp; }
         ];
       }
-      (ha.mkConditional [ isActive ] {
-        type = "picture-entity";
-        entity = ent.coverImage;
-        show_name = false;
-        show_state = false;
-      })
+
+      (ha.mkMushTitle "Drucker")
+      amsCard
+      printerCard
+
+      (ha.mkConditional
+        [
+          {
+            condition = "state";
+            entity = ent.spoolSensor;
+            state_not = "unavailable";
+          }
+        ]
+        {
+          type = "vertical-stack";
+          cards = [
+            spoolCard
+          ];
+        }
+      )
     ])
 
-    # ── Druckdetails ────────────────────────────────────────────────
-    (ha.mkGridSection [
-      (ha.mkMushTitle "Druckdetails")
-      {
-        type = "custom:mushroom-entity-card";
-        entity = ent.task;
-        name = "Task";
-        icon = "mdi:clipboard-text";
-        fill_container = true;
-      }
-      (ha.mkHStack [
-        {
-          type = "custom:mushroom-entity-card";
-          entity = ent.progress;
-          name = "Fortschritt";
-          icon = "mdi:progress-helper";
-        }
-        {
-          type = "custom:mushroom-template-card";
-          entity = ent.layer;
-          primary = "Layer";
-          icon = "mdi:layers";
-          icon_color = "var(--blue)";
-          secondary = "{{ states('${ent.layer}') }} / {{ states('${ent.layerTotal}') }}";
-        }
-      ])
-      {
-        type = "entities";
-        entities = [
-          {
-            entity = ent.stage;
-            name = "Phase";
-          }
-          {
-            entity = ent.startTime;
-            name = "Start";
-            secondary_info = "last-changed";
-          }
-          {
-            entity = ent.endTime;
-            name = "Ende";
-          }
-          {
-            entity = ent.remaining;
-            name = "Restzeit";
-          }
-          {
-            entity = ent.firmware;
-            name = "Firmware";
-          }
-          {
-            entity = ent.activeTray;
-            name = "Filament";
-          }
-          {
-            entity = ent.printError;
-            name = "Druckfehler";
-          }
-        ];
-      }
-    ])
+    # ── Middle column: reserved for later. ──────────────────────────
+    (ha.mkGridSection [ ])
 
-    # ── Temperaturen ────────────────────────────────────────────────
+    # ── Right column: details, top-to-bottom. ───────────────────────
     (ha.mkGridSection [
+      (ha.mkConditional [ (ha.stateIs ent.hms "on") ] (
+        ha.mkActionCard {
+          name = "HMS-Meldung";
+          icon = "mdi:alert";
+          entity = ent.hms;
+          service = "homeassistant.update_entity";
+          serviceData.entity_id = ent.hms;
+          cardBg = "var(--red)";
+          iconColor = "var(--contrast1)";
+          nameColor = "var(--contrast1)";
+          extraCardProps."margin-top" = "24px";
+        }
+      ))
+
       (ha.mkMushTitle "Temperaturen")
       (ha.mkHStack [
         (tempGauge {
@@ -351,24 +567,37 @@ in
       })
       {
         type = "entities";
-        title = "Soll";
         entities = [
           {
             entity = ent.nozzleTarget;
-            name = "Düse";
+            name = "Soll Düse";
           }
           {
             entity = ent.bedTarget;
-            name = "Bett";
+            name = "Soll Bett";
           }
         ];
       }
-    ])
 
-    # ── Lüfter ──────────────────────────────────────────────────────
-    # No writable fan.* entities are exposed here (only sensors of the
-    # current rpm/duty), so this is read-only too.
-    (ha.mkGridSection [
+      (ha.mkMushTitle "AMS")
+      {
+        type = "entities";
+        entities = [
+          {
+            entity = ent.amsTemp;
+            name = "Temperatur";
+          }
+          {
+            entity = ent.amsHumidity;
+            name = "Feuchte";
+          }
+          {
+            entity = ent.amsHumidityIx;
+            name = "Feuchte-Index";
+          }
+        ];
+      }
+
       (ha.mkMushTitle "Lüfter")
       {
         type = "entities";
@@ -390,71 +619,58 @@ in
           }
         ];
       }
-    ])
 
-    # ── AMS ─────────────────────────────────────────────────────────
-    (ha.mkGridSection [
-      (ha.mkMushTitle "AMS")
+      (ha.mkMushTitle "Druckdetails")
       {
-        type = "picture-entity";
-        entity = ent.amsActive;
-        show_name = false;
-        show_state = false;
-        image = (img "ams");
-      }
-      (ha.mkHStack [
-        (amsSlotCard 1)
-        (amsSlotCard 2)
-        (amsSlotCard 3)
-        (amsSlotCard 4)
-      ])
-      (ha.mkHStack [
-        humidityCard
-        {
-          type = "custom:mushroom-entity-card";
-          entity = ent.amsTemp;
-          name = "AMS Temp";
-          icon = "mdi:thermometer";
-          icon_color = "blue";
-          fill_container = true;
-        }
-      ])
-
-      (ha.mkConditional
-        [
+        type = "entities";
+        entities = [
           {
-            condition = "state";
-            entity = ent.spoolSensor;
-            state_not = "unavailable";
+            entity = ent.task;
+            name = "Task";
           }
-        ]
-        (
-          ha.mkHStack [
-            {
-              type = "picture-entity";
-              entity = ent.spoolSensor;
-              show_name = false;
-              show_state = false;
-              image = (img "spool");
-            }
-            {
-              type = "custom:mushroom-template-card";
-              entity = ent.spoolSensor;
-              primary = "Externe Spool";
-              secondary = "{{ state_attr('${ent.spoolSensor}', 'type') or states('${ent.spoolSensor}') }}";
-              icon = "mdi:spool";
-              icon_color = "{{ state_attr('${ent.spoolSensor}', 'color') or 'disabled' }}";
-              badge_icon = "{% if is_state_attr('${ent.spoolSensor}', 'active', true) %}mdi:check-circle{% endif %}";
-              badge_color = "var(--yellow)";
-              fill_container = true;
-            }
-          ]
-        )
-      )
-    ])
+          {
+            entity = ent.progress;
+            name = "Fortschritt";
+          }
+          {
+            entity = ent.stage;
+            name = "Phase";
+          }
+          {
+            entity = ent.layer;
+            name = "Layer";
+          }
+          {
+            entity = ent.layerTotal;
+            name = "Layer gesamt";
+          }
+          {
+            entity = ent.startTime;
+            name = "Start";
+          }
+          {
+            entity = ent.endTime;
+            name = "Ende";
+          }
+          {
+            entity = ent.remaining;
+            name = "Restzeit";
+          }
+          {
+            entity = ent.firmware;
+            name = "Firmware";
+          }
+          {
+            entity = ent.activeTray;
+            name = "Filament";
+          }
+          {
+            entity = ent.speedProfile;
+            name = "Geschwindigkeit";
+          }
+        ];
+      }
 
-    # ── Diagnose ────────────────────────────────────────────────────
-    (ha.mkGridSection [
       (ha.mkMushTitle "Diagnose")
       {
         type = "entities";
@@ -478,6 +694,10 @@ in
           {
             entity = ent.cameraSwitch;
             name = "Kamera";
+          }
+          {
+            entity = ent.printError;
+            name = "Druckfehler";
           }
         ];
       }

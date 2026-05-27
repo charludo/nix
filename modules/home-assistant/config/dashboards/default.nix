@@ -69,6 +69,7 @@ in
         layout-card
         weather-radar-card
         windrose-card
+        config-template-card
         google-fonts-quicksand
       ];
 

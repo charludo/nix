@@ -85,6 +85,15 @@ in
     sha256 = "sha256-ZYJD0PVh2E07cdY1a7uxSxdooAMz78HwJpwr4uWofZM=";
   };
 
+  custom_icons = mkComponent {
+    pname = "custom_icons";
+    version = "1.0.1";
+    owner = "thomasloven";
+    repo = "hass-custom_icons";
+    rev = "v1.0.1";
+    sha256 = "sha256-3H3McTVvNytmJ0At4K+Z0gvOTFdk415t0MWAI2EDnCc=";
+  };
+
   bambu_lab = mkComponent {
     pname = "bambu_lab";
     version = "2.2.22";

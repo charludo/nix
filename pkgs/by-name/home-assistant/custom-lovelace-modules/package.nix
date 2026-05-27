@@ -78,6 +78,13 @@ in
     sha256 = "sha256-Pvwb7sKBG5fWOUmMv+8qKZ/wLCy0HvI0mkgVh1MLD3w=";
   };
 
+  config-template-card = mkCard {
+    pname = "config-template-card";
+    version = "1.3.6";
+    url = "https://github.com/iantrich/config-template-card/releases/download/1.3.6/config-template-card.js";
+    sha256 = "0bkclpgd9frm30fp95ay891ffsjhz7qygqid8fd0x4hh19z3rvpc";
+  };
+
   windrose-card = mkCard {
     pname = "windrose-card";
     version = "2.4.1";
