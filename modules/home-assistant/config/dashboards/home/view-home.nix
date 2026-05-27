@@ -88,6 +88,32 @@ in
           type = "grid";
           columns = 1;
           cards = [
+            # X1C printing banner — same shape as the sonos one. Tap
+            # navigates to the X1C dashboard; the cancel-print path
+            # stays gated behind a long-press / the dedicated control.
+            (ha.mkConditional [ (ha.stateIs "sensor.x1c_druckstatus" "running") ] (
+              (ha.mkActionCard {
+                name = "X1C druckt";
+                icon = "mdi:printer-3d-nozzle";
+                entity = "sensor.x1c_druckstatus";
+                label = "[[[ const rem = states['sensor.x1c_verbleibende_zeit']?.state ?? '?'; const lay = states['sensor.x1c_aktuelle_schicht']?.state ?? '?'; const tot = states['sensor.x1c_gesamtzahl_der_schichten']?.state ?? '?'; return 'noch ' + rem + ' min · Layer ' + lay + '/' + tot; ]]]";
+                # mkActionCard requires `service`; we override
+                # tap_action below to navigate instead of perform.
+                service = "homeassistant.update_entity";
+                serviceData.entity_id = "sensor.x1c_druckstatus";
+                cardBg = "var(--green)";
+                iconColor = "var(--black)";
+                nameColor = "var(--black)";
+                labelColor = "var(--black)";
+                extraCardProps."margin-top" = "24px";
+              }) // {
+                tap_action = {
+                  action = "navigate";
+                  navigation_path = "/lovelace/x1c";
+                  haptic = "medium";
+                };
+              }
+            ))
             (ha.mkConditional [ (ha.stateIs e.media_player.alle "playing") ] (
               ha.mkActionCard {
                 name = "Musik anhalten";

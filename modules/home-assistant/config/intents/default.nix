@@ -12,6 +12,7 @@
     ./tv.nix
     ./ventilator.nix
     ./weather.nix
+    ./x1c.nix
   ];
 
   hass.voice.defaultLanguage = "de";

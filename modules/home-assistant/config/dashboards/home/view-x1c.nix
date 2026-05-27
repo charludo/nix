@@ -471,7 +471,54 @@ in
   max_columns = 3;
   icon = "mdi:printer-3d-nozzle";
   path = "x1c";
-  header.card = ha.mkTitleCard "X1 Carbon";
+  header.card = ha.mkBadgeTitleCard {
+    name = "X1 Carbon";
+    badgeCard = {
+      type = "custom:button-card";
+      entity = ent.status;
+      show_icon = false;
+      tap_action = {
+        action = "more-info";
+        haptic = "medium";
+      };
+      name = ''
+        [[[
+          const st = states["${ent.status}"]?.state ?? "unknown";
+          const rem = states["${ent.remaining}"]?.state;
+          const lay = states["${ent.layer}"]?.state;
+          const tot = states["${ent.layerTotal}"]?.state;
+          if (st === "running") {
+            const layers = (lay && tot && lay !== "unknown" && tot !== "unknown")
+              ? " · Layer " + lay + "/" + tot : "";
+            return "Druckt · noch " + rem + " min" + layers;
+          }
+          if (st === "pause") return "Pausiert · noch " + rem + " min";
+          if (st === "idle" || st === "finish") return "Leerlauf";
+          if (st === "prepare") return "Vorbereitung";
+          if (st === "offline") return "Offline";
+          if (st === "failed") return "Fehler";
+          return st.charAt(0).toUpperCase() + st.slice(1);
+        ]]]
+      '';
+      styles =
+        (ha.mkStyles {
+          card = {
+            padding = "6px 10px";
+            "font-size" = "12px";
+            "line-height" = "18px";
+            "font-weight" = 500;
+            background = "var(--contrast20)";
+          };
+          name.color = "var(--contrast1)";
+        })
+        // {
+          grid = ha.mkStyleProp {
+            "grid-template-areas" = ''"n gutter l"'';
+            "grid-template-rows" = "min-content";
+          };
+        };
+    };
+  };
 
   sections = [
     # ── Left column: live view, AMS, printer image, external spool ──
