@@ -18,6 +18,7 @@
     ./shopping.nix
     ./sonos.nix
     ./timers.nix
+    ./voice_satellite.nix
     ./xiaomi.nix
     ./zigbee.nix
   ];

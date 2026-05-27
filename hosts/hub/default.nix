@@ -31,6 +31,7 @@
   suspend.gigabyteFix = true;
   tailscale.enable = true;
   wifi.enable = true;
+  wyomingSatellite.enable = true;
   programs.dconf.enable = true;
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.zakalwe.sudoFile;

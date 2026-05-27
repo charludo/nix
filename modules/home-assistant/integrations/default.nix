@@ -7,6 +7,7 @@
     ./persons.nix
     ./shopping.nix
     ./sidebar.nix
+    ./tts_relay.nix
     ./voice.nix
     ./zha-reconciler.nix
   ];

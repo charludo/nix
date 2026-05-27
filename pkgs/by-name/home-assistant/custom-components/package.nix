@@ -76,6 +76,12 @@ in
     src = ../../../../hass-grocery-categorize;
   };
 
+  tts_relay = mkLocalComponent {
+    pname = "tts_relay";
+    version = "0.1.0";
+    src = ./tts_relay;
+  };
+
   auth_oidc = mkComponent {
     pname = "auth_oidc";
     version = "1.0.2";
