@@ -32,6 +32,27 @@
   tailscale.enable = true;
   wifi.enable = true;
   wyomingSatellite.enable = true;
+  wyomingSatellite.leds.enable = true;
+  wyomingSatellite.leds.brightness = 12;
+  wyomingSatellite.tuning = {
+    # Acoustic Echo Cancellation
+    ECHOONOFF = 1;
+    # Automatic Gain Control
+    AGCONOFF = 1;
+    AGCMAXGAIN = 30.0;
+    AGCDESIREDLEVEL = 0.03;
+    # High-pass filter at 125 Hz (cuts low-frequency rumble)
+    HPFONOFF = 2;
+    # Noise suppression (stationary + non-stationary, both for ASR path)
+    STATNOISEONOFF = 1;
+    STATNOISEONOFF_SR = 1;
+    NONSTATNOISEONOFF = 1;
+    NONSTATNOISEONOFF_SR = 1;
+    # Comfort noise insertion off (cleaner for ASR)
+    CNIONOFF = 0;
+    # Transient echo suppression
+    TRANSIENTONOFF = 1;
+  };
   programs.dconf.enable = true;
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.zakalwe.sudoFile;

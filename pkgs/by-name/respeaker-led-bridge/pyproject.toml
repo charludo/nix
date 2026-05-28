@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "respeaker-led-bridge"
+version = "0.1.0"
+description = "Wyoming event service + XMOS DSP tuning for ReSpeaker Mic Array v2.0"
+requires-python = ">=3.11"
+dependencies = [
+  "pixel-ring",
+  "pyusb",
+  "wyoming>=1.5",
+]
+
+[project.scripts]
+respeaker-led-bridge = "respeaker_led_bridge.bridge:main"
+respeaker-tuning-apply = "respeaker_led_bridge.apply_tuning:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
