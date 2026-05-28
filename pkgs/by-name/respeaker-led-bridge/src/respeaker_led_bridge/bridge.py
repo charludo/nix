@@ -80,13 +80,13 @@ class State:
             self.handover_task = None
 
     def _firmware_listen_on_sync(self):
-        # Hand the ring to the firmware: blue ring with green DoA segment,
-        # gated by the on-chip VAD/beamformer.
-        self.pixel_ring.set_vad_led(1)
+        # Hand the ring to the firmware: blue ring with green DoA segment.
+        # We intentionally do NOT call set_vad_led(1): that command also
+        # lights the on-board red status LED, and the trace pattern works
+        # on its own as long as the ring was last given a manual show().
         self.pixel_ring.trace()
 
     def _firmware_listen_off_sync(self):
-        self.pixel_ring.set_vad_led(0)
         self.pixel_ring.off()
 
     async def _handover_after_flash(self):

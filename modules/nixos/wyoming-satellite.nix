@@ -122,7 +122,9 @@ in
 
       microphone.command = "${pkgs.alsa-utils}/bin/arecord -D ${cfg.alsaDevice} -r 16000 -c 1 -f S16_LE -t raw";
       sound.command = "${pkgs.alsa-utils}/bin/aplay -D ${cfg.alsaDevice} -r 22050 -c 1 -f S16_LE -t raw";
-      microphone.autoGain = 20;
+      # Hardware AGC on the XMOS chip handles level normalisation. Software
+      # AGC on top would fight it and produce pumping artefacts.
+      microphone.autoGain = 0;
       vad.enable = false;
 
       extraArgs = [
@@ -130,8 +132,10 @@ in
         "tcp://127.0.0.1:10400"
         "--wake-word-name"
         cfg.wakeWord
+        # Constant +10 dB to bridge the XMOS's -15 dBov target to
+        # openWakeWord's preferred ~-5 dBFS input range.
         "--mic-volume-multiplier"
-        "4.0"
+        "3.0"
       ]
       ++ optionals cfg.leds.enable [
         "--event-uri"
