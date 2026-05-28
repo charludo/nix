@@ -2,6 +2,7 @@
   imports = [
     ./areas.nix
     ./bambu.nix
+    ./builtin_intents.nix
     ./closest_intent.nix
     ./openweathermap.nix
     ./persons.nix

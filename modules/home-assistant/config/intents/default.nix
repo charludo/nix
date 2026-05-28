@@ -17,4 +17,9 @@
 
   hass.voice.defaultLanguage = "de";
   hass.voice.extraConfig.de.skip_words = [ ];
+  hass.voice.disableBuiltinIntents = [
+    "HassGetWeather"
+    "HassClimateGetTemperature"
+    "HassVacuumStart"
+  ];
 }

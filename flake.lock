@@ -898,8 +898,8 @@
     "hass-closest-intent": {
       "flake": false,
       "locked": {
-        "lastModified": 1778236176,
-        "narHash": "sha256-xYolKdpr3YIsLObYxP7eyAnh87m0nV2d4t0s1uuCP4s=",
+        "lastModified": 1779988824,
+        "narHash": "sha256-hkMZREBFtSbJbC/VOZezEwqQwkfy/SBzLgHalSxRIOs=",
         "path": "/home/charlotte/Projekte/hass-closest-intent",
         "type": "path"
       },
