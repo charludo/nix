@@ -1,6 +1,6 @@
 { ... }:
 {
-  hass.voice = {
+  hass.voice.intents = {
     Zeit_Uhrzeit = {
       sentences = [
         "Wie (spät|viel Uhr) ist es"

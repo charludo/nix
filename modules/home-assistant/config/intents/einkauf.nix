@@ -3,7 +3,7 @@
 #
 # `{item}` is a wildcard — captures arbitrary spoken text.
 {
-  hass.voice = {
+  hass.voice.intents = {
     Einkauf_Add = {
       sentences = [
         "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"

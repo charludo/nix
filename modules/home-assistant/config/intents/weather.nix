@@ -62,7 +62,7 @@ let
       '';
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     Wetter_Heute = {
       sentences = [
         "Wie ist das Wetter (gerade|draußen|aktuell)"

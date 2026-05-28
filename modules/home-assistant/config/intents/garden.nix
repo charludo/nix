@@ -3,7 +3,7 @@ let
   e = config.hass.entities;
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     Pumpe_An = {
       sentences = [
         "(Aktiviere|Schalte) [die ][Wasser]Pumpe [an|ein]"

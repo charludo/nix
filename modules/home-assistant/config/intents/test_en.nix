@@ -2,7 +2,7 @@
   # English translations of all German intents, for testing the matcher.
   # Mirrors botty, climate, einkauf, garden, music, news, time, tv, weather
   # — sentences + speech responses only, no actions executed.
-  hass.voice = {
+  hass.voice.intents = {
     # ----- botty (vacuum) -----
     EN_Botty_Start = {
       language = "en";

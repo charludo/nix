@@ -141,7 +141,7 @@ in
   # ---------------------------------------------------------------------
   # Voice intents
   # ---------------------------------------------------------------------
-  hass.voice = {
+  hass.voice.intents = {
     News_Tagesschau = {
       sentences = [
         "(Spiele|Spiel|Starte) [die ]Tagesschau"

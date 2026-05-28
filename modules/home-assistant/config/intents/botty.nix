@@ -24,7 +24,7 @@ let
   ];
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     Botty_Start = {
       sentences = [
         "(Starte|Beginne) [die ]Reinigung"

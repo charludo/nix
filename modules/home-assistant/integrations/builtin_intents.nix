@@ -57,7 +57,7 @@ in
               fi
             done
             if [ ''${#missing[@]} -gt 0 ]; then
-              echo "ERROR: hass.disabledBuiltinIntents lists intents that do not exist in any home_assistant_intents data file:" >&2
+              echo "ERROR: hass.voice.disableBuiltinIntents lists intents that do not exist in any home_assistant_intents data file:" >&2
               printf '  - %s\n' "''${missing[@]}" >&2
               exit 1
             fi

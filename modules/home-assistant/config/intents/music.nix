@@ -15,7 +15,7 @@ let
   ];
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     MusikAn = {
       sentences = [
         "(Spiele|Spiel|Starte) [Musik|die Musik]"

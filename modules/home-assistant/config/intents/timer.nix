@@ -24,7 +24,7 @@ let
   ];
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     Timer_Stellen_Minuten = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"

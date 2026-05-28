@@ -8,10 +8,7 @@ let
   cfg = config.hass.voice;
   yamlFormat = pkgs.formats.yaml { };
 
-  intents = removeAttrs cfg [
-    "defaultLanguage"
-    "extraConfig"
-  ];
+  intents = cfg.intents;
 
   intentList = lib.mapAttrsToList (
     name: i:
@@ -132,37 +129,37 @@ let
   };
 in
 {
-  options.hass.voice = lib.mkOption {
-    default = { };
-    description = ''
-      Voice intents. Set ``hass.voice.<IntentName>`` to an attrset with
-      ``sentences`` and/or ``script`` (plus optional ``language``,
-      ``lists``, ``expansionRules``, ``responses``). All intents are
-      grouped by language and emitted as a single
-      ``custom_sentences/<lang>/nix.yaml`` file
-    '';
-    type = lib.types.submodule {
-      freeformType = lib.types.attrsOf intentType;
-      options = {
-        defaultLanguage = lib.mkOption {
-          type = lib.types.str;
-          default = "en";
-          description = "Fallback language for intents that don't set ``language``";
-        };
-        extraConfig = lib.mkOption {
-          type = lib.types.attrsOf yamlFormat.type;
-          default = { };
-          description = ''
-            Extra top-level keys merged into the per-language
-            custom_sentences file, keyed by language code. Use for
-            things like ``skip_words`` that apply to the whole file
-            rather than a single intent
-          '';
-          example = lib.literalExpression ''
-            { de.skip_words = [ "bitte" "mal" ]; }
-          '';
-        };
-      };
+  options.hass.voice = {
+    intents = lib.mkOption {
+      type = lib.types.attrsOf intentType;
+      default = { };
+      description = ''
+        Voice intents. Set ``hass.voice.intents.<IntentName>`` to an
+        attrset with ``sentences`` and/or ``script`` (plus optional
+        ``language``, ``lists``, ``expansionRules``, ``responses``).
+        All intents are grouped by language and emitted as a single
+        ``custom_sentences/<lang>/nix.yaml`` file
+      '';
+    };
+
+    defaultLanguage = lib.mkOption {
+      type = lib.types.str;
+      default = "en";
+      description = "Fallback language for intents that don't set ``language``";
+    };
+
+    extraConfig = lib.mkOption {
+      type = lib.types.attrsOf yamlFormat.type;
+      default = { };
+      description = ''
+        Extra top-level keys merged into the per-language
+        custom_sentences file, keyed by language code. Use for
+        things like ``skip_words`` that apply to the whole file
+        rather than a single intent
+      '';
+      example = lib.literalExpression ''
+        { de.skip_words = [ "bitte" "mal" ]; }
+      '';
     };
   };
 

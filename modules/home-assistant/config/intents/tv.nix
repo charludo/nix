@@ -3,7 +3,7 @@ let
   tv = config.hass.entities.media_player.lg_c4;
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     TV_Hell = {
       sentences = [
         "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) hell[er]"

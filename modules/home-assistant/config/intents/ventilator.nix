@@ -3,7 +3,7 @@ let
   e = config.hass.entities;
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     Ventilator_An = {
       sentences = [
         "(Schalte|Mach|Aktiviere) [den ]Ventilator [an|ein]"

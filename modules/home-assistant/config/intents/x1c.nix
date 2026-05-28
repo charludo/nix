@@ -6,7 +6,7 @@ let
   layerTotal = "sensor.x1c_gesamtzahl_der_schichten";
 in
 {
-  hass.voice = {
+  hass.voice.intents = {
     X1C_Druckdauer = {
       sentences = [
         "Wie lange dauert der Druck noch"

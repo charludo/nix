@@ -23,5 +23,5 @@ let
   };
 in
 {
-  hass.voice = lib.mapAttrs' mkVoice areasWithClimate;
+  hass.voice.intents = lib.mapAttrs' mkVoice areasWithClimate;
 }
