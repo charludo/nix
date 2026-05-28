@@ -7,8 +7,9 @@
         "Wie viel Uhr ist es"
         "Wie spät ist es"
         "Uhrzeit"
+        "Woodland" # ok, sure thing buddy whisper
       ];
-      script.speech.text = "Es ist {{ now().strftime('%H:%M') }} Uhr.";
+      script.speech.text = "Es ist {{ now().strftime('%H:%M') }}.";
     };
 
     Zeit_Datum = {
