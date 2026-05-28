@@ -7,7 +7,6 @@ endpoint so Home Assistant can drive the ring as a notification light.
 
 import argparse
 import asyncio
-import json
 import logging
 import struct
 from functools import partial
@@ -34,45 +33,112 @@ from . import tuning
 
 _LOGGER = logging.getLogger("respeaker-led-bridge")
 
+NUM_LEDS = 12
 
-def _read_doa(tuning_dev):
-    """Best-effort read of DOAANGLE; returns degrees or None."""
+# Colors used by the listening pattern.
+COLOR_RING = (0, 0, 80)         # dim blue across the ring
+COLOR_DOA = (0, 120, 0)         # bright green at the source direction
+COLOR_DOA_NEIGHBOR = (0, 40, 20) # soft green on the adjacent LEDs
+COLOR_DETECT_FLASH = (0, 0, 160) # bright blue confirmation cue
+
+
+def _read_doa_sync(tuning_dev):
+    """Best-effort read of DOAANGLE; returns degrees 0..359 or None."""
     if tuning_dev is None:
         return None
     try:
-        # DOAANGLE is parameter id 21, offset 0, int
         data = tuning_dev.dev.ctrl_transfer(
             0x80 | 0x40,  # vendor IN
             0,
-            0x80 | 0,  # cmd: read offset 0
-            21,
+            0x80 | 0,
+            21,  # DOAANGLE parameter id
             8,
             tuning.TIMEOUT,
         )
         (value,) = struct.unpack(b"i", bytes(data[:4]))
-        return value
+        return value % 360
     except Exception:
         return None
 
 
-class LedHandler(AsyncEventHandler):
-    def __init__(self, pixel_ring, tuning_dev, lock, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+def _paint_doa_sync(pixel_ring, doa):
+    """Paint the ring with COLOR_RING everywhere and COLOR_DOA at `doa`."""
+    pixels = [COLOR_RING] * NUM_LEDS
+    led = int(((doa + (360 / NUM_LEDS / 2)) % 360) // (360 / NUM_LEDS)) % NUM_LEDS
+    pixels[(led - 1) % NUM_LEDS] = COLOR_DOA_NEIGHBOR
+    pixels[(led + 1) % NUM_LEDS] = COLOR_DOA_NEIGHBOR
+    pixels[led] = COLOR_DOA
+
+    data = []
+    for r, g, b in pixels:
+        data.extend([r, g, b, 0])
+    pixel_ring.show(data)
+
+
+def _paint_solid_sync(pixel_ring, rgb):
+    pixels = [rgb] * NUM_LEDS
+    data = []
+    for r, g, b in pixels:
+        data.extend([r, g, b, 0])
+    pixel_ring.show(data)
+
+
+class State:
+    """Shared mutable state across the wyoming handler, HTTP API, and painter."""
+
+    def __init__(self, pixel_ring, tuning_dev, lock):
         self.pixel_ring = pixel_ring
         self.tuning_dev = tuning_dev
         self.lock = lock
+        self.doa_task: asyncio.Task | None = None
 
-    async def _do(self, fn):
+    async def _under_lock(self, fn, *args):
         async with self.lock:
-            await asyncio.to_thread(fn)
+            await asyncio.to_thread(fn, *args)
 
-    def _listen_on(self):
-        self.pixel_ring.set_vad_led(1)
-        self.pixel_ring.trace()
+    async def _doa_loop(self):
+        try:
+            while True:
+                async with self.lock:
+                    doa = await asyncio.to_thread(_read_doa_sync, self.tuning_dev)
+                    if doa is not None:
+                        await asyncio.to_thread(_paint_doa_sync, self.pixel_ring, doa)
+                await asyncio.sleep(0.1)
+        except asyncio.CancelledError:
+            pass
 
-    def _listen_off(self):
-        self.pixel_ring.set_vad_led(0)
-        self.pixel_ring.off()
+    async def start_listening(self):
+        # Solid blue confirmation cue, then start DoA polling overlay.
+        await self._under_lock(_paint_solid_sync, self.pixel_ring, COLOR_DETECT_FLASH)
+        await self.stop_doa_loop()
+        self.doa_task = asyncio.create_task(self._doa_loop())
+
+    async def stop_doa_loop(self):
+        if self.doa_task is not None:
+            self.doa_task.cancel()
+            try:
+                await self.doa_task
+            except asyncio.CancelledError:
+                pass
+            self.doa_task = None
+
+    async def stop_listening(self):
+        await self.stop_doa_loop()
+        await self._under_lock(self.pixel_ring.off)
+
+    async def speak(self):
+        await self.stop_doa_loop()
+        await self._under_lock(self.pixel_ring.speak)
+
+    async def error(self):
+        await self.stop_doa_loop()
+        await self._under_lock(self.pixel_ring.mono, 0xFF0000)
+
+
+class LedHandler(AsyncEventHandler):
+    def __init__(self, state: State, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state = state
 
     async def handle_event(self, event: Event) -> bool:
         if Describe.is_type(event.type):
@@ -81,40 +147,36 @@ class LedHandler(AsyncEventHandler):
 
         if Detection.is_type(event.type):
             _LOGGER.info("wake detected")
-            # Hand the ring back to the on-chip firmware so it can render its
-            # real-time DoA visualization (blue ring + green segment pointing
-            # at the speaker). trace() picks the tracking pattern; the VAD-LED
-            # toggle is what actually lets the firmware drive the ring.
-            await self._do(self._listen_on)
+            await self.state.start_listening()
         elif StreamingStarted.is_type(event.type):
-            # Keep DoA visible while we stream to HA.
-            pass
+            pass  # DoA loop already running
         elif Synthesize.is_type(event.type):
-            await self._do(self._listen_off)
-            await self._do(self.pixel_ring.speak)
+            await self.state.speak()
         elif StreamingStopped.is_type(event.type) or Played.is_type(event.type):
-            await self._do(self._listen_off)
+            await self.state.stop_listening()
         elif RunSatellite.is_type(event.type) or SatelliteConnected.is_type(event.type):
-            await self._do(self._listen_off)
+            await self.state.stop_listening()
         elif SatelliteDisconnected.is_type(event.type) or WyError.is_type(event.type):
-            await self._do(self._listen_off)
-            await self._do(lambda: self.pixel_ring.mono(0xFF0000))
+            await self.state.error()
 
         return True
 
 
-def _make_http_app(pixel_ring, lock):
+def _make_http_app(state: State):
     """HTTP API: POST /notify with one of
        {"action": "off"}
        {"action": "color", "r": 0..255, "g": 0..255, "b": 0..255}
        {"action": "pattern", "name": "think|speak|spin|listen"}
        {"action": "brightness", "value": 0..31}
     """
+    pixel_ring = state.pixel_ring
 
     async def notify(request):
         body = await request.json()
         action = body.get("action")
-        async with lock:
+        # Notifications interrupt any active wake-word painting.
+        await state.stop_doa_loop()
+        async with state.lock:
             if action == "off":
                 await asyncio.to_thread(pixel_ring.off)
             elif action == "color":
@@ -147,17 +209,16 @@ async def _run(args):
     pixel_ring = _pixel_ring
     tuning_dev = tuning.find()
 
-    # Disable the firmware's auto-VAD LED behavior so the ring only lights up
-    # under our control. set_vad_led(0) turns off the on-chip ring driver.
+    # Disable firmware-driven LED behavior; we paint manually via show().
     pixel_ring.set_vad_led(0)
     pixel_ring.off()
     if args.brightness is not None:
         pixel_ring.set_brightness(args.brightness)
 
-    lock = asyncio.Lock()
+    state = State(pixel_ring, tuning_dev, asyncio.Lock())
 
     if args.http_port:
-        app = _make_http_app(pixel_ring, lock)
+        app = _make_http_app(state)
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner, args.http_host, args.http_port)
@@ -166,7 +227,7 @@ async def _run(args):
 
     server = AsyncServer.from_uri(args.uri)
     _LOGGER.info("wyoming event server on %s", args.uri)
-    await server.run(partial(LedHandler, pixel_ring, tuning_dev, lock))
+    await server.run(partial(LedHandler, state))
 
 
 def main():
