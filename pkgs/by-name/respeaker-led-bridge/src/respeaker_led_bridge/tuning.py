@@ -90,6 +90,32 @@ class Tuning:
             TIMEOUT,
         )
 
+    def read(self, name):
+        try:
+            param = PARAMETERS[name]
+        except KeyError:
+            raise ValueError(f"unknown parameter {name!r}") from None
+
+        param_id, offset, type_, *_ = param
+        cmd = 0x80 | offset
+        if type_ == "int":
+            cmd |= 0x40
+
+        response = self.dev.ctrl_transfer(
+            usb.util.CTRL_IN
+            | usb.util.CTRL_TYPE_VENDOR
+            | usb.util.CTRL_RECIPIENT_DEVICE,
+            0,
+            cmd,
+            param_id,
+            8,
+            TIMEOUT,
+        )
+        a, b = struct.unpack(b"ii", bytes(response))
+        if type_ == "int":
+            return a
+        return a * (2.0 ** b)
+
     def close(self):
         usb.util.dispose_resources(self.dev)
 

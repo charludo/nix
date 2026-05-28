@@ -62,10 +62,21 @@ in
         default = true;
         description = "Open the notification port in the firewall.";
       };
+
+      debug = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable debug logging in the LED bridge.";
+      };
     };
 
     tuning = mkOption {
-      type = with types; attrsOf (oneOf [ int float ]);
+      type =
+        with types;
+        attrsOf (oneOf [
+          int
+          float
+        ]);
       default = { };
       example = {
         AGCONOFF = 1;
@@ -114,19 +125,18 @@ in
       microphone.autoGain = 20;
       vad.enable = false;
 
-      extraArgs =
-        [
-          "--wake-uri"
-          "tcp://127.0.0.1:10400"
-          "--wake-word-name"
-          cfg.wakeWord
-          "--mic-volume-multiplier"
-          "4.0"
-        ]
-        ++ optionals cfg.leds.enable [
-          "--event-uri"
-          "unix://${eventSocket}"
-        ];
+      extraArgs = [
+        "--wake-uri"
+        "tcp://127.0.0.1:10400"
+        "--wake-word-name"
+        cfg.wakeWord
+        "--mic-volume-multiplier"
+        "4.0"
+      ]
+      ++ optionals cfg.leds.enable [
+        "--event-uri"
+        "unix://${eventSocket}"
+      ];
     };
 
     systemd.services.wyoming-satellite = {
@@ -140,11 +150,12 @@ in
       requires = mkIf cfg.leds.enable [ "respeaker-led-bridge.service" ];
     };
 
-    networking.firewall.allowedTCPPorts =
-      [ 10700 ]
-      ++ optionals (cfg.leds.enable && cfg.leds.openNotificationFirewall) [
-        cfg.leds.notificationPort
-      ];
+    networking.firewall.allowedTCPPorts = [
+      10700
+    ]
+    ++ optionals (cfg.leds.enable && cfg.leds.openNotificationFirewall) [
+      cfg.leds.notificationPort
+    ];
 
     services.pipewire.wireplumber.extraConfig."51-respeaker-ignore" = {
       "monitor.alsa.rules" = [
@@ -205,6 +216,7 @@ in
             "--brightness"
             (toString cfg.leds.brightness)
           ]
+          ++ optional cfg.leds.debug "--debug"
         );
         Restart = "on-failure";
         RestartSec = 2;
