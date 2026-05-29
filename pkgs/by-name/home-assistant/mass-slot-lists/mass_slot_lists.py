@@ -25,6 +25,44 @@ LOGGER = logging.getLogger("mass-slot-lists")
 
 PAGE = 500
 
+# Leading articles dropped to form an alias. The canonical (out) keeps
+# the article; the aliased (in) form is the bare name, so users saying
+# "spiel Beatles" still resolves to "The Beatles".
+LEADING_ARTICLES = ("the ", "die ", "der ", "das ", "les ", "la ", "le ",
+                    "el ", "los ", "las ", "il ", "gli ", "i ")
+
+PLAYLIST_SUFFIX = " (from library)"
+
+
+def _name_aliases(name: str) -> list[str]:
+    """Return spoken-form aliases worth registering alongside ``name``."""
+    aliases: list[str] = []
+    lower = name.lower()
+    for art in LEADING_ARTICLES:
+        if lower.startswith(art) and len(name) > len(art):
+            aliases.append(name[len(art):])
+            break
+    return aliases
+
+
+def _slot_values(names: list[str], alias_fn=_name_aliases) -> list:
+    """Build a hassil values list: plain strings + in/out aliases."""
+    out: list = []
+    for name in names:
+        out.append(name)
+        for alias in alias_fn(name):
+            if alias and alias != name:
+                out.append({"in": alias, "out": name})
+    return out
+
+
+def _playlist_aliases(name: str) -> list[str]:
+    """Strip the '(from library)' suffix MA appends to its built-in playlists."""
+    if name.endswith(PLAYLIST_SUFFIX):
+        stripped = name[: -len(PLAYLIST_SUFFIX)].rstrip()
+        return [stripped] if stripped else []
+    return []
+
 
 def _read_token(path: Path) -> str:
     return path.read_text().strip()
@@ -144,9 +182,9 @@ async def main_async(args: argparse.Namespace) -> int:
         doc = {
             "language": args.language,
             "lists": {
-                "mass_artist": {"values": artist_names},
-                "mass_album": {"values": album_names},
-                "mass_playlist": {"values": playlist_names},
+                "mass_artist": {"values": _slot_values(artist_names)},
+                "mass_album": {"values": _slot_values(album_names)},
+                "mass_playlist": {"values": _slot_values(playlist_names, _playlist_aliases)},
             },
         }
         _write_atomic(args.output, doc)

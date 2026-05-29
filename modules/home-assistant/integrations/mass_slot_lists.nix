@@ -76,11 +76,15 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Symlink the generated state file into HA's custom_sentences/<lang>/.
-    # First-boot before the unit has run, this dangles; HA conversation
-    # tolerates an unreadable file in the directory.
-    systemd.tmpfiles.settings."20-mass-slot-lists".${linkPath} = {
-      "L+".argument = stateFile;
+    # Two rules: (1) make sure the state dir is hass-owned so HA can
+    # read what we write here — `StateDirectory=` only sets ownership
+    # on initial create, so a stale DynamicUser-owned directory from
+    # an earlier service revision would still block writes; (2) symlink
+    # the state file into HA's custom_sentences/<lang>/. The symlink
+    # dangles before the first sync run; HA tolerates an unreadable
+    # file in the directory.
+    systemd.tmpfiles.settings."20-mass-slot-lists" = {
+      ${linkPath}."L+".argument = stateFile;
     };
 
     systemd.services.mass-slot-lists = {
@@ -99,7 +103,11 @@ in
 
       serviceConfig = {
         Type = "oneshot";
-        DynamicUser = true;
+        # Run as hass so HA (also hass) can read the state file
+        # directly. DynamicUser would route the dir through
+        # /var/lib/private (0700 root:root), which HA can't traverse.
+        User = "hass";
+        Group = "hass";
         StateDirectory = "mass-slot-lists";
         # Exposes tokens at $CREDENTIALS_DIRECTORY/{mass,hass}-token; the
         # script picks them up by default.

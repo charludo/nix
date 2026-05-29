@@ -173,16 +173,15 @@ in
       };
     };
 
+    # mass_playlist / mass_album / mass_artist slot lists are populated
+    # at runtime by mass-slot-lists.service into
+    # custom_sentences/de/mass_lists.yaml. HA conversation merges the
+    # lists block across all files in the language dir, so the slot
+    # variables resolve even though no `lists.<name>.values` is set here.
     Musik_Playlist = {
       sentences = [
-        "(Spiele|Spiel|Starte) [die ]Playlist {playlist}"
-        "Playlist[e] {playlist}"
-      ];
-      lists.playlist.values = [
-        "Bridgerton Pop"
-        "NieR"
-        "Philharmonix"
-        "Sea Shanties"
+        "(Spiele|Spiel|Starte) [die ]Playlist {mass_playlist}"
+        "Playlist[e] {mass_playlist}"
       ];
       script = {
         action = [
@@ -190,12 +189,53 @@ in
             action = "music_assistant.play_media";
             target.entity_id = player;
             data = {
-              media_id = "{{ playlist }}";
+              media_id = "{{ mass_playlist }}";
               media_type = "playlist";
             };
           }
         ];
-        speech.text = "Spiele Playlist {{ playlist }}.";
+        speech.text = "Spiele Playlist {{ mass_playlist }}.";
+      };
+    };
+
+    Musik_Album = {
+      sentences = [
+        "(Spiele|Spiel|Starte) [das ]Album {mass_album}"
+        "Album {mass_album}"
+      ];
+      script = {
+        action = [
+          {
+            action = "music_assistant.play_media";
+            target.entity_id = player;
+            data = {
+              media_id = "{{ mass_album }}";
+              media_type = "album";
+            };
+          }
+        ];
+        speech.text = "Spiele Album {{ mass_album }}.";
+      };
+    };
+
+    Musik_Kuenstler = {
+      sentences = [
+        "(Spiele|Spiel|Starte) [den ](Künstler|Artist) {mass_artist}"
+        "(Spiele|Spiel) (was|etwas|Musik) von {mass_artist}"
+        "(Künstler|Artist) {mass_artist}"
+      ];
+      script = {
+        action = [
+          {
+            action = "music_assistant.play_media";
+            target.entity_id = player;
+            data = {
+              media_id = "{{ mass_artist }}";
+              media_type = "artist";
+            };
+          }
+        ];
+        speech.text = "Spiele {{ mass_artist }}.";
       };
     };
   };
