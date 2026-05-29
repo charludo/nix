@@ -25,9 +25,11 @@
 
   services.home-assistant.config.closest_intent = {
     threshold = 70;
-    # slot_threshold = 60;
+    slot_threshold = 60;
     expansion_cap = 16;
     slot_extraction = true;
     include_builtins = false;
   };
+
+  services.home-assistant.config.logger.logs."custom_components.closest_intent" = "debug";
 }

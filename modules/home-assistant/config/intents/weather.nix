@@ -65,8 +65,8 @@ in
   hass.voice.intents = {
     Wetter_Heute = {
       sentences = [
-        "Wie ist das Wetter (gerade|draußen|aktuell)"
-        "Wie warm ist es (draußen|gerade|jetzt)"
+        "Wie ist das Wetter [heute|draußen|gerade|jetzt|aktuell]"
+        "Wie warm ist es [draußen|gerade|jetzt|aktuell]"
       ];
       # Temperature, humidity, pressure straight from the local Wetterstation;
       # condition string comes from OWM (categorical, not measured locally),
@@ -139,6 +139,7 @@ in
 
     Wetter_TemperaturMaxHeute = {
       sentences = [
+        "Wie wird das Wetter [heute]"
         "Wie warm wird es heute [noch]"
         "Was ist die Höchsttemperatur heute"
       ];

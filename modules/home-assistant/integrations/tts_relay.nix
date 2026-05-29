@@ -54,5 +54,7 @@ in
       }
       // lib.optionalAttrs (r.volume != null) { inherit (r) volume; }
     ) cfg;
+
+    services.home-assistant.config.logger.logs."custom_components.tts_relay" = "debug";
   };
 }

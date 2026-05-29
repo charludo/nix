@@ -176,7 +176,7 @@ in
     Musik_Playlist = {
       sentences = [
         "(Spiele|Spiel|Starte) [die ]Playlist {playlist}"
-        "Playlist {playlist}"
+        "Playlist[e] {playlist}"
       ];
       lists.playlist.values = [
         "Bridgerton Pop"

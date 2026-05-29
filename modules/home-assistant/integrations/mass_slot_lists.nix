@@ -1,0 +1,130 @@
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
+  cfg = config.hass.massSlotLists;
+  hassCfgDir = config.services.home-assistant.configDir;
+  # State-side YAML; HA sees it via a tmpfiles symlink under custom_sentences/.
+  stateDir = "/var/lib/mass-slot-lists";
+  stateFile = "${stateDir}/${cfg.language}.yaml";
+  linkPath = "${hassCfgDir}/custom_sentences/${cfg.language}/mass_lists.yaml";
+in
+{
+  # Snapshot Music Assistant's library (artists + albums) into a
+  # hassil slot-list YAML under `custom_sentences/<lang>/`. closest_intent
+  # picks the file up automatically (see _load_custom_sentences in its
+  # conversation.py); stock HA conversation reads it too. Refreshed on
+  # every MA start and on a timer so new library additions become
+  # voice-addressable without a HA restart.
+  options.hass.massSlotLists = {
+    enable = lib.mkEnableOption "Music Assistant -> HA custom_sentences slot list sync";
+
+    massUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:8095";
+      description = "Music Assistant base URL";
+    };
+
+    massTokenPath = lib.mkOption {
+      type = lib.types.path;
+      default = "/run/agenix/mass-token";
+      description = ''
+        Path to a file containing a Music Assistant long-lived token.
+        MA schema >= 28 requires authentication even on the local socket,
+        so this is a separate token from ``hass.zha.reconciler.tokenPath``.
+        Mint via the MA UI -> Settings -> Security -> Long-lived tokens
+        and plumb in alongside the existing hass secrets:
+
+          age.secrets.mass-token = {
+            rekeyFile = secrets.mass-token;
+            owner = "hass";
+            group = "hass";
+          };
+      '';
+    };
+
+    hassUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "http://127.0.0.1:8123";
+      description = "Home Assistant base URL (used for conversation.reload)";
+    };
+
+    hassTokenPath = lib.mkOption {
+      type = lib.types.path;
+      default = "/run/agenix/hass-reconciler-token";
+      description = ''
+        Path to a HA long-lived token. Reused from the reconciler — it's
+        a generic HA LLT, only used here to POST conversation.reload.
+      '';
+    };
+
+    language = lib.mkOption {
+      type = lib.types.str;
+      default = config.hass.voice.defaultLanguage;
+      defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
+      description = "Language code; written into the YAML's `language:` field and used as the custom_sentences subdir";
+    };
+
+    interval = lib.mkOption {
+      type = lib.types.str;
+      default = "1h";
+      description = "Refresh cadence (systemd OnUnitActiveSec value)";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    # Symlink the generated state file into HA's custom_sentences/<lang>/.
+    # First-boot before the unit has run, this dangles; HA conversation
+    # tolerates an unreadable file in the directory.
+    systemd.tmpfiles.settings."20-mass-slot-lists".${linkPath} = {
+      "L+".argument = stateFile;
+    };
+
+    systemd.services.mass-slot-lists = {
+      description = "Sync Music Assistant artists + albums into HA custom_sentences";
+      # Run after both MA and HA are up. Wanted-by MA so each MA restart
+      # triggers a fresh sync; the timer handles the steady-state cadence.
+      after = [
+        "music-assistant.service"
+        "home-assistant.service"
+      ];
+      wants = [
+        "music-assistant.service"
+        "home-assistant.service"
+      ];
+      wantedBy = [ "music-assistant.service" ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        DynamicUser = true;
+        StateDirectory = "mass-slot-lists";
+        # Exposes tokens at $CREDENTIALS_DIRECTORY/{mass,hass}-token; the
+        # script picks them up by default.
+        LoadCredential = [
+          "mass-token:${cfg.massTokenPath}"
+          "hass-token:${cfg.hassTokenPath}"
+        ];
+        ExecStart = lib.concatStringsSep " " [
+          "${pkgs.ours.home-assistant.mass-slot-lists}/bin/mass-slot-lists"
+          "--mass-url=${cfg.massUrl}"
+          "--hass-url=${cfg.hassUrl}"
+          "--language=${cfg.language}"
+          "--output=${stateFile}"
+        ];
+      };
+    };
+
+    systemd.timers.mass-slot-lists = {
+      description = "Hourly refresh of Music Assistant slot lists";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "5min";
+        OnUnitActiveSec = cfg.interval;
+        Unit = "mass-slot-lists.service";
+      };
+    };
+  };
+}

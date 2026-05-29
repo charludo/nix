@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   secrets,
   ...
 }:
@@ -63,6 +64,22 @@
     group = "hass";
   };
 
+  age.secrets.mass-token = lib.mkIf config.hass.massSlotLists.enable {
+    rekeyFile = secrets.mass-token;
+    owner = "hass";
+    group = "hass";
+  };
+
+  age.secrets.hass-mass-token = lib.mkIf config.hass.massSlotLists.enable {
+    rekeyFile = secrets.hass-mass-token;
+    owner = "hass";
+    group = "hass";
+  };
+
   hass.zha.reconciler.enable = true;
   hass.bambu.enable = true;
+  hass.massSlotLists.enable = true;
+  hass.massSlotLists.hassTokenPath = config.age.secrets.hass-mass-token.path;
+  hass.massSlotLists.massTokenPath = config.age.secrets.mass-token.path;
+
 }

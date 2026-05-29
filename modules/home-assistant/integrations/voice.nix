@@ -176,10 +176,55 @@ in
       intent_script = scripts;
     };
 
+    # Symlink the Nix-generated nix.yaml per-language, not the whole
+    # custom_sentences/ directory. Leaves <lang>/ writable so runtime
+    # generators (e.g. mass-slot-lists) can drop sibling YAML files
+    # next to nix.yaml — HA picks up every *.yaml in the directory.
+    #
+    # The `d` rules explicitly create the parent dirs as hass:hass so
+    # the L+ rules don't traverse the root-owned dirs that `L+` would
+    # otherwise auto-create — systemd-tmpfiles refuses to canonicalize
+    # paths that cross an ownership boundary ("unsafe path transition").
     systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
-      "10-hass-custom-sentences"."${config.services.home-assistant.configDir}/custom_sentences" = {
-        "L+".argument = "${sentencesDir}";
-      };
+      "10-hass-custom-sentences" =
+        {
+          "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
+            mode = "0755";
+            user = "hass";
+            group = "hass";
+          };
+        }
+        // lib.listToAttrs (
+          lib.concatMap (lang: [
+            {
+              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
+              value."d" = {
+                mode = "0755";
+                user = "hass";
+                group = "hass";
+              };
+            }
+            {
+              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
+              value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
+            }
+          ]) languages
+        );
+    };
+
+    # One-shot migration from the previous layout, which symlinked the
+    # whole custom_sentences/ directory into a Nix store path. tmpfiles
+    # `L+` rules would try to write through that symlink and hit a
+    # read-only filesystem; clear it before systemd-tmpfiles-setup runs.
+    # Self-limiting: once the parent is a real directory the test fails
+    # and the script is a no-op.
+    system.activationScripts.hassCustomSentencesMigrate = lib.mkIf (intents != { }) {
+      text = ''
+        if [ -L ${config.services.home-assistant.configDir}/custom_sentences ]; then
+          rm ${config.services.home-assistant.configDir}/custom_sentences
+        fi
+      '';
+      deps = [ ];
     };
   };
 }
