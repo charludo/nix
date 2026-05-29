@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
   player = e.media_player.alle;
@@ -13,10 +13,18 @@ let
       };
     }
   ];
+
+  # Music intents start audio on the same Sonos that tts_relay would
+  # otherwise speak on; the speech would talk over the music. silentAction
+  # drops the satellite-side audio while keeping the speech for the chat
+  # path. Transport intents (pause/skip/shuffle) get acknowledgeAction —
+  # a short blip is friendlier than no feedback at all.
+  silent = lib.ha.voice.silentAction;
+  ack = lib.ha.voice.acknowledgeAction;
 in
 {
   hass.voice.intents = {
-    MusikAn = {
+    MusikAn = silent {
       sentences = [
         "(Spiele|Spiel|Starte) [Musik|die Musik]"
         "Musik (an|abspielen|starten)"
@@ -27,7 +35,7 @@ in
       };
     };
 
-    Musik_Fortsetzen = {
+    Musik_Fortsetzen = ack {
       sentences = [
         "Musik fortsetzen"
         "(Mache|Setze) Musik fort"
@@ -44,7 +52,7 @@ in
       };
     };
 
-    Musik_Pause = {
+    Musik_Pause = ack {
       sentences = [
         "(Pausiere|Stoppe|Anhalten) [die Musik]"
         "Musik (pausieren|anhalten|stoppen)"
@@ -61,7 +69,7 @@ in
       };
     };
 
-    Musik_Naechster = {
+    Musik_Naechster = ack {
       sentences = [
         "(Nächster|Nächstes) (Titel|Song|Lied)"
         "Skip"
@@ -78,7 +86,7 @@ in
       };
     };
 
-    Musik_ShuffleAn = {
+    Musik_ShuffleAn = ack {
       sentences = [
         "Shuffle (an|ein|aktivieren)"
         "Mischen (an|ein|aktivieren)"
@@ -96,7 +104,7 @@ in
       };
     };
 
-    Musik_ShuffleAus = {
+    Musik_ShuffleAus = ack {
       sentences = [
         "Shuffle (aus|ab|deaktivieren)"
         "Mischen (aus|ab|deaktivieren)"
@@ -114,7 +122,7 @@ in
       };
     };
 
-    Musik_PlayerNeustart = {
+    Musik_PlayerNeustart = ack {
       sentences = [
         "(Player|Spieler|Sonos) (neu starten|neustarten|resetten)"
         "Restart Player"
@@ -125,7 +133,7 @@ in
       };
     };
 
-    Musik_ZufaelligesAlbum = {
+    Musik_ZufaelligesAlbum = silent {
       sentences = [
         "(Spiele|Spiel) [ein ]zufälliges Album"
         "Zufälliges Album"
@@ -137,7 +145,7 @@ in
       };
     };
 
-    Musik_ZufaelligerKuenstler = {
+    Musik_ZufaelligerKuenstler = silent {
       sentences = [
         "(Spiele|Spiel) [einen ]zufälligen (Künstler|Artist)"
         "Zufälliger (Künstler|Artist)"
@@ -149,7 +157,7 @@ in
       };
     };
 
-    Musik_NeueMusik = {
+    Musik_NeueMusik = silent {
       sentences = [
         "(Spiele|Spiel) [die ]neue[sten|n] (Musik|Tracks|Titel|Lieder)"
         "(Spiele|Spiel) [die ]Playlist (neue Musik|Neue Tracks|Recently Added)"
@@ -161,7 +169,7 @@ in
       };
     };
 
-    Musik_KuerzlichGespielt = {
+    Musik_KuerzlichGespielt = silent {
       sentences = [
         "(Spiele|Spiel) [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
         "Recently Played"
@@ -178,7 +186,7 @@ in
     # custom_sentences/de/mass_lists.yaml. HA conversation merges the
     # lists block across all files in the language dir, so the slot
     # variables resolve even though no `lists.<name>.values` is set here.
-    Musik_Playlist = {
+    Musik_Playlist = silent {
       sentences = [
         "(Spiele|Spiel|Starte) [die ]Playlist {mass_playlist}"
         "Playlist[e] {mass_playlist}"
@@ -198,7 +206,7 @@ in
       };
     };
 
-    Musik_Album = {
+    Musik_Album = silent {
       sentences = [
         "(Spiele|Spiel|Starte) [das ]Album {mass_album}"
         "Album {mass_album}"
@@ -218,7 +226,7 @@ in
       };
     };
 
-    Musik_Kuenstler = {
+    Musik_Kuenstler = silent {
       sentences = [
         "(Spiele|Spiel|Starte) [den ](Künstler|Artist) {mass_artist}"
         "(Spiele|Spiel) (was|etwas|Musik) von {mass_artist}"

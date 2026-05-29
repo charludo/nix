@@ -19,4 +19,17 @@ in
       volume = 0.4;
     }
   ];
+
+  # Sound files played by tts_relay in place of the TTS audio for
+  # intents wrapped with lib.ha.voice.acknowledgeAction / silentAction
+  # etc. Each path is symlinked individually under <configDir>/www/sounds/
+  # (see voice.nix) and served from /local/sounds/<basename>. Set to
+  # null to fall back to relaying the synthesized speech for that
+  # category.
+  hass.voice.sounds = {
+    acknowledge = ./assets/sounds/acknowledge-short.mp3;
+    timer = ./assets/sounds/timer-bell.wav;
+    reminder = ./assets/sounds/reminder-friendly.mp3;
+    alarmclock = ./assets/sounds/wecker-chipper.mp3;
+  };
 }

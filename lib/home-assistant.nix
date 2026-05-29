@@ -6,6 +6,52 @@ rec {
   lowBatteryThreshold = 10;
 
   # ---------------------------------------------------------------------------
+  # Voice intent helpers (satellite vs. chat response differentiation)
+  # ---------------------------------------------------------------------------
+  #
+  # Wraps a `hass.voice.intents.<X>` body so the voice satellite path
+  # plays a configured sound (acknowledge) or nothing (silent) instead
+  # of relaying the TTS speech onto Sonos. The chat UI still receives
+  # the full speech text because the helper only annotates the intent
+  # response with a marker card; the speech itself is untouched.
+  #
+  # Mechanism: the helper adds `script.card = { type = "voice_effect";
+  # title = <effect>; content = ""; }` to the intent body. tts_relay
+  # reads `response.card.voice_effect.title` from the pipeline's
+  # INTENT_END event and, on the subsequent TTS_END, either substitutes
+  # the configured sound URL (acknowledge/timer/reminder/alarmclock) or
+  # drops the audio entirely (silent). HA's chat UI ignores unknown
+  # card types, so the marker is invisible there.
+  voice =
+    let
+      _voiceEffectCard = name: {
+        type = "voice_effect";
+        title = name;
+        content = "";
+      };
+
+      mkEffect =
+        name: body:
+        body
+        // {
+          script = (body.script or { }) // {
+            card = _voiceEffectCard name;
+          };
+        };
+    in
+    {
+      # Voice path: play the "acknowledge" sound on the target Sonos
+      # instead of speaking the TTS. Use for intents whose only output
+      # is a confirmation ("Licht eingeschaltet", "Pausiert", ...).
+      acknowledgeAction = mkEffect "acknowledge";
+
+      # Voice path: emit nothing. Use for intents whose action already
+      # produces audible feedback (music starting on the same target
+      # Sonos), where a spoken confirmation would just talk over it.
+      silentAction = mkEffect "silent";
+    };
+
+  # ---------------------------------------------------------------------------
   # Slug helper (shared with areas and devices)
   # ---------------------------------------------------------------------------
 

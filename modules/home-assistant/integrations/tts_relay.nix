@@ -47,13 +47,24 @@ in
       pkgs.ours.home-assistant.custom-components.tts_relay
     ];
 
-    services.home-assistant.config.tts_relay = map (
-      r:
-      {
-        inherit (r) satellite target;
-      }
-      // lib.optionalAttrs (r.volume != null) { inherit (r) volume; }
-    ) cfg;
+    # tts_relay takes either a bare list of route dicts (legacy) or a
+    # dict with `routes:` + `sounds:`. We always emit the dict form so
+    # the voice-effect sound URLs flow through to the component. URLs
+    # are derived from the per-category paths in `hass.voice.sounds` —
+    # voice.nix symlinks each path into `<www>/sounds/<basename>`, so
+    # the public URL is `/local/sounds/<basename>`.
+    services.home-assistant.config.tts_relay = {
+      routes = map (
+        r:
+        {
+          inherit (r) satellite target;
+        }
+        // lib.optionalAttrs (r.volume != null) { inherit (r) volume; }
+      ) cfg;
+      sounds = lib.mapAttrs (_: path: "/local/sounds/${baseNameOf path}") (
+        lib.filterAttrs (_: v: v != null) config.hass.voice.sounds
+      );
+    };
 
     services.home-assistant.config.logger.logs."custom_components.tts_relay" = "debug";
   };
