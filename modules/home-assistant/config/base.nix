@@ -41,12 +41,11 @@
 
       http = {
         use_x_forwarded_for = true;
-        ip_ban_enabled = true;
+        ip_ban_enabled = false;
         trusted_proxies = [
           "192.168.24.3"
           "192.168.24.2"
         ];
-        login_attempts_threshold = 5;
       };
     };
   };

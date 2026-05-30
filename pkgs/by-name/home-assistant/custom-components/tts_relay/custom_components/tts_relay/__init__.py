@@ -1,4 +1,4 @@
-"""Re-route assist_pipeline TTS responses to a Sonos via snapshot/restore.
+"""Re-route assist_pipeline TTS responses to a Sonos via announce mode.
 
 Wyoming satellites without a usable speaker still receive TTS audio
 over the wyoming protocol as raw PCM. There's no URL the satellite
@@ -8,13 +8,17 @@ on the satellite entity — not on the HA event bus. A pure-YAML
 automation therefore can't see the URL.
 
 This integration wraps ``AssistSatelliteEntity._internal_on_pipeline_event``
-so that when a configured satellite emits ``TTS_END``, we play the
-audio on a target Sonos. ``media_player.play_media``'s ``announce:
-true`` is *not* used because Sonos routes it through the local
-WebSocket API which requires periodic Sonos-cloud OAuth — useless
-behind a firewall and times out for 5+ s on every call. Instead we
-emulate ducking with ``sonos.snapshot`` / ``sonos.restore``, which run
-purely over local UPnP.
+so that when a configured satellite emits ``TTS_END``, we replay the
+audio on a target Sonos using HA's native ``media_player.play_media``
+with ``announce: true``. Sonos handles ducking and resume natively
+under that flag — much cleaner than juggling ``sonos.snapshot`` /
+``sonos.restore`` manually.
+
+Note: the ``audioClip`` cloud check that the speaker's firmware runs
+on every announce call will silently delay playback by ~5 s if the
+speaker can't reach Sonos cloud. If your speakers are firewalled, use
+*reject* (TCP RST) rather than *block* (silent drop) on outbound — the
+RST short-circuits the cloud check in ~50 ms instead of timing out.
 
 Voice-effect markers
 --------------------
@@ -27,37 +31,26 @@ Intent handlers can annotate their response with a card of type
 
 On the matching satellite's ``TTS_END``:
 
-* ``silent``     — drop the audio; play nothing. Use for intents whose
-                   action already produces audible feedback (music
-                   starting on the same Sonos).
-* ``<category>`` — substitute the configured sound URL for that
-                   category (from the ``sounds:`` config) and play that
-                   on the target Sonos with the usual snapshot/restore
-                   ducking.
-* unset / unknown — relay the synthesized TTS audio (default behaviour).
+* ``silent``     — drop the audio; announce nothing. Use for intents
+                   whose action already produces audible feedback
+                   (music starting on the same Sonos).
+* ``<category>`` — announce the configured sound URL for that category
+                   (from the ``sounds:`` config) instead of the TTS.
+* unset / unknown — announce the synthesized TTS audio (default).
 
 The chat path is unaffected: HA's chat UI renders only ``card.simple``,
 so a ``voice_effect`` card is invisible there and the original speech
 text is shown verbatim.
-
-Sequence on TTS_END (when something needs to play):
-  1. If target is currently ``playing``: ``sonos.snapshot``.
-  2. Set volume (optional).
-  3. ``media_player.play_media`` with the chosen URL.
-  4. If we snapshotted: wait for state to leave ``playing`` (clip
-     finished), then ``sonos.restore``.
 """
 
 from __future__ import annotations
 
-import asyncio
 import logging
 
 import voluptuous as vol
 from homeassistant.const import CONF_TARGET
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.helpers.network import NoURLAvailableError, get_url
 from homeassistant.helpers.typing import ConfigType
 
@@ -69,12 +62,8 @@ CONF_SOUNDS = "sounds"
 
 # Card type intent handlers use to flag a voice-effect override.
 VOICE_EFFECT_CARD_TYPE = "voice_effect"
-# Special title that means "drop the TTS audio, play nothing".
+# Special title that means "drop the TTS audio, announce nothing".
 SILENT_EFFECT = "silent"
-
-# Safety cap so a stuck-pending state never leaks a snapshot. TTS
-# responses are short (seconds); 60 s is generous.
-_RESTORE_TIMEOUT = 60.0
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -123,89 +112,29 @@ def _absolutise(hass: HomeAssistant, url: str) -> str | None:
     return base.rstrip("/") + url
 
 
-async def _play_on_target(hass: HomeAssistant, route: dict, url: str, content_type: str) -> None:
+async def _announce(hass: HomeAssistant, route: dict, url: str) -> None:
+    """Fire one ``media_player.play_media`` with ``announce: true``. Sonos
+    handles ducking and queue restore natively under that flag."""
     target = route[CONF_TARGET]
-    state = hass.states.get(target)
-    was_playing = state is not None and state.state == "playing"
-
-    if was_playing:
-        try:
-            await hass.services.async_call(
-                "sonos", "snapshot", {"entity_id": target}, blocking=True
-            )
-        except Exception:
-            _LOGGER.exception("tts_relay: snapshot failed for %s", target)
-            was_playing = False  # Don't try to restore something we couldn't save.
-
+    data: dict = {
+        "entity_id": target,
+        "announce": True,
+        "media_content_id": url,
+        # Generic media class — actual format is sniffed from the URL.
+        "media_content_type": "music",
+    }
     volume = route.get(CONF_VOLUME)
     if volume is not None:
-        try:
-            await hass.services.async_call(
-                "media_player",
-                "volume_set",
-                {"entity_id": target, "volume_level": volume},
-                blocking=True,
-            )
-        except Exception:
-            _LOGGER.exception("tts_relay: volume_set failed for %s", target)
+        # Sonos audioClip expects volume as int 0–100; our config takes
+        # a 0.0–1.0 float for consistency with media_player.volume_set.
+        data["extra"] = {"volume": int(volume * 100)}
 
     try:
         await hass.services.async_call(
-            "media_player",
-            "play_media",
-            {
-                "entity_id": target,
-                "media_content_id": url,
-                "media_content_type": content_type,
-            },
-            blocking=True,
+            "media_player", "play_media", data, blocking=True
         )
     except Exception:
-        _LOGGER.exception("tts_relay: play_media failed for %s", target)
-        if was_playing:
-            await _restore(hass, target)
-        return
-
-    if not was_playing:
-        return
-
-    # Wait for the clip to finish (target leaves ``playing``). Attach
-    # the listener before re-reading the state to avoid the
-    # play-ends-between-call-and-listen race.
-    done: asyncio.Event = asyncio.Event()
-
-    @callback
-    def _on_change(event):
-        new_state = event.data.get("new_state")
-        if new_state is not None and new_state.state != "playing":
-            done.set()
-
-    unsub = async_track_state_change_event(hass, [target], _on_change)
-    try:
-        current = hass.states.get(target)
-        if current is not None and current.state != "playing":
-            done.set()
-        try:
-            await asyncio.wait_for(done.wait(), timeout=_RESTORE_TIMEOUT)
-        except asyncio.TimeoutError:
-            _LOGGER.warning(
-                "tts_relay: %s still playing after %.0fs; restoring anyway",
-                target,
-                _RESTORE_TIMEOUT,
-            )
-    finally:
-        unsub()
-
-    await _restore(hass, target)
-
-
-async def _restore(hass: HomeAssistant, target: str) -> None:
-    try:
-        await hass.services.async_call(
-            "sonos", "restore", {"entity_id": target}, blocking=True
-        )
-    except Exception:
-        _LOGGER.exception("tts_relay: restore failed for %s", target)
+        _LOGGER.exception("tts_relay: announce failed for %s", target)
 
 
 def _read_voice_effect(intent_output: dict | None) -> str | None:
@@ -239,13 +168,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     by_satellite = {r[CONF_SATELLITE]: r for r in routes}
 
-    # One relay at a time per route, so a fast second TTS doesn't race
-    # the first one's restore. Queue-style: subsequent TTSes wait their
-    # turn instead of stomping on the snapshot.
-    locks: dict[str, asyncio.Lock] = {
-        r[CONF_SATELLITE]: asyncio.Lock() for r in routes
-    }
-
     # Per-satellite "last seen INTENT_END effect", consumed by the
     # immediately-following TTS_END. assist_satellite runs at most one
     # pipeline at a time per entity, so there's no concurrency risk.
@@ -257,10 +179,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     from homeassistant.components.assist_satellite.entity import AssistSatelliteEntity
 
     original = AssistSatelliteEntity._internal_on_pipeline_event
-
-    async def _run(satellite_id: str, route: dict, url: str, content_type: str) -> None:
-        async with locks[satellite_id]:
-            await _play_on_target(hass, route, url, content_type)
 
     def patched(self, event):
         original(self, event)
@@ -303,14 +221,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 )
             # Capture the voice_effect marker (if any) for the upcoming
             # TTS_END to consume.
-            captured = _read_voice_effect(intent_output)
-            pending_effects[self.entity_id] = captured
-            _LOGGER.debug(
-                "tts_relay: INTENT_END on %s — voice_effect=%r, card=%r",
-                self.entity_id,
-                captured,
-                (intent_output.get("response") or {}).get("card"),
-            )
+            pending_effects[self.entity_id] = _read_voice_effect(intent_output)
 
         route = by_satellite.get(self.entity_id)
         if route is None:
@@ -321,12 +232,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # Consume the marker the matching INTENT_END left behind. If
         # none, fall through to the default TTS-relay behaviour.
         effect = pending_effects.pop(self.entity_id, None)
-        _LOGGER.debug(
-            "tts_relay: TTS_END on %s — effect=%r, configured sounds=%s",
-            self.entity_id,
-            effect,
-            sorted(sounds.keys()),
-        )
 
         if effect == SILENT_EFFECT:
             _LOGGER.debug("tts_relay: silent effect for %s; dropping TTS", self.entity_id)
@@ -344,27 +249,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             else:
                 url = _absolutise(hass, sound_url)
                 if url:
-                    _LOGGER.debug(
-                        "tts_relay: playing effect %r on %s -> %s",
-                        effect, route[CONF_TARGET], url,
-                    )
-                    hass.async_create_task(_run(self.entity_id, route, url, "music"))
+                    hass.async_create_task(_announce(hass, route, url))
                     return
 
         tts_output = data.get("tts_output") or {}
         url = _absolutise(hass, tts_output.get("url"))
         if not url:
             return
-        # Sonos rejects MIME types like ``audio/x-wav``; the HA Sonos
-        # integration only accepts the generic media class strings
-        # (``music``, ``audio``, ...). The actual format is determined
-        # by the URL/file content, not this field.
-        hass.async_create_task(_run(self.entity_id, route, url, "music"))
+        hass.async_create_task(_announce(hass, route, url))
 
     AssistSatelliteEntity._internal_on_pipeline_event = patched
 
     _LOGGER.info(
-        "tts_relay: relaying TTS for %s; configured effects: %s",
+        "tts_relay: announcing TTS for %s; configured effects: %s",
         ", ".join(f"{k} -> {v[CONF_TARGET]}" for k, v in by_satellite.items()),
         sorted(sounds.keys()) or "(none)",
     )
