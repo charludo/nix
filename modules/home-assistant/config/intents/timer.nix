@@ -1,8 +1,7 @@
-{ config, lib, ... }:
+{ config, ... }:
 let
   e = config.hass.entities;
   pool = builtins.attrValues e.timer;
-  ack = lib.ha.voice.acknowledgeAction;
 
   # Jinja: pick the first idle timer from the pool, fall back to first.
   pickIdle = ''
@@ -26,7 +25,7 @@ let
 in
 {
   hass.voice.intents = {
-    Timer_Stellen_Minuten = ack {
+    Timer_Stellen_Minuten = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
         "Timer (für|auf) {timer_minutes:minutes} Minuten"
@@ -38,7 +37,7 @@ in
       };
     };
 
-    Timer_Stellen_Sekunden = ack {
+    Timer_Stellen_Sekunden = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_seconds:seconds} Sekunden"
         "Timer {timer_seconds:seconds} Sekunden"
@@ -49,7 +48,7 @@ in
       };
     };
 
-    Timer_Stellen_Stunden = ack {
+    Timer_Stellen_Stunden = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden"
         "Timer {timer_hours:hours} Stunden"
@@ -60,7 +59,7 @@ in
       };
     };
 
-    Timer_Stellen_Kombiniert = ack {
+    Timer_Stellen_Kombiniert = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten"
       ];
@@ -70,7 +69,7 @@ in
       };
     };
 
-    Timer_Abbrechen = ack {
+    Timer_Abbrechen = {
       sentences = [
         "(Brich|Stoppe) [den|alle] Timer ab"
         "Timer (abbrechen|stoppen|löschen)"

@@ -35,7 +35,7 @@ in
       };
     };
 
-    Musik_Fortsetzen = ack {
+    Musik_Fortsetzen = silent {
       sentences = [
         "Musik fortsetzen"
         "(Mache|Setze) Musik fort"
@@ -52,7 +52,7 @@ in
       };
     };
 
-    Musik_Pause = ack {
+    Musik_Pause = silent {
       sentences = [
         "(Pausiere|Stoppe|Anhalten) [die Musik]"
         "Musik (pausieren|anhalten|stoppen)"
@@ -69,7 +69,7 @@ in
       };
     };
 
-    Musik_Naechster = ack {
+    Musik_Naechster = silent {
       sentences = [
         "(Nächster|Nächstes) (Titel|Song|Lied)"
         "Skip"
@@ -122,7 +122,7 @@ in
       };
     };
 
-    Musik_PlayerNeustart = ack {
+    Musik_PlayerNeustart = {
       sentences = [
         "(Player|Spieler|Sonos) (neu starten|neustarten|resetten)"
         "Restart Player"
@@ -181,12 +181,7 @@ in
       };
     };
 
-    # mass_playlist / mass_album / mass_artist slot lists are populated
-    # at runtime by mass-slot-lists.service into
-    # custom_sentences/de/mass_lists.yaml. HA conversation merges the
-    # lists block across all files in the language dir, so the slot
-    # variables resolve even though no `lists.<name>.values` is set here.
-    Musik_Playlist = silent {
+    Musik_Playlist = {
       sentences = [
         "(Spiele|Spiel|Starte) [die ]Playlist {mass_playlist}"
         "Playlist[e] {mass_playlist}"
@@ -206,7 +201,7 @@ in
       };
     };
 
-    Musik_Album = silent {
+    Musik_Album = {
       sentences = [
         "(Spiele|Spiel|Starte) [das ]Album {mass_album}"
         "Album {mass_album}"
@@ -226,7 +221,7 @@ in
       };
     };
 
-    Musik_Kuenstler = silent {
+    Musik_Kuenstler = {
       sentences = [
         "(Spiele|Spiel|Starte) [den ](Künstler|Artist) {mass_artist}"
         "(Spiele|Spiel) (was|etwas|Musik) von {mass_artist}"

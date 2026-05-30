@@ -12,7 +12,10 @@ in
     # before symlinking the per-asset folders into it.
     "d ${www} 0755 hass hass -"
     "L+ ${www}/bambu - - - - ${./assets/bambu}"
-    # /www/sounds/ and the per-file voice-effect symlinks are owned by
-    # hass.voice.sounds (see voice.nix); paths live there individually.
+    # Expose the whole sounds palette so every file is browseable at
+    # /local/sounds/<name>. Auditioning a new file in Dev Tools no
+    # longer needs a per-category re-assign-and-rebuild cycle; only
+    # adding entirely new files to the asset dir requires a rebuild.
+    "L+ ${www}/sounds - - - - ${./assets/sounds}"
   ];
 }

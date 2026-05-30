@@ -10,13 +10,6 @@ let
 
   intents = cfg.intents;
 
-  # Per-category sound files configured under `hass.voice.sounds`,
-  # filtered down to the ones the user actually set. Symlinked into
-  # `<configDir>/www/sounds/<basename>` and served at the matching
-  # `/local/sounds/<basename>` URL; tts_relay.nix consumes those URLs.
-  configuredSounds = lib.filterAttrs (_: v: v != null) cfg.sounds;
-  wwwDir = "${config.services.home-assistant.configDir}/www";
-
   intentList = lib.mapAttrsToList (
     name: i:
     {
@@ -232,55 +225,32 @@ in
     # the L+ rules don't traverse the root-owned dirs that `L+` would
     # otherwise auto-create — systemd-tmpfiles refuses to canonicalize
     # paths that cross an ownership boundary ("unsafe path transition").
-    systemd.tmpfiles.settings = lib.mkMerge [
-      (lib.mkIf (intents != { }) {
-        "10-hass-custom-sentences" =
-          {
-            "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
-              mode = "0755";
-              user = "hass";
-              group = "hass";
-            };
-          }
-          // lib.listToAttrs (
-            lib.concatMap (lang: [
-              {
-                name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
-                value."d" = {
-                  mode = "0755";
-                  user = "hass";
-                  group = "hass";
-                };
-              }
-              {
-                name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
-                value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
-              }
-            ]) languages
-          );
-      })
-
-      # Per-category voice sound files, symlinked individually so each
-      # one is independently traceable to its Nix store path. `d` on the
-      # sounds/ dir keeps it hass-owned (avoids the unsafe-path-transition
-      # check the L+ symlinks would otherwise trip).
-      (lib.mkIf (configuredSounds != { }) {
-        "15-hass-voice-sounds" =
-          {
-            "${wwwDir}/sounds"."d" = {
-              mode = "0755";
-              user = "hass";
-              group = "hass";
-            };
-          }
-          // lib.mapAttrs' (
-            _: path:
-            lib.nameValuePair "${wwwDir}/sounds/${baseNameOf path}" {
-              "L+".argument = "${path}";
+    systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
+      "10-hass-custom-sentences" =
+        {
+          "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
+            mode = "0755";
+            user = "hass";
+            group = "hass";
+          };
+        }
+        // lib.listToAttrs (
+          lib.concatMap (lang: [
+            {
+              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
+              value."d" = {
+                mode = "0755";
+                user = "hass";
+                group = "hass";
+              };
             }
-          ) configuredSounds;
-      })
-    ];
+            {
+              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
+              value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
+            }
+          ]) languages
+        );
+    };
 
     # One-shot migration from the previous layout, which symlinked the
     # whole custom_sentences/ directory into a Nix store path. tmpfiles

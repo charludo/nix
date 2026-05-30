@@ -24,81 +24,77 @@ let
   ];
 in
 {
-  hass.voice.intents =
-    let
-      ack = lib.ha.voice.acknowledgeAction;
-    in
-    {
-      Botty_Start = ack {
-        sentences = [
-          "(Starte|Beginne) [die ]Reinigung"
-          "Reinigung starten"
-          "Botty (starten|los|reinigen|saugen|saug)"
-          "Sauge"
-        ];
-        script = {
-          action = [ { action = e.script.botty_reinigung; } ];
-          speech.text = "Reinigung gestartet.";
-        };
-      };
-
-      Botty_Ende = ack {
-        sentences = [
-          "(Beende|Stoppe) [die ]Reinigung"
-          "Reinigung (beenden|stoppen)"
-          "Botty (zurück|nach Hause|zur Basis|stop)"
-        ];
-        script = {
-          action = [ { action = e.script.botty_zurueckkehren; } ];
-          speech.text = "Reinigung beendet.";
-        };
-      };
-
-      Botty_Wohnzimmer = ack {
-        sentences = [
-          "(Reinige|Sauge) [im|das] Wohnzimmer"
-          "Botty [ins] Wohnzimmer"
-          "Wohnzimmer (reinigen|saugen)"
-        ];
-        script = {
-          action = cleanRoom rooms.Wohnzimmer;
-          speech.text = "Reinige Wohnzimmer.";
-        };
-      };
-
-      Botty_Buero = ack {
-        sentences = [
-          "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
-          "Botty [ins] (Büro|Arbeitszimmer)"
-          "(Büro|Arbeitszimmer) (reinigen|saugen)"
-        ];
-        script = {
-          action = cleanRoom rooms.Buero;
-          speech.text = "Reinige Büro.";
-        };
-      };
-
-      Botty_Kueche = ack {
-        sentences = [
-          "(Reinige|Sauge) [in der|die] Küche"
-          "Botty [in die] Küche"
-          "[Botty] Küche (reinigen|saugen)"
-        ];
-        script = {
-          action = cleanRoom rooms.Kueche;
-          speech.text = "Reinige Küche.";
-        };
-      };
-
-      Botty_Sofa = ack {
-        sentences = [
-          "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
-          "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
-        ];
-        script = {
-          action = cleanRoom rooms.Sofa;
-          speech.text = "Reinige Sofa.";
-        };
+  hass.voice.intents = {
+    Botty_Start = {
+      sentences = [
+        "(Starte|Beginne) [die ]Reinigung"
+        "Reinigung starten"
+        "Botty (starten|los|reinigen|saugen|saug)"
+        "Starte Reinigung[svorgang]"
+      ];
+      script = {
+        action = [ { action = e.script.botty_reinigung; } ];
+        speech.text = "Starte Reinigung.";
       };
     };
+
+    Botty_Ende = {
+      sentences = [
+        "(Beende|Stoppe) [die ]Reinigung"
+        "Reinigung (beenden|stoppen)"
+        "Botty (zurück|nach Hause|zur Basis|stop)"
+      ];
+      script = {
+        action = [ { action = e.script.botty_zurueckkehren; } ];
+        speech.text = "Reinigung beendet.";
+      };
+    };
+
+    Botty_Wohnzimmer = {
+      sentences = [
+        "(Reinige|Sauge) [im|das] Wohnzimmer"
+        "Botty [ins] Wohnzimmer"
+        "Wohnzimmer (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Wohnzimmer;
+        speech.text = "Reinige Wohnzimmer.";
+      };
+    };
+
+    Botty_Buero = {
+      sentences = [
+        "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
+        "Botty [ins] (Büro|Arbeitszimmer)"
+        "(Büro|Arbeitszimmer) (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Buero;
+        speech.text = "Reinige Büro.";
+      };
+    };
+
+    Botty_Kueche = {
+      sentences = [
+        "(Reinige|Sauge) [in der|die] Küche"
+        "Botty [in die] Küche"
+        "[Botty] Küche (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Kueche;
+        speech.text = "Reinige Küche.";
+      };
+    };
+
+    Botty_Sofa = {
+      sentences = [
+        "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
+        "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
+      ];
+      script = {
+        action = cleanRoom rooms.Sofa;
+        speech.text = "Reinige Sofa.";
+      };
+    };
+  };
 }

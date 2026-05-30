@@ -2,6 +2,7 @@
 let
   tv = config.hass.entities.media_player.lg_c4;
   ack = lib.ha.voice.acknowledgeAction;
+  silent = lib.ha.voice.silentAction;
 in
 {
   hass.voice.intents = {
@@ -43,7 +44,7 @@ in
       };
     };
 
-    TV_Stumm = ack {
+    TV_Stumm = silent {
       sentences = [
         "(Stumm|Stummschalten|Mute) [den|das] (TV|Fernseher)"
         "(TV|Fernseher) (stumm|stummschalten|leise|mute)"
