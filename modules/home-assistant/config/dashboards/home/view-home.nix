@@ -477,8 +477,141 @@ in
                 })
               ];
             }
+
+            # Broadcast button — toggles input_boolean.broadcast_open,
+            # which gates the inline form (text input + Send) revealed
+            # in the conditional card below this grid. See
+            # config/scripts/broadcast.nix for the script.
+            {
+              type = "custom:button-card";
+              entity = "input_boolean.broadcast_open";
+              name = "Broadcast";
+              icon = "mdi:bullhorn";
+              tap_action = {
+                action = "toggle";
+                haptic = "medium";
+              };
+              styles = ha.mkStyles {
+                card = {
+                  background = "var(--contrast2)";
+                  padding = "16px";
+                  "--mdc-ripple-press-opacity" = 0;
+                };
+                img_cell = {
+                  "justify-self" = "start";
+                  width = "24px";
+                };
+                icon = {
+                  width = "24px";
+                  height = "24px";
+                  color = "var(--contrast8)";
+                };
+                name = {
+                  "justify-self" = "start";
+                  "font-size" = "14px";
+                  margin = "4px 0 12px 0";
+                  color = "var(--contrast8)";
+                };
+              };
+            }
           ];
         }
+
+        # Broadcast form — revealed by the Alarme-grid Broadcast button
+        # (toggles input_boolean.broadcast_open). Single-line text
+        # input plus a Send button whose tap_action templates the
+        # sender from `hass.user.name` client-side, so no user UUIDs
+        # need to be pinned in Nix. Script collapses the form on
+        # completion (resets input_text + turns the toggle off).
+        (ha.mkConditional [ (ha.stateIs "input_boolean.broadcast_open" "on") ] {
+          type = "vertical-stack";
+          cards = [
+            {
+              type = "entities";
+              entities = [
+                {
+                  entity = "input_text.broadcast_message";
+                  name = "Nachricht";
+                }
+              ];
+              show_header_toggle = false;
+            }
+            {
+              type = "custom:button-card";
+              name = "Senden";
+              icon = "mdi:send";
+              tap_action = {
+                action = "call-service";
+                service = "script.broadcast_announce";
+                # input_text card only commits to HA state on blur or
+                # Enter — tapping Send isn't a real blur, so the state
+                # is almost always stale at tap time. Workaround: read
+                # the value directly from the focused DOM input (walks
+                # shadow roots because HA uses shadow DOM extensively).
+                # Falls back to state if no input is focused (e.g.
+                # user already tapped outside first).
+                data = {
+                  sender = "[[[ return hass.user.name; ]]]";
+                  message = ''
+                    [[[
+                      function deepActive(root) {
+                        let a = root.activeElement;
+                        while (a && a.shadowRoot && a.shadowRoot.activeElement) {
+                          a = a.shadowRoot.activeElement;
+                        }
+                        return a;
+                      }
+                      const el = deepActive(document);
+                      if (el && typeof el.value === 'string' && el.value.length > 0) {
+                        return el.value;
+                      }
+                      return states['input_text.broadcast_message'].state;
+                    ]]]
+                  '';
+                };
+                confirmation.text = ''
+                  [[[
+                    function deepActive(root) {
+                      let a = root.activeElement;
+                      while (a && a.shadowRoot && a.shadowRoot.activeElement) {
+                        a = a.shadowRoot.activeElement;
+                      }
+                      return a;
+                    }
+                    const el = deepActive(document);
+                    const msg = (el && typeof el.value === 'string' && el.value.length > 0)
+                      ? el.value
+                      : (states['input_text.broadcast_message'].state || ''');
+                    return 'Senden: "' + msg + '" ?';
+                  ]]]
+                '';
+                haptic = "medium";
+              };
+              styles = ha.mkStyles {
+                card = {
+                  background = "var(--contrast2)";
+                  padding = "16px";
+                  "--mdc-ripple-press-opacity" = 0;
+                };
+                img_cell = {
+                  "justify-self" = "start";
+                  width = "24px";
+                };
+                icon = {
+                  width = "24px";
+                  height = "24px";
+                  color = "var(--contrast8)";
+                };
+                name = {
+                  "justify-self" = "start";
+                  "font-size" = "14px";
+                  margin = "4px 0 12px 0";
+                  color = "var(--contrast8)";
+                };
+              };
+            }
+          ];
+        })
 
         # Dashboards nav grid
         {

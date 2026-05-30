@@ -1,5 +1,6 @@
 {
   imports = [
+    ./alarm.nix
     ./botty.nix
     ./climate.nix
     ./einkauf.nix

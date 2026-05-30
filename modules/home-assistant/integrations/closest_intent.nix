@@ -25,7 +25,7 @@
 
   services.home-assistant.config.closest_intent = {
     threshold = 70;
-    slot_threshold = 60;
+    slot_threshold = 50;
     expansion_cap = 16;
     slot_extraction = true;
     include_builtins = false;
