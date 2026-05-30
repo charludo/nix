@@ -27,8 +27,8 @@ in
   # null to fall back to relaying the synthesized speech for that
   # category.
   hass.voice.sounds = {
-    acknowledge = ./assets/sounds/acknowledge-synth.wav;
-    timer = ./assets/sounds/timer-bell.wav;
+    acknowledge = ./assets/sounds/acknowledge-synth.mp3;
+    timer = ./assets/sounds/timer-bell.mp3;
     reminder = ./assets/sounds/reminder-friendly.mp3;
     alarmclock = ./assets/sounds/wecker-chipper.mp3;
   };
