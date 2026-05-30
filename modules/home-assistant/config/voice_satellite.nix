@@ -15,8 +15,8 @@ in
   hass.ttsRelay = [
     {
       satellite = "assist_satellite.hub_satellite";
-      target = e.media_player.living_room;
-      volume = 0.4;
+      target = e.media_player.office;
+      volume = 0.35;
     }
   ];
 
@@ -27,7 +27,7 @@ in
   # null to fall back to relaying the synthesized speech for that
   # category.
   hass.voice.sounds = {
-    acknowledge = ./assets/sounds/acknowledge-short.mp3;
+    acknowledge = ./assets/sounds/acknowledge-synth.wav;
     timer = ./assets/sounds/timer-bell.wav;
     reminder = ./assets/sounds/reminder-friendly.mp3;
     alarmclock = ./assets/sounds/wecker-chipper.mp3;

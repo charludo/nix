@@ -141,42 +141,46 @@ in
   # ---------------------------------------------------------------------
   # Voice intents
   # ---------------------------------------------------------------------
-  hass.voice.intents = {
-    News_Tagesschau = {
-      sentences = [
-        "(Spiele|Spiel|Starte) [die ]Tagesschau"
-        "(Spiele|Spiel) Tagesschau in (hundert|100) Sekunden"
-        "Tagesschau"
-      ];
-      script = {
-        action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "replace") ];
-        speech.text = "Von der Tagesschau.";
+  hass.voice.intents =
+    let
+      silent = lib.ha.voice.silentAction;
+    in
+    {
+      News_Tagesschau = silent {
+        sentences = [
+          "(Spiele|Spiel|Starte) [die ]Tagesschau"
+          "(Spiele|Spiel) Tagesschau in (hundert|100) Sekunden"
+          "Tagesschau"
+        ];
+        script = {
+          action = prepare ++ [ (playLocal "tagesschau_100s.mp3" "replace") ];
+          speech.text = "Von der Tagesschau.";
+        };
       };
-    };
 
-    News_WDRAktuell = {
-      sentences = [
-        "(Spiele|Spiel|Starte) WDR (Aktuell|aktuell)"
-        "WDR[ Aktuell| Nachrichten]"
-      ];
-      script = {
-        action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "replace") ];
-        speech.text = "Von WDR Aktuell.";
+      News_WDRAktuell = silent {
+        sentences = [
+          "(Spiele|Spiel|Starte) WDR (Aktuell|aktuell)"
+          "WDR[ Aktuell| Nachrichten]"
+        ];
+        script = {
+          action = prepare ++ [ (playLocal "wdr_aktuell.mp3" "replace") ];
+          speech.text = "Von WDR Aktuell.";
+        };
       };
-    };
 
-    News_TaeglicheZusammenfassung = {
-      sentences = [
-        "(Spiele|Spiel|Starte) [die |meine ][Nachrichten|tägliche Zusammenfassung]"
-        "Nachrichten"
-        "Tägliche Zusammenfassung"
-      ];
-      script = {
-        action = dailySummarySequence;
-        speech.text = "Hier ist deine tägliche Zusammenfassung.";
+      News_TaeglicheZusammenfassung = silent {
+        sentences = [
+          "(Spiele|Spiel|Starte) [die |meine ][Nachrichten|tägliche Zusammenfassung]"
+          "Nachrichten"
+          "Tägliche Zusammenfassung"
+        ];
+        script = {
+          action = dailySummarySequence;
+          speech.text = "Hier ist deine tägliche Zusammenfassung.";
+        };
       };
     };
-  };
 
   # Same sequence exposed as a script so non-voice triggers (e.g.
   # button long-presses) can run it via `script.turn_on`.

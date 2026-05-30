@@ -1,10 +1,13 @@
-{ ... }:
+{ lib, ... }:
 # Voice intents for adding items to shopping / to-do lists.
 #
 # `{item}` is a wildcard — captures arbitrary spoken text.
+let
+  ack = lib.ha.voice.acknowledgeAction;
+in
 {
   hass.voice.intents = {
-    Einkauf_Add = {
+    Einkauf_Add = ack {
       sentences = [
         "(setze|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"
         "{item} auf die Einkaufsliste"
@@ -22,7 +25,7 @@
       };
     };
 
-    ToDo_Add = {
+    ToDo_Add = ack {
       sentences = [
         "(setze|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
         "{item} auf die ToDo-Liste"

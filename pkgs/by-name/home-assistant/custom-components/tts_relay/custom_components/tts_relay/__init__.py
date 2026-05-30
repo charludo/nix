@@ -303,7 +303,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 )
             # Capture the voice_effect marker (if any) for the upcoming
             # TTS_END to consume.
-            pending_effects[self.entity_id] = _read_voice_effect(intent_output)
+            captured = _read_voice_effect(intent_output)
+            pending_effects[self.entity_id] = captured
+            _LOGGER.debug(
+                "tts_relay: INTENT_END on %s — voice_effect=%r, card=%r",
+                self.entity_id,
+                captured,
+                (intent_output.get("response") or {}).get("card"),
+            )
 
         route = by_satellite.get(self.entity_id)
         if route is None:
@@ -314,6 +321,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # Consume the marker the matching INTENT_END left behind. If
         # none, fall through to the default TTS-relay behaviour.
         effect = pending_effects.pop(self.entity_id, None)
+        _LOGGER.debug(
+            "tts_relay: TTS_END on %s — effect=%r, configured sounds=%s",
+            self.entity_id,
+            effect,
+            sorted(sounds.keys()),
+        )
 
         if effect == SILENT_EFFECT:
             _LOGGER.debug("tts_relay: silent effect for %s; dropping TTS", self.entity_id)
@@ -331,6 +344,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             else:
                 url = _absolutise(hass, sound_url)
                 if url:
+                    _LOGGER.debug(
+                        "tts_relay: playing effect %r on %s -> %s",
+                        effect, route[CONF_TARGET], url,
+                    )
                     hass.async_create_task(_run(self.entity_id, route, url, "music"))
                     return
 

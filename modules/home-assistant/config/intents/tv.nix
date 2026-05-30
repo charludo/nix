@@ -1,10 +1,11 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   tv = config.hass.entities.media_player.lg_c4;
+  ack = lib.ha.voice.acknowledgeAction;
 in
 {
   hass.voice.intents = {
-    TV_Hell = {
+    TV_Hell = ack {
       sentences = [
         "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) hell[er]"
         "[Fernseher] Tagmodus"
@@ -15,7 +16,7 @@ in
       };
     };
 
-    TV_Dunkel = {
+    TV_Dunkel = ack {
       sentences = [
         "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) (dunkel|dunkler)"
         "[Fernseher] Nachtmodus"
@@ -26,7 +27,7 @@ in
       };
     };
 
-    TV_Aus = {
+    TV_Aus = ack {
       sentences = [
         "(Schalte|Mache) [den|das] (TV|Fernseher) aus"
         "(TV|Fernseher) (aus|ausschalten|abschalten)"
@@ -42,7 +43,7 @@ in
       };
     };
 
-    TV_Stumm = {
+    TV_Stumm = ack {
       sentences = [
         "(Stumm|Stummschalten|Mute) [den|das] (TV|Fernseher)"
         "(TV|Fernseher) (stumm|stummschalten|leise|mute)"

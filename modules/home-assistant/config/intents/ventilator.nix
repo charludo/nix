@@ -1,10 +1,11 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
+  ack = lib.ha.voice.acknowledgeAction;
 in
 {
   hass.voice.intents = {
-    Ventilator_An = {
+    Ventilator_An = ack {
       sentences = [
         "(Schalte|Mach|Aktiviere) [den ]Ventilator [an|ein]"
         "Ventilator an"
@@ -20,7 +21,7 @@ in
       };
     };
 
-    Ventilator_Aus = {
+    Ventilator_Aus = ack {
       sentences = [
         "(Schalte|Mach|Deaktiviere) [den ]Ventilator (aus|ab)"
         "Ventilator aus"

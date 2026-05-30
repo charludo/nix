@@ -1,10 +1,11 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
+  ack = lib.ha.voice.acknowledgeAction;
 in
 {
   hass.voice.intents = {
-    Pumpe_An = {
+    Pumpe_An = ack {
       sentences = [
         "(Aktiviere|Schalte) [die ][Wasser]Pumpe [an|ein]"
         "[Wasser]Pumpe an"
@@ -20,7 +21,7 @@ in
       };
     };
 
-    Pumpe_Aus = {
+    Pumpe_Aus = ack {
       sentences = [
         "(Deaktiviere|Schalte) [die ][Wasser]Pumpe (aus|ab)"
         "[Wasser]Pumpe aus"
