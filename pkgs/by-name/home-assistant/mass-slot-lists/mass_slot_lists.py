@@ -1,9 +1,10 @@
-"""Sync Music Assistant artists + albums into a HA custom_sentences YAML.
+"""Sync Music Assistant library into a HA custom_sentences slot-list YAML.
 
-Pulls the full library over MA's websocket API, writes a hassil slot-list
-YAML next to the language pack, and pings HA's ``conversation.reload``.
-The closest_intent custom component (and HA core conversation) picks up
-the file at reload time.
+Pulls artists, albums, playlists and tracks over MA's websocket API,
+applies a category-specific cleanup so STT-style spoken forms map back
+to the exact library names MA needs, writes the hassil slot lists, and
+pings HA's ``conversation.reload``. closest_intent (and HA core
+conversation) picks the file up at reload time.
 
 Token files default to systemd's ``$CREDENTIALS_DIRECTORY/{mass,hass}-token``.
 """
@@ -12,6 +13,7 @@ import argparse
 import asyncio
 import logging
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -25,36 +27,249 @@ LOGGER = logging.getLogger("mass-slot-lists")
 
 PAGE = 500
 
-# Leading articles dropped to form an alias. The canonical (out) keeps
-# the article; the aliased (in) form is the bare name, so users saying
-# "spiel Beatles" still resolves to "The Beatles".
-LEADING_ARTICLES = ("the ", "die ", "der ", "das ", "les ", "la ", "le ",
-                    "el ", "los ", "las ", "il ", "gli ", "i ")
-
 PLAYLIST_SUFFIX = " (from library)"
 
+# Anything bracket-like; iterate so nested wrappers fully collapse.
+_BRACKETS_RE = re.compile(r"[\(\[\{][^\(\[\{\)\]\}]*[\)\]\}]")
 
-def _name_aliases(name: str) -> list[str]:
-    """Return spoken-form aliases worth registering alongside ``name``."""
-    aliases: list[str] = []
-    lower = name.lower()
-    for art in LEADING_ARTICLES:
-        if lower.startswith(art) and len(name) > len(art):
-            aliases.append(name[len(art):])
-            break
-    return aliases
+# Marker used to coalesce a regex of disparate separators into a
+# single splittable boundary. Picked to never appear in library data.
+_SEP = "\x00"
+
+# Characters with syntactic meaning to hassil when parsing a slot-list
+# `in:` value as a sentence template. Stray (e.g. unbalanced ")") or
+# functional (e.g. "|") occurrences make hassil's parser bail and the
+# whole conversation lang fails to load. Stripped from every `in:` we
+# emit; canonical `out:` keeps the original so MA still gets the exact
+# library title for lookup.
+_HASSIL_SPECIALS_RE = re.compile(r"[\(\)\[\]\{\}\<\>\|]")
 
 
-def _slot_values(names: list[str], alias_fn=_name_aliases) -> list:
-    """Build a hassil values list: plain strings + in/out aliases."""
-    out: list = []
-    for name in names:
-        out.append(name)
-        for alias in alias_fn(name):
-            if alias and alias != name:
-                out.append({"in": alias, "out": name})
+def _sanitise_for_hassil(s: str) -> str:
+    return re.sub(r"\s+", " ", _HASSIL_SPECIALS_RE.sub(" ", s)).strip()
+
+
+# Common boilerplate ripped out of album / track titles before splitting.
+# "Original Soundtrack" appears in both bracketed ("(Original Soundtrack)")
+# and bare (" - Original Soundtrack") forms; bracket-stripping handles the
+# former, this handles the latter.
+_OST_RE = re.compile(r"(?i)\boriginal soundtrack\b")
+
+
+def _strip_phrases(s: str) -> str:
+    return re.sub(r"\s+", " ", _OST_RE.sub("", s)).strip()
+
+
+def _strip_brackets(s: str) -> str:
+    """Iteratively strip (...) [...] {...} contents (no nesting depth)."""
+    while True:
+        new = _BRACKETS_RE.sub("", s)
+        if new == s:
+            return re.sub(r"\s+", " ", new).strip()
+        s = new
+
+
+def _normalise_track_chars(s: str) -> str:
+    """Replace ; and non-ASCII non-letter chars (symbols, em-dashes,
+    emoji, hearts, stars) with a space; preserve umlauts and other
+    non-ASCII *letters*. Squash repeated whitespace."""
+    out_chars = []
+    for c in s:
+        if c == ";":
+            out_chars.append(" ")
+        elif ord(c) > 127 and not c.isalpha():
+            out_chars.append(" ")
+        else:
+            out_chars.append(c)
+    return re.sub(r"\s+", " ", "".join(out_chars)).strip()
+
+
+# --------------------------------------------------------------------------
+# Artists
+# --------------------------------------------------------------------------
+
+def _split_artist(name: str) -> list[str]:
+    """Split a "collaboration" artist string into its members.
+
+    Drops bracketed annotations first ("(Live in 1972)" etc.), then
+    splits on the symbol-style separators ( |, /, ;, ,, & ) and the
+    word-style ones (feat./featuring/and/with/und/mit). Result excludes
+    the original (the original is emitted separately as the canonical).
+    """
+    cleaned = _strip_brackets(name)
+    # Word-form splitters need to be substituted first so we don't tear
+    # words like "Land" via "and".
+    cleaned = re.sub(
+        r"(?i)\bfeat\.?(?=\s|$)|\b(?:featuring|with|and|und|mit)\b",
+        _SEP,
+        cleaned,
+    )
+    # Symbol-form splitters.
+    cleaned = re.sub(r"[|/;,&]", _SEP, cleaned)
+    parts = [p.strip() for p in cleaned.split(_SEP) if p.strip()]
+    # Dedup, preserve order, drop the full-name echo.
+    seen = {name.lower()}
+    out: list[str] = []
+    for p in parts:
+        key = p.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
     return out
 
+
+# --------------------------------------------------------------------------
+# Albums
+# --------------------------------------------------------------------------
+
+_ALBUM_PREFIX_RE = re.compile(r"^(\w[\w']*):\s*(.+)$")
+
+
+def _split_album(name: str) -> list[str]:
+    """Split a multi-piece album title into addressable subtitles.
+
+    Bracketed annotations and "Original Soundtrack" boilerplate are
+    stripped first. If the title starts with "<Word>: ..." (common
+    for classical compilations like "Dvorak: Symphony No.9 & Slavonic
+    Dances"), strip the prefix off the splittable portion and prepend
+    "<Word> " to every resulting segment — so "Dvorak Slavonic Dances"
+    still resolves to the original album.
+    """
+    cleaned_name = _strip_phrases(_strip_brackets(name))
+    if not cleaned_name:
+        return []
+
+    prefix_match = _ALBUM_PREFIX_RE.match(cleaned_name)
+    if prefix_match:
+        prefix, rest = prefix_match.groups()
+    else:
+        prefix, rest = None, cleaned_name
+
+    cleaned = re.sub(r"[|/;&]", _SEP, rest)
+    cleaned = re.sub(r"\s+-\s+", _SEP, cleaned)
+    parts = [p.strip() for p in cleaned.split(_SEP) if p.strip()]
+    if prefix:
+        parts = [f"{prefix} {p}" for p in parts]
+
+    # Also include the bracket/OST-stripped form as a direct alias if
+    # it differs from the original — useful for spoken matches against
+    # albums like "Dark Side of the Moon (Remastered)".
+    if cleaned_name.lower() != name.lower():
+        parts.insert(0, cleaned_name)
+
+    seen = {name.lower()}
+    out: list[str] = []
+    for p in parts:
+        key = p.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
+# --------------------------------------------------------------------------
+# Tracks
+# --------------------------------------------------------------------------
+
+# (term, case_sensitive). A segment is dropped when it contains the term
+# AND its length is below `len(term) + 6`. The +6 buffer is a safety
+# valve against shadowing useful titles ("Soundtrack" survives "Track").
+_TRACK_FILTER_TERMS: list[tuple[str, bool]] = [
+    ("creditless", False),
+    ("fps", False),
+    ("4k", False),
+    ("Subtitles", False),
+    ("UHD", False),
+    ("Opening", False),
+    ("Moderation", False),
+    ("Track", False),
+    ("Spur", False),
+    ("CC", True),
+]
+
+
+def _track_segment_filtered(segment: str) -> bool:
+    for term, case_sensitive in _TRACK_FILTER_TERMS:
+        haystack = segment if case_sensitive else segment.lower()
+        needle = term if case_sensitive else term.lower()
+        if needle in haystack and len(segment) < len(term) + 6:
+            return True
+    return False
+
+
+def _track_title_is_junk(name: str) -> bool:
+    """Drop the entire track when its title contains two or more filter
+    terms — catches credit-less / OP / UHD / FPS combos that the
+    per-segment length check can't help with because they all live in
+    one long segment ("Creditless SPY x FAMILY OP Opening 4 UHD 60FPS").
+    Single matches are still left to the segment-level filter so titles
+    like "Soundtrack to Spider-Man" survive."""
+    count = 0
+    name_lower = name.lower()
+    for term, case_sensitive in _TRACK_FILTER_TERMS:
+        haystack = name if case_sensitive else name_lower
+        needle = term if case_sensitive else term.lower()
+        if needle in haystack:
+            count += 1
+            if count >= 2:
+                return True
+    return False
+
+
+def _artist_name_set(artist_str: str | None) -> set[str]:
+    """Lowercased atom set for "is-this-segment-just-the-artist" check.
+
+    MA joins artist names with `/`; split that plus common collab
+    separators so we can identify "Beatles" as the artist regardless
+    of whether the track's artist_str is "The Beatles" or
+    "Beatles/Lennon".
+    """
+    if not artist_str:
+        return set()
+    parts = re.split(r"\s*[/&,;|]\s*", artist_str)
+    return {p.strip().lower() for p in parts if p.strip()}
+
+
+def _track_segments(name: str, artist_str: str | None) -> list[str]:
+    """Build the alias-segments list for a track title.
+
+    Pipeline: char-normalise → bracket-strip → split on |, /, " - " →
+    drop segments matching filter terms (within length threshold),
+    too-short (<5), numeric-only, or identical to the artist name.
+    Final dedup. Empty list ⇒ caller should drop the track entirely.
+    """
+    cleaned = _normalise_track_chars(name)
+    cleaned = _strip_brackets(cleaned)
+    cleaned = _strip_phrases(cleaned)
+    cleaned = re.sub(r"[|/]", _SEP, cleaned)
+    cleaned = re.sub(r"\s+-\s+", _SEP, cleaned)
+    raw_parts = [p.strip() for p in cleaned.split(_SEP) if p.strip()]
+
+    artist_names = _artist_name_set(artist_str)
+    seen: set[str] = set()
+    out: list[str] = []
+    for p in raw_parts:
+        if _track_segment_filtered(p):
+            continue
+        if len(p) < 5:
+            continue
+        if p.isdigit():
+            continue
+        key = p.lower()
+        if key in artist_names:
+            continue
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out
+
+
+# --------------------------------------------------------------------------
+# Playlists
+# --------------------------------------------------------------------------
 
 def _playlist_aliases(name: str) -> list[str]:
     """Strip the '(from library)' suffix MA appends to its built-in playlists."""
@@ -62,6 +277,65 @@ def _playlist_aliases(name: str) -> list[str]:
         stripped = name[: -len(PLAYLIST_SUFFIX)].rstrip()
         return [stripped] if stripped else []
     return []
+
+
+# --------------------------------------------------------------------------
+# Slot-list construction
+# --------------------------------------------------------------------------
+
+def _emit(out: list, canonical: str, aliases: list[str]) -> None:
+    """Append a canonical name + its aliases to a slot-values list,
+    ensuring every `in:` is hassil-safe. If the canonical itself has
+    specials we emit it as `{in: cleaned, out: canonical}` so MA still
+    receives the exact library string at action time. `cleaned` strips
+    bracket *contents* (not just the bracket chars themselves) so the
+    spoken form lines up with the rest of the alias list."""
+    clean_canon = _sanitise_for_hassil(_strip_brackets(canonical))
+    if not clean_canon:
+        return
+    if clean_canon == canonical:
+        out.append(canonical)
+    else:
+        out.append({"in": clean_canon, "out": canonical})
+
+    canon_key = clean_canon.lower()
+    for alias in aliases:
+        clean = _sanitise_for_hassil(alias)
+        if not clean or clean.lower() == canon_key:
+            continue
+        out.append({"in": clean, "out": canonical})
+
+
+def _values_with_aliases(names: list[str], alias_fn) -> list:
+    """Plain canonical strings + `{in: alias, out: canonical}` entries."""
+    out: list = []
+    for name in names:
+        _emit(out, name, alias_fn(name))
+    return out
+
+
+def _track_slot_values(tracks: list) -> list:
+    """Tracks need cleanup that depends on the per-track artist string;
+    can also drop the track entirely when nothing survives filtering."""
+    out: list = []
+    seen_canon: set[str] = set()
+    for t in tracks:
+        name = (t.name or "").strip()
+        if not name:
+            continue
+        if _track_title_is_junk(name):
+            continue
+        artist_str = getattr(t, "artist_str", None) or ""
+        segments = _track_segments(name, artist_str)
+        if not segments:
+            continue
+        if name.isdigit():
+            continue
+        if name.lower() in seen_canon:
+            continue
+        seen_canon.add(name.lower())
+        _emit(out, name, segments)
+    return out
 
 
 def _read_token(path: Path) -> str:
@@ -170,21 +444,34 @@ async def main_async(args: argparse.Namespace) -> int:
             artists = await _fetch_all(client.music.get_library_artists)
             albums = await _fetch_all(client.music.get_library_albums)
             playlists = await _fetch_all(client.music.get_library_playlists)
+            tracks = await _fetch_all(client.music.get_library_tracks)
         finally:
             await client.disconnect()
 
         artist_names = sorted({a.name for a in artists if a.name})
         album_names = sorted({a.name for a in albums if a.name})
         playlist_names = sorted({p.name for p in playlists if p.name})
-        LOGGER.info("Fetched %d artists, %d albums, %d playlists",
-                    len(artist_names), len(album_names), len(playlist_names))
+
+        artist_values = _values_with_aliases(artist_names, _split_artist)
+        album_values = _values_with_aliases(album_names, _split_album)
+        playlist_values = _values_with_aliases(playlist_names, _playlist_aliases)
+        track_values = _track_slot_values(tracks)
+
+        LOGGER.info(
+            "Fetched %d artists, %d albums, %d playlists, %d tracks "
+            "(%d kept after filtering)",
+            len(artist_names), len(album_names), len(playlist_names),
+            len(tracks),
+            sum(1 for v in track_values if isinstance(v, str)),
+        )
 
         doc = {
             "language": args.language,
             "lists": {
-                "mass_artist": {"values": _slot_values(artist_names)},
-                "mass_album": {"values": _slot_values(album_names)},
-                "mass_playlist": {"values": _slot_values(playlist_names, _playlist_aliases)},
+                "mass_artist": {"values": artist_values},
+                "mass_album": {"values": album_values},
+                "mass_playlist": {"values": playlist_values},
+                "mass_track": {"values": track_values},
             },
         }
         _write_atomic(args.output, doc)

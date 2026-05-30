@@ -241,5 +241,55 @@ in
         speech.text = "Spiele {{ mass_artist }}.";
       };
     };
+
+    # mass_track is populated by mass-slot-lists.service (see
+    # mass_slot_lists.py); each title gets a canonical entry plus
+    # in/out aliases derived from a cleanup pass (bracketed metadata
+    # stripped, split on |, /, " - ", short/numeric segments dropped).
+    # The resolved `out` is the exact library title MA needs to look
+    # up the track unambiguously.
+    Musik_Song = silent {
+      sentences = [
+        "(Spiele|Spiel|Starte) [das |den ](Lied|Stück|Song) {mass_track}"
+        "(Lied|Song) {mass_track}"
+      ];
+      script = {
+        action = [
+          {
+            action = "music_assistant.play_media";
+            target.entity_id = player;
+            data = {
+              media_id = "{{ mass_track }}";
+              media_type = "track";
+            };
+          }
+        ];
+        speech.text = "Spiele {{ mass_track }}.";
+      };
+    };
+
+    # Same title, disambiguated by artist — for ASR-collision titles
+    # like "Hello", "Yesterday", "Heroes". `artist` is passed alongside
+    # `media_id` so MA narrows the library search to that artist's
+    # catalogue before picking a match.
+    Musik_SongVonKuenstler = silent {
+      sentences = [
+        "(Spiele|Spiel|Starte) [das ](Lied|Stück|Song) {mass_track} von {mass_artist}"
+      ];
+      script = {
+        action = [
+          {
+            action = "music_assistant.play_media";
+            target.entity_id = player;
+            data = {
+              media_id = "{{ mass_track }}";
+              media_type = "track";
+              artist = "{{ mass_artist }}";
+            };
+          }
+        ];
+        speech.text = "Spiele {{ mass_track }} von {{ mass_artist }}.";
+      };
+    };
   };
 }
