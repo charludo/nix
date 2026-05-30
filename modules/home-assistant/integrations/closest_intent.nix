@@ -29,6 +29,10 @@
     expansion_cap = 16;
     slot_extraction = true;
     include_builtins = false;
+    builtin_allowlist = [
+      "HassTurnOn"
+      "HassTurnOff"
+    ];
   };
 
   services.home-assistant.config.logger.logs."custom_components.closest_intent" = "debug";
