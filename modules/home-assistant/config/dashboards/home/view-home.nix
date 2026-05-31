@@ -115,7 +115,7 @@ in
                 };
               }
             ))
-            (ha.mkConditional [ (ha.stateIs e.media_player.alle "playing") ] (
+            (ha.mkConditional [ (ha.stateIs e.media_player.office "playing") ] (
               ha.mkActionCard {
                 name = "Musik anhalten";
                 icon = "mdi:pause";
