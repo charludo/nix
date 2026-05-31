@@ -221,6 +221,30 @@ in
       };
     };
 
+    # mass_genre's `out:` is a `library://genre/<id>` URI rather than a
+    # name. MA's HA integration resolves bare names via
+    # get_item_by_name, which has no get_library_genres fall-through,
+    # so the only path that actually plays a genre is the direct-URI
+    # branch. That also means `{{ mass_genre }}` is a URI here, not a
+    # human label — hence the generic speech response.
+    Musik_Genre = {
+      sentences = [
+        "(Spiele|Spiel|Starte) {mass_genre} (Musik|Lieder)"
+        "(Spiele|Spiel|Starte) [die ]Musikrichtung {mass_genre}"
+        "(Genre|Musikrichtung) {mass_genre} [Musik]"
+      ];
+      script = {
+        action = [
+          {
+            action = "music_assistant.play_media";
+            target.entity_id = player;
+            data.media_id = "{{ mass_genre }}";
+          }
+        ];
+        speech.text = "Spiele Musik.";
+      };
+    };
+
     Musik_Kuenstler = {
       sentences = [
         "(Spiele|Spiel|Starte) [den ](Künstler|Artist) {mass_artist}"

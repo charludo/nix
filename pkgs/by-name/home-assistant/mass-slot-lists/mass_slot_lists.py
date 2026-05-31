@@ -280,6 +280,159 @@ def _playlist_aliases(name: str) -> list[str]:
 
 
 # --------------------------------------------------------------------------
+# Genres
+# --------------------------------------------------------------------------
+
+# MA's frontend ships these translations bundled inside its minified JS;
+# the backend only stores the English `name` and a `translation_key` per
+# default genre. We mirror the German short titles here so voice intents
+# can be spoken in German while still resolving to the same library item
+# MA looks up by English `name`. Extracted from music-assistant-frontend
+# 2.17.x; missing keys fall back to the English name.
+_GENRE_DE: dict[str, str] = {
+    "afrobeats": "Afrobeats",
+    "ambient": "Ambient",
+    "anime_and_video_game_music": "Anime- und Videospielmusik",
+    "asian_music": "Asiatische Musik",
+    "bluegrass": "Bluegrass",
+    "blues": "Blues",
+    "brazilian_music": "Brasilianische Musik",
+    "chanson": "Chanson",
+    "childrens_music": "Kindermusik",
+    "christmas_music": "Weihnachtsmusik",
+    "church_music": "Kirchenmusik",
+    "classical": "Klassische",
+    "comedy": "Komödie",
+    "country": "Country",
+    "dance": "Dance",
+    "dark_ambient": "Dark-Ambient",
+    "dark_wave": "Dark-Wave",
+    "disco": "Disko",
+    "electronic": "Elektronische",
+    "experimental": "Experimentelle",
+    "field_recording": "Feldaufnahme",
+    "folk": "Folk",
+    "funk": "Funk",
+    "gangsta_rap": "Gangsta-Rap",
+    "gospel": "Gospel",
+    "hip_hop": "Hip-Hop",
+    "indian_classical": "Indische Klassik",
+    "industrial": "Industrial",
+    "jazz": "Jazz",
+    "klezmer": "Klezmer",
+    "latin": "Lateinische",
+    "marching_band": "Marschkapelle",
+    "metal": "Metal",
+    "middle_eastern_music": "Nahöstliche Musik",
+    "musical": "Musical",
+    "new_age": "New Age",
+    "poetry": "Poesie",
+    "polka": "Polka",
+    "pop": "Pop",
+    "psychedelic": "Psychedelische",
+    "punk": "Punk",
+    "r_b": "R&B",
+    "ragtime": "Ragtime",
+    "rai": "Raï",
+    "reggae": "Reggae",
+    "reggaeton": "Reggaeton",
+    "rock": "Rock",
+    "salsa": "Salsa",
+    "singer_songwriter": "Sänger-Songwriter",
+    "ska": "Ska",
+    "soul": "Soul",
+    "sound_effects": "Soundeffekte",
+    "soundtrack": "Soundtrack",
+    "spoken_word": "Gesprochenes Wort",
+    "swing": "Swing",
+    "tango": "Tango",
+    "trap": "Trap",
+    "waltz": "Walzer",
+    "wellness": "Wellness",
+}
+
+
+async def _fetch_genres(client) -> list[tuple[str, str]]:
+    """Return MA's default, non-empty genres as (spoken, library_uri) pairs.
+
+    Two-step over MA's websocket API:
+      1. ``music/genres/library_items`` with no args → MA's curated "default"
+         genres (rows where ``translation_key`` is set). MA itself does the
+         cleanup/canonicalisation we'd otherwise have to do here.
+      2. ``music/genres/media_counts`` for those IDs → drop any genre whose
+         mapped-media count across all media types is zero, so we don't
+         surface genres MA's UI would render as empty buckets.
+
+    `spoken` is the German short title pulled from `_GENRE_DE` via the
+    item's `translation_key`, falling back to the English `name` if MA
+    ever ships a translation_key we don't have a German mapping for.
+    `library_uri` is the canonical ``library://genre/<id>`` form. The MA
+    integration's ``play_media`` resolves names via ``get_item_by_name``,
+    which only iterates artist/album/track/playlist/radio/audiobook/podcast
+    library getters — there is no ``get_library_genres`` — so a bare name
+    can't ever resolve to a genre. URIs hit the direct ``"://" in s``
+    branch instead, which feeds straight into ``player_queues.play_media``
+    and from there into ``get_genre_tracks``.
+    """
+    items = await client.send_command("music/genres/library_items")
+    if not items:
+        return []
+    ids = [str(it["item_id"]) for it in items if it.get("item_id") is not None]
+    counts = await client.send_command("music/genres/media_counts", genre_ids=ids)
+    out: list[tuple[str, str]] = []
+    for it in items:
+        gid = str(it.get("item_id", ""))
+        if not gid or not any(counts.get(gid, {}).values()):
+            continue
+        eng = (it.get("name") or "").strip()
+        if not eng:
+            continue
+        tkey = (it.get("translation_key") or "").strip()
+        spoken = _GENRE_DE.get(tkey, eng)
+        out.append((spoken, f"library://genre/{gid}"))
+    return out
+
+
+# Strip a trailing "musik" (with or without a leading separator) from a
+# genre title so slot values are stems like "Asiatische" / "Kinder" /
+# "Anime- und Videospiel" rather than "Asiatische Musik" / "Kindermusik" /
+# "Anime- und Videospielmusik". The intent template then requires the
+# trailing " Musik" explicitly, which keeps closest_intent's fuzzy
+# matcher from greedily capturing "<stem> musik" as the slot region and
+# then snapping to whichever slot value happens to end in "Musik" — the
+# failure mode that pulled "klassische musik" to "Asiatische Musik".
+_MUSIK_SUFFIX_RE = re.compile(r"[\s-]*musik$", re.IGNORECASE)
+
+
+def _strip_musik_suffix(s: str) -> str:
+    return _MUSIK_SUFFIX_RE.sub("", s).rstrip()
+
+
+def _genre_slot_values(genres: list[tuple[str, str]]) -> list:
+    """Emit ``{in: stem, out: uri}`` for each genre, dedup by stem.
+
+    `_strip_brackets` removes parenthetical disambiguation from titles
+    like "Afrobeats (westafrikanische Urban-/Popmusik)"; `_strip_musik_suffix`
+    drops a trailing "musik"/" Musik"/"-Musik" so the slot value is the
+    bare stem the intent template's trailing " Musik" gets appended to.
+    `_sanitise_for_hassil` strips parser-meaningful chars. The `out:` is
+    always a URI (never echoed in speech)."""
+    out: list = []
+    seen: set[str] = set()
+    for spoken, uri in sorted(genres, key=lambda x: x[0].lower()):
+        stem = _strip_musik_suffix(_strip_brackets(spoken))
+        clean = _sanitise_for_hassil(stem)
+        if not clean:
+            continue
+        key = clean.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"in": clean, "out": uri})
+    return out
+
+
+# --------------------------------------------------------------------------
 # Slot-list construction
 # --------------------------------------------------------------------------
 
@@ -445,6 +598,7 @@ async def main_async(args: argparse.Namespace) -> int:
             albums = await _fetch_all(client.music.get_library_albums)
             playlists = await _fetch_all(client.music.get_library_playlists)
             tracks = await _fetch_all(client.music.get_library_tracks)
+            genres = await _fetch_genres(client)
         finally:
             await client.disconnect()
 
@@ -455,13 +609,14 @@ async def main_async(args: argparse.Namespace) -> int:
         artist_values = _values_with_aliases(artist_names, _split_artist)
         album_values = _values_with_aliases(album_names, _split_album)
         playlist_values = _values_with_aliases(playlist_names, _playlist_aliases)
+        genre_values = _genre_slot_values(genres)
         track_values = _track_slot_values(tracks)
 
         LOGGER.info(
-            "Fetched %d artists, %d albums, %d playlists, %d tracks "
+            "Fetched %d artists, %d albums, %d playlists, %d genres, %d tracks "
             "(%d kept after filtering)",
             len(artist_names), len(album_names), len(playlist_names),
-            len(tracks),
+            len(genres), len(tracks),
             sum(1 for v in track_values if isinstance(v, str)),
         )
 
@@ -471,6 +626,7 @@ async def main_async(args: argparse.Namespace) -> int:
                 "mass_artist": {"values": artist_values},
                 "mass_album": {"values": album_values},
                 "mass_playlist": {"values": playlist_values},
+                "mass_genre": {"values": genre_values},
                 "mass_track": {"values": track_values},
             },
         }
