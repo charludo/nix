@@ -65,6 +65,9 @@ VOICE_EFFECT_CARD_TYPE = "voice_effect"
 # Special title that means "drop the TTS audio, announce nothing".
 SILENT_EFFECT = "silent"
 
+SERVICE_SILENCE = "silence"
+ATTR_ENTITY_ID = "entity_id"
+
 _LOGGER = logging.getLogger(__name__)
 
 ROUTE_SCHEMA = vol.Schema(
@@ -137,6 +140,51 @@ async def _announce(hass: HomeAssistant, route: dict, url: str) -> None:
         )
     except Exception:
         _LOGGER.exception("tts_relay: announce failed for %s", target)
+
+
+async def _silence(hass: HomeAssistant, entity_ids: list[str]) -> None:
+    """Stop playback on each speaker — both queue and in-flight announce.
+
+    ``media_player.media_stop`` covers the queue (Sonos issues SOAP Stop
+    via SoCo). Announces routed through ``announce: true`` ride a
+    separate Sonos cloud-websocket channel (``audioClip:1``) that
+    ignores volume/mute and survives a queue stop, so we also send
+    ``cancelAudioClip`` to each speaker's websocket. Non-Sonos
+    entities are skipped silently — the queue stop already handled
+    them.
+    """
+    await hass.services.async_call(
+        "media_player",
+        "media_stop",
+        {"entity_id": entity_ids},
+        blocking=True,
+    )
+
+    component = hass.data.get("media_player")
+    if component is None:
+        return
+    for entity_id in entity_ids:
+        entity = component.get_entity(entity_id)
+        if entity is None:
+            continue
+        # SonosMediaPlayerEntity exposes the underlying SonosSpeaker,
+        # which carries the cloud websocket. Non-Sonos players have no
+        # speaker attribute; skip them.
+        speaker = getattr(entity, "speaker", None)
+        websocket = getattr(speaker, "websocket", None) if speaker else None
+        if websocket is None:
+            continue
+        try:
+            player_id = await websocket.get_player_id()
+            await websocket.send_command(
+                {
+                    "namespace": "audioClip:1",
+                    "command": "cancelAudioClip",
+                    "playerId": player_id,
+                }
+            )
+        except Exception:
+            _LOGGER.exception("tts_relay: cancelAudioClip failed for %s", entity_id)
 
 
 def _read_voice_effect(intent_output: dict | None) -> str | None:
@@ -263,6 +311,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         hass.async_create_task(_announce(hass, route, url))
 
     AssistSatelliteEntity._internal_on_pipeline_event = patched
+
+    async def _handle_silence(call) -> None:
+        entity_ids = call.data[ATTR_ENTITY_ID]
+        if isinstance(entity_ids, str):
+            entity_ids = [entity_ids]
+        await _silence(hass, list(entity_ids))
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SILENCE,
+        _handle_silence,
+        schema=vol.Schema({vol.Required(ATTR_ENTITY_ID): cv.entity_ids}),
+    )
 
     _LOGGER.info(
         "tts_relay: announcing TTS for %s; configured effects: %s",

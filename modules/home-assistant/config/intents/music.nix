@@ -201,6 +201,30 @@ in
       script.action = volumeAction (relativeVolume "[1.0, cur + 0.05] | min");
     };
 
+    # Hard mute: kill normal playback (media_stop) AND any in-flight
+    # Sonos audioClip announce (cancelAudioClip via cloud websocket).
+    # Both layers matter because the announce path is independent of
+    # the queue/volume — pausing the queue or muting the speaker does
+    # nothing to a running announce. tts_relay.silence wraps both.
+    Stille_Alle = silent {
+      sentences = [
+        "[Halt die ](Klappe|Fresse)[ halten]"
+        "Sei (still|ruhig)[ jetzt]"
+        "Stille"
+        "Ruhe"
+        "Aus"
+      ];
+      script.action = [
+        {
+          action = "tts_relay.silence";
+          data.entity_id = [
+            e.media_player.living_room
+            e.media_player.office
+          ];
+        }
+      ];
+    };
+
     Musik_Leiser = silent {
       sentences = [
         "Leiser"
