@@ -292,7 +292,7 @@ def _playlist_aliases(name: str) -> list[str]:
 _GENRE_DE: dict[str, str] = {
     "afrobeats": "Afrobeats",
     "ambient": "Ambient",
-    "anime_and_video_game_music": "Anime- und Videospielmusik",
+    "anime_and_video_game_music": "Anime",
     "asian_music": "Asiatische Musik",
     "bluegrass": "Bluegrass",
     "blues": "Blues",

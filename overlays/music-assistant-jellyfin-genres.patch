@@ -1,0 +1,79 @@
+Populate Jellyfin item genres on Track/Album/Artist parses.
+
+The stock MA jellyfin provider never reads Jellyfin's `Genres` array on
+sync, so library genres come only from online metadata enrichers
+(theaudiodb, etc.) — which routinely guess wrong. Request the Genres
+field on the Items query and copy it through to `metadata.genres`, so
+the genre scanner has something accurate to map from.
+
+diff --git a/music_assistant/providers/jellyfin/const.py b/music_assistant/providers/jellyfin/const.py
+--- a/music_assistant/providers/jellyfin/const.py
++++ b/music_assistant/providers/jellyfin/const.py
+@@ -46,6 +46,7 @@
+ ITEM_KEY_PARENT_INDEX_NUM: Final = "ParentIndexNumber"
+ ITEM_KEY_RUNTIME_TICKS: Final = "RunTimeTicks"
+ ITEM_KEY_USER_DATA: Final = "UserData"
++ITEM_KEY_GENRES: Final = "Genres"
+
+ ITEM_TYPE_AUDIO: Final = "Audio"
+ ITEM_TYPE_LIBRARY: Final = "CollectionFolder"
+@@ -70,11 +71,13 @@
+     ItemFields.Overview,
+     ItemFields.ProviderIds,
+     ItemFields.SortName,
++    ItemFields.Genres,
+ ]
+ ALBUM_FIELDS: Final = [
+     ItemFields.Overview,
+     ItemFields.ProviderIds,
+     ItemFields.SortName,
++    ItemFields.Genres,
+ ]
+ TRACK_FIELDS: Final = [
+     ItemFields.ProviderIds,
+@@ -82,6 +85,7 @@
+     ItemFields.SortName,
+     ItemFields.MediaSources,
+     ItemFields.MediaStreams,
++    ItemFields.Genres,
+ ]
+
+ USER_APP_NAME: Final = "Music Assistant"
+diff --git a/music_assistant/providers/jellyfin/parsers.py b/music_assistant/providers/jellyfin/parsers.py
+--- a/music_assistant/providers/jellyfin/parsers.py
++++ b/music_assistant/providers/jellyfin/parsers.py
+@@ -31,6 +31,7 @@
+     ITEM_KEY_ALBUM_ID,
+     ITEM_KEY_ARTIST_ITEMS,
+     ITEM_KEY_CAN_DOWNLOAD,
++    ITEM_KEY_GENRES,
+     ITEM_KEY_ID,
+     ITEM_KEY_IMAGE_TAGS,
+     ITEM_KEY_MEDIA_CHANNELS,
+@@ -86,6 +87,8 @@
+     album.metadata.images = _get_artwork(instance_id, connection, jellyfin_album)
+     if ITEM_KEY_OVERVIEW in jellyfin_album:
+         album.metadata.description = jellyfin_album[ITEM_KEY_OVERVIEW]
++    if genres := jellyfin_album.get(ITEM_KEY_GENRES):
++        album.metadata.genres = set(genres)
+     if ITEM_KEY_MUSICBRAINZ_ALBUM in jellyfin_album[ITEM_KEY_PROVIDER_IDS]:
+         try:
+             album.add_external_id(
+@@ -159,6 +162,8 @@
+     )
+     if ITEM_KEY_OVERVIEW in jellyfin_artist:
+         artist.metadata.description = jellyfin_artist[ITEM_KEY_OVERVIEW]
++    if genres := jellyfin_artist.get(ITEM_KEY_GENRES):
++        artist.metadata.genres = set(genres)
+     if ITEM_KEY_MUSICBRAINZ_ARTIST in jellyfin_artist[ITEM_KEY_PROVIDER_IDS]:
+         try:
+             artist.mbid = jellyfin_artist[ITEM_KEY_PROVIDER_IDS][ITEM_KEY_MUSICBRAINZ_ARTIST]
+@@ -224,6 +229,8 @@
+         track.position = track.track_number
+
+     track.metadata.images = _get_artwork(instance_id, client, jellyfin_track)
++    if genres := jellyfin_track.get(ITEM_KEY_GENRES):
++        track.metadata.genres = set(genres)
+
+     if jellyfin_track[ITEM_KEY_ARTIST_ITEMS]:
+         for artist_item in jellyfin_track[ITEM_KEY_ARTIST_ITEMS]:
