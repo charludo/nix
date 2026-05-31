@@ -65,7 +65,7 @@ let
             (ha.mkHStack [
               {
                 type = "sensor";
-                entity = e.sensor.cumulative_rain_1h;
+                entity = e.sensor.rain_rate;
                 name = "Niederschlag";
                 graph = "line";
                 detail = 2;

@@ -20,7 +20,6 @@ in
         entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "change";
         max_age.hours = 24;
-        sampling_size = 200;
       }
       {
         platform = "statistics";
@@ -28,15 +27,14 @@ in
         entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "change";
         max_age.hours = 8;
-        sampling_size = 100;
       }
       {
-        platform = "statistics";
-        name = "Cumulative Rain 1h";
-        entity_id = e.sensor.wetterstation.precipitation;
-        state_characteristic = "change";
-        max_age.hours = 1;
-        sampling_size = 60;
+        platform = "derivative";
+        name = "Rain Rate";
+        source = e.sensor.wetterstation.precipitation;
+        unit_time = "h";
+        time_window = "00:05:00";
+        round = 2;
       }
       {
         platform = "group";

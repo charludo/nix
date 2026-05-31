@@ -66,7 +66,7 @@ in
     weathers.openweathermap = { };
 
     sensors = {
-      cumulative_rain_1h.area = a.terrasse;
+      rain_rate.area = a.terrasse;
       cumulative_rain_8h.area = a.terrasse;
       cumulative_rain_24h.area = a.terrasse;
       zigbee_min_battery = { };
