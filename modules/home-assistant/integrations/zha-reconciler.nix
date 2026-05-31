@@ -59,6 +59,33 @@ let
       area_slug = mkSlug v.area;
     }) (lib.filterAttrs (_: v: v.area != null) attrs);
 
+  # Wyoming/assist satellites are auto-discovered, so they're not in
+  # hass.devices. But each tts_relay route names a satellite-target
+  # pair, and the target's area is declared — by definition both live
+  # in the same room. Push the target's area onto the satellite's
+  # device so the conversation framework can fill `preferred_area_id`
+  # for intent_scripts (e.g. the volume intents in intents/music.nix).
+  satelliteAreas =
+    let
+      mps = cfg.devices.media_players;
+    in
+    lib.filter (e: e != null) (
+      map (
+        r:
+        let
+          slug = lib.removePrefix "media_player." r.target;
+          area = mps.${slug}.area or null;
+        in
+        if area == null then
+          null
+        else
+          {
+            entity_id = r.satellite;
+            area_slug = mkSlug area;
+          }
+      ) (cfg.ttsRelay or [ ])
+    );
+
   entityManifest = lib.concatLists [
     (collectAreas "input_boolean" cfg.devices.input_booleans)
     (collectAreas "input_number" cfg.devices.input_numbers)
@@ -69,6 +96,7 @@ let
     (collectAreas "sun" cfg.devices.suns)
     (collectAreas "weather" cfg.devices.weathers)
     (collectAreas "sensor" cfg.devices.sensors)
+    satelliteAreas
   ];
 
   zhaManifestFile = pkgs.writeText "zha-reconciler-zha.json" (builtins.toJSON zhaManifest);

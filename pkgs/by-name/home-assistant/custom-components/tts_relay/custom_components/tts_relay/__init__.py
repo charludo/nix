@@ -71,7 +71,9 @@ ROUTE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_SATELLITE): cv.entity_id,
         vol.Required(CONF_TARGET): cv.entity_id,
-        vol.Optional(CONF_VOLUME): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+        vol.Optional(CONF_VOLUME): vol.All(
+            vol.Coerce(float), vol.Range(min=0.05, max=1.0)
+        ),
     }
 )
 
@@ -234,7 +236,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         effect = pending_effects.pop(self.entity_id, None)
 
         if effect == SILENT_EFFECT:
-            _LOGGER.debug("tts_relay: silent effect for %s; dropping TTS", self.entity_id)
+            _LOGGER.debug(
+                "tts_relay: silent effect for %s; dropping TTS", self.entity_id
+            )
             return
 
         if effect:
