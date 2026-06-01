@@ -122,6 +122,39 @@ in
       };
     };
 
+    Musik_LoopAn = ack {
+      sentences = [
+        "(Loop|Wiederholung|Wiederholen) (an|ein|aktivieren)"
+        "(Loop|Wiederholung|Wiederholen)"
+      ];
+      script = {
+        action = [
+          {
+            action = "media_player.repeat_set";
+            target.entity_id = player;
+            data.repeat = "all";
+          }
+        ];
+        speech.text = "Wiederholung aktiviert.";
+      };
+    };
+
+    Musik_LoopAus = ack {
+      sentences = [
+        "(Loop|Wiederholung|Wiederholen) (aus|ab|deaktivieren)"
+      ];
+      script = {
+        action = [
+          {
+            action = "media_player.repeat_set";
+            target.entity_id = player;
+            data.repeat = "off";
+          }
+        ];
+        speech.text = "Wiederholung deaktiviert.";
+      };
+    };
+
     Musik_PlayerNeustart = {
       sentences = [
         "(Player|Spieler|Sonos) (neu starten|neustarten|resetten)"

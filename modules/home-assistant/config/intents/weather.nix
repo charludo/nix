@@ -40,7 +40,10 @@ let
       past,
     }:
     let
-      t = "as_datetime(state_attr('${e.sun.sun}', '${attr}'))";
+      # `next_rising`/`next_setting` are UTC ISO strings; `as_datetime`
+      # preserves that offset, so `.strftime('%H:%M')` would render UTC.
+      # `as_local` converts into the configured HA timezone.
+      t = "as_local(as_datetime(state_attr('${e.sun.sun}', '${attr}')))";
     in
     if day == "heute" then
       ''
@@ -104,12 +107,19 @@ in
         "Wie [wird|ist] das Wetter um {hours} Uhr"
         "Wie warm wird es um {hours} Uhr"
       ];
+      # OWM stores `datetime` as UTC ISO; compare the *local* hour to the
+      # requested {hours} slot, otherwise we'd be off by the TZ offset.
       script.speech.text = ''
         {% set h = hours | int %}
         {% set entries = state_attr('${hourly}', 'forecast') %}
-        {% set match = entries | selectattr('datetime', 'match', '.*T' ~ '%02d' | format(h) ~ ':') | list %}
-        {% if match %}
-          {% set m = match[0] %}
+        {% set ns = namespace(m=none) %}
+        {% for e in entries %}
+          {% if ns.m is none and as_local(as_datetime(e.datetime)).hour == h %}
+            {% set ns.m = e %}
+          {% endif %}
+        {% endfor %}
+        {% if ns.m %}
+          {% set m = ns.m %}
           Um {{ h }} Uhr wird es ${cond "m.condition"} bei ${num "m.temperature"} Grad, Niederschlag ${num "m.precipitation | default(0)"} Millimeter mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
         {% else %}
           Für {{ h }} Uhr habe ich keine Vorhersage.
@@ -176,9 +186,14 @@ in
       script.speech.text = ''
         {% set h = hours | int %}
         {% set entries = state_attr('${hourly}', 'forecast') %}
-        {% set match = entries | selectattr('datetime', 'match', '.*T' ~ '%02d' | format(h) ~ ':') | list %}
-        {% if match %}
-          {% set m = match[0] %}
+        {% set ns = namespace(m=none) %}
+        {% for e in entries %}
+          {% if ns.m is none and as_local(as_datetime(e.datetime)).hour == h %}
+            {% set ns.m = e %}
+          {% endif %}
+        {% endfor %}
+        {% if ns.m %}
+          {% set m = ns.m %}
           Um {{ h }} Uhr: ${num "m.precipitation | default(0)"} Millimeter Regen mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
         {% else %}
           Für {{ h }} Uhr habe ich keine Regenvorhersage.

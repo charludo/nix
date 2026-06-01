@@ -4,6 +4,35 @@ let
 
   silent = lib.ha.voice.silentAction;
 
+  # Room-keyed Sonos mute intents: each Sonos with a declared area gets
+  # an "an/laut" (unmute) and "stumm/aus" (mute) intent. The label in
+  # the sentence is the area's display name from `hass.areas`.
+  sonosByRoom = {
+    Wohnzimmer = e.media_player.living_room;
+    "Büro" = e.media_player.office;
+  };
+
+  mkMute = room: entity: muted: silent {
+    sentences = [ "Lautsprecher im ${room} ${if muted then "(stumm|aus)" else "(an|laut)"}" ];
+    script = {
+      action = [
+        {
+          action = "media_player.volume_mute";
+          target.entity_id = entity;
+          data.is_volume_muted = muted;
+        }
+      ];
+      speech.text = if muted then "Stummgeschaltet." else "Wieder laut.";
+    };
+  };
+
+  muteIntents = lib.foldlAttrs (acc: room: entity:
+    acc // {
+      "Lautsprecher_${lib.ha.mkSlug room}_Aus" = mkMute room entity true;
+      "Lautsprecher_${lib.ha.mkSlug room}_An" = mkMute room entity false;
+    }
+  ) { } sonosByRoom;
+
   # area_slug → target media_player for the volume intents, derived
   # from the tts_relay routes plus each target's declared area in
   # hass.devices.media_players. The conversation framework injects the
@@ -60,7 +89,7 @@ let
   '';
 in
 {
-  hass.voice.intents = {
+  hass.voice.intents = muteIntents // {
     # Volume intents route to "the speaker for this satellite" via
     # `preferred_area_id`, which the conversation framework derives
     # from the calling satellite's area. The Nix-side area→target map
