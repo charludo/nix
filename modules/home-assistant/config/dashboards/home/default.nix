@@ -22,7 +22,10 @@ in
   services.home-assistant.lovelaceConfig = {
     default = true;
     views = [
-      (import ./view-home.nix { inherit lib e areas; })
+      (import ./view-home.nix {
+        inherit lib e areas;
+        wateringTimes = config.hass.bewasserung.times;
+      })
       (import ./view-botty.nix { inherit lib e; })
       (import ./view-sonos.nix { inherit lib e; })
       (import ./view-tv.nix { inherit lib e; })

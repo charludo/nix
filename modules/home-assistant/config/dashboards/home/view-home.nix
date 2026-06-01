@@ -2,9 +2,62 @@
   lib,
   e,
   areas,
+  wateringTimes ? [ ],
 }:
 let
   ha = lib.ha;
+
+  # Mini variant of `mkToggleCard` for the watering slot row: same
+  # contrast2/blue palette and icon-over-name layout, but shorter so
+  # six of them fit comfortably in one horizontal-stack row.
+  mkWateringSlotButton = t:
+    let
+      slug = lib.replaceStrings [ ":" ] [ "_" ] t;
+    in
+    {
+      type = "custom:button-card";
+      entity = "input_boolean.bewasserung_zeit_${slug}";
+      name = t;
+      icon = "mdi:clock-outline";
+      tap_action = {
+        action = "toggle";
+        haptic = "selection";
+      };
+      styles = ha.mkStyles {
+        card = {
+          background = "var(--contrast2)";
+          padding = "8px 4px";
+          "--mdc-ripple-press-opacity" = 0;
+        };
+        img_cell = {
+          "justify-self" = "center";
+          width = "20px";
+        };
+        icon = {
+          width = "20px";
+          height = "20px";
+          color = "var(--contrast8)";
+        };
+        name = {
+          "justify-self" = "center";
+          "font-size" = "12px";
+          margin = "4px 0 0 0";
+          color = "var(--contrast8)";
+        };
+      };
+      state = [
+        (ha.mkStateStyle "on" {
+          card.background = "var(--blue)";
+          icon.color = "var(--black)";
+          name.color = "var(--black)";
+        })
+        (ha.mkStateStyle "off" {
+          icon.color = "var(--contrast20)";
+          name.color = "var(--contrast20)";
+        })
+      ];
+    };
+
   mkAutoToggle =
     {
       entity,
@@ -319,167 +372,192 @@ in
           ];
         }
 
-        # Garten grid
+        # Garten grid — columns=1 so each child is a full-width row; the
+        # per-feature rows below are wrapped in conditionals so a feature
+        # being off hides its whole row instead of leaving a half-empty
+        # one.
         {
           square = false;
           type = "grid";
-          columns = 2;
+          columns = 1;
           title = "Garten";
           tap_action = {
             action = "navigate";
             navigation_path = "/dashboard-garten";
           };
           cards = [
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] (
-              ha.mkToggleCard {
-                entity = e.switch.steckdose_pflanzenlicht.switch;
-                name = "Pflanzenlicht";
-                icon = "mdi:flower-pollen";
-                onColor = "var(--green)";
-              }
-            ))
             (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] {
-              type = "custom:button-card";
-              entity = e.automation.pflanzenlicht_automatik;
-              name = "Pflanzlicht-Automatik";
-              icon = ha.robotIcon;
-              tap_action = {
-                action = "toggle";
-                haptic = "medium";
-              };
-              hold_action = {
-                action = "more-info";
-                haptic = "medium";
-              };
-              custom_fields = {
-                uren = "[[[ return states['${e.input_number.stunden_sonnenlicht_setzlinge}'].state + 'h' ]]]";
-                slider.card = {
-                  type = "custom:my-slider-v2";
-                  entity = e.input_number.stunden_sonnenlicht_setzlinge;
-                  min = 1;
-                  max = 24;
-                  step = 1;
-                  styles = {
-                    container = {
-                      background = "none";
-                      "border-radius" = "100px";
-                      overflow = "visible";
-                    };
-                    card = {
-                      height = "16px";
-                      padding = "0 8px";
-                      background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
-                    };
-                    track = {
-                      overflow = "visible";
-                      background = "none";
-                    };
-                    progress.background = "none";
-                    thumb = {
-                      background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
-                      top = "2px";
-                      right = "-6px";
-                      height = "12px";
-                      width = "12px";
-                      "border-radius" = "100px";
-                    };
-                  };
-                };
-              };
-              styles =
-                (ha.mkStyles {
-                  card = {
-                    background = "var(--contrast2)";
-                    padding = "16px";
-                    "--mdc-ripple-press-opacity" = 0;
-                  };
-                  img_cell = {
-                    "justify-self" = "start";
-                    width = "24px";
-                  };
-                  icon = {
-                    width = "24px";
-                    height = "24px";
-                    color = "var(--contrast8)";
-                  };
-                  name = {
-                    "justify-self" = "start";
-                    "font-size" = "14px";
-                    margin = "4px 0 12px 0";
-                    color = "var(--contrast8)";
-                  };
+              type = "horizontal-stack";
+              cards = [
+                (ha.mkToggleCard {
+                  entity = e.switch.steckdose_pflanzenlicht.switch;
+                  name = "Pflanzenlicht";
+                  icon = "mdi:flower-pollen";
+                  onColor = "var(--green)";
                 })
-                // {
-                  grid = ha.mkStyleProp {
-                    "grid-template-areas" = ''"i i" "n uren" "slider slider"'';
-                    "grid-template-columns" = "1fr min-content";
-                    "grid-template-rows" = "1fr min-content min-content";
+                {
+                  type = "custom:button-card";
+                  entity = e.automation.pflanzenlicht_automatik;
+                  name = "Pflanzlicht-Automatik";
+                  icon = ha.robotIcon;
+                  tap_action = {
+                    action = "toggle";
+                    haptic = "medium";
                   };
-                  custom_fields = ha.mkStyles {
-                    uren = {
-                      "font-size" = "12px";
-                      color = "var(--contrast9)";
-                      "padding-left" = "2px";
-                      "align-self" = "center";
-                      "margin-bottom" = "12px";
+                  hold_action = {
+                    action = "more-info";
+                    haptic = "medium";
+                  };
+                  custom_fields = {
+                    uren = "[[[ return states['${e.input_number.stunden_sonnenlicht_setzlinge}'].state + 'h' ]]]";
+                    slider.card = {
+                      type = "custom:my-slider-v2";
+                      entity = e.input_number.stunden_sonnenlicht_setzlinge;
+                      min = 1;
+                      max = 24;
+                      step = 1;
+                      styles = {
+                        container = {
+                          background = "none";
+                          "border-radius" = "100px";
+                          overflow = "visible";
+                        };
+                        card = {
+                          height = "16px";
+                          padding = "0 8px";
+                          background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
+                        };
+                        track = {
+                          overflow = "visible";
+                          background = "none";
+                        };
+                        progress.background = "none";
+                        thumb = {
+                          background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
+                          top = "2px";
+                          right = "-6px";
+                          height = "12px";
+                          width = "12px";
+                          "border-radius" = "100px";
+                        };
+                      };
                     };
                   };
-                };
-              state = [
-                (ha.mkStateStyle "on" {
-                  card.background = "var(--green)";
-                  icon.color = "var(--black)";
-                  name.color = "var(--black)";
-                })
-                (ha.mkStateStyle "off" {
-                  icon.color = "var(--contrast20)";
-                  name.color = "var(--contrast20)";
+                  styles =
+                    (ha.mkStyles {
+                      card = {
+                        background = "var(--contrast2)";
+                        padding = "16px";
+                        "--mdc-ripple-press-opacity" = 0;
+                      };
+                      img_cell = {
+                        "justify-self" = "start";
+                        width = "24px";
+                      };
+                      icon = {
+                        width = "24px";
+                        height = "24px";
+                        color = "var(--contrast8)";
+                      };
+                      name = {
+                        "justify-self" = "start";
+                        "font-size" = "14px";
+                        margin = "4px 0 12px 0";
+                        color = "var(--contrast8)";
+                      };
+                    })
+                    // {
+                      grid = ha.mkStyleProp {
+                        "grid-template-areas" = ''"i i" "n uren" "slider slider"'';
+                        "grid-template-columns" = "1fr min-content";
+                        "grid-template-rows" = "1fr min-content min-content";
+                      };
+                      custom_fields = ha.mkStyles {
+                        uren = {
+                          "font-size" = "12px";
+                          color = "var(--contrast9)";
+                          "padding-left" = "2px";
+                          "align-self" = "center";
+                          "margin-bottom" = "12px";
+                        };
+                      };
+                    };
+                  state = [
+                    (ha.mkStateStyle "on" {
+                      card.background = "var(--green)";
+                      icon.color = "var(--black)";
+                      name.color = "var(--black)";
+                    })
+                    (ha.mkStateStyle "off" {
+                      icon.color = "var(--contrast20)";
+                      name.color = "var(--contrast20)";
+                    })
+                  ];
+                }
+              ];
+            })
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] {
+              # The Bewässerung row is itself a vertical stack: the
+              # standard Wasserpumpe + Automatik pair, and beneath them
+              # the per-slot enable pills (shown only while the
+              # automation is on). Keeping them nested means the pills
+              # always sit directly under their Automatik toggle no
+              # matter which other Garten features happen to be enabled.
+              type = "vertical-stack";
+              cards = [
+                {
+                  type = "horizontal-stack";
+                  cards = [
+                    (ha.mkToggleCard {
+                      entity = e.switch.steckdose_wasserpumpe.switch;
+                      name = "Wasserpumpe";
+                      icon = "mdi:water-pump";
+                      onColor = "var(--blue)";
+                    })
+                    # Card shows wasserpumpe_an's enabled state, but tap
+                    # toggles both halves of the watering cycle at once so
+                    # they stay in sync — leaving the off-automation
+                    # enabled while the on-automation is disabled would
+                    # be a footgun.
+                    ((mkAutoToggle {
+                      entity = e.automation.wasserpumpe_an;
+                      name = "Bewässerungs-Automatik";
+                      onColor = "var(--blue)";
+                    }) // {
+                      tap_action = {
+                        action = "perform-action";
+                        perform_action = "automation.toggle";
+                        haptic = "medium";
+                        data.entity_id = [
+                          e.automation.wasserpumpe_an
+                          e.automation.wasserpumpe_aus
+                        ];
+                      };
+                    })
+                  ];
+                }
+                (ha.mkConditional [ (ha.stateIs e.automation.wasserpumpe_an "on") ] {
+                  type = "horizontal-stack";
+                  cards = map mkWateringSlotButton wateringTimes;
                 })
               ];
             })
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (
-              ha.mkToggleCard {
-                entity = e.switch.steckdose_wasserpumpe.switch;
-                name = "Wasserpumpe";
-                icon = "mdi:water-pump";
-                onColor = "var(--blue)";
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (
-              # Card shows wasserpumpe_an's enabled state, but tap toggles
-              # both halves of the watering cycle at once so they stay in
-              # sync — leaving the off-automation enabled while the
-              # on-automation is disabled would be a footgun.
-              (mkAutoToggle {
-                entity = e.automation.wasserpumpe_an;
-                name = "Bewässerungs-Automatik";
-                onColor = "var(--blue)";
-              })
-              // {
-                tap_action = {
-                  action = "perform-action";
-                  perform_action = "automation.toggle";
-                  haptic = "medium";
-                  data.entity_id = [
-                    e.automation.wasserpumpe_an
-                    e.automation.wasserpumpe_aus
-                  ];
-                };
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (
-              ha.mkToggleCard {
-                entity = e.switch.steckdose_gewachshaus_heizung.switch;
-                name = "Gewächshaus Heizung";
-                icon = "mdi:radiator";
-                onColor = "var(--yellow)";
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (mkAutoToggle {
-              entity = e.automation.heat_greenhouse;
-              name = "Heizungs-Automatik";
-              onColor = "var(--yellow)";
-            }))
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] {
+              type = "horizontal-stack";
+              cards = [
+                (ha.mkToggleCard {
+                  entity = e.switch.steckdose_gewachshaus_heizung.switch;
+                  name = "Gewächshaus Heizung";
+                  icon = "mdi:radiator";
+                  onColor = "var(--yellow)";
+                })
+                (mkAutoToggle {
+                  entity = e.automation.heat_greenhouse;
+                  name = "Heizungs-Automatik";
+                  onColor = "var(--yellow)";
+                })
+              ];
+            })
           ];
         }
 
