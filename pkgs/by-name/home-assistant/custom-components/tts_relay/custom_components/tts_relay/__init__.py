@@ -64,6 +64,13 @@ CONF_SOUNDS = "sounds"
 VOICE_EFFECT_CARD_TYPE = "voice_effect"
 # Special title that means "drop the TTS audio, announce nothing".
 SILENT_EFFECT = "silent"
+# Fallback effect for pipeline intent errors other than "no match".
+ERROR_EFFECT = "error"
+# IntentResponseErrorCode.NO_INTENT_MATCH — "Entschuldigung, das habe
+# ich nicht verstanden". We treat it as silent rather than chime
+# because "wake word + nothing happens" is the desired UX when the
+# user mumbled or the matcher whiffed.
+NO_MATCH_ERROR_CODE = "no_intent_match"
 
 SERVICE_SILENCE = "silence"
 ATTR_ENTITY_ID = "entity_id"
@@ -190,19 +197,35 @@ async def _silence(hass: HomeAssistant, entity_ids: list[str]) -> None:
 def _read_voice_effect(intent_output: dict | None) -> str | None:
     """Pull the voice_effect marker out of the INTENT_END event payload.
 
-    Returns the effect name (``acknowledge``, ``silent``, ...) or None.
-    Looks for a ``card.voice_effect.title`` set by intent_script via
-    `lib.ha.voice.acknowledgeAction` / `silentAction`.
+    An explicit ``card.voice_effect.title`` (set by intent_script via
+    `lib.ha.voice.acknowledgeAction` / `silentAction`) always wins.
+    Otherwise, error responses fall through to a code-driven mapping:
+
+    * ``no_intent_match`` → ``silent`` — don't read the apology, just
+      shrug. Sentence-level miss is usually because we mumbled or hit
+      a sentence we never taught the matcher.
+    * other error codes  → ``error`` — play the configured error
+      chime in place of the TTS. Covers ``failed_to_handle``,
+      ``no_valid_targets``, ``unknown`` — anything where the intent
+      was recognised but went sideways on dispatch.
+
+    Returns the effect name, or None when the response was a normal
+    action-done and no explicit marker was set.
     """
     if not intent_output:
         return None
     response = intent_output.get("response") or {}
     card = response.get("card") or {}
-    effect = card.get(VOICE_EFFECT_CARD_TYPE)
-    if not effect:
-        return None
+    effect = card.get(VOICE_EFFECT_CARD_TYPE) or {}
     title = (effect.get("title") or "").strip().lower()
-    return title or None
+    if title:
+        return title
+    if response.get("response_type") == "error":
+        code = (response.get("data") or {}).get("code") or ""
+        if code == NO_MATCH_ERROR_CODE:
+            return SILENT_EFFECT
+        return ERROR_EFFECT
+    return None
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:

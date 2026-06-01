@@ -176,6 +176,18 @@ in
               ``/local/sounds/<basename>``.
             '';
           };
+          error = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = ''
+              Path to the sound file played in place of the TTS when the
+              pipeline returns an error response (``response_type =
+              "error"``) other than ``no_intent_match``. Covers
+              ``failed_to_handle``, ``no_valid_targets``, ``unknown``.
+              ``no_intent_match`` is silenced unconditionally — no chime.
+              Set null to fall back to relaying the synthesized error text.
+            '';
+          };
           timer = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
@@ -226,30 +238,29 @@ in
     # otherwise auto-create — systemd-tmpfiles refuses to canonicalize
     # paths that cross an ownership boundary ("unsafe path transition").
     systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
-      "10-hass-custom-sentences" =
-        {
-          "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
-            mode = "0755";
-            user = "hass";
-            group = "hass";
-          };
-        }
-        // lib.listToAttrs (
-          lib.concatMap (lang: [
-            {
-              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
-              value."d" = {
-                mode = "0755";
-                user = "hass";
-                group = "hass";
-              };
-            }
-            {
-              name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
-              value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
-            }
-          ]) languages
-        );
+      "10-hass-custom-sentences" = {
+        "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
+          mode = "0755";
+          user = "hass";
+          group = "hass";
+        };
+      }
+      // lib.listToAttrs (
+        lib.concatMap (lang: [
+          {
+            name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
+            value."d" = {
+              mode = "0755";
+              user = "hass";
+              group = "hass";
+            };
+          }
+          {
+            name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
+            value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
+          }
+        ]) languages
+      );
     };
 
     # One-shot migration from the previous layout, which symlinked the

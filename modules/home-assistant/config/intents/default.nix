@@ -7,6 +7,7 @@
     ./garden.nix
     ./music.nix
     ./news.nix
+    ./volume.nix
     ./test_en.nix
     ./time.nix
     ./timer.nix

@@ -31,5 +31,6 @@ in
     timer = ./assets/sounds/timer-bell.mp3;
     reminder = ./assets/sounds/reminder-friendly.mp3;
     alarmclock = ./assets/sounds/wecker-chipper.mp3;
+    error = ./assets/sounds/error-kick.mp3;
   };
 }
