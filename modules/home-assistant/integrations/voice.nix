@@ -203,6 +203,19 @@ in
             default = null;
             description = "Path to the sound file for alarm-clock intents (currently unused).";
           };
+          duck = lib.mkOption {
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = ''
+              Path to a near-silent audio file fired as a Sonos
+              announce on wake-word detection, so the speaker's native
+              audioClip ducking lowers playback while the user
+              interacts with the satellite. Should be a short clip
+              (10–15s) — long enough to cover a typical interaction,
+              short enough to recover gracefully if tts_relay fails to
+              cancel it. Set null to disable wake-word ducking.
+            '';
+          };
         };
       };
       default = { };

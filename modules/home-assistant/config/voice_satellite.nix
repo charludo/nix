@@ -32,5 +32,6 @@ in
     reminder = ./assets/sounds/reminder-friendly.mp3;
     alarmclock = ./assets/sounds/wecker-chipper.mp3;
     error = ./assets/sounds/error-kick.mp3;
+    duck = ./assets/sounds/silence.mp3;
   };
 }

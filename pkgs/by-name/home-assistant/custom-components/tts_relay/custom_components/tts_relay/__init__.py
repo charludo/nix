@@ -41,6 +41,21 @@ On the matching satellite's ``TTS_END``:
 The chat path is unaffected: HA's chat UI renders only ``card.simple``,
 so a ``voice_effect`` card is invisible there and the original speech
 text is shown verbatim.
+
+Wake-word ducking
+-----------------
+If a ``duck`` sound is configured, ``RUN_START`` fires a near-silent
+audioClip via ``announce: true`` so Sonos's native ducking lowers
+playback for the duration of the interaction. The clip is cancelled
+on ``TTS_END`` (so the response announce isn't queued behind it) and
+defensively on ``RUN_END`` (so an aborted pipeline doesn't strand the
+duck on a finite-length clip). Should the cancel fail, the clip's own
+duration is the worst-case recovery time.
+
+``RUN_START`` rather than ``WAKE_WORD_END`` because the latter is only
+emitted when HA itself runs the wake-word stage. Wyoming satellites
+typically detect the wake word on-device and tell HA to start the
+pipeline at ``STT``, in which case ``WAKE_WORD_END`` never fires.
 """
 
 from __future__ import annotations
@@ -66,6 +81,9 @@ VOICE_EFFECT_CARD_TYPE = "voice_effect"
 SILENT_EFFECT = "silent"
 # Fallback effect for pipeline intent errors other than "no match".
 ERROR_EFFECT = "error"
+# Sounds key for the near-silent clip fired on wake-word detection,
+# used to make Sonos duck music for the duration of an interaction.
+DUCK_EFFECT = "duck"
 # IntentResponseErrorCode.NO_INTENT_MATCH — "Entschuldigung, das habe
 # ich nicht verstanden". We treat it as silent rather than chime
 # because "wake word + nothing happens" is the desired UX when the
@@ -149,6 +167,36 @@ async def _announce(hass: HomeAssistant, route: dict, url: str) -> None:
         _LOGGER.exception("tts_relay: announce failed for %s", target)
 
 
+async def _cancel_audio_clip(hass: HomeAssistant, entity_id: str) -> None:
+    """Send Sonos ``cancelAudioClip`` over the cloud websocket. No-op
+    for non-Sonos entities or if no clip is in flight. Used both by
+    ``tts_relay.silence`` and by the wake-word duck cleanup."""
+    component = hass.data.get("media_player")
+    if component is None:
+        return
+    entity = component.get_entity(entity_id)
+    if entity is None:
+        return
+    # SonosMediaPlayerEntity exposes the underlying SonosSpeaker,
+    # which carries the cloud websocket. Non-Sonos players have no
+    # speaker attribute; skip them.
+    speaker = getattr(entity, "speaker", None)
+    websocket = getattr(speaker, "websocket", None) if speaker else None
+    if websocket is None:
+        return
+    try:
+        player_id = await websocket.get_player_id()
+        await websocket.send_command(
+            {
+                "namespace": "audioClip:1",
+                "command": "cancelAudioClip",
+                "playerId": player_id,
+            }
+        )
+    except Exception:
+        _LOGGER.exception("tts_relay: cancelAudioClip failed for %s", entity_id)
+
+
 async def _silence(hass: HomeAssistant, entity_ids: list[str]) -> None:
     """Stop playback on each speaker — both queue and in-flight announce.
 
@@ -166,32 +214,8 @@ async def _silence(hass: HomeAssistant, entity_ids: list[str]) -> None:
         {"entity_id": entity_ids},
         blocking=True,
     )
-
-    component = hass.data.get("media_player")
-    if component is None:
-        return
     for entity_id in entity_ids:
-        entity = component.get_entity(entity_id)
-        if entity is None:
-            continue
-        # SonosMediaPlayerEntity exposes the underlying SonosSpeaker,
-        # which carries the cloud websocket. Non-Sonos players have no
-        # speaker attribute; skip them.
-        speaker = getattr(entity, "speaker", None)
-        websocket = getattr(speaker, "websocket", None) if speaker else None
-        if websocket is None:
-            continue
-        try:
-            player_id = await websocket.get_player_id()
-            await websocket.send_command(
-                {
-                    "namespace": "audioClip:1",
-                    "command": "cancelAudioClip",
-                    "playerId": player_id,
-                }
-            )
-        except Exception:
-            _LOGGER.exception("tts_relay: cancelAudioClip failed for %s", entity_id)
+        await _cancel_audio_clip(hass, entity_id)
 
 
 def _read_voice_effect(intent_output: dict | None) -> str | None:
@@ -246,6 +270,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # pipeline at a time per entity, so there's no concurrency risk.
     pending_effects: dict[str, str | None] = {}
 
+    # Target media_players with an in-flight wake-word duck clip. We
+    # cancel before any subsequent announce on the same target so the
+    # TTS isn't queued behind the (15s) silence, and on pipeline
+    # terminal events so a mid-pipeline abort doesn't strand the duck.
+    active_ducks: set[str] = set()
+
+    async def _clear_duck(target: str) -> None:
+        if target in active_ducks:
+            active_ducks.discard(target)
+            await _cancel_audio_clip(hass, target)
+
     # Imported lazily so HA's manifest dependency resolution gets a
     # chance to load assist_satellite first.
     from homeassistant.components.assist_pipeline.pipeline import PipelineEventType
@@ -299,6 +334,31 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         route = by_satellite.get(self.entity_id)
         if route is None:
             return
+        target = route[CONF_TARGET]
+
+        # Pipeline starting: fire the near-silent duck clip so the
+        # target Sonos lowers its playback for the duration of the
+        # interaction. Cancelled either on TTS_END (so the response
+        # announce isn't queued behind it) or on RUN_END (defensive
+        # cleanup for aborted pipelines). RUN_START rather than
+        # WAKE_WORD_END because Wyoming satellites do their own wake
+        # detection and start the HA pipeline at STT — HA never emits
+        # WAKE_WORD_END for that path.
+        if event.type == PipelineEventType.RUN_START:
+            duck_path = sounds.get(DUCK_EFFECT)
+            if not duck_path:
+                return
+            url = _absolutise(hass, duck_path)
+            if not url:
+                return
+            active_ducks.add(target)
+            hass.async_create_task(_announce(hass, route, url))
+            return
+
+        if event.type == PipelineEventType.RUN_END:
+            hass.async_create_task(_clear_duck(target))
+            return
+
         if event.type != PipelineEventType.TTS_END:
             return
 
@@ -310,7 +370,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             _LOGGER.debug(
                 "tts_relay: silent effect for %s; dropping TTS", self.entity_id
             )
+            hass.async_create_task(_clear_duck(target))
             return
+
+        async def _replace_duck_with(url: str) -> None:
+            await _clear_duck(target)
+            await _announce(hass, route, url)
 
         if effect:
             sound_url = sounds.get(effect)
@@ -324,14 +389,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             else:
                 url = _absolutise(hass, sound_url)
                 if url:
-                    hass.async_create_task(_announce(hass, route, url))
+                    hass.async_create_task(_replace_duck_with(url))
                     return
 
         tts_output = data.get("tts_output") or {}
         url = _absolutise(hass, tts_output.get("url"))
         if not url:
+            hass.async_create_task(_clear_duck(target))
             return
-        hass.async_create_task(_announce(hass, route, url))
+        hass.async_create_task(_replace_duck_with(url))
 
     AssistSatelliteEntity._internal_on_pipeline_event = patched
 
