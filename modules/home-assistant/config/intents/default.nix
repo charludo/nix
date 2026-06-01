@@ -3,8 +3,8 @@
     ./alarm.nix
     ./botty.nix
     ./climate.nix
+    ./devices.nix
     ./einkauf.nix
-    ./garden.nix
     ./music.nix
     ./news.nix
     ./volume.nix
@@ -12,7 +12,6 @@
     ./time.nix
     ./timer.nix
     ./tv.nix
-    ./ventilator.nix
     ./weather.nix
     ./x1c.nix
   ];
@@ -23,5 +22,8 @@
     "HassGetWeather"
     "HassClimateGetTemperature"
     "HassVacuumStart"
+    "HassTurnOn"
+    "HassTurnOff"
+    "HassGetState"
   ];
 }
