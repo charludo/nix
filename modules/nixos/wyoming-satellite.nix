@@ -109,7 +109,7 @@ in
     services.wyoming.openwakeword = {
       enable = true;
       uri = "tcp://127.0.0.1:10400";
-      threshold = 0.65;
+      threshold = 0.6;
       customModelsDirectories = [ ../home-assistant/config/assets/wakewords ];
     };
 
