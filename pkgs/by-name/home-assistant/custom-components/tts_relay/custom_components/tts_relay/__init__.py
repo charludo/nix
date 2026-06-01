@@ -47,10 +47,13 @@ Wake-word ducking
 If a ``duck`` sound is configured, ``RUN_START`` fires a near-silent
 audioClip via ``announce: true`` so Sonos's native ducking lowers
 playback for the duration of the interaction. The clip is cancelled
-on ``TTS_END`` (so the response announce isn't queued behind it) and
-defensively on ``RUN_END`` (so an aborted pipeline doesn't strand the
-duck on a finite-length clip). Should the cancel fail, the clip's own
-duration is the worst-case recovery time.
+on ``STT_END`` (when the satellite stops capturing audio — its input
+LED goes off), and defensively on ``RUN_END`` (so an aborted pipeline
+doesn't strand the duck on a finite-length clip). The TTS response
+itself rides another ``announce: true`` call, so Sonos re-ducks
+naturally for playback even though the wake-time duck has cleared.
+Should the cancel fail, the clip's own duration is the worst-case
+recovery time.
 
 ``RUN_START`` rather than ``WAKE_WORD_END`` because the latter is only
 emitted when HA itself runs the wake-word stage. Wyoming satellites
@@ -337,13 +340,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         target = route[CONF_TARGET]
 
         # Pipeline starting: fire the near-silent duck clip so the
-        # target Sonos lowers its playback for the duration of the
-        # interaction. Cancelled either on TTS_END (so the response
-        # announce isn't queued behind it) or on RUN_END (defensive
-        # cleanup for aborted pipelines). RUN_START rather than
-        # WAKE_WORD_END because Wyoming satellites do their own wake
-        # detection and start the HA pipeline at STT — HA never emits
-        # WAKE_WORD_END for that path.
+        # target Sonos lowers its playback for the recording phase.
+        # Cancelled on STT_END (when the satellite stops capturing
+        # audio — its input LED goes off) so an aborted pipeline
+        # doesn't strand music ducked while we wait for RUN_END's
+        # pipeline timeout. RUN_START rather than WAKE_WORD_END
+        # because Wyoming satellites do their own wake detection and
+        # start the HA pipeline at STT — HA never emits WAKE_WORD_END
+        # for that path.
         if event.type == PipelineEventType.RUN_START:
             duck_path = sounds.get(DUCK_EFFECT)
             if not duck_path:
@@ -353,6 +357,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 return
             active_ducks.add(target)
             hass.async_create_task(_announce(hass, route, url))
+            return
+
+        # STT_END is "audio capture finished" on the satellite — i.e.
+        # the moment its input LED goes off. Clearing here means an
+        # aborted pipeline (wake triggered but no usable speech) stops
+        # ducking the music promptly instead of waiting for RUN_END's
+        # pipeline timeout. The cost is a brief flutter on normal
+        # interactions: music returns during intent processing, then
+        # TTS_END's announce re-ducks. With local intent matching the
+        # processing window is short enough that the flutter is barely
+        # perceptible.
+        if event.type == PipelineEventType.STT_END:
+            hass.async_create_task(_clear_duck(target))
             return
 
         if event.type == PipelineEventType.RUN_END:
