@@ -16,6 +16,70 @@ let
       icon = ha.robotIcon;
     };
 
+  # Pre-made broadcast messages rendered as one-per-row buttons above
+  # the input field when the broadcast form is open. Tapping fills the
+  # input_text but doesn't send, so the user can tweak first.
+  broadcastPresets = [
+    {
+      name = "Gleich da";
+      icon = "mdi:home-clock";
+      text = "Ich bin in 5 Minuten zuhause.";
+    }
+    {
+      name = "Ruf zurück";
+      icon = "mdi:phone-alert";
+      text = "Bitte ruf mich dringend zurück.";
+    }
+    {
+      name = "Hallo?!";
+      icon = "mdi:heart-pulse";
+      text = "Gib ein Lebenszeichen.";
+    }
+  ];
+
+  # Shared styles for the buttons in the broadcast form (input_text
+  # presets + Send). Same shape as the Türalarm button but without
+  # state-based recolouring: name/icon stay white (contrast20) at all
+  # times so they read as "normal" interactive controls rather than
+  # the muted contrast8 look the form had before.
+  broadcastBtnStyles = ha.mkStyles {
+    card = {
+      background = "var(--contrast2)";
+      padding = "16px";
+      "--mdc-ripple-press-opacity" = 0;
+    };
+    img_cell = {
+      "justify-self" = "start";
+      width = "24px";
+    };
+    icon = {
+      width = "24px";
+      height = "24px";
+      color = "var(--contrast20)";
+    };
+    name = {
+      "justify-self" = "start";
+      "font-size" = "14px";
+      margin = "4px 0 12px 0";
+      color = "var(--contrast20)";
+    };
+  };
+
+  mkBroadcastPreset = preset: {
+    type = "custom:button-card";
+    inherit (preset) name icon;
+    tap_action = {
+      action = "perform-action";
+      perform_action = "input_text.set_value";
+      haptic = "selection";
+      data = {
+        entity_id = "input_text.broadcast_message";
+        value = preset.text;
+      };
+    };
+    styles = broadcastBtnStyles;
+  };
+
   # One status banner per timer in the pool, visible only while running.
   # Tapping cancels the timer (with confirmation). Label shows end time;
   # it refreshes when the timer state changes.
@@ -513,6 +577,27 @@ in
                   color = "var(--contrast8)";
                 };
               };
+              state = [
+                (ha.mkStateStyle "on" {
+                  card = {
+                    background = "var(--yellow)";
+                  };
+                  icon = {
+                    color = "var(--black)";
+                  };
+                  name = {
+                    color = "var(--black)";
+                  };
+                })
+                (ha.mkStateStyle "off" {
+                  icon = {
+                    color = "var(--contrast20)";
+                  };
+                  name = {
+                    color = "var(--contrast20)";
+                  };
+                })
+              ];
             }
           ];
         }
@@ -526,6 +611,12 @@ in
         (ha.mkConditional [ (ha.stateIs "input_boolean.broadcast_open" "on") ] {
           type = "vertical-stack";
           cards = [
+            {
+              square = false;
+              type = "grid";
+              columns = 3;
+              cards = map mkBroadcastPreset broadcastPresets;
+            }
             {
               type = "entities";
               entities = [
@@ -587,28 +678,7 @@ in
                 '';
                 haptic = "medium";
               };
-              styles = ha.mkStyles {
-                card = {
-                  background = "var(--contrast2)";
-                  padding = "16px";
-                  "--mdc-ripple-press-opacity" = 0;
-                };
-                img_cell = {
-                  "justify-self" = "start";
-                  width = "24px";
-                };
-                icon = {
-                  width = "24px";
-                  height = "24px";
-                  color = "var(--contrast8)";
-                };
-                name = {
-                  "justify-self" = "start";
-                  "font-size" = "14px";
-                  margin = "4px 0 12px 0";
-                  color = "var(--contrast8)";
-                };
-              };
+              styles = broadcastBtnStyles;
             }
           ];
         })
