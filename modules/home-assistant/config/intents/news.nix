@@ -171,7 +171,7 @@ in
 
       News_TaeglicheZusammenfassung = silent {
         sentences = [
-          "(Spiele|Spiel|Starte) [die |meine ][Nachrichten|tägliche Zusammenfassung]"
+          "(Spiele|Spiel|Starte) [die |meine ](Nachrichten|tägliche Zusammenfassung)"
           "Nachrichten"
           "Tägliche Zusammenfassung"
         ];

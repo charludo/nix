@@ -26,7 +26,7 @@ in
   hass.voice.intents = {
     MusikAn = silent {
       sentences = [
-        "(Spiele|Spiel|Starte) [Musik|die Musik]"
+        "(Spiele|Spiel|Starte) (Musik|die Musik)"
         "Musik (an|abspielen|starten)"
       ];
       script = {
@@ -55,7 +55,7 @@ in
     Musik_Pause = silent {
       sentences = [
         "(Pausiere|Stoppe|Anhalten) [die Musik]"
-        "Musik (pausieren|anhalten|stoppen)"
+        "Musik (pausieren|anhalten|stoppen|aus)"
         "Pause"
       ];
       script = {
