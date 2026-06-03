@@ -1,4 +1,7 @@
 { lib, config, ... }:
+let
+  cfg = config.hass.automations;
+in
 {
   options.hass.automations = lib.mkOption {
     default = { };
@@ -40,15 +43,11 @@
     );
   };
 
-  # Pin each automation's HA entity_id to its Nix-side key by emitting
-  # an explicit `id`. Without this, HA derives the entity_id from
-  # slug(alias), which can drift away from the key — and then anything
-  # referencing `e.automation.<key>` resolves to a non-existent entity.
   config.services.home-assistant.config = lib.mkMerge (
     lib.mapAttrsToList (name: auto: {
       "automation ${name}" = auto // {
         id = name;
       };
-    }) config.hass.automations
+    }) cfg
   );
 }

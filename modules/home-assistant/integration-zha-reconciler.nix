@@ -10,7 +10,7 @@ let
   rcfg = cfg.zha.reconciler;
   inherit (lib.ha) mkSlug;
 
-  # Mirrors zigbeeDomainMap in modules/home-assistant/devices.nix.
+  # Mirrors the zigbee domain map in modules/home-assistant/entities.nix.
   # Several nix-level keys (sensor, diagnostic) collapse to the same
   # HA-level domain (sensor).
   zigbeeDomainMap = {
