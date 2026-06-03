@@ -33,7 +33,7 @@ in
       (import ./view-einkaufsliste.nix {
         inherit lib;
         supermarkets = config.hass.shopping.supermarkets or { };
-        todoEntity = config.hass.shopping.todo_entity;
+        todoEntity = config.hass.shopping.todoEntity;
       })
       (import ./view-einstellungen.nix { inherit lib e; })
     ];

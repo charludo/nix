@@ -93,7 +93,10 @@
     group = "hass";
   };
 
-  hass.zha.reconciler.enable = true;
+  hass.zha.reconciler = {
+    enable = true;
+    tokenPath = config.age.secrets.hass-reconciler-token.path;
+  };
   hass.bambu.enable = true;
   hass.massSlotLists = {
     enable = true;

@@ -8,118 +8,85 @@ let
   cfg = config.hass.voice;
   yamlFormat = pkgs.formats.yaml { };
 
-  intents = cfg.intents;
-
-  intentList = lib.mapAttrsToList (
-    name: i:
-    {
-      inherit name;
-      language = if i.language != null then i.language else cfg.defaultLanguage;
-    }
-    // {
-      inherit (i)
-        sentences
-        script
-        lists
-        expansionRules
-        responses
-        ;
-    }
-  ) intents;
-
-  languages = lib.unique (map (i: i.language) intentList);
-
-  mergeForLang =
+  langOf = i: if i.language != null then i.language else cfg.defaultLanguage;
+  languages = lib.unique (lib.mapAttrsToList (_: langOf) cfg.intents);
+  yamlByLang = lib.genAttrs languages (
     lang:
     let
-      forLang = lib.filter (i: i.language == lang) intentList;
-    in
-    lib.foldl'
-      (acc: i: {
-        intents =
-          acc.intents
-          // lib.optionalAttrs (i.sentences != [ ]) {
-            ${i.name}.data = [ { sentences = i.sentences; } ];
-          };
-        lists = acc.lists // i.lists;
-        expansion_rules = acc.expansion_rules // i.expansionRules;
-        responses = acc.responses // i.responses;
-      })
-      {
-        intents = { };
-        lists = { };
-        expansion_rules = { };
-        responses = { };
-      }
-      forLang;
-
-  mkLangYaml =
-    lang:
-    let
-      m = mergeForLang lang;
-      extra = cfg.extraConfig.${lang} or { };
+      forLang = lib.filterAttrs (_: i: langOf i == lang) cfg.intents;
+      intents = lib.mapAttrs (_: i: { data = [ { sentences = i.sentences; } ]; }) (
+        lib.filterAttrs (_: i: i.sentences != [ ]) forLang
+      );
+      mergeField =
+        field:
+        lib.foldlAttrs (
+          a: _: i:
+          a // i.${field}
+        ) { } forLang;
+      lists = mergeField "lists";
+      expansion_rules = mergeField "expansionRules";
+      responses = mergeField "responses";
     in
     {
       language = lang;
     }
-    // (lib.optionalAttrs (m.intents != { }) { inherit (m) intents; })
-    // (lib.optionalAttrs (m.lists != { }) { inherit (m) lists; })
-    // (lib.optionalAttrs (m.expansion_rules != { }) { inherit (m) expansion_rules; })
-    // (lib.optionalAttrs (m.responses != { }) { inherit (m) responses; })
-    // extra;
-
-  sentencesDir = pkgs.runCommand "hass-custom-sentences" { } (
-    lib.concatStringsSep "\n" (
-      [ "mkdir -p $out" ]
-      ++ map (lang: ''
-        mkdir -p $out/${lang}
-        cp ${yamlFormat.generate "nix.yaml" (mkLangYaml lang)} $out/${lang}/nix.yaml
-      '') languages
-    )
+    // lib.optionalAttrs (intents != { }) { inherit intents; }
+    // lib.optionalAttrs (lists != { }) { inherit lists; }
+    // lib.optionalAttrs (expansion_rules != { }) { inherit expansion_rules; }
+    // lib.optionalAttrs (responses != { }) { inherit responses; }
+    // (cfg.extraConfig.${lang} or { })
   );
 
-  scripts = lib.mapAttrs (_: i: i.script) (lib.filterAttrs (_: i: i.script != null) intents);
-
-  intentType = lib.types.submodule {
-    options = {
-      sentences = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
-        default = [ ];
-        description = "Sentence patterns for this intent";
-      };
-      script = lib.mkOption {
-        type = lib.types.nullOr lib.types.anything;
-        default = null;
-        description = "intent_script body for this intent, usually `{ speech.text = ...; action = [ ... ]; }`";
-      };
-      language = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = config.hass.voice.defaultLanguage;
-        defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
-        description = "Language code to use";
-      };
-      lists = lib.mkOption {
-        type = yamlFormat.type;
-        default = { };
-        description = "Slot lists merged into this language's custom_sentences file";
-      };
-      expansionRules = lib.mkOption {
-        type = lib.types.attrsOf lib.types.str;
-        default = { };
-        description = "Expansion rules merged into this language's custom_sentences file";
-      };
-      responses = lib.mkOption {
-        type = yamlFormat.type;
-        default = { };
-        description = "Responses merged into this language's custom_sentences file";
-      };
-    };
-  };
+  sentencesDir = pkgs.runCommand "hass-custom-sentences" { } (
+    "mkdir -p $out\n"
+    + lib.concatStrings (
+      lib.mapAttrsToList (lang: body: ''
+        mkdir -p $out/${lang}
+        cp ${yamlFormat.generate "nix.yaml" body} $out/${lang}/nix.yaml
+      '') yamlByLang
+    )
+  );
 in
 {
   options.hass.voice = {
     intents = lib.mkOption {
-      type = lib.types.attrsOf intentType;
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          options = {
+            sentences = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "Sentence patterns for this intent";
+            };
+            script = lib.mkOption {
+              type = lib.types.nullOr lib.types.anything;
+              default = null;
+              description = "intent_script body for this intent, usually `{ speech.text = ...; action = [ ... ]; }`";
+            };
+            language = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = config.hass.voice.defaultLanguage;
+              defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
+              description = "Language code to use";
+            };
+            lists = lib.mkOption {
+              type = yamlFormat.type;
+              default = { };
+              description = "Slot lists merged into this language's custom_sentences file";
+            };
+            expansionRules = lib.mkOption {
+              type = lib.types.attrsOf lib.types.str;
+              default = { };
+              description = "Expansion rules merged into this language's custom_sentences file";
+            };
+            responses = lib.mkOption {
+              type = yamlFormat.type;
+              default = { };
+              description = "Responses merged into this language's custom_sentences file";
+            };
+          };
+        }
+      );
       default = { };
       description = "Custom voice intent definitions";
     };
@@ -179,7 +146,7 @@ in
     };
   };
 
-  config = lib.mkIf (intents != { }) {
+  config = lib.mkIf (cfg.intents != { }) {
     services.home-assistant.extraComponents = [
       "wyoming"
       "assist_pipeline"
@@ -188,35 +155,33 @@ in
       "todo"
     ];
 
-    services.home-assistant.config = lib.mkIf (scripts != { }) {
-      intent_script = scripts;
-    };
+    services.home-assistant.config.intent_script = lib.mapAttrs (_: i: i.script) (
+      lib.filterAttrs (_: i: i.script != null) cfg.intents
+    );
 
-    systemd.tmpfiles.settings = {
-      "10-hass-custom-sentences" = {
-        "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
-          mode = "0755";
-          user = "hass";
-          group = "hass";
-        };
-      }
-      // lib.listToAttrs (
-        lib.concatMap (lang: [
-          {
-            name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
-            value."d" = {
-              mode = "0755";
-              user = "hass";
-              group = "hass";
-            };
-          }
-          {
-            name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
-            value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
-          }
-        ]) languages
-      );
-    };
+    systemd.tmpfiles.settings."10-hass-custom-sentences" = {
+      "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
+        mode = "0755";
+        user = "hass";
+        group = "hass";
+      };
+    }
+    // lib.listToAttrs (
+      lib.concatMap (lang: [
+        {
+          name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}";
+          value."d" = {
+            mode = "0755";
+            user = "hass";
+            group = "hass";
+          };
+        }
+        {
+          name = "${config.services.home-assistant.configDir}/custom_sentences/${lang}/nix.yaml";
+          value."L+".argument = "${sentencesDir}/${lang}/nix.yaml";
+        }
+      ]) languages
+    );
 
     system.activationScripts.hassCustomSentencesMigrate = {
       text = ''

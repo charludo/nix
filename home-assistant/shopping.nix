@@ -1,6 +1,6 @@
 {
   hass.shopping = {
-    todo_entity = "todo.shopping_list";
+    todoEntity = "todo.shopping_list";
     supermarkets = {
       REWE = {
         color = "var(--red)";
