@@ -8,7 +8,6 @@
     ./areas.nix
     ./assets.nix
     ./base.nix
-    ./botty.nix
     ./buttons.nix
     ./devices.nix
     ./helpers.nix

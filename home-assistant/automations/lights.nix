@@ -16,28 +16,14 @@ in
       ];
       condition = [
         {
-          condition = "and";
-          conditions = [
-            {
-              condition = "time";
-              after = "23:00:00";
-              before = "07:00:00";
-              weekday = [
-                "mon"
-                "tue"
-                "wed"
-                "thu"
-                "fri"
-                "sat"
-                "sun"
-              ];
-            }
-            {
-              condition = "state";
-              entity_id = e.light.strahler.light;
-              state = "off";
-            }
-          ];
+          condition = "time";
+          after = "23:00:00";
+          before = "07:00:00";
+        }
+        {
+          condition = "state";
+          entity_id = e.light.strahler.light;
+          state = "off";
         }
       ];
       action = [
@@ -61,28 +47,14 @@ in
       ];
       condition = [
         {
-          condition = "and";
-          conditions = [
-            {
-              condition = "time";
-              after = "23:00:00";
-              before = "07:00:00";
-              weekday = [
-                "mon"
-                "tue"
-                "wed"
-                "thu"
-                "fri"
-                "sat"
-                "sun"
-              ];
-            }
-            {
-              condition = "state";
-              entity_id = e.light.strahler.light;
-              state = "on";
-            }
-          ];
+          condition = "time";
+          after = "23:00:00";
+          before = "07:00:00";
+        }
+        {
+          condition = "state";
+          entity_id = e.light.strahler.light;
+          state = "on";
         }
       ];
       action = [

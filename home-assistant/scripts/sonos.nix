@@ -1,6 +1,18 @@
 { config, ... }:
 let
   e = config.hass.entities;
+
+  mkVolumeToggle = name: entity: {
+    alias = "Sonos ${name} toggle";
+    icon = "mdi:volume-off";
+    sequence = [
+      {
+        action = "media_player.volume_mute";
+        target.entity_id = entity;
+        data.is_volume_muted = "{{ not state_attr('${entity}', 'is_volume_muted') }}";
+      }
+    ];
+  };
 in
 {
   hass.scripts = {
@@ -10,35 +22,13 @@ in
       sequence = [
         {
           action = "media_player.media_play_pause";
-          data = { };
           target.entity_id = e.media_player.alle;
         }
       ];
     };
 
-    sonos_wohnzimmer_toggle = {
-      alias = "Sonos Wohnzimmer toggle";
-      icon = "mdi:volume-off";
-      sequence = [
-        {
-          action = "media_player.volume_mute";
-          target.entity_id = e.media_player.living_room;
-          data.is_volume_muted = "{{ not state_attr('${e.media_player.living_room}', 'is_volume_muted') }}";
-        }
-      ];
-    };
-
-    sonos_buro_toggle = {
-      alias = "Sonos Büro toggle";
-      icon = "mdi:volume-off";
-      sequence = [
-        {
-          action = "media_player.volume_mute";
-          target.entity_id = e.media_player.office;
-          data.is_volume_muted = "{{ not state_attr('${e.media_player.office}', 'is_volume_muted') }}";
-        }
-      ];
-    };
+    sonos_wohnzimmer_toggle = mkVolumeToggle "Wohnzimmer" e.media_player.living_room;
+    sonos_buro_toggle = mkVolumeToggle "Büro" e.media_player.office;
 
     sonos_reset = {
       alias = "Sonos reset";
@@ -56,7 +46,7 @@ in
           action = "media_player.turn_off";
           target.entity_id = e.media_player.alle;
         }
-        { delay = "00:00:01"; }
+        { delay.seconds = 1; }
         {
           action = "media_player.turn_on";
           target.entity_id = e.media_player.alle;
@@ -66,30 +56,22 @@ in
 
     media_seek = {
       alias = "Media Seek";
-      description = "From: https://github.com/RafhaanShah/Home-Assistant-Config/blob/b09199c4d9425c8af2b9356a65c8e853864176f5/scripts/media/media_seek.yaml";
       icon = "mdi:fast-forward-15";
       mode = "queued";
       sequence = [
         {
-          condition = "and";
-          conditions = [
-            {
-              condition = "template";
-              value_template = "{{ (state_attr(media_player, 'media_position')) != none }}";
-            }
-          ];
+          condition = "template";
+          value_template = "{{ (state_attr(media_player, 'media_position')) != none }}";
         }
         {
-          data.entity_id = "{{ media_player }}";
           action = "media_player.media_play_pause";
+          target.entity_id = "{{ media_player }}";
         }
         { delay.milliseconds = 500; }
         {
-          data = {
-            entity_id = "{{ media_player }}";
-            seek_position = "{{ state_attr(media_player, \"media_position\")|int + seek_amount }}";
-          };
           action = "media_player.media_seek";
+          target.entity_id = "{{ media_player }}";
+          data.seek_position = ''{{ state_attr(media_player, "media_position")|int + seek_amount }}'';
         }
       ];
     };

@@ -1,120 +1,60 @@
-{ lib, config, ... }:
+{ config, ... }:
 let
   e = config.hass.entities;
-  cfg = config.hass.botty;
 
-  zoneToggles = lib.mapAttrsToList (slug: _: e.input_boolean.${"botty_${slug}_reinigen"}) cfg.zones;
-
-  # One Jinja {% if %}-clause per zone; emits its rectangle plus the global
-  # repeat counter only when the matching toggle is on.
-  mkZoneClause =
-    slug:
-    {
-      x1,
-      y1,
-      x2,
-      y2,
-    }:
-    let
-      bool = e.input_boolean.${"botty_${slug}_reinigen"};
-      coords = lib.concatStringsSep "," (
-        map toString [
-          x1
-          y1
-          x2
-          y2
-        ]
-      );
-    in
-    "{% if is_state('${bool}', 'on') %}[${coords},{{ states.input_number.botty_wiederholungen.state | int }}],{% endif %}";
-
-  zonedCleanParams = "[" + lib.concatStrings (lib.mapAttrsToList mkZoneClause cfg.zones) + "]";
-in
-{
-  options.hass.botty.zones = lib.mkOption {
-    type = lib.types.attrsOf (
-      lib.types.submodule {
-        options = {
-          x1 = lib.mkOption {
-            type = lib.types.int;
-            description = "First-corner X coordinate (vacuum map space)";
-          };
-          y1 = lib.mkOption {
-            type = lib.types.int;
-            description = "First-corner Y coordinate (vacuum map space)";
-          };
-          x2 = lib.mkOption {
-            type = lib.types.int;
-            description = "Opposite-corner X coordinate";
-          };
-          y2 = lib.mkOption {
-            type = lib.types.int;
-            description = "Opposite-corner Y coordinate";
-          };
-        };
-      }
-    );
-    default = { };
-    description = "Vacuum zone rectangles keyed by room slug; each is paired with input_boolean.botty_<slug>_reinigen";
+  vacuumCmd = data: {
+    action = "vacuum.send_command";
+    inherit data;
+    target.entity_id = e.vacuum.botty;
   };
 
-  config.hass.scripts = {
-    botty_reinigung = {
-      alias = "Botty Reinigung";
-      icon = "mdi:robot-vacuum";
+  mkResetScript =
+    { alias, consumable }:
+    {
+      inherit alias;
       sequence = [
-        {
-          "if" = [
-            {
-              condition = "and";
-              conditions = map (entity_id: {
-                condition = "state";
-                inherit entity_id;
-                state = "off";
-              }) zoneToggles;
-            }
-          ];
-          "then" = [
-            {
-              action = "vacuum.send_command";
-              data = {
-                command = "app_segment_clean";
-                params = [
-                  {
-                    segments = [
-                      18 # Wohnzimmer
-                      17 # Büro
-                    ];
-                  }
-                ];
-              };
-              target.entity_id = e.vacuum.botty;
-            }
-          ];
-          "else" = [
-            {
-              action = "vacuum.send_command";
-              data = {
-                command = "app_zoned_clean";
-                params = zonedCleanParams;
-              };
-              target.entity_id = e.vacuum.botty;
-            }
-          ];
-        }
-        {
-          action = "input_boolean.turn_off";
-          data = { };
-          target.entity_id = zoneToggles;
-        }
-        {
-          action = "input_number.set_value";
-          data.value = 1;
-          target.entity_id = e.input_number.botty_wiederholungen;
-        }
+        (vacuumCmd {
+          command = "reset_consumable";
+          params = [ consumable ];
+        })
       ];
     };
+in
+{
+  hass.botty = {
+    zones = {
+      sofa = {
+        x1 = 23500;
+        y1 = 25150;
+        x2 = 26300;
+        y2 = 29250;
+      };
+      kueche = {
+        x1 = 19510;
+        y1 = 25150;
+        x2 = 23500;
+        y2 = 27700;
+      };
+      wohnzimmer = {
+        x1 = 19510;
+        y1 = 25150;
+        x2 = 26300;
+        y2 = 31250;
+      };
+      buro = {
+        x1 = 20250;
+        y1 = 31300;
+        x2 = 26250;
+        y2 = 35100;
+      };
+    };
+    rooms = [
+      18 # Wohnzimmer
+      17 # Büro
+    ];
+  };
 
+  hass.scripts = {
     botty_wiederholungen = {
       alias = "Botty Wiederholungen";
       icon = "mdi:repeat";
@@ -130,7 +70,6 @@ in
           "then" = [
             {
               action = "input_number.increment";
-              data = { };
               target.entity_id = e.input_number.botty_wiederholungen;
             }
           ];
@@ -149,105 +88,42 @@ in
       alias = "Botty Zurückkehren";
       icon = "mdi:robot-vacuum";
       sequence = [
-        {
-          action = "vacuum.send_command";
-          data.command = "app_pause";
-          target.entity_id = e.vacuum.botty;
-        }
-        {
-          delay = {
-            hours = 0;
-            minutes = 0;
-            seconds = 2;
-            milliseconds = 0;
-          };
-        }
-        {
-          action = "vacuum.send_command";
-          data.command = "app_charge";
-          target.entity_id = e.vacuum.botty;
-        }
+        (vacuumCmd { command = "app_pause"; })
+        { delay.seconds = 2; }
+        (vacuumCmd { command = "app_charge"; })
       ];
     };
 
     botty_pausieren = {
       alias = "Botty Pausieren";
       icon = "mdi:robot-vacuum";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          data.command = "app_pause";
-          target.entity_id = e.vacuum.botty;
-        }
-      ];
+      sequence = [ (vacuumCmd { command = "app_pause"; }) ];
     };
 
     botty_fortsetzen = {
       alias = "Botty Fortsetzen";
       icon = "mdi:robot-vacuum";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          data.command = "resume_zoned_clean";
-          target.entity_id = e.vacuum.botty;
-        }
-      ];
+      sequence = [ (vacuumCmd { command = "resume_zoned_clean"; }) ];
     };
 
-    botty_main_brush_reset = {
+    botty_main_brush_reset = mkResetScript {
       alias = "Botty main brush reset";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          target.entity_id = e.vacuum.botty;
-          data = {
-            command = "reset_consumable";
-            params = [ "main_brush_work_time" ];
-          };
-        }
-      ];
+      consumable = "main_brush_work_time";
     };
 
-    botty_side_brush_reset = {
+    botty_side_brush_reset = mkResetScript {
       alias = "Botty side brush reset";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          target.entity_id = e.vacuum.botty;
-          data = {
-            command = "reset_consumable";
-            params = [ "side_brush_work_time" ];
-          };
-        }
-      ];
+      consumable = "side_brush_work_time";
     };
 
-    botty_filter_reset = {
+    botty_filter_reset = mkResetScript {
       alias = "Botty filter reset";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          target.entity_id = e.vacuum.botty;
-          data = {
-            command = "reset_consumable";
-            params = [ "filter_work_time" ];
-          };
-        }
-      ];
+      consumable = "filter_work_time";
     };
 
-    botty_sensor_cleaning_reset = {
+    botty_sensor_cleaning_reset = mkResetScript {
       alias = "Botty sensor cleaning reset";
-      sequence = [
-        {
-          action = "vacuum.send_command";
-          target.entity_id = e.vacuum.botty;
-          data = {
-            command = "reset_consumable";
-            params = [ "sensor_dirty_time" ];
-          };
-        }
-      ];
+      consumable = "sensor_dirty_time";
     };
   };
 }

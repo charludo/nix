@@ -1,7 +1,4 @@
+{ lib, ... }:
 {
-  imports = [
-    ./botty.nix
-    ./broadcast.nix
-    ./sonos.nix
-  ];
+  imports = lib.helpers.mkImportsNoDefault ./.;
 }

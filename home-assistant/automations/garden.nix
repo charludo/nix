@@ -3,6 +3,15 @@ let
   e = config.hass.entities;
 in
 {
+  hass.bewasserung.times = [
+    "07:00"
+    "10:00"
+    "13:00"
+    "16:00"
+    "19:00"
+    "22:00"
+  ];
+
   hass.automations = {
     heat_greenhouse = {
       alias = "Heat Greenhouse";
@@ -16,23 +25,9 @@ in
       ];
       condition = [
         {
-          condition = "and";
-          conditions = [
-            {
-              condition = "time";
-              after = "19:00:00";
-              before = "07:00:00";
-              weekday = [
-                "mon"
-                "tue"
-                "wed"
-                "thu"
-                "fri"
-                "sat"
-                "sun"
-              ];
-            }
-          ];
+          condition = "time";
+          after = "19:00:00";
+          before = "07:00:00";
         }
       ];
       action = [
@@ -48,48 +43,35 @@ in
       mode = "single";
       trigger = [
         {
-          value_template = "{{ (as_timestamp(state_attr('sun.sun', 'next_dusk')) + 2 * 3600 - (states('input_number.stunden_sonnenlicht_setzlinge') | float(0) * 3600)) | timestamp_custom('%H:%M', true) == now().strftime('%H:%M') }}";
           trigger = "template";
+          id = "on";
+          value_template = "{{ (as_timestamp(state_attr('${e.sun.sun}', 'next_dusk')) + 2 * 3600 - (states('${e.input_number.stunden_sonnenlicht_setzlinge}') | float(0) * 3600)) | timestamp_custom('%H:%M', true) == now().strftime('%H:%M') }}";
         }
         {
+          trigger = "sun";
+          id = "off";
           event = "sunset";
           offset = "02:00:00";
-          trigger = "sun";
         }
       ];
       action = [
         {
-          choose = [
+          "if" = [
             {
-              conditions = [
-                {
-                  condition = "template";
-                  value_template = "{{ now().strftime('%H:%M') == (as_timestamp(state_attr('sun.sun', 'next_dusk')) + 2 * 3600 - (states('input_number.stunden_sonnenlicht_setzlinge') | float(0) * 3600)) | timestamp_custom('%H:%M', true) }}";
-                }
-              ];
-              sequence = [
-                {
-                  action = "switch.turn_on";
-                  data = { };
-                  target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
-                }
-              ];
+              condition = "trigger";
+              id = "on";
             }
+          ];
+          "then" = [
             {
-              conditions = [
-                {
-                  condition = "sun";
-                  after = "sunset";
-                  after_offset = "02:00:00";
-                }
-              ];
-              sequence = [
-                {
-                  action = "switch.turn_off";
-                  data = { };
-                  target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
-                }
-              ];
+              action = "switch.turn_on";
+              target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
+            }
+          ];
+          "else" = [
+            {
+              action = "switch.turn_off";
+              target.entity_id = e.switch.steckdose_pflanzenlicht.switch;
             }
           ];
         }

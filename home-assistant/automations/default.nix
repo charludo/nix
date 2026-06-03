@@ -1,10 +1,4 @@
+{ lib, ... }:
 {
-  imports = [
-    ./alerts.nix
-    ./bewasserung.nix
-    ./garden.nix
-    ./lights.nix
-    ./media.nix
-    ./timer.nix
-  ];
+  imports = lib.helpers.mkImportsNoDefault ./.;
 }
