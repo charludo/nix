@@ -17,12 +17,7 @@ in
           target.entity_id = e.fan.xiaomi_smart_fan;
         }
       ];
-      long = [
-        {
-          action = "script.turn_on";
-          target.entity_id = e.script.daily_summary;
-        }
-      ];
+      long = [ { action = e.script.daily_summary; } ];
     };
 
     ${e.zigbee.button_gewachshaus} = {
@@ -77,12 +72,7 @@ in
           data.is_volume_muted = false;
         }
       ];
-      long = [
-        {
-          action = "script.turn_on";
-          target.entity_id = e.script.sonos_reset;
-        }
-      ];
+      long = [ { action = e.script.sonos_reset; } ];
     };
   };
 }

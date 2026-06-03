@@ -1,6 +1,4 @@
 {
-  # Pool of generic timers picked by the voice intent (first idle one wins).
-  # Add more entries here if you tend to run several timers concurrently.
   hass.timers = {
     timer_1 = {
       name = "Timer 1";
