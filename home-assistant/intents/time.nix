@@ -1,7 +1,7 @@
 { ... }:
 {
   hass.voice.intents = {
-    Zeit_Uhrzeit = {
+    ZeitUhrzeit = {
       sentences = [
         "Wie (spät|viel Uhr) ist es"
         "Uhrzeit"
@@ -10,7 +10,7 @@
       script.speech.text = "Es ist {{ now().strftime('%H:%M') }}.";
     };
 
-    Zeit_Datum = {
+    ZeitDatum = {
       sentences = [
         "(Welches|Was für ein) Datum (haben wir|ist heute)"
         "Datum"
@@ -20,7 +20,7 @@
       '';
     };
 
-    Zeit_Wochentag = {
+    ZeitWochentag = {
       sentences = [
         "Welcher (Tag|Wochentag) ist heute"
         "Was ist heute für ein (Wochentag|Tag)"

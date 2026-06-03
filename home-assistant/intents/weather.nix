@@ -66,7 +66,7 @@ let
 in
 {
   hass.voice.intents = {
-    Wetter_Heute = {
+    WetterHeute = {
       sentences = [
         "Wie ist das Wetter [heute|draußen|gerade|jetzt|aktuell]"
         "Wie warm ist es [draußen|gerade|jetzt|aktuell]"
@@ -79,7 +79,7 @@ in
       '';
     };
 
-    Wetter_Morgen = {
+    WetterMorgen = {
       sentences = [
         "Wie wird das Wetter morgen [früh|nachmittag|abend]"
         "Wie warm wird es morgen"
@@ -90,7 +90,7 @@ in
       '';
     };
 
-    Wetter_Woche = {
+    WetterWoche = {
       sentences = [
         "Wie wird das Wetter (diese Woche|in den nächsten Tagen|die nächste Woche)"
         "Wettervorhersage [für die nächsten Tage]"
@@ -102,7 +102,7 @@ in
       '';
     };
 
-    Wetter_Stunde = hoursList // {
+    WetterStunde = hoursList // {
       sentences = [
         "Wie [wird|ist] das Wetter um {hours} Uhr"
         "Wie warm wird es um {hours} Uhr"
@@ -127,7 +127,7 @@ in
       '';
     };
 
-    Wetter_WindAktuell = {
+    WetterWindAktuell = {
       sentences = [
         "Wie windig ist es [heute|jetzt|gerade]"
         "Wie stark weht der Wind"
@@ -137,7 +137,7 @@ in
       '';
     };
 
-    Wetter_WindHeuteNacht = {
+    WetterWindHeuteNacht = {
       sentences = [
         "Wie windig wird es (heute Nacht|nachts|heute Abend)"
       ];
@@ -147,7 +147,7 @@ in
       '';
     };
 
-    Wetter_TemperaturMaxHeute = {
+    WetterTemperaturMaxHeute = {
       sentences = [
         "Wie wird das Wetter [heute]"
         "Wie warm wird es heute [noch]"
@@ -159,7 +159,7 @@ in
       '';
     };
 
-    Wetter_RegenHeute = {
+    WetterRegenHeute = {
       sentences = [
         "Regnet es [heute|heute noch]"
         "Wird es heute regnen"
@@ -177,7 +177,7 @@ in
       '';
     };
 
-    Wetter_RegenStunde = hoursList // {
+    WetterRegenStunde = hoursList // {
       sentences = [
         "Regnet es um {hours} Uhr"
         "Wird es um {hours} Uhr regnen"
@@ -201,7 +201,7 @@ in
       '';
     };
 
-    Sonnenaufgang_Heute = {
+    SonnenaufgangHeute = {
       sentences = [
         "Wann geht die Sonne [heute] auf"
         "Wann ist [heute] [der ]Sonnenaufgang"
@@ -214,7 +214,7 @@ in
       };
     };
 
-    Sonnenaufgang_Morgen = {
+    SonnenaufgangMorgen = {
       sentences = [
         "Wann geht die Sonne morgen auf"
         "Wann ist morgen [der ]Sonnenaufgang"
@@ -227,7 +227,7 @@ in
       };
     };
 
-    Sonnenuntergang_Heute = {
+    SonnenuntergangHeute = {
       sentences = [
         "Wann geht die Sonne [heute] unter"
         "Wann ist [heute] [der ]Sonnenuntergang"
@@ -240,7 +240,7 @@ in
       };
     };
 
-    Sonnenuntergang_Morgen = {
+    SonnenuntergangMorgen = {
       sentences = [
         "Wann geht die Sonne morgen unter"
         "Wann ist morgen [der ]Sonnenuntergang"

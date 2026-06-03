@@ -91,6 +91,14 @@ rec {
     in
     lib.concatStringsSep "_" pieces;
 
+  # CamelCase version of `mkSlug` for places (intent names, etc.) that
+  # use no underscores and want each piece capitalised.
+  mkTitleSlug =
+    name:
+    lib.concatMapStrings (
+      p: if p == "" then "" else (lib.toUpper (builtins.substring 0 1 p)) + (builtins.substring 1 (-1) p)
+    ) (lib.splitString "_" (mkSlug name));
+
   # ---------------------------------------------------------------------------
   # Style helpers
   # ---------------------------------------------------------------------------

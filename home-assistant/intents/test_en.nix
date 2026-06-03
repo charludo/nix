@@ -7,7 +7,7 @@
   # don't repeat the same one line on every intent.
   hass.voice.intents = lib.mapAttrs (_: i: i // { language = "en"; }) {
     # ----- botty (vacuum) -----
-    EN_Botty_Start = {
+    ENBottyStart = {
       sentences = [
         "(start|begin) [the ]cleaning"
         "start cleaning"
@@ -18,7 +18,7 @@
       script.speech.text = "Cleaning started.";
     };
 
-    EN_Botty_Ende = {
+    ENBottyEnde = {
       sentences = [
         "(stop|end) [the ]cleaning"
         "(stop|end) vacuuming"
@@ -28,7 +28,7 @@
       script.speech.text = "Cleaning ended.";
     };
 
-    EN_Botty_Wohnzimmer = {
+    ENBottyWohnzimmer = {
       sentences = [
         "(vacuum|clean) [the ]living room"
         "botty [to the] living room"
@@ -37,7 +37,7 @@
       script.speech.text = "Cleaning the living room.";
     };
 
-    EN_Botty_Buero = {
+    ENBottyBuero = {
       sentences = [
         "(vacuum|clean) [the ](office|study)"
         "botty [to the] (office|study)"
@@ -46,7 +46,7 @@
       script.speech.text = "Cleaning the office.";
     };
 
-    EN_Botty_Kueche = {
+    ENBottyKueche = {
       sentences = [
         "(vacuum|clean) [the ]kitchen"
         "botty [to the] kitchen"
@@ -55,7 +55,7 @@
       script.speech.text = "Cleaning the kitchen.";
     };
 
-    EN_Botty_Sofa = {
+    ENBottySofa = {
       sentences = [
         "(vacuum|clean) (under|in front of) the (sofa|couch|tv|television)"
         "[botty] (vacuum|clean) [the ](sofa|couch|tv|television)"
@@ -64,7 +64,7 @@
     };
 
     # ----- climate -----
-    EN_Temperatur = {
+    ENTemperatur = {
       sentences = [
         "how (warm|hot) is it in [the ]{area}"
         "what (is the |'s the )(temperature|humidity) in [the ]{area}"
@@ -83,7 +83,7 @@
     };
 
     # ----- einkauf (shopping / todo list) -----
-    EN_Einkauf_Add = {
+    ENEinkaufAdd = {
       sentences = [
         "(add|put|throw) {item} (on|to) [the |my ]shopping list"
         "{item} (on|to) the shopping list"
@@ -93,7 +93,7 @@
       script.speech.text = ''"{{ item }}" added.'';
     };
 
-    EN_ToDo_Add = {
+    ENToDoAdd = {
       sentences = [
         "(add|put|throw) {item} (on|to) [the |my ](todo|to-do|to do) list"
         "{item} (on|to) the (todo|to-do) list"
@@ -104,7 +104,7 @@
     };
 
     # ----- garden (water pump) -----
-    EN_Pumpe_An = {
+    ENPumpeAn = {
       sentences = [
         "(activate|turn on|switch on) [the ][water ]pump"
         "[water ]pump on"
@@ -112,7 +112,7 @@
       script.speech.text = "Water pump activated.";
     };
 
-    EN_Pumpe_Aus = {
+    ENPumpeAus = {
       sentences = [
         "(deactivate|turn off|switch off) [the ][water ]pump"
         "[water ]pump off"
@@ -121,7 +121,7 @@
     };
 
     # ----- music -----
-    EN_MusikAn = {
+    ENMusikAn = {
       sentences = [
         "(play|start) [some |the ]music"
         "music (on|please|start)"
@@ -129,7 +129,7 @@
       script.speech.text = "Playing 500 random tracks.";
     };
 
-    EN_Musik_Fortsetzen = {
+    ENMusikFortsetzen = {
       sentences = [
         "(resume|continue) [the ]music"
         "(resume|continue) playback"
@@ -138,7 +138,7 @@
       script.speech.text = "Resuming.";
     };
 
-    EN_Musik_Pause = {
+    ENMusikPause = {
       sentences = [
         "(pause|stop|halt) [the ]music"
         "(pause|stop) playback"
@@ -147,7 +147,7 @@
       script.speech.text = "Paused.";
     };
 
-    EN_Musik_Naechster = {
+    ENMusikNaechster = {
       sentences = [
         "next (track|song)"
         "skip [this] (track|song)"
@@ -156,7 +156,7 @@
       script.speech.text = "Next track.";
     };
 
-    EN_Musik_ShuffleAn = {
+    ENMusikShuffleAn = {
       sentences = [
         "(turn on|enable|activate) shuffle"
         "shuffle (on|enable)"
@@ -165,7 +165,7 @@
       script.speech.text = "Shuffle enabled.";
     };
 
-    EN_Musik_ShuffleAus = {
+    ENMusikShuffleAus = {
       sentences = [
         "(turn off|disable|deactivate) shuffle"
         "shuffle (off|disable)"
@@ -174,7 +174,7 @@
       script.speech.text = "Shuffle disabled.";
     };
 
-    EN_Musik_PlayerNeustart = {
+    ENMusikPlayerNeustart = {
       sentences = [
         "(restart|reset) [the ](player|sonos)"
         "restart player"
@@ -182,7 +182,7 @@
       script.speech.text = "Restarting the player.";
     };
 
-    EN_Musik_ZufaelligesAlbum = {
+    ENMusikZufaelligesAlbum = {
       sentences = [
         "play [a ]random album"
         "random album"
@@ -190,7 +190,7 @@
       script.speech.text = "Playing a random album.";
     };
 
-    EN_Musik_ZufaelligerKuenstler = {
+    ENMusikZufaelligerKuenstler = {
       sentences = [
         "play [a ]random (artist|musician)"
         "random artist"
@@ -198,7 +198,7 @@
       script.speech.text = "Playing a random artist.";
     };
 
-    EN_Musik_NeueMusik = {
+    ENMusikNeueMusik = {
       sentences = [
         "play [the ](new|newest|latest) (music|tracks|songs)"
         "play [the ]playlist (new music|recently added)"
@@ -207,7 +207,7 @@
       script.speech.text = "Playing new music.";
     };
 
-    EN_Musik_KuerzlichGespielt = {
+    ENMusikKuerzlichGespielt = {
       sentences = [
         "play [the ]recently (played|heard) (tracks|songs)"
         "recently played"
@@ -216,7 +216,7 @@
       script.speech.text = "Playing recently heard tracks.";
     };
 
-    EN_Musik_Playlist = {
+    ENMusikPlaylist = {
       sentences = [
         "(play|start) [the ]playlist {playlist}"
         "playlist {playlist}"
@@ -231,7 +231,7 @@
     };
 
     # ----- news -----
-    EN_News_Tagesschau = {
+    ENNewsTagesschau = {
       sentences = [
         "(play|start) [the ]tagesschau"
         "(play|start) tagesschau in (one hundred|100) seconds"
@@ -240,7 +240,7 @@
       script.speech.text = "From the Tagesschau.";
     };
 
-    EN_News_WDRAktuell = {
+    ENNewsWDRAktuell = {
       sentences = [
         "(play|start) WDR (current|aktuell)"
         "WDR[ news| aktuell]"
@@ -248,7 +248,7 @@
       script.speech.text = "From WDR Aktuell.";
     };
 
-    EN_News_TaeglicheZusammenfassung = {
+    ENNewsTaeglicheZusammenfassung = {
       sentences = [
         "(play|start) [the |my ](news|daily (summary|briefing|digest))"
         "news"
@@ -258,7 +258,7 @@
     };
 
     # ----- time -----
-    EN_Zeit_Uhrzeit = {
+    ENZeitUhrzeit = {
       sentences = [
         "what (time is it|'s the time)"
         "tell me the time"
@@ -268,7 +268,7 @@
       script.speech.text = "It is {{ now().strftime('%H:%M') }}.";
     };
 
-    EN_Zeit_Datum = {
+    ENZeitDatum = {
       sentences = [
         "what (date is it|'s the date|'s today's date)"
         "what is today's date"
@@ -279,7 +279,7 @@
       '';
     };
 
-    EN_Zeit_Wochentag = {
+    ENZeitWochentag = {
       sentences = [
         "what (day|weekday) is it [today]"
         "what day of the week is it"
@@ -291,7 +291,7 @@
     };
 
     # ----- tv -----
-    EN_TV_Hell = {
+    ENTVHell = {
       sentences = [
         "(make|set) the (tv|television|picture|screen) bright[er]"
         "[tv ]day mode"
@@ -299,7 +299,7 @@
       script.speech.text = "Picture is now bright.";
     };
 
-    EN_TV_Dunkel = {
+    ENTVDunkel = {
       sentences = [
         "(make|set) the (tv|television|picture|screen) (dark|darker|dimmer)"
         "[tv ]night mode"
@@ -307,7 +307,7 @@
       script.speech.text = "Picture is now dark.";
     };
 
-    EN_TV_Aus = {
+    ENTVAus = {
       sentences = [
         "(turn|switch) off [the ](tv|television)"
         "(tv|television) (off|turn off)"
@@ -315,7 +315,7 @@
       script.speech.text = "Television turned off.";
     };
 
-    EN_TV_Stumm = {
+    ENTVStumm = {
       sentences = [
         "mute [the ](tv|television)"
         "(tv|television) (mute|silence)"
@@ -325,7 +325,7 @@
     };
 
     # ----- weather -----
-    EN_Wetter_Heute = {
+    ENWetterHeute = {
       sentences = [
         "(what's|what is|how's|how is) the weather (today|right now|currently|outside)"
         "how (warm|hot|cold) is it (outside|right now|currently)"
@@ -333,7 +333,7 @@
       script.speech.text = "It is currently 18.4 degrees outside, feels like 17.";
     };
 
-    EN_Wetter_Morgen = {
+    ENWetterMorgen = {
       sentences = [
         "(what's|what is|how's|how is) the weather tomorrow [morning|afternoon|evening]"
         "how (warm|hot) will it be tomorrow"
@@ -341,7 +341,7 @@
       script.speech.text = "Tomorrow will be 21.0 degrees with a low of 12.5 degrees. Precipitation: 0.0 millimeters.";
     };
 
-    EN_Wetter_Woche = {
+    ENWetterWoche = {
       sentences = [
         "(what's|what is|how's|how is) the weather (this week|the next few days|next week)"
         "weather forecast [for the next few days]"
@@ -349,7 +349,7 @@
       script.speech.text = "Monday: 12.0 to 21.0 degrees. Tuesday: 13.0 to 22.0 degrees. Wednesday: 14.0 to 20.0 degrees.";
     };
 
-    EN_Wetter_Stunde = {
+    ENWetterStunde = {
       sentences = [
         "(what's|what will|how will|how's) the weather [be ]at {timer_hours:hours} (o'clock|)"
         "how (warm|hot) will it be at {timer_hours:hours} (o'clock|)"
@@ -357,7 +357,7 @@
       script.speech.text = "At {{ timer_hours }} o'clock it will be 19.5 degrees, partly cloudy, 0 millimeters precipitation with 10 percent probability.";
     };
 
-    EN_Wetter_WindAktuell = {
+    ENWetterWindAktuell = {
       sentences = [
         "how windy is it [today|right now|currently]"
         "how (strong|hard) is the wind [blowing]"
@@ -365,14 +365,14 @@
       script.speech.text = "The wind is currently blowing at 14.2 kilometers per hour, with gusts up to 28.0.";
     };
 
-    EN_Wetter_WindHeuteNacht = {
+    ENWetterWindHeuteNacht = {
       sentences = [
         "how windy will it be (tonight|at night|this evening)"
       ];
       script.speech.text = "Tonight around 9 kilometers per hour.";
     };
 
-    EN_Wetter_TemperaturMaxHeute = {
+    ENWetterTemperaturMaxHeute = {
       sentences = [
         "how (warm|hot) will it (get|be) today [still]"
         "what (is|'s) the (high|maximum|highest) temperature today"
@@ -380,7 +380,7 @@
       script.speech.text = "Today will reach up to 22.5 degrees with a low of 11.0.";
     };
 
-    EN_Wetter_RegenHeute = {
+    ENWetterRegenHeute = {
       sentences = [
         "(is|will) it (raining|rain) (today|later today)"
         "will it rain today"
@@ -389,7 +389,7 @@
       script.speech.text = "No rain is expected today.";
     };
 
-    EN_Wetter_RegenStunde = {
+    ENWetterRegenStunde = {
       sentences = [
         "(is|will) it (raining|rain) at {timer_hours:hours} (o'clock|)"
         "is there [any ]rain at {timer_hours:hours} (o'clock|)"

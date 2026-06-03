@@ -121,7 +121,7 @@ in
   };
 
   hass.voice.intents = {
-    News_Tagesschau = {
+    NewsTagesschau = {
       sentences = [
         "[Spiele|Spiel|Starte] [die] Tagesschau [in (hundert|100) Sekunden]"
       ];
@@ -131,7 +131,7 @@ in
       };
     };
 
-    News_WDRAktuell = {
+    NewsWDRAktuell = {
       sentences = [
         "[Spiele|Spiel|Starte] WDR (Aktuell|aktuell)"
       ];
@@ -141,7 +141,7 @@ in
       };
     };
 
-    News_TaeglicheZusammenfassung = {
+    NewsTaeglicheZusammenfassung = {
       sentences = [
         "[Spiele|Spiel|Starte] [die|meine] (Nachrichten|tägliche Zusammenfassung)"
       ];

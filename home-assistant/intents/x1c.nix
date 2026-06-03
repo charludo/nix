@@ -7,7 +7,7 @@ let
 in
 {
   hass.voice.intents = {
-    X1C_Druckdauer = {
+    X1CDruckdauer = {
       sentences = [
         "Wie lange (dauert|braucht) der [3D-]Druck[er] [noch]"
         "Wann ist der [3D-]Druck[er] fertig"

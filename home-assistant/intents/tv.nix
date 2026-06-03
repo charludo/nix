@@ -6,7 +6,7 @@ let
 in
 {
   hass.voice.intents = {
-    TV_Hell = ack {
+    TVHell = ack {
       sentences = [
         "[Mach] [den|das] (Fernseher|Bild) hell[er]"
       ];
@@ -16,7 +16,7 @@ in
       };
     };
 
-    TV_Dunkel = ack {
+    TVDunkel = ack {
       sentences = [
         "[Mach] [den|das] (Fernseher|Bild) (dunkel|dunkler)"
       ];
@@ -26,7 +26,7 @@ in
       };
     };
 
-    TV_Aus = ack {
+    TVAus = ack {
       sentences = [
         "(Schalt|Mache) den Fernseher aus"
         "Fernseher (aus|ausschalten)"
@@ -42,7 +42,7 @@ in
       };
     };
 
-    TV_Stumm = silent {
+    TVStumm = silent {
       sentences = [
         "Fernseher (stumm|stummschalten|leise)"
         "(Mach|Schalt) den Fernseher (stumm|leise)"

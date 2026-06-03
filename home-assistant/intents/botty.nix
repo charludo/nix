@@ -25,7 +25,7 @@ let
 in
 {
   hass.voice.intents = {
-    Botty_Start = {
+    BottyStart = {
       sentences = [
         "(Starte|Beginne) [die |den ]Reinigung[svorgang]"
         "(Reinigung[svorgang]|Botty) starten"
@@ -36,7 +36,7 @@ in
       };
     };
 
-    Botty_Ende = {
+    BottyEnde = {
       sentences = [
         "(Beende|Stoppe) [die |den ]Reinigung[svorgang]"
         "(Reinigung[svorgang]|Botty) (beenden|stoppen)"
@@ -48,7 +48,7 @@ in
       };
     };
 
-    Botty_Wohnzimmer = {
+    BottyWohnzimmer = {
       sentences = [
         "(Reinige|Sauge|Botty) [im|das|ins] Wohnzimmer"
         "[Botty] Wohnzimmer (reinigen|saugen)"
@@ -59,7 +59,7 @@ in
       };
     };
 
-    Botty_Buero = {
+    BottyBuero = {
       sentences = [
         "(Reinige|Sauge|Botty) [im|das|ins] (Büro|Arbeitszimmer)"
         "[Botty] (Büro|Arbeitszimmer) (reinigen|saugen)"
@@ -70,7 +70,7 @@ in
       };
     };
 
-    Botty_Kueche = {
+    BottyKueche = {
       sentences = [
         "(Reinige|Sauge|Botty) [in der|in die|die] Küche"
         "[Botty] Küche (reinigen|saugen)"
@@ -81,7 +81,7 @@ in
       };
     };
 
-    Botty_Sofa = {
+    BottySofa = {
       sentences = [
         "(Reinige|Sauge|Botty) [vor|unter|am] [dem] (Fernseher|Sofa)"
         "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"

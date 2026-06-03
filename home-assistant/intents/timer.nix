@@ -25,7 +25,7 @@ let
 in
 {
   hass.voice.intents = {
-    Timer_Stellen_Minuten = {
+    TimerStellenMinuten = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
         "Timer (für|auf) {timer_minutes:minutes} Minuten"
@@ -37,7 +37,7 @@ in
       };
     };
 
-    Timer_Stellen_Sekunden = {
+    TimerStellenSekunden = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_seconds:seconds} Sekunden"
         "Timer {timer_seconds:seconds} Sekunden"
@@ -48,7 +48,7 @@ in
       };
     };
 
-    Timer_Stellen_Stunden = {
+    TimerStellenStunden = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden"
         "Timer {timer_hours:hours} Stunden"
@@ -59,7 +59,7 @@ in
       };
     };
 
-    Timer_Stellen_Kombiniert = {
+    TimerStellenKombiniert = {
       sentences = [
         "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten"
       ];
@@ -69,7 +69,7 @@ in
       };
     };
 
-    Timer_Abbrechen = {
+    TimerAbbrechen = {
       sentences = [
         "(Brich|Stoppe) [den|alle] Timer ab"
         "Timer (abbrechen|stoppen|löschen)"
@@ -86,7 +86,7 @@ in
       };
     };
 
-    Timer_Restzeit = {
+    TimerRestzeit = {
       sentences = [
         "Wie viel Zeit (ist|bleibt) [noch] [auf dem Timer]"
         "(Wann|Wie lange noch) [bis der] Timer (klingelt|fertig)"

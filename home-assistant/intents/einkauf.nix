@@ -1,7 +1,7 @@
 { config, ... }:
 {
   hass.voice.intents = {
-    Einkauf_Add = {
+    EinkaufAdd = {
       sentences = [
         "[setze|setz|pack|tu|schreib] {item} auf (die|meine) Einkaufsliste"
         "Einkaufsliste {item}"
@@ -20,7 +20,7 @@
       };
     };
 
-    ToDo_Add = {
+    ToDoAdd = {
       sentences = [
         "(setze|setz|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
         "ToDo-Liste {item}"

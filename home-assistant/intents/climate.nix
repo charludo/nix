@@ -6,7 +6,7 @@ let
     _: a: a.temperatureEntity != null && a.humidityEntity != null
   ) config.hass.areas;
 
-  intentName = areaName: "Temperatur_${ha.mkSlug areaName}";
+  intentName = areaName: "Temperatur${ha.mkTitleSlug areaName}";
 
   mkVoice = areaName: area: {
     name = intentName areaName;

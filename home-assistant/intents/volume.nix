@@ -32,8 +32,8 @@ let
     acc: room: entity:
     acc
     // {
-      "Lautsprecher_${lib.ha.mkSlug room}_Aus" = mkMute room entity true;
-      "Lautsprecher_${lib.ha.mkSlug room}_An" = mkMute room entity false;
+      "Lautsprecher${lib.ha.mkTitleSlug room}Aus" = mkMute room entity true;
+      "Lautsprecher${lib.ha.mkTitleSlug room}An" = mkMute room entity false;
     }
   ) { } sonosByRoom;
 
@@ -84,7 +84,7 @@ let
   ];
 
   # Half a step on the user-visible 1–10 scale. Jinja expressions used
-  # by Musik_Lauter / Musik_Leiser to read the target's current volume
+  # by MusikLauter / MusikLeiser to read the target's current volume
   # off its state and shift by ±0.05, clamped to [0, 1].
   relativeVolume = op: ''
     {%- set t = area_to_target[preferred_area_id] -%}
@@ -101,7 +101,7 @@ in
     # adding a satellite just means setting its area + adding a
     # ttsRelay route — no per-intent edits. Chat-path and non-area
     # satellites short-circuit the action and the intent is a no-op.
-    Musik_Lautstaerke = silent {
+    MusikLautstaerke = silent {
       sentences = [ "Lautstärke {level}" ];
       lists.level.range = {
         from = 1;
@@ -110,7 +110,7 @@ in
       script.action = volumeAction "{{ (level | int) / 10 }}";
     };
 
-    Musik_Lauter = silent {
+    MusikLauter = silent {
       sentences = [
         "Lauter"
         "Lautstärke (hoch|höher|hoeher)"
@@ -118,7 +118,7 @@ in
       script.action = volumeAction (relativeVolume "[1.0, cur + 0.05] | min");
     };
 
-    Musik_Leiser = silent {
+    MusikLeiser = silent {
       sentences = [
         "Leiser"
         "Lautstärke (runter|niedriger)"
@@ -131,7 +131,7 @@ in
     # Both layers matter because the announce path is independent of
     # the queue/volume — pausing the queue or muting the speaker does
     # nothing to a running announce. tts_relay.silence wraps both.
-    Stille_Alle = silent {
+    StilleAlle = silent {
       sentences = [
         "[Halt die ](Klappe|Fresse)[ halten]"
         "Sei (still|ruhig)[ jetzt]"
