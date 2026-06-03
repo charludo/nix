@@ -32,6 +32,8 @@
   tailscale.enable = true;
   wifi.enable = true;
   wyomingSatellite.enable = true;
+  wyomingSatellite.wakeWordThreshold = 0.6;
+  wyomingSatellite.customWakeWordModel = ../../home-assistant/assets/wakewords/computer_v2.tflite;
   wyomingSatellite.leds.enable = true;
   wyomingSatellite.leds.brightness = 12;
   wyomingSatellite.tuning = {
