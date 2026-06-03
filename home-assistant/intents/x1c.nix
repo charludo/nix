@@ -9,10 +9,8 @@ in
   hass.voice.intents = {
     X1C_Druckdauer = {
       sentences = [
-        "Wie lange dauert der Druck noch"
-        "Wie lange noch beim Druck[er]"
+        "Wie lange (dauert|braucht) der [3D-]Druck[er] [noch]"
         "Wann ist der [3D-]Druck[er] fertig"
-        "Wie lange braucht der [3D-]Druck[er][ noch]"
         "Druckzeit"
       ];
       script.speech.text = ''

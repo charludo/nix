@@ -4,8 +4,6 @@
     Zeit_Uhrzeit = {
       sentences = [
         "Wie (spät|viel Uhr) ist es"
-        "Wie viel Uhr ist es"
-        "Wie spät ist es"
         "Uhrzeit"
         "Woodland" # ok, sure thing buddy whisper
       ];
@@ -15,7 +13,6 @@
     Zeit_Datum = {
       sentences = [
         "(Welches|Was für ein) Datum (haben wir|ist heute)"
-        "Was ist heute für ein Datum"
         "Datum"
       ];
       script.speech.text = ''
@@ -26,8 +23,7 @@
     Zeit_Wochentag = {
       sentences = [
         "Welcher (Tag|Wochentag) ist heute"
-        "Was ist heute für ein Tag"
-        "[Wochen]Tag"
+        "Was ist heute für ein (Wochentag|Tag)"
       ];
       script.speech.text = ''
         Heute ist {{ ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][now().weekday()] }}.

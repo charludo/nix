@@ -27,10 +27,8 @@ in
   hass.voice.intents = {
     Botty_Start = {
       sentences = [
-        "(Starte|Beginne) [die ]Reinigung"
-        "Reinigung starten"
-        "Botty (starten|los|reinigen|saugen|saug)"
-        "Starte Reinigung[svorgang]"
+        "(Starte|Beginne) [die |den ]Reinigung[svorgang]"
+        "(Reinigung[svorgang]|Botty) starten"
       ];
       script = {
         action = [ { action = e.script.botty_reinigung; } ];
@@ -40,9 +38,9 @@ in
 
     Botty_Ende = {
       sentences = [
-        "(Beende|Stoppe) [die ]Reinigung"
-        "Reinigung (beenden|stoppen)"
-        "Botty (zurück|nach Hause|zur Basis|stop)"
+        "(Beende|Stoppe) [die |den ]Reinigung[svorgang]"
+        "(Reinigung[svorgang]|Botty) (beenden|stoppen)"
+        "Botty ([zurück ]nach Hause|zur Basis|stoppen|anhalten)"
       ];
       script = {
         action = [ { action = e.script.botty_zurueckkehren; } ];
@@ -52,9 +50,8 @@ in
 
     Botty_Wohnzimmer = {
       sentences = [
-        "(Reinige|Sauge) [im|das] Wohnzimmer"
-        "Botty [ins] Wohnzimmer"
-        "Wohnzimmer (reinigen|saugen)"
+        "(Reinige|Sauge|Botty) [im|das|ins] Wohnzimmer"
+        "[Botty] Wohnzimmer (reinigen|saugen)"
       ];
       script = {
         action = cleanRoom rooms.Wohnzimmer;
@@ -64,9 +61,8 @@ in
 
     Botty_Buero = {
       sentences = [
-        "(Reinige|Sauge) [im|das] (Büro|Arbeitszimmer)"
-        "Botty [ins] (Büro|Arbeitszimmer)"
-        "(Büro|Arbeitszimmer) (reinigen|saugen)"
+        "(Reinige|Sauge|Botty) [im|das|ins] (Büro|Arbeitszimmer)"
+        "[Botty] (Büro|Arbeitszimmer) (reinigen|saugen)"
       ];
       script = {
         action = cleanRoom rooms.Buero;
@@ -76,8 +72,7 @@ in
 
     Botty_Kueche = {
       sentences = [
-        "(Reinige|Sauge) [in der|die] Küche"
-        "Botty [in die] Küche"
+        "(Reinige|Sauge|Botty) [in der|in die|die] Küche"
         "[Botty] Küche (reinigen|saugen)"
       ];
       script = {
@@ -88,7 +83,7 @@ in
 
     Botty_Sofa = {
       sentences = [
-        "(Reinige|Sauge) [vor|unter|am] [dem] [Fernseher|Sofa]"
+        "(Reinige|Sauge|Botty) [vor|unter|am] [dem] (Fernseher|Sofa)"
         "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
       ];
       script = {

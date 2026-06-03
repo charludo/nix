@@ -3,30 +3,24 @@ let
   e = config.hass.entities;
   player = e.media_player.alle;
 
-  playPlaylist = name: [
-    {
-      action = "music_assistant.play_media";
-      target.entity_id = player;
-      data = {
-        media_id = name;
-        media_type = "playlist";
-      };
-    }
-  ];
+  playMA = mediaType: mediaId: {
+    action = "music_assistant.play_media";
+    target.entity_id = player;
+    data = {
+      media_id = mediaId;
+      media_type = mediaType;
+    };
+  };
+  playPlaylist = name: [ (playMA "playlist" name) ];
 
-  # Music intents start audio on the same Sonos that tts_relay would
-  # otherwise speak on; the speech would talk over the music. silentAction
-  # drops the satellite-side audio while keeping the speech for the chat
-  # path. Transport intents (pause/skip/shuffle) get acknowledgeAction —
-  # a short blip is friendlier than no feedback at all.
   silent = lib.ha.voice.silentAction;
   ack = lib.ha.voice.acknowledgeAction;
 in
 {
   hass.voice.intents = {
-    MusikAn = silent {
+    Musik_An = silent {
       sentences = [
-        "(Spiele|Spiel|Starte) (Musik|die Musik)"
+        "(Spiele|Spiel|Starte) [etwas|ein bisschen|irgendwelche|zufällige] Musik"
         "Musik (an|abspielen|starten)"
       ];
       script = {
@@ -37,9 +31,9 @@ in
 
     Musik_Fortsetzen = silent {
       sentences = [
-        "Musik fortsetzen"
+        "Musik (fortsetzen|weiter)"
         "(Mache|Setze) Musik fort"
-        "(Fortsetzen|Weiter abspielen|Weiterspielen)"
+        "(Fortsetzen|Weiter abspielen|Weiterspielen|Spiel weiter)"
       ];
       script = {
         action = [
@@ -54,7 +48,7 @@ in
 
     Musik_Pause = silent {
       sentences = [
-        "(Pausiere|Stoppe|Anhalten) [die Musik]"
+        "(Pausiere|Stoppe) die Musik"
         "Musik (pausieren|anhalten|stoppen|aus)"
         "Pause"
       ];
@@ -88,9 +82,7 @@ in
 
     Musik_ShuffleAn = ack {
       sentences = [
-        "Shuffle (an|ein|aktivieren)"
-        "Mischen (an|ein|aktivieren)"
-        "Zufallswiedergabe (an|ein|aktivieren)"
+        "(Shuffle|Mischen|Zufallswiedergabe) [an|ein|aktivieren]"
       ];
       script = {
         action = [
@@ -106,9 +98,7 @@ in
 
     Musik_ShuffleAus = ack {
       sentences = [
-        "Shuffle (aus|ab|deaktivieren)"
-        "Mischen (aus|ab|deaktivieren)"
-        "Zufallswiedergabe (aus|ab|deaktivieren)"
+        "(Shuffle|Mischen|Zufallswiedergabe) (aus|deaktivieren)"
       ];
       script = {
         action = [
@@ -124,8 +114,7 @@ in
 
     Musik_LoopAn = ack {
       sentences = [
-        "(Loop|Wiederholung|Wiederholen) (an|ein|aktivieren)"
-        "(Loop|Wiederholung|Wiederholen)"
+        "(Wiederholung|Wiederholen) [an|ein|aktivieren]"
       ];
       script = {
         action = [
@@ -135,13 +124,13 @@ in
             data.repeat = "all";
           }
         ];
-        speech.text = "Wiederholung aktiviert.";
+        speech.text = "Wiederholen aktiviert.";
       };
     };
 
     Musik_LoopAus = ack {
       sentences = [
-        "(Loop|Wiederholung|Wiederholen) (aus|ab|deaktivieren)"
+        "(Wiederholung|Wiederholen) (aus|deaktivieren)"
       ];
       script = {
         action = [
@@ -151,14 +140,13 @@ in
             data.repeat = "off";
           }
         ];
-        speech.text = "Wiederholung deaktiviert.";
+        speech.text = "Wiederholen deaktiviert.";
       };
     };
 
     Musik_PlayerNeustart = {
       sentences = [
         "(Player|Spieler|Sonos) (neu starten|neustarten|resetten)"
-        "Restart Player"
       ];
       script = {
         action = [ { action = e.script.sonos_reset; } ];
@@ -168,9 +156,7 @@ in
 
     Musik_ZufaelligesAlbum = silent {
       sentences = [
-        "(Spiele|Spiel) [ein ]zufälliges Album"
-        "Zufälliges Album"
-        "Random Album"
+        "[Spiele|Spiel] [ein] (zufälliges Album|Zufallsalbum)"
       ];
       script = {
         action = playPlaylist "Random Album (from library)";
@@ -180,9 +166,7 @@ in
 
     Musik_ZufaelligerKuenstler = silent {
       sentences = [
-        "(Spiele|Spiel) [einen ]zufälligen (Künstler|Artist)"
-        "Zufälliger (Künstler|Artist)"
-        "Random Artist"
+        "(Spiele|Spiel) [einen] (zufälligen|zufälliger) (Künstler|Artist)"
       ];
       script = {
         action = playPlaylist "Random Artist (from library)";
@@ -192,21 +176,18 @@ in
 
     Musik_NeueMusik = silent {
       sentences = [
-        "(Spiele|Spiel) [die ]neue[sten|n] (Musik|Tracks|Titel|Lieder)"
-        "(Spiele|Spiel) [die ]Playlist (neue Musik|Neue Tracks|Recently Added)"
-        "Recently Added"
+        "(Spiele|Spiel) ([die] neue[sten|n]|kürzlich hinzugefügte) (Musik|Tracks|Titel|Lieder)"
       ];
       script = {
         action = playPlaylist "Recently added tracks";
-        speech.text = "Spiele neue Musik.";
+        speech.text = "Spiele kürzlich hinzugefügte Musik.";
       };
     };
 
     Musik_KuerzlichGespielt = silent {
       sentences = [
         "(Spiele|Spiel) [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
-        "Recently Played"
-        "Spiel die selben Songs nochmal"
+        "Spiel (die|den) selben Song[s] nochmal"
       ];
       script = {
         action = playPlaylist "Recently played tracks";
@@ -216,55 +197,28 @@ in
 
     Musik_Playlist = {
       sentences = [
-        "(Spiele|Spiel|Starte) [die ]Playlist {mass_playlist}"
-        "Playlist[e] {mass_playlist}"
+        "(Spiele|Spiel|Starte) die Playlist {mass_playlist}"
       ];
       script = {
-        action = [
-          {
-            action = "music_assistant.play_media";
-            target.entity_id = player;
-            data = {
-              media_id = "{{ mass_playlist }}";
-              media_type = "playlist";
-            };
-          }
-        ];
-        speech.text = "Spiele Playlist {{ mass_playlist }}.";
+        action = [ (playMA "playlist" "{{ mass_playlist }}") ];
+        speech.text = "Spiele die Playlist {{ mass_playlist }}.";
       };
     };
 
     Musik_Album = {
       sentences = [
-        "(Spiele|Spiel|Starte) [das ]Album {mass_album}"
-        "Album {mass_album}"
+        "(Spiele|Spiel|Starte) das Album {mass_album}"
       ];
       script = {
-        action = [
-          {
-            action = "music_assistant.play_media";
-            target.entity_id = player;
-            data = {
-              media_id = "{{ mass_album }}";
-              media_type = "album";
-            };
-          }
-        ];
-        speech.text = "Spiele Album {{ mass_album }}.";
+        action = [ (playMA "album" "{{ mass_album }}") ];
+        speech.text = "Spiele das Album {{ mass_album }}.";
       };
     };
 
-    # mass_genre's `out:` is a `library://genre/<id>` URI rather than a
-    # name. MA's HA integration resolves bare names via
-    # get_item_by_name, which has no get_library_genres fall-through,
-    # so the only path that actually plays a genre is the direct-URI
-    # branch. That also means `{{ mass_genre }}` is a URI here, not a
-    # human label — hence the generic speech response.
     Musik_Genre = {
       sentences = [
         "(Spiele|Spiel|Starte) {mass_genre} (Musik|Lieder)"
         "(Spiele|Spiel|Starte) [die ]Musikrichtung {mass_genre}"
-        "(Genre|Musikrichtung) {mass_genre} [Musik]"
       ];
       script = {
         action = [
@@ -274,64 +228,33 @@ in
             data.media_id = "{{ mass_genre }}";
           }
         ];
-        speech.text = "Spiele Musik.";
+        speech.text = "Spiele {{mass_genre}} Musik.";
       };
     };
 
     Musik_Kuenstler = {
       sentences = [
-        "(Spiele|Spiel|Starte) [den ](Künstler|Artist) {mass_artist}"
-        "(Spiele|Spiel) (was|etwas|Musik) von {mass_artist}"
-        "(Künstler|Artist) {mass_artist}"
+        "(Spiele|Spiel) (was|etwas|Musik|etwas Musik) von {mass_artist}"
       ];
       script = {
-        action = [
-          {
-            action = "music_assistant.play_media";
-            target.entity_id = player;
-            data = {
-              media_id = "{{ mass_artist }}";
-              media_type = "artist";
-            };
-          }
-        ];
-        speech.text = "Spiele {{ mass_artist }}.";
+        action = [ (playMA "artist" "{{ mass_artist }}") ];
+        speech.text = "Spiele Musik von {{ mass_artist }}.";
       };
     };
 
-    # mass_track is populated by mass-slot-lists.service (see
-    # mass_slot_lists.py); each title gets a canonical entry plus
-    # in/out aliases derived from a cleanup pass (bracketed metadata
-    # stripped, split on |, /, " - ", short/numeric segments dropped).
-    # The resolved `out` is the exact library title MA needs to look
-    # up the track unambiguously.
     Musik_Song = silent {
       sentences = [
-        "(Spiele|Spiel|Starte) [das |den ](Lied|Stück|Song) {mass_track}"
-        "(Lied|Song) {mass_track}"
+        "(Spiele|Spiel|Starte) (das|den) (Lied|Stück|Song) {mass_track}"
       ];
       script = {
-        action = [
-          {
-            action = "music_assistant.play_media";
-            target.entity_id = player;
-            data = {
-              media_id = "{{ mass_track }}";
-              media_type = "track";
-            };
-          }
-        ];
+        action = [ (playMA "track" "{{ mass_track }}") ];
         speech.text = "Spiele {{ mass_track }}.";
       };
     };
 
-    # Same title, disambiguated by artist — for ASR-collision titles
-    # like "Hello", "Yesterday", "Heroes". `artist` is passed alongside
-    # `media_id` so MA narrows the library search to that artist's
-    # catalogue before picking a match.
     Musik_SongVonKuenstler = silent {
       sentences = [
-        "(Spiele|Spiel|Starte) [das ](Lied|Stück|Song) {mass_track} von {mass_artist}"
+        "(Spiele|Spiel|Starte) [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
       ];
       script = {
         action = [

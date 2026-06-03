@@ -1,11 +1,13 @@
+{ lib, ... }:
 {
   # English translations of all German intents, for testing the matcher.
   # Mirrors botty, climate, einkauf, garden, music, news, time, tv, weather
-  # — sentences + speech responses only, no actions executed.
-  hass.voice.intents = {
+  # — sentences + speech responses only, no actions executed. Every
+  # entry's `language` is set to "en" via the wrapping mapAttrs so we
+  # don't repeat the same one line on every intent.
+  hass.voice.intents = lib.mapAttrs (_: i: i // { language = "en"; }) {
     # ----- botty (vacuum) -----
     EN_Botty_Start = {
-      language = "en";
       sentences = [
         "(start|begin) [the ]cleaning"
         "start cleaning"
@@ -17,7 +19,6 @@
     };
 
     EN_Botty_Ende = {
-      language = "en";
       sentences = [
         "(stop|end) [the ]cleaning"
         "(stop|end) vacuuming"
@@ -28,7 +29,6 @@
     };
 
     EN_Botty_Wohnzimmer = {
-      language = "en";
       sentences = [
         "(vacuum|clean) [the ]living room"
         "botty [to the] living room"
@@ -38,7 +38,6 @@
     };
 
     EN_Botty_Buero = {
-      language = "en";
       sentences = [
         "(vacuum|clean) [the ](office|study)"
         "botty [to the] (office|study)"
@@ -48,7 +47,6 @@
     };
 
     EN_Botty_Kueche = {
-      language = "en";
       sentences = [
         "(vacuum|clean) [the ]kitchen"
         "botty [to the] kitchen"
@@ -58,7 +56,6 @@
     };
 
     EN_Botty_Sofa = {
-      language = "en";
       sentences = [
         "(vacuum|clean) (under|in front of) the (sofa|couch|tv|television)"
         "[botty] (vacuum|clean) [the ](sofa|couch|tv|television)"
@@ -68,7 +65,6 @@
 
     # ----- climate -----
     EN_Temperatur = {
-      language = "en";
       sentences = [
         "how (warm|hot) is it in [the ]{area}"
         "what (is the |'s the )(temperature|humidity) in [the ]{area}"
@@ -88,7 +84,6 @@
 
     # ----- einkauf (shopping / todo list) -----
     EN_Einkauf_Add = {
-      language = "en";
       sentences = [
         "(add|put|throw) {item} (on|to) [the |my ]shopping list"
         "{item} (on|to) the shopping list"
@@ -99,7 +94,6 @@
     };
 
     EN_ToDo_Add = {
-      language = "en";
       sentences = [
         "(add|put|throw) {item} (on|to) [the |my ](todo|to-do|to do) list"
         "{item} (on|to) the (todo|to-do) list"
@@ -111,7 +105,6 @@
 
     # ----- garden (water pump) -----
     EN_Pumpe_An = {
-      language = "en";
       sentences = [
         "(activate|turn on|switch on) [the ][water ]pump"
         "[water ]pump on"
@@ -120,7 +113,6 @@
     };
 
     EN_Pumpe_Aus = {
-      language = "en";
       sentences = [
         "(deactivate|turn off|switch off) [the ][water ]pump"
         "[water ]pump off"
@@ -130,7 +122,6 @@
 
     # ----- music -----
     EN_MusikAn = {
-      language = "en";
       sentences = [
         "(play|start) [some |the ]music"
         "music (on|please|start)"
@@ -139,7 +130,6 @@
     };
 
     EN_Musik_Fortsetzen = {
-      language = "en";
       sentences = [
         "(resume|continue) [the ]music"
         "(resume|continue) playback"
@@ -149,7 +139,6 @@
     };
 
     EN_Musik_Pause = {
-      language = "en";
       sentences = [
         "(pause|stop|halt) [the ]music"
         "(pause|stop) playback"
@@ -159,7 +148,6 @@
     };
 
     EN_Musik_Naechster = {
-      language = "en";
       sentences = [
         "next (track|song)"
         "skip [this] (track|song)"
@@ -169,7 +157,6 @@
     };
 
     EN_Musik_ShuffleAn = {
-      language = "en";
       sentences = [
         "(turn on|enable|activate) shuffle"
         "shuffle (on|enable)"
@@ -179,7 +166,6 @@
     };
 
     EN_Musik_ShuffleAus = {
-      language = "en";
       sentences = [
         "(turn off|disable|deactivate) shuffle"
         "shuffle (off|disable)"
@@ -189,7 +175,6 @@
     };
 
     EN_Musik_PlayerNeustart = {
-      language = "en";
       sentences = [
         "(restart|reset) [the ](player|sonos)"
         "restart player"
@@ -198,7 +183,6 @@
     };
 
     EN_Musik_ZufaelligesAlbum = {
-      language = "en";
       sentences = [
         "play [a ]random album"
         "random album"
@@ -207,7 +191,6 @@
     };
 
     EN_Musik_ZufaelligerKuenstler = {
-      language = "en";
       sentences = [
         "play [a ]random (artist|musician)"
         "random artist"
@@ -216,7 +199,6 @@
     };
 
     EN_Musik_NeueMusik = {
-      language = "en";
       sentences = [
         "play [the ](new|newest|latest) (music|tracks|songs)"
         "play [the ]playlist (new music|recently added)"
@@ -226,7 +208,6 @@
     };
 
     EN_Musik_KuerzlichGespielt = {
-      language = "en";
       sentences = [
         "play [the ]recently (played|heard) (tracks|songs)"
         "recently played"
@@ -236,7 +217,6 @@
     };
 
     EN_Musik_Playlist = {
-      language = "en";
       sentences = [
         "(play|start) [the ]playlist {playlist}"
         "playlist {playlist}"
@@ -252,7 +232,6 @@
 
     # ----- news -----
     EN_News_Tagesschau = {
-      language = "en";
       sentences = [
         "(play|start) [the ]tagesschau"
         "(play|start) tagesschau in (one hundred|100) seconds"
@@ -262,7 +241,6 @@
     };
 
     EN_News_WDRAktuell = {
-      language = "en";
       sentences = [
         "(play|start) WDR (current|aktuell)"
         "WDR[ news| aktuell]"
@@ -271,7 +249,6 @@
     };
 
     EN_News_TaeglicheZusammenfassung = {
-      language = "en";
       sentences = [
         "(play|start) [the |my ](news|daily (summary|briefing|digest))"
         "news"
@@ -282,7 +259,6 @@
 
     # ----- time -----
     EN_Zeit_Uhrzeit = {
-      language = "en";
       sentences = [
         "what (time is it|'s the time)"
         "tell me the time"
@@ -293,7 +269,6 @@
     };
 
     EN_Zeit_Datum = {
-      language = "en";
       sentences = [
         "what (date is it|'s the date|'s today's date)"
         "what is today's date"
@@ -305,7 +280,6 @@
     };
 
     EN_Zeit_Wochentag = {
-      language = "en";
       sentences = [
         "what (day|weekday) is it [today]"
         "what day of the week is it"
@@ -318,7 +292,6 @@
 
     # ----- tv -----
     EN_TV_Hell = {
-      language = "en";
       sentences = [
         "(make|set) the (tv|television|picture|screen) bright[er]"
         "[tv ]day mode"
@@ -327,7 +300,6 @@
     };
 
     EN_TV_Dunkel = {
-      language = "en";
       sentences = [
         "(make|set) the (tv|television|picture|screen) (dark|darker|dimmer)"
         "[tv ]night mode"
@@ -336,7 +308,6 @@
     };
 
     EN_TV_Aus = {
-      language = "en";
       sentences = [
         "(turn|switch) off [the ](tv|television)"
         "(tv|television) (off|turn off)"
@@ -345,7 +316,6 @@
     };
 
     EN_TV_Stumm = {
-      language = "en";
       sentences = [
         "mute [the ](tv|television)"
         "(tv|television) (mute|silence)"
@@ -356,7 +326,6 @@
 
     # ----- weather -----
     EN_Wetter_Heute = {
-      language = "en";
       sentences = [
         "(what's|what is|how's|how is) the weather (today|right now|currently|outside)"
         "how (warm|hot|cold) is it (outside|right now|currently)"
@@ -365,7 +334,6 @@
     };
 
     EN_Wetter_Morgen = {
-      language = "en";
       sentences = [
         "(what's|what is|how's|how is) the weather tomorrow [morning|afternoon|evening]"
         "how (warm|hot) will it be tomorrow"
@@ -374,7 +342,6 @@
     };
 
     EN_Wetter_Woche = {
-      language = "en";
       sentences = [
         "(what's|what is|how's|how is) the weather (this week|the next few days|next week)"
         "weather forecast [for the next few days]"
@@ -383,7 +350,6 @@
     };
 
     EN_Wetter_Stunde = {
-      language = "en";
       sentences = [
         "(what's|what will|how will|how's) the weather [be ]at {timer_hours:hours} (o'clock|)"
         "how (warm|hot) will it be at {timer_hours:hours} (o'clock|)"
@@ -392,7 +358,6 @@
     };
 
     EN_Wetter_WindAktuell = {
-      language = "en";
       sentences = [
         "how windy is it [today|right now|currently]"
         "how (strong|hard) is the wind [blowing]"
@@ -401,7 +366,6 @@
     };
 
     EN_Wetter_WindHeuteNacht = {
-      language = "en";
       sentences = [
         "how windy will it be (tonight|at night|this evening)"
       ];
@@ -409,7 +373,6 @@
     };
 
     EN_Wetter_TemperaturMaxHeute = {
-      language = "en";
       sentences = [
         "how (warm|hot) will it (get|be) today [still]"
         "what (is|'s) the (high|maximum|highest) temperature today"
@@ -418,7 +381,6 @@
     };
 
     EN_Wetter_RegenHeute = {
-      language = "en";
       sentences = [
         "(is|will) it (raining|rain) (today|later today)"
         "will it rain today"
@@ -428,7 +390,6 @@
     };
 
     EN_Wetter_RegenStunde = {
-      language = "en";
       sentences = [
         "(is|will) it (raining|rain) at {timer_hours:hours} (o'clock|)"
         "is there [any ]rain at {timer_hours:hours} (o'clock|)"

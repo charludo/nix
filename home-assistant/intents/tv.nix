@@ -8,8 +8,7 @@ in
   hass.voice.intents = {
     TV_Hell = ack {
       sentences = [
-        "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) hell[er]"
-        "[Fernseher] Tagmodus"
+        "[Mach] [den|das] (Fernseher|Bild) hell[er]"
       ];
       script = {
         action = [ { action = "rest_command.lgtv_picture_day"; } ];
@@ -19,8 +18,7 @@ in
 
     TV_Dunkel = ack {
       sentences = [
-        "[Mache|Setze|Stelle] [den|das] (TV|Fernseher|Bild|Bildschirm) (dunkel|dunkler)"
-        "[Fernseher] Nachtmodus"
+        "[Mach] [den|das] (Fernseher|Bild) (dunkel|dunkler)"
       ];
       script = {
         action = [ { action = "rest_command.lgtv_picture_night"; } ];
@@ -30,8 +28,8 @@ in
 
     TV_Aus = ack {
       sentences = [
-        "(Schalte|Mache) [den|das] (TV|Fernseher) aus"
-        "(TV|Fernseher) (aus|ausschalten|abschalten)"
+        "(Schalt|Mache) den Fernseher aus"
+        "Fernseher (aus|ausschalten)"
       ];
       script = {
         action = [
@@ -46,9 +44,8 @@ in
 
     TV_Stumm = silent {
       sentences = [
-        "(Stumm|Stummschalten|Mute) [den|das] (TV|Fernseher)"
-        "(TV|Fernseher) (stumm|stummschalten|leise|mute)"
-        "(Mache|Stelle) [den|das] (TV|Fernseher) (stumm|leise)"
+        "Fernseher (stumm|stummschalten|leise)"
+        "(Mach|Schalt) den Fernseher (stumm|leise)"
       ];
       script = {
         action = [

@@ -5,7 +5,7 @@ in
 {
   hass.voice.intents.Tueralarm_Aktivieren = {
     sentences = [
-      "(Alarmanlage|Türalarm|Alarm) (aktivieren|scharfschalten|einschalten|anschalten|an|scharf)"
+      "(Alarmanlage|Türalarm|Alarm) (aktivieren|scharfschalten|einschalten|anschalten)"
       "(Aktiviere|Schalte) [den |die ](Türalarm|Alarmanlage|Alarm) [scharf|ein|an]"
       "Sicherheitsmodus"
     ];

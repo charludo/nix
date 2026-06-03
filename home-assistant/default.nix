@@ -22,7 +22,7 @@
     ./shopping.nix
     ./sonos.nix
     ./timers.nix
-    ./voice_satellite.nix
+    ./voice.nix
     ./weather.nix
     ./xiaomi.nix
   ];
