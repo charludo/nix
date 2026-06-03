@@ -13,6 +13,11 @@ let
       action = target;
       data = { inherit title message; };
     };
+
+  notifyBoth = msg: [
+    (notify e.person.charlotte.notify msg)
+    (notify e.person.marie.notify msg)
+  ];
 in
 {
   hass.automations = {
@@ -24,11 +29,7 @@ in
           platform = "numeric_state";
           entity_id = e.sensor.thermometer_gewachshaus.temperature;
           below = 0;
-          for = {
-            hours = 0;
-            minutes = 20;
-            seconds = 0;
-          };
+          for.minutes = 20;
         }
       ];
       action = [
@@ -47,23 +48,13 @@ in
           platform = "numeric_state";
           entity_id = e.sensor.thermometer_badezimmer.humidity;
           above = 90;
-          for = {
-            hours = 1;
-            minutes = 0;
-            seconds = 0;
-          };
+          for.hours = 1;
         }
       ];
-      action = [
-        (notify e.person.charlotte.notify {
-          title = "Luftfeuchtigkeit im Badezimmer zu hoch";
-          message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
-        })
-        (notify e.person.marie.notify {
-          title = "Luftfeuchtigkeit im Badezimmer zu hoch";
-          message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
-        })
-      ];
+      action = notifyBoth {
+        title = "Luftfeuchtigkeit im Badezimmer zu hoch";
+        message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
+      };
     };
 
     temperatur_serverschrank = {
@@ -74,23 +65,13 @@ in
           platform = "numeric_state";
           entity_id = e.sensor.thermometer_serverschrank.temperature;
           above = 40;
-          for = {
-            hours = 0;
-            minutes = 5;
-            seconds = 0;
-          };
+          for.minutes = 5;
         }
       ];
-      action = [
-        (notify e.person.charlotte.notify {
-          title = "Was da los?!";
-          message = "Hohe Temperatur im Serverschrank";
-        })
-        (notify e.person.marie.notify {
-          title = "Was da los?!";
-          message = "Hohe Temperatur im Serverschrank";
-        })
-      ];
+      action = notifyBoth {
+        title = "Was da los?!";
+        message = "Hohe Temperatur im Serverschrank";
+      };
     };
 
     luftfeuchtigkeit_wohnbereich = {
@@ -105,23 +86,13 @@ in
             e.sensor.thermometer_buro.humidity
           ];
           above = 65;
-          for = {
-            hours = 0;
-            minutes = 4;
-            seconds = 0;
-          };
+          for.minutes = 4;
         }
       ];
-      action = [
-        (notify e.person.charlotte.notify {
-          title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
-          message = "Zeit zu Lüften!";
-        })
-        (notify e.person.marie.notify {
-          title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
-          message = "Zeit zu Lüften!";
-        })
-      ];
+      action = notifyBoth {
+        title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
+        message = "Zeit zu Lüften!";
+      };
     };
 
     tursensor_alarm = {
@@ -132,11 +103,7 @@ in
           platform = "state";
           entity_id = e.binary_sensor.tursensor.opening;
           to = "on";
-          for = {
-            hours = 0;
-            minutes = 0;
-            seconds = 3;
-          };
+          for.seconds = 3;
         }
       ];
       condition = [
@@ -146,27 +113,19 @@ in
           state = "on";
         }
       ];
-      action = [
-        (notify e.person.charlotte.notify {
+      action =
+        notifyBoth {
           title = "Wohnungstür ist seit 3 Sekunden offen";
           message = "WOHNUNGSTÜR WURDE GEÖFFNET";
-        })
-        (notify e.person.marie.notify {
-          title = "Wohnungstür ist seit 3 Sekunden offen";
-          message = "WOHNUNGSTÜR WURDE GEÖFFNET";
-        })
-        {
-          action = "input_boolean.turn_on";
-          target.entity_id = e.input_boolean.turalarm_persistent;
         }
-      ];
+        ++ [
+          {
+            action = "input_boolean.turn_on";
+            target.entity_id = e.input_boolean.turalarm_persistent;
+          }
+        ];
     };
 
-    # Watches the min-battery group sensor (see helpers.nix) and pings
-    # both phones with the names of all devices currently below 10%.
-    # `expand` walks the group's members at firing time, so the list of
-    # batteries stays driven by hass.devices.zigbee — no second source
-    # of truth here.
     zigbee_low_battery = {
       alias = "Zigbee niedriger Akku";
       mode = "single";
@@ -175,35 +134,21 @@ in
           platform = "numeric_state";
           entity_id = e.sensor.zigbee_min_battery;
           below = lowBatteryThreshold;
-          for = {
-            hours = 0;
-            minutes = 5;
-            seconds = 0;
-          };
+          for.minutes = 5;
         }
       ];
-      action =
-        let
-          message = ''
-            {% set ns = namespace(names=[]) %}
-            {%- for s in expand('${e.sensor.zigbee_min_battery}') -%}
-              {%- if s.state not in ['unknown', 'unavailable'] and (s.state | float(100)) < ${toString lowBatteryThreshold} -%}
-                {%- set ns.names = ns.names + [s.name + ' (' + s.state + '%)'] -%}
-              {%- endif -%}
-            {%- endfor -%}
-            Niedriger Akku: {{ ns.names | join(', ') }}
-          '';
-        in
-        [
-          (notify e.person.charlotte.notify {
-            title = "Zigbee: Akku schwach";
-            inherit message;
-          })
-          (notify e.person.marie.notify {
-            title = "Zigbee: Akku schwach";
-            inherit message;
-          })
-        ];
+      action = notifyBoth {
+        title = "Zigbee: Akku schwach";
+        message = ''
+          {% set ns = namespace(names=[]) %}
+          {%- for s in expand('${e.sensor.zigbee_min_battery}') -%}
+            {%- if s.state not in ['unknown', 'unavailable'] and (s.state | float(100)) < ${toString lowBatteryThreshold} -%}
+              {%- set ns.names = ns.names + [s.name + ' (' + s.state + '%)'] -%}
+            {%- endif -%}
+          {%- endfor -%}
+          Niedriger Akku: {{ ns.names | join(', ') }}
+        '';
+      };
     };
   };
 }
