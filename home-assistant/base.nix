@@ -24,7 +24,7 @@
         joserfc
         vacuum-map-parser-base
         vacuum-map-parser-roborock
-        pkgs.ours.hass-grocery-categorize
+        pkgs.ours.home-assistant.grocery-categorize-cli
         p.vacuum-map-parser-dreame
         p.vacuum-map-parser-ijai
         p.vacuum-map-parser-roidmi

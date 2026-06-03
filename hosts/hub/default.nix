@@ -47,10 +47,11 @@
 
     # --- Automatic gain control ------------------------------------------
     AGCONOFF = 1;
-    AGCMAXGAIN = 30.0;        # up to ~30 dB; needed for far-field speakers
-    AGCDESIREDLEVEL = 0.03;   # ≈ -15 dBov target
-    AGCTIME = 1.0;            # 1 s ramp (chip max). Prevents pumping during
-                              # natural pauses; faster ramps confuse ASR.
+    AGCMAXGAIN = 30.0; # up to ~30 dB; needed for far-field speakers
+    AGCDESIREDLEVEL = 0.03; # ≈ -15 dBov target
+    AGCTIME = 1.0;
+    # 1 s ramp (chip max). Prevents pumping during
+    # natural pauses; faster ramps confuse ASR.
 
     # --- High-pass filter -------------------------------------------------
     # 180 Hz: more aggressive rumble removal. Safe here because the lowest
@@ -68,8 +69,8 @@
     STATNOISEONOFF_SR = 1;
     NONSTATNOISEONOFF = 1;
     NONSTATNOISEONOFF_SR = 1;
-    MIN_NS_SR = 0.3;          # -10 dB floor (vs default 0.15 = -16 dB)
-    MIN_NN_SR = 0.4;          # -8 dB floor (vs default 0.3 = -10 dB)
+    MIN_NS_SR = 0.3; # -10 dB floor (vs default 0.15 = -16 dB)
+    MIN_NN_SR = 0.4; # -8 dB floor (vs default 0.3 = -10 dB)
 
     # --- Comfort noise ---------------------------------------------------
     # Off for ASR — don't inject synthetic noise into silence.

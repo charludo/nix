@@ -32,11 +32,13 @@ let
   # for whichever slot fired without a per-slot duplicated branch.
   timeSlug = lib.replaceStrings [ ":" ] [ "_" ];
 
-  slotBoolean = t: lib.nameValuePair "bewasserung_zeit_${timeSlug t}" {
-    name = "Bewässerung ${t}";
-    icon = "mdi:water-outline";
-    area = e.areaName.terrasse;
-  };
+  slotBoolean =
+    t:
+    lib.nameValuePair "bewasserung_zeit_${timeSlug t}" {
+      name = "Bewässerung ${t}";
+      icon = "mdi:water-outline";
+      area = e.areaName.terrasse;
+    };
 
   # Same predicate as before the refactor (8h > 4mm OR 24h > 10mm). Kept as
   # a single attrset so both the rain-skip notify branch and the dashboard

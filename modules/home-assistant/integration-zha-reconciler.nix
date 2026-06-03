@@ -163,7 +163,7 @@ in
       # The script logs each per-device failure; check the journal if
       # something looks off.
       script = ''
-        ${pkgs.ours.home-assistant.zha-reconciler}/bin/zha-reconciler \
+        ${lib.getExe pkgs.ours.home-assistant.zha-reconciler} \
           --url ${lib.escapeShellArg rcfg.url} \
           --token-file "$CREDENTIALS_DIRECTORY/token" \
           --manifest ${zhaManifestFile} \

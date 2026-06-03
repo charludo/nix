@@ -61,25 +61,10 @@ let
     };
 in
 {
-  # Sourced from the `hass-closest-intent` flake input (a local path while the
-  # repo isn't published). Swap to `mkComponent` with fetchFromGitHub once it
-  # lives upstream.
   closest_intent = mkLocalComponent {
     pname = "closest_intent";
     version = "0.1.0";
     src = hass-closest-intent-src;
-  };
-
-  grocery_categorize = mkLocalComponent {
-    pname = "grocery_categorize";
-    version = "0.1.0";
-    src = ../../../../hass-grocery-categorize;
-  };
-
-  tts_relay = mkLocalComponent {
-    pname = "tts_relay";
-    version = "0.1.0";
-    src = ./tts_relay;
   };
 
   auth_oidc = mkComponent {

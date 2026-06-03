@@ -10,7 +10,8 @@ let
   # Mini variant of `mkToggleCard` for the watering slot row: same
   # contrast2/blue palette and icon-over-name layout, but shorter so
   # six of them fit comfortably in one horizontal-stack row.
-  mkWateringSlotButton = t:
+  mkWateringSlotButton =
+    t:
     let
       slug = lib.replaceStrings [ ":" ] [ "_" ] t;
     in
@@ -519,21 +520,24 @@ in
                     # they stay in sync — leaving the off-automation
                     # enabled while the on-automation is disabled would
                     # be a footgun.
-                    ((mkAutoToggle {
-                      entity = e.automation.wasserpumpe_an;
-                      name = "Bewässerungs-Automatik";
-                      onColor = "var(--blue)";
-                    }) // {
-                      tap_action = {
-                        action = "perform-action";
-                        perform_action = "automation.toggle";
-                        haptic = "medium";
-                        data.entity_id = [
-                          e.automation.wasserpumpe_an
-                          e.automation.wasserpumpe_aus
-                        ];
-                      };
-                    })
+                    (
+                      (mkAutoToggle {
+                        entity = e.automation.wasserpumpe_an;
+                        name = "Bewässerungs-Automatik";
+                        onColor = "var(--blue)";
+                      })
+                      // {
+                        tap_action = {
+                          action = "perform-action";
+                          perform_action = "automation.toggle";
+                          haptic = "medium";
+                          data.entity_id = [
+                            e.automation.wasserpumpe_an
+                            e.automation.wasserpumpe_aus
+                          ];
+                        };
+                      }
+                    )
                   ];
                 }
                 (ha.mkConditional [ (ha.stateIs e.automation.wasserpumpe_an "on") ] {

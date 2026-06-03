@@ -52,7 +52,7 @@ in
 
   config = lib.mkIf (cfg.supermarkets != { }) {
     services.home-assistant.customComponents = [
-      pkgs.ours.home-assistant.custom-components.grocery_categorize
+      pkgs.ours.home-assistant.grocery-categorize
     ];
 
     # rapidfuzz + numpy only — the component pulls them in via

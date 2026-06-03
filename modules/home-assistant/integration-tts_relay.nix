@@ -44,7 +44,7 @@ in
 
   config = lib.mkIf (cfg != [ ]) {
     services.home-assistant.customComponents = [
-      pkgs.ours.home-assistant.custom-components.tts_relay
+      pkgs.ours.home-assistant.tts-relay
     ];
 
     # tts_relay takes either a bare list of route dicts (legacy) or a

@@ -51,7 +51,7 @@ let
     }) d.aliases
   ) devices;
 
-  spokenName = ''state_attr(geraet, 'friendly_name') or geraet'';
+  spokenName = "state_attr(geraet, 'friendly_name') or geraet";
 in
 {
   hass.voice.intents = {

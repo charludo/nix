@@ -12,22 +12,26 @@ let
     "Büro" = e.media_player.office;
   };
 
-  mkMute = room: entity: muted: silent {
-    sentences = [ "Lautsprecher im ${room} ${if muted then "(stumm|aus)" else "(an|laut)"}" ];
-    script = {
-      action = [
-        {
-          action = "media_player.volume_mute";
-          target.entity_id = entity;
-          data.is_volume_muted = muted;
-        }
-      ];
-      speech.text = if muted then "Stummgeschaltet." else "Wieder laut.";
+  mkMute =
+    room: entity: muted:
+    silent {
+      sentences = [ "Lautsprecher im ${room} ${if muted then "(stumm|aus)" else "(an|laut)"}" ];
+      script = {
+        action = [
+          {
+            action = "media_player.volume_mute";
+            target.entity_id = entity;
+            data.is_volume_muted = muted;
+          }
+        ];
+        speech.text = if muted then "Stummgeschaltet." else "Wieder laut.";
+      };
     };
-  };
 
-  muteIntents = lib.foldlAttrs (acc: room: entity:
-    acc // {
+  muteIntents = lib.foldlAttrs (
+    acc: room: entity:
+    acc
+    // {
       "Lautsprecher_${lib.ha.mkSlug room}_Aus" = mkMute room entity true;
       "Lautsprecher_${lib.ha.mkSlug room}_An" = mkMute room entity false;
     }

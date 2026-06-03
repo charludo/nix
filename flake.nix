@@ -49,10 +49,10 @@
     idagio.url = "github:charludo/IDAGIO-Downloader-Rust-ver";
     idagio.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Local checkout while the component is not yet published. Swap to a
-    # `github:charludo/hass-closest-intent` URL once it lives upstream.
     hass-closest-intent.url = "path:/home/charlotte/Projekte/hass-closest-intent";
     hass-closest-intent.flake = false;
+    hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
+    hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

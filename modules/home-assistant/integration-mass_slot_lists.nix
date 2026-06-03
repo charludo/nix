@@ -130,7 +130,7 @@ in
           "hass-token:${cfg.hassTokenPath}"
         ];
         ExecStart = lib.concatStringsSep " " [
-          "${pkgs.ours.home-assistant.mass-slot-lists}/bin/mass-slot-lists"
+          (lib.getExe pkgs.ours.home-assistant.mass-slot-lists)
           "--mass-url=${cfg.massUrl}"
           "--hass-url=${cfg.hassUrl}"
           "--language=${cfg.language}"
