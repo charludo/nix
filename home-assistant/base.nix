@@ -95,7 +95,11 @@
 
   hass.zha.reconciler.enable = true;
   hass.bambu.enable = true;
-  hass.massSlotLists.enable = true;
+  hass.massSlotLists = {
+    enable = true;
+    massTokenPath = config.age.secrets.mass-token.path;
+    hassTokenPath = config.age.secrets.hass-mass-token.path;
+  };
   hass.closestIntent.enable = true;
   hass.openweathermap.enable = true;
 }

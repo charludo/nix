@@ -33,12 +33,7 @@
           fields = lib.mkOption {
             type = lib.types.attrsOf lib.types.anything;
             default = { };
-            description = ''
-              Declared input fields with `selector`s. When the script
-              is run from the UI (more-info → Run, or the Run service
-              from Dev Tools), HA renders a form with these fields
-              and passes the entered values as script variables.
-            '';
+            description = "Declared input fields with selectors";
           };
         };
       }

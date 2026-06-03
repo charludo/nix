@@ -8,20 +8,6 @@ let
   cfg = config.hass.closestIntent;
 in
 {
-  # Standalone fuzzy-match conversation agent.
-  #
-  # Reads `services.home-assistant.config.conversation.intents` at YAML
-  # load time, fuzzy-matches user input against those patterns, captures
-  # whatever the user said in slot positions, then re-feeds the canonical
-  # sentence to HA's default conversation agent. From that point on it's
-  # a normal Hassil-handled command — slot lists, intent dispatch, the
-  # whole thing.
-  #
-  # After deploy, pick `conversation.closest_intent` as the conversation
-  # agent in HA → Settings → Voice assistants → (pipeline) → Edit. To
-  # have the default agent tried first (with this acting only as a
-  # fallback), enable **"Prefer handling commands locally"** on the same
-  # pipeline screen.
   options.hass.closestIntent.enable = lib.mkEnableOption "closest_intent fuzzy-match conversation agent";
 
   config = lib.mkIf cfg.enable {

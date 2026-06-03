@@ -10,9 +10,6 @@ let
   rcfg = cfg.zha.reconciler;
   inherit (lib.ha) mkSlug;
 
-  # Mirrors the zigbee domain map in modules/home-assistant/entities.nix.
-  # Several nix-level keys (sensor, diagnostic) collapse to the same
-  # HA-level domain (sensor).
   zigbeeDomainMap = {
     binary_sensor = "binary_sensor";
     diagnostic = "sensor";
@@ -23,9 +20,6 @@ let
     switch = "switch";
   };
 
-  # `{ light = ["light"]; sensor = ["humidity", "temperature", "battery"]; }`
-  # for one device, after merging nix's `sensor` + `diagnostic` into HA's
-  # single `sensor` domain.
   declaredEntitiesByDomain =
     dev:
     lib.foldl' (
@@ -37,12 +31,6 @@ let
       if suffixes == [ ] then acc else acc // { ${haDomain} = (acc.${haDomain} or [ ]) ++ suffixes; }
     ) { } (lib.attrNames zigbeeDomainMap);
 
-  # ieees are normalised to lowercase for case-insensitive matching
-  # against whatever ZHA returns. `entities` is the authoritative list
-  # of expected entity-name suffixes per HA domain: the reconciler uses
-  # it to match HA entities (by translation_key or device_class) and
-  # derive the desired entity_id, instead of slugifying HA's localized
-  # display names.
   zhaManifest = lib.mapAttrsToList (deviceName: dev: {
     ieee = lib.toLower dev.id;
     name = deviceName;
@@ -50,9 +38,6 @@ let
     entities = declaredEntitiesByDomain dev;
   }) cfg.devices.zigbee;
 
-  # Every non-zigbee declared device that has an area, addressed by its
-  # predictable entity_id. The reconciler prefers to set area on the
-  # owning device when one exists, otherwise falls back to entity-level.
   collectAreas =
     domain: attrs:
     lib.mapAttrsToList (slug: v: {
@@ -60,12 +45,6 @@ let
       area_slug = mkSlug v.area;
     }) (lib.filterAttrs (_: v: v.area != null) attrs);
 
-  # Wyoming/assist satellites are auto-discovered, so they're not in
-  # hass.devices. But each tts_relay route names a satellite-target
-  # pair, and the target's area is declared — by definition both live
-  # in the same room. Push the target's area onto the satellite's
-  # device so the conversation framework can fill `preferred_area_id`
-  # for intent_scripts (e.g. the volume intents in intents/music.nix).
   satelliteAreas =
     let
       mps = cfg.devices.media_players;
@@ -105,7 +84,7 @@ let
 in
 {
   options.hass.zha.reconciler = {
-    enable = lib.mkEnableOption "zha-reconciler: push Nix-declared device names and areas into HA's device registry via the websocket API";
+    enable = lib.mkEnableOption "pushing Nix-declared device names and areas into HA's device registry via the websocket API";
 
     url = lib.mkOption {
       type = lib.types.str;
@@ -115,14 +94,7 @@ in
 
     tokenPath = lib.mkOption {
       type = lib.types.path;
-      default = "/run/agenix/hass-reconciler-token";
-      description = ''
-        Path to a file containing a Home Assistant long-lived access token.
-        Default points at the agenix secret declared by this module — the
-        encrypted payload is sourced from ``secrets.hass-reconciler-token``.
-        Create the token in HA (user profile -> Security -> Long-lived tokens)
-        and re-rekey to update.
-      '';
+      description = "Path to a file containing a HA long-lived access token";
     };
   };
 
@@ -138,30 +110,17 @@ in
       after = [ "home-assistant.service" ];
       wants = [ "home-assistant.service" ];
       wantedBy = [ "multi-user.target" ];
-      # Re-run whenever a manifest or the script changes, via
-      # switch-to-configuration restart logic.
       restartTriggers = [
         zhaManifestFile
         entityManifestFile
         pkgs.ours.home-assistant.zha-reconciler
       ];
       serviceConfig = {
-        # Type=simple so the unit is reported "active" the moment the script
-        # is exec'd. With Type=oneshot the unit stays "activating" until the
-        # script returns, which makes switch-to-configuration block on long
-        # reconciles (e.g. an unreachable battery device) and time out the
-        # whole rebuild.
         Type = "simple";
         DynamicUser = true;
         SupplementaryGroups = [ "hass" ];
-        # Exposes the token at $CREDENTIALS_DIRECTORY/token without the
-        # unit user needing direct access to the agenix path.
         LoadCredential = [ "token:${rcfg.tokenPath}" ];
       };
-      # Swallow non-zero exits so a partial reconcile (e.g. a device
-      # offline because its battery is dead) doesn't fail activation.
-      # The script logs each per-device failure; check the journal if
-      # something looks off.
       script = ''
         ${lib.getExe pkgs.ours.home-assistant.zha-reconciler} \
           --url ${lib.escapeShellArg rcfg.url} \

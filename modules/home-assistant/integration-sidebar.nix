@@ -6,18 +6,6 @@
 }:
 let
   cfg = config.hass;
-
-  sidebarCfg = (pkgs.formats.yaml { }).generate "sidebar-config.yaml" {
-    sidebar_editable = false;
-    order = lib.imap0 (
-      idx: entry:
-      {
-        inherit (entry) item hide divider;
-        order = idx + 1;
-      }
-      // lib.optionalAttrs (entry.name != null) { inherit (entry) name; }
-    ) cfg.sidebar;
-  };
 in
 {
   options.hass.sidebar = lib.mkOption {
@@ -28,7 +16,7 @@ in
         options = {
           item = lib.mkOption {
             type = lib.types.str;
-            description = "Panel slug as it appears in the sidebar URL (lovelace, history, ...)";
+            description = "Panel slug as it appears in the sidebar URL";
           };
           name = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
@@ -51,8 +39,22 @@ in
   };
 
   config = lib.mkIf (cfg.sidebar != [ ]) {
-    systemd.tmpfiles.rules = [
-      "L+ ${config.services.home-assistant.configDir}/www/sidebar-config.yaml - - - - ${sidebarCfg}"
-    ];
+    systemd.tmpfiles.rules =
+      let
+        sidebarCfg = (pkgs.formats.yaml { }).generate "sidebar-config.yaml" {
+          sidebar_editable = false;
+          order = lib.imap0 (
+            idx: entry:
+            {
+              inherit (entry) item hide divider;
+              order = idx + 1;
+            }
+            // lib.optionalAttrs (entry.name != null) { inherit (entry) name; }
+          ) cfg.sidebar;
+        };
+      in
+      [
+        "L+ ${config.services.home-assistant.configDir}/www/sidebar-config.yaml - - - - ${sidebarCfg}"
+      ];
   };
 }

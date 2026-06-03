@@ -8,19 +8,9 @@ let
   cfg = config.hass.ttsRelay;
 in
 {
-  # Re-route assist_pipeline TTS output for a satellite (e.g. a wyoming
-  # mic with no speaker) onto a Sonos. Uses sonos.snapshot /
-  # sonos.restore (local UPnP) to emulate ducking — HA's `announce:
-  # true` would be the natural fit, but Sonos's announce path needs
-  # cloud OAuth and is unusable behind a firewall.
   options.hass.ttsRelay = lib.mkOption {
     default = [ ];
-    description = ''
-      List of routes mapping an ``assist_satellite`` entity to a target
-      Sonos ``media_player``. On each TTS response, the target is
-      snapshotted (if playing), the TTS clip is played, and the
-      previous state is restored when the clip ends
-    '';
+    description = "List of routes mapping an `assist_satellite` entity to a target Sonos `media_player`";
     type = lib.types.listOf (
       lib.types.submodule {
         options = {
@@ -35,7 +25,7 @@ in
           volume = lib.mkOption {
             type = lib.types.nullOr (lib.types.numbers.between 0.0 1.0);
             default = null;
-            description = "Optional TTS playback volume (0.0–1.0). Original volume is restored after the clip";
+            description = "Optional TTS playback volume (0.0–1.0) only for the announcement";
           };
         };
       }
@@ -47,12 +37,6 @@ in
       pkgs.ours.home-assistant.tts-relay
     ];
 
-    # tts_relay takes either a bare list of route dicts (legacy) or a
-    # dict with `routes:` + `sounds:`. We always emit the dict form so
-    # the voice-effect sound URLs flow through to the component. URLs
-    # are derived from the per-category paths in `hass.voice.sounds` —
-    # voice.nix symlinks each path into `<www>/sounds/<basename>`, so
-    # the public URL is `/local/sounds/<basename>`.
     services.home-assistant.config.tts_relay = {
       routes = map (
         r:

@@ -9,7 +9,7 @@ let
 in
 {
   options.hass.shopping = {
-    todo_entity = lib.mkOption {
+    todoEntity = lib.mkOption {
       type = lib.types.str;
       default = "todo.einkaufsliste";
       description = "HA todo entity ID to read uncompleted items from";
@@ -17,7 +17,7 @@ in
 
     supermarkets = lib.mkOption {
       default = { };
-      description = "Map of supermarket display name → categories shown on the shopping dashboard";
+      description = "Map of supermarket display name to categories shown on the shopping dashboard";
       example = lib.literalExpression ''
         {
           ALDI.categories = [ "Obst" "Gemüse" "Milchprodukte" ];
@@ -32,12 +32,12 @@ in
           options = {
             categories = lib.mkOption {
               type = lib.types.listOf lib.types.str;
-              description = "Ordered list of category names; order = store aisle sequence";
+              description = "Aisle-ordered list of category names";
             };
             color = lib.mkOption {
               type = lib.types.str;
               default = "var(--green)";
-              description = "CSS colour expression for the supermarket's button";
+              description = "CSS color expression for the supermarket's button";
             };
             icon = lib.mkOption {
               type = lib.types.str;
@@ -55,8 +55,6 @@ in
       pkgs.ours.home-assistant.grocery-categorize
     ];
 
-    # rapidfuzz + numpy only — the component pulls them in via
-    # manifest.json, but HA on NixOS doesn't auto-resolve.
     services.home-assistant.extraPackages = py: [
       py.rapidfuzz
       py.numpy
@@ -64,8 +62,7 @@ in
     ];
 
     services.home-assistant.config.grocery_categorize = {
-      inherit (cfg) todo_entity;
-      # Component only cares about category order, not the colour.
+      inherit (cfg) todoEntity;
       supermarkets = lib.mapAttrs (_: s: s.categories) cfg.supermarkets;
     };
   };

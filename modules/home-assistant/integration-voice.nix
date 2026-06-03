@@ -85,45 +85,33 @@ let
       sentences = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         default = [ ];
-        description = ''
-          Sentence patterns for this intent. Patterns may reference
-          Hassil expansion rules (``<rule>``), built-in HA slot lists
-          (``{name}``, ``{area}``, ``{timer_hours:hours}``), or custom
-          slot lists declared via the sibling ``lists`` option
-        '';
+        description = "Sentence patterns for this intent";
       };
       script = lib.mkOption {
         type = lib.types.nullOr lib.types.anything;
         default = null;
-        description = ''
-          ``intent_script`` body for this intent — usually
-          ``{ speech.text = ...; action = [ ... ]; }``
-        '';
+        description = "intent_script body for this intent, usually `{ speech.text = ...; action = [ ... ]; }`";
       };
       language = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
-        default = null;
+        default = config.hass.voice.defaultLanguage;
         defaultText = lib.literalExpression "config.hass.voice.defaultLanguage";
-        description = "Language code; falls back to ``hass.voice.defaultLanguage``";
+        description = "Language code to use";
       };
       lists = lib.mkOption {
         type = yamlFormat.type;
         default = { };
-        description = ''
-          Hassil slot lists merged into this language's custom_sentences
-          file. Supports ``{ values = [...]; }``, ``{ wildcard = true; }``,
-          and ``{ range.from = N; range.to = M; }``
-        '';
+        description = "Slot lists merged into this language's custom_sentences file";
       };
       expansionRules = lib.mkOption {
         type = lib.types.attrsOf lib.types.str;
         default = { };
-        description = "Hassil expansion rules merged into this language's custom_sentences file";
+        description = "Expansion rules merged into this language's custom_sentences file";
       };
       responses = lib.mkOption {
         type = yamlFormat.type;
         default = { };
-        description = "Hassil ``responses`` merged into this language's custom_sentences file";
+        description = "Responses merged into this language's custom_sentences file";
       };
     };
   };
@@ -133,30 +121,19 @@ in
     intents = lib.mkOption {
       type = lib.types.attrsOf intentType;
       default = { };
-      description = ''
-        Voice intents. Set ``hass.voice.intents.<IntentName>`` to an
-        attrset with ``sentences`` and/or ``script`` (plus optional
-        ``language``, ``lists``, ``expansionRules``, ``responses``).
-        All intents are grouped by language and emitted as a single
-        ``custom_sentences/<lang>/nix.yaml`` file
-      '';
+      description = "Custom voice intent definitions";
     };
 
     defaultLanguage = lib.mkOption {
       type = lib.types.str;
-      default = "en";
-      description = "Fallback language for intents that don't set ``language``";
+      default = "de";
+      description = "Fallback language for intents that don't set language";
     };
 
     extraConfig = lib.mkOption {
       type = lib.types.attrsOf yamlFormat.type;
       default = { };
-      description = ''
-        Extra top-level keys merged into the per-language
-        custom_sentences file, keyed by language code. Use for
-        things like ``skip_words`` that apply to the whole file
-        rather than a single intent
-      '';
+      description = "Extra top-level keys merged into the per-language custom_sentences file";
       example = lib.literalExpression ''
         { de.skip_words = [ "bitte" "mal" ]; }
       '';
@@ -168,63 +145,37 @@ in
           acknowledge = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = ''
-              Path to the sound file played on the satellite's target
-              Sonos when an intent is marked with
-              ``lib.ha.voice.acknowledgeAction``. Symlinked into
-              ``<configDir>/www/sounds/<basename>`` and served as
-              ``/local/sounds/<basename>``.
-            '';
+            description = "Path to the acknowledge sound file played on the satellite's target Sonos";
           };
           error = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = ''
-              Path to the sound file played in place of the TTS when the
-              pipeline returns an error response (``response_type =
-              "error"``) other than ``no_intent_match``. Covers
-              ``failed_to_handle``, ``no_valid_targets``, ``unknown``.
-              ``no_intent_match`` is silenced unconditionally — no chime.
-              Set null to fall back to relaying the synthesized error text.
-            '';
+            description = "Path to the error sound file played on the satellite's target Sonos";
           };
           timer = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = "Path to the sound file for timer-finished intents (currently unused).";
+            description = "Path to the timer finished sound file played on the satellite's target Sonos";
           };
           reminder = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = "Path to the sound file for reminder intents (currently unused).";
+            description = "Path to the reminder sound file played on the satellite's target Sonos";
           };
           alarmclock = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = "Path to the sound file for alarm-clock intents (currently unused).";
+            description = "Path to the alarmclock sound file played on the satellite's target Sonos";
           };
           duck = lib.mkOption {
             type = lib.types.nullOr lib.types.path;
             default = null;
-            description = ''
-              Path to a near-silent audio file fired as a Sonos
-              announce on wake-word detection, so the speaker's native
-              audioClip ducking lowers playback while the user
-              interacts with the satellite. Should be a short clip
-              (10–15s) — long enough to cover a typical interaction,
-              short enough to recover gracefully if tts_relay fails to
-              cancel it. Set null to disable wake-word ducking.
-            '';
+            description = "Path to near-silent audio file used to trick the satellite's target Sonos into ducking the audio during STT recoginition";
           };
         };
       };
       default = { };
-      description = ''
-        Per-category sound file paths played by tts_relay on the
-        satellite's target Sonos when an intent's response carries a
-        voice_effect card marker. Categories not listed (or set to
-        null) fall back to relaying the synthesized TTS audio.
-      '';
+      description = "Sound files played on the satellite's target Sonos";
     };
   };
 
@@ -241,15 +192,6 @@ in
       intent_script = scripts;
     };
 
-    # Symlink the Nix-generated nix.yaml per-language, not the whole
-    # custom_sentences/ directory. Leaves <lang>/ writable so runtime
-    # generators (e.g. mass-slot-lists) can drop sibling YAML files
-    # next to nix.yaml — HA picks up every *.yaml in the directory.
-    #
-    # The `d` rules explicitly create the parent dirs as hass:hass so
-    # the L+ rules don't traverse the root-owned dirs that `L+` would
-    # otherwise auto-create — systemd-tmpfiles refuses to canonicalize
-    # paths that cross an ownership boundary ("unsafe path transition").
     systemd.tmpfiles.settings = {
       "10-hass-custom-sentences" = {
         "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
@@ -276,12 +218,6 @@ in
       );
     };
 
-    # One-shot migration from the previous layout, which symlinked the
-    # whole custom_sentences/ directory into a Nix store path. tmpfiles
-    # `L+` rules would try to write through that symlink and hit a
-    # read-only filesystem; clear it before systemd-tmpfiles-setup runs.
-    # Self-limiting: once the parent is a real directory the test fails
-    # and the script is a no-op.
     system.activationScripts.hassCustomSentencesMigrate = {
       text = ''
         if [ -L ${config.services.home-assistant.configDir}/custom_sentences ]; then
