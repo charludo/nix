@@ -43,7 +43,7 @@ let
   # calling satellite's area as `preferred_area_id`, so the script can
   # look up the right speaker without knowing anything satellite-side.
   # Targets whose area isn't declared in Nix are dropped silently — the
-  # zha-reconciler would push that area assignment if it were set.
+  # ha-reconciler would push that area assignment if it were set.
   mediaPlayers = config.hass.devices.media_players;
   areaToTarget = lib.listToAttrs (
     lib.filter (p: p != null) (

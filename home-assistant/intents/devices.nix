@@ -7,7 +7,7 @@ let
   # the entity_id homeassistant.turn_on/off should target; `aliases`
   # are the spoken forms the slot matcher accepts. Speech responses
   # pull the spoken-back form from HA's friendly_name at runtime
-  # (zha-reconciler sets it for ZHA devices; integration defaults
+  # (ha-reconciler sets it for ZHA devices; integration defaults
   # otherwise — e.g. the Xiaomi fan reads back as "Xiaomi Smart Fan").
   #
   # The slot is named `geraet` rather than `name` because `name` is

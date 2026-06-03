@@ -93,7 +93,7 @@
     group = "hass";
   };
 
-  hass.zha.reconciler = {
+  hass.reconciler = {
     enable = true;
     tokenPath = config.age.secrets.hass-reconciler-token.path;
   };

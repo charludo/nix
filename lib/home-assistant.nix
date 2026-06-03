@@ -60,7 +60,7 @@ rec {
   #   2. lowercase
   #   3. replace any run of non-[a-z0-9] with a single "_"
   #   4. strip leading/trailing "_"
-  # Keep this in sync with the `slugify()` in zha-reconciler/zha_reconciler.py
+  # Keep this in sync with the `slugify()` in ha-reconciler/ha_reconciler.py
   # so dashboard entity_ids and the entity_ids the reconciler renames to match.
   mkSlug =
     name:
