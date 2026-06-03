@@ -25,7 +25,9 @@
     );
   };
 
-  config.services.home-assistant.config.timer = lib.mapAttrs (
-    _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon duration; }
-  ) config.hass.timers;
+  config = lib.mkIf (config.hass.timers != { }) {
+    services.home-assistant.config.timer = lib.mapAttrs (
+      _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon duration; }
+    ) config.hass.timers;
+  };
 }

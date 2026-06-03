@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  secrets,
   ...
 }:
 let
@@ -54,10 +55,11 @@ in
 
     hassTokenPath = lib.mkOption {
       type = lib.types.path;
-      default = "/run/agenix/hass-reconciler-token";
+      default = "/run/agenix/hass-mass-token";
       description = ''
-        Path to a HA long-lived token. Reused from the reconciler — it's
-        a generic HA LLT, only used here to POST conversation.reload.
+        Path to a HA long-lived token, used here to POST conversation.reload
+        after a slot-list refresh. Kept separate from the zha-reconciler
+        token so revoking one doesn't break the other.
       '';
     };
 
@@ -76,6 +78,18 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    age.secrets.mass-token = {
+      rekeyFile = secrets.mass-token;
+      owner = "hass";
+      group = "hass";
+    };
+
+    age.secrets.hass-mass-token = {
+      rekeyFile = secrets.hass-mass-token;
+      owner = "hass";
+      group = "hass";
+    };
+
     # Two rules: (1) make sure the state dir is hass-owned so HA can
     # read what we write here — `StateDirectory=` only sets ownership
     # on initial create, so a stale DynamicUser-owned directory from

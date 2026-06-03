@@ -277,25 +277,28 @@ in
       domain: (zigbeeEntities.${domain} or { }) // (simpleEntities.${domain} or { })
     );
 
-    services.home-assistant.config = {
-      input_boolean = lib.mapAttrs (
-        _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon initial; }
-      ) cfg.devices.input_booleans;
-
-      input_number = lib.mapAttrs (
-        _: v:
-        lib.filterAttrs (_: x: x != null) {
-          inherit (v)
-            name
-            min
-            max
-            step
-            initial
-            icon
-            unit_of_measurement
-            ;
-        }
-      ) cfg.devices.input_numbers;
-    };
+    services.home-assistant.config = lib.mkMerge [
+      (lib.mkIf (cfg.devices.input_booleans != { }) {
+        input_boolean = lib.mapAttrs (
+          _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon initial; }
+        ) cfg.devices.input_booleans;
+      })
+      (lib.mkIf (cfg.devices.input_numbers != { }) {
+        input_number = lib.mapAttrs (
+          _: v:
+          lib.filterAttrs (_: x: x != null) {
+            inherit (v)
+              name
+              min
+              max
+              step
+              initial
+              icon
+              unit_of_measurement
+              ;
+          }
+        ) cfg.devices.input_numbers;
+      })
+    ];
   };
 }

@@ -1,6 +1,15 @@
-{ pkgs, ... }:
+{
+  config,
+  pkgs,
+  secrets,
+  ...
+}:
 {
   services.home-assistant = {
+    enable = true;
+    openFirewall = true;
+    lovelaceConfigWritable = false;
+
     extraPackages =
       python3Packages:
       let
@@ -8,6 +17,8 @@
       in
       with python3Packages;
       [
+        psycopg2
+
         ical
         python-miio
         joserfc
@@ -22,6 +33,14 @@
       ];
 
     extraComponents = [
+      "default_config"
+      "mobile_app"
+      "isal"
+
+      "sun"
+      "history"
+      "statistics"
+
       "google_translate"
       "met"
       "webostv"
@@ -47,6 +66,36 @@
           "192.168.24.2"
         ];
       };
+
+      recorder.db_url = "postgresql://@/hass";
+      logger.default = "warn";
+      mobile_app = { };
+      history = { };
+      sun = { };
     };
   };
+
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "hass" ];
+    ensureUsers = [
+      {
+        name = "hass";
+        ensureDBOwnership = true;
+      }
+    ];
+  };
+
+  age.secrets.hass-secrets = {
+    rekeyFile = secrets.hass-secrets;
+    path = "${config.services.home-assistant.configDir}/secrets.yaml";
+    owner = "hass";
+    group = "hass";
+  };
+
+  hass.zha.reconciler.enable = true;
+  hass.bambu.enable = true;
+  hass.massSlotLists.enable = true;
+  hass.closestIntent.enable = true;
+  hass.openweathermap.enable = true;
 }

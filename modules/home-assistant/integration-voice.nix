@@ -228,7 +228,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf (intents != { }) {
     services.home-assistant.extraComponents = [
       "wyoming"
       "assist_pipeline"
@@ -250,7 +250,7 @@ in
     # the L+ rules don't traverse the root-owned dirs that `L+` would
     # otherwise auto-create — systemd-tmpfiles refuses to canonicalize
     # paths that cross an ownership boundary ("unsafe path transition").
-    systemd.tmpfiles.settings = lib.mkIf (intents != { }) {
+    systemd.tmpfiles.settings = {
       "10-hass-custom-sentences" = {
         "${config.services.home-assistant.configDir}/custom_sentences"."d" = {
           mode = "0755";
@@ -282,7 +282,7 @@ in
     # read-only filesystem; clear it before systemd-tmpfiles-setup runs.
     # Self-limiting: once the parent is a real directory the test fails
     # and the script is a no-op.
-    system.activationScripts.hassCustomSentencesMigrate = lib.mkIf (intents != { }) {
+    system.activationScripts.hassCustomSentencesMigrate = {
       text = ''
         if [ -L ${config.services.home-assistant.configDir}/custom_sentences ]; then
           rm ${config.services.home-assistant.configDir}/custom_sentences

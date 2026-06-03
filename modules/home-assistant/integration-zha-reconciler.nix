@@ -2,6 +2,7 @@
   lib,
   config,
   pkgs,
+  secrets,
   ...
 }:
 let
@@ -117,20 +118,21 @@ in
       default = "/run/agenix/hass-reconciler-token";
       description = ''
         Path to a file containing a Home Assistant long-lived access token.
-        Create the token in HA (user profile -> Security -> Long-lived tokens),
-        store it as an agenix secret named e.g. hass-reconciler-token, and
-        plumb it in alongside the existing hass-secrets entry:
-
-          age.secrets.hass-reconciler-token = {
-            rekeyFile = secrets.hass-reconciler-token;
-            owner = "hass";
-            group = "hass";
-          };
+        Default points at the agenix secret declared by this module — the
+        encrypted payload is sourced from ``secrets.hass-reconciler-token``.
+        Create the token in HA (user profile -> Security -> Long-lived tokens)
+        and re-rekey to update.
       '';
     };
   };
 
   config = lib.mkIf rcfg.enable {
+    age.secrets.hass-reconciler-token = {
+      rekeyFile = secrets.hass-reconciler-token;
+      owner = "hass";
+      group = "hass";
+    };
+
     systemd.services.zha-reconciler = {
       description = "Reconcile ZHA device names + areas from Nix into HA";
       after = [ "home-assistant.service" ];

@@ -45,5 +45,7 @@
     );
   };
 
-  config.services.home-assistant.config.script = config.hass.scripts;
+  config = lib.mkIf (config.hass.scripts != { }) {
+    services.home-assistant.config.script = config.hass.scripts;
+  };
 }
