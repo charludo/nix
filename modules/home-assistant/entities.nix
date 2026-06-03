@@ -11,39 +11,39 @@ in
   };
 
   config.hass.entities = lib.mkMerge (
-    # Zigbee sub-entities
     lib.concatLists (
       lib.mapAttrsToList (
         deviceName: device:
-        lib.mapAttrsToList
-          (
-            nixKey: haDomain:
-            lib.optionalAttrs (device.${nixKey} != [ ]) {
-              ${haDomain}.${mkSlug deviceName} = {
-                device = mkSlug deviceName;
+        [ { zigbee.${mkSlug deviceName} = deviceName; } ]
+        ++
+          lib.mapAttrsToList
+            (
+              nixKey: haDomain:
+              lib.optionalAttrs (device.${nixKey} != [ ]) {
+                ${haDomain}.${mkSlug deviceName} = {
+                  device = mkSlug deviceName;
+                }
+                // lib.genAttrs device.${nixKey} (
+                  e:
+                  if e == haDomain then
+                    "${haDomain}.${mkSlug deviceName}"
+                  else
+                    "${haDomain}.${mkSlug deviceName}_${e}"
+                );
               }
-              // lib.genAttrs device.${nixKey} (
-                e:
-                if e == haDomain then
-                  "${haDomain}.${mkSlug deviceName}"
-                else
-                  "${haDomain}.${mkSlug deviceName}_${e}"
-              );
+            )
+            {
+              binary_sensor = "binary_sensor";
+              diagnostic = "sensor";
+              light = "light";
+              number = "number";
+              select = "select";
+              sensor = "sensor";
+              switch = "switch";
             }
-          )
-          {
-            binary_sensor = "binary_sensor";
-            diagnostic = "sensor";
-            light = "light";
-            number = "number";
-            select = "select";
-            sensor = "sensor";
-            switch = "switch";
-          }
       ) cfg.devices.zigbee
     )
 
-    # Misc
     ++
       lib.mapAttrsToList
         (domain: source: {
@@ -64,31 +64,25 @@ in
           timer = cfg.timers;
         }
     ++ [
-      # Zigbee
       {
-        zigbee = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) name) cfg.devices.zigbee;
+        area = lib.mapAttrs' (
+          name: _:
+          lib.nameValuePair (mkSlug name) {
+            slug = mkSlug name;
+            inherit name;
+          }
+        ) cfg.areas;
       }
 
-      # 4. `e.area.<slug>` → the slug (for URL paths and HA area refs).
-      # `e.areaName.<slug>` → the original capitalised key in
-      # `hass.areas` (e.g. "Wohnzimmer"), the form `area = ...;` fields
-      # on devices expect. Lets call sites use the type-safe e.* tree
-      # instead of hardcoded strings.
       {
-        area = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) (mkSlug name)) cfg.areas;
-        areaName = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) name) cfg.areas;
-      }
-
-      # Persons
-      {
-        person = lib.mapAttrs' (name: _: lib.nameValuePair (mkSlug name) "person.${mkSlug name}") (
-          cfg.persons or { }
-        );
-
-        persons = lib.mapAttrs (_: p: {
-          notify = if p.phone == null then null else "notify.mobile_app_${mkSlug p.phone}";
-          device_tracker = if p.phone == null then null else "device_tracker.${mkSlug p.phone}";
-        }) (cfg.persons or { });
+        person = lib.mapAttrs' (
+          name: p:
+          lib.nameValuePair (mkSlug name) {
+            entity_id = "person.${mkSlug name}";
+            notify = if p.phone == null then null else "notify.mobile_app_${mkSlug p.phone}";
+            device_tracker = if p.phone == null then null else "device_tracker.${mkSlug p.phone}";
+          }
+        ) (cfg.persons or { });
       }
     ]
   );

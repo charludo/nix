@@ -37,7 +37,7 @@ let
     lib.nameValuePair "bewasserung_zeit_${timeSlug t}" {
       name = "Bewässerung ${t}";
       icon = "mdi:water-outline";
-      area = e.areaName.terrasse;
+      area = e.area.terrasse.name;
     };
 
   # Same predicate as before the refactor (8h > 4mm OR 24h > 10mm). Kept as
@@ -105,7 +105,7 @@ in
                 "if" = [ rainSkip ];
                 "then" = [
                   {
-                    action = e.persons.Charlotte.notify;
+                    action = e.person.charlotte.notify;
                     data.message = ''
                       {% set r8 = states('${e.sensor.cumulative_rain_8h}') | float(0) %}
                       {% if r8 > 4 %}
@@ -135,7 +135,7 @@ in
                     ];
                     "then" = [
                       {
-                        action = e.persons.Charlotte.notify;
+                        action = e.person.charlotte.notify;
                         data.message = "Pumpe reaktiviert.";
                       }
                       {

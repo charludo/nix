@@ -1,6 +1,6 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
-  a = config.hass.entities.areaName;
+  a = lib.mapAttrs (_: v: v.name) config.hass.entities.area;
 
   thermometer = id: area: {
     inherit id area;

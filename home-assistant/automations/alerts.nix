@@ -32,7 +32,7 @@ in
         }
       ];
       action = [
-        (notify e.persons.Charlotte.notify {
+        (notify e.person.charlotte.notify {
           title = "Temperaturwarnung";
           message = "Extremtemperatur im Gewächshaus";
         })
@@ -55,11 +55,11 @@ in
         }
       ];
       action = [
-        (notify e.persons.Charlotte.notify {
+        (notify e.person.charlotte.notify {
           title = "Luftfeuchtigkeit im Badezimmer zu hoch";
           message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
         })
-        (notify e.persons.Marie.notify {
+        (notify e.person.marie.notify {
           title = "Luftfeuchtigkeit im Badezimmer zu hoch";
           message = "Aufhören zu Duschen und Fenster aufmachen! 😡";
         })
@@ -82,11 +82,11 @@ in
         }
       ];
       action = [
-        (notify e.persons.Charlotte.notify {
+        (notify e.person.charlotte.notify {
           title = "Was da los?!";
           message = "Hohe Temperatur im Serverschrank";
         })
-        (notify e.persons.Marie.notify {
+        (notify e.person.marie.notify {
           title = "Was da los?!";
           message = "Hohe Temperatur im Serverschrank";
         })
@@ -113,11 +113,11 @@ in
         }
       ];
       action = [
-        (notify e.persons.Charlotte.notify {
+        (notify e.person.charlotte.notify {
           title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
           message = "Zeit zu Lüften!";
         })
-        (notify e.persons.Marie.notify {
+        (notify e.person.marie.notify {
           title = "Luftfeuchtigkeit im Wohnbereich zu hoch";
           message = "Zeit zu Lüften!";
         })
@@ -147,11 +147,11 @@ in
         }
       ];
       action = [
-        (notify e.persons.Charlotte.notify {
+        (notify e.person.charlotte.notify {
           title = "Wohnungstür ist seit 3 Sekunden offen";
           message = "WOHNUNGSTÜR WURDE GEÖFFNET";
         })
-        (notify e.persons.Marie.notify {
+        (notify e.person.marie.notify {
           title = "Wohnungstür ist seit 3 Sekunden offen";
           message = "WOHNUNGSTÜR WURDE GEÖFFNET";
         })
@@ -195,11 +195,11 @@ in
           '';
         in
         [
-          (notify e.persons.Charlotte.notify {
+          (notify e.person.charlotte.notify {
             title = "Zigbee: Akku schwach";
             inherit message;
           })
-          (notify e.persons.Marie.notify {
+          (notify e.person.marie.notify {
             title = "Zigbee: Akku schwach";
             inherit message;
           })

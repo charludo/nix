@@ -806,7 +806,7 @@ in
               cards = map (
                 nv:
                 let
-                  slug = e.area.${ha.mkSlug nv.name};
+                  slug = e.area.${ha.mkSlug nv.name}.slug;
                 in
                 {
                   type = "area";

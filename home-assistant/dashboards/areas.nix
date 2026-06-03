@@ -82,7 +82,7 @@ let
               filter = {
                 include = [
                   {
-                    area = e.area.${areaSlug};
+                    area = e.area.${areaSlug}.slug;
                     options = { };
                   }
                 ];
