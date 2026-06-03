@@ -52,7 +52,7 @@ in
     # served via thomasloven's custom_icons component, which reads from
     # ${configDir}/custom_icons/. Symlink in our nix-packaged copy.
     systemd.tmpfiles.rules = [
-      "L+ ${config.services.home-assistant.configDir}/custom_icons - - - - ${../config/assets/bambu_icons}"
+      "L+ ${config.services.home-assistant.configDir}/custom_icons - - - - ${../../home-assistant/assets/bambu_icons}"
     ];
   };
 }

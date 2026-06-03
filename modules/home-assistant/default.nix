@@ -5,14 +5,7 @@
   ...
 }:
 {
-  imports = [
-    ./automations.nix
-    ./buttons.nix
-    ./devices.nix
-    ./integrations
-    ./scripts.nix
-    ./timers.nix
-  ];
+  imports = lib.helpers.mkImportsNoDefault ./.;
 
   services.home-assistant = {
     enable = true;
@@ -81,5 +74,4 @@
   hass.massSlotLists.enable = true;
   hass.massSlotLists.hassTokenPath = config.age.secrets.hass-mass-token.path;
   hass.massSlotLists.massTokenPath = config.age.secrets.mass-token.path;
-
 }

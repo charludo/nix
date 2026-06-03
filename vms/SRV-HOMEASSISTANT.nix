@@ -2,7 +2,7 @@
 {
   imports = [
     ../modules/home-assistant
-    ../modules/home-assistant/config
+    ../home-assistant
   ];
 
   vm = {
