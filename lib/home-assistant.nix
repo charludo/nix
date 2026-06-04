@@ -38,6 +38,26 @@ rec {
             card = _voiceEffectCard name;
           };
         };
+
+      # area_slug → media_player target for whichever satellite the
+      # voice command is spoken on. Walks `hass.ttsRelay` routes,
+      # drops ones whose declared media_player has no area set, and
+      # keys the survivors by area slug. Internal — the helpers below
+      # call this themselves.
+      satelliteAreaToTarget =
+        config:
+        lib.listToAttrs (
+          lib.filter (p: p != null) (
+            map (
+              r:
+              let
+                slug = lib.removePrefix "media_player." r.target;
+                area = config.hass.devices.media_players.${slug}.area or null;
+              in
+              if area == null then null else lib.nameValuePair (mkSlug area) r.target
+            ) (config.hass.ttsRelay or [ ])
+          )
+        );
     in
     {
       # Voice path: play the "acknowledge" sound on the target Sonos
@@ -49,6 +69,41 @@ rec {
       # produces audible feedback (music starting on the same target
       # Sonos), where a spoken confirmation would just talk over it.
       silentAction = mkEffect "silent";
+
+      # Intent-body wrapper composable with silentAction /
+      # acknowledgeAction. Prepends a conditional-unmute step to the
+      # body's `script.action` so the satellite the command was spoken
+      # on is audible before the rest of the sequence fires. Loads an
+      # `area_to_target` script variable from the host's tts_relay
+      # routes, then flips `is_volume_muted` off on the matching
+      # media_player only when `preferred_area_id` maps to a known
+      # target — chat path and area-less satellites no-op the `if`.
+      unmuteSatellite =
+        config: body:
+        body
+        // {
+          script = (body.script or { }) // {
+            action = [
+              { variables.area_to_target = satelliteAreaToTarget config; }
+              {
+                "if" = [
+                  {
+                    condition = "template";
+                    value_template = ''{{ area_to_target.get(preferred_area_id | default("")) is not none }}'';
+                  }
+                ];
+                "then" = [
+                  {
+                    action = "media_player.volume_mute";
+                    target.entity_id = "{{ area_to_target[preferred_area_id] }}";
+                    data.is_volume_muted = false;
+                  }
+                ];
+              }
+            ]
+            ++ (body.script.action or [ ]);
+          };
+        };
     };
 
   # ---------------------------------------------------------------------------
