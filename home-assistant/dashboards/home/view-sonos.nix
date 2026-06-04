@@ -1,155 +1,98 @@
 { lib, e }:
 let
   ha = lib.ha;
+  alle = e.media_player.alle;
 
+  # Variant of mkServiceButton with the Sonos visual defaults (white
+  # foreground, 88px tall, left-aligned). Used by every transport
+  # control on this view that isn't a stand-alone preset.
   mkSonosBtn =
+    args:
+    ha.mkServiceButton (
+      {
+        height = 88;
+        align = "start";
+        padding = "13px 0px 16px 20px";
+        fg = "var(--white)";
+        haptic = "medium";
+      }
+      // args
+    );
+
+  # Track-step button (next/previous) — full-width media_player call,
+  # entity_id pinned to the `alle` speaker group.
+  mkStepBtn =
     {
       name,
       icon,
-      height ? 184,
-      padding ? "108px 0px 16px 20px",
-      bg ? "var(--contrast2)",
-      iconColor ? "var(--contrast20)",
-      nameColor ? "var(--contrast20)",
-      centered ? false,
-      tapAction,
-      entity ? null,
-      states ? [ ],
-    }:
-    let
-      base = {
-        type = "custom:button-card";
-        inherit name icon;
-        tap_action = tapAction;
-        styles =
-          (ha.mkStyles {
-            icon = {
-              width = "24px";
-              color = iconColor;
-            };
-            img_cell = {
-              "justify-content" = if centered then "center" else "flex-start";
-              "margin-top" = "0px";
-            };
-            name = {
-              "justify-self" = if centered then "center" else "start";
-              "font-size" = "14px";
-              "margin-top" = "0px";
-              color = nameColor;
-            };
-            card = {
-              height = "${toString height}px";
-              "border-radius" = "24px";
-              padding = padding;
-              "background-color" = bg;
-            };
-          })
-          // {
-            grid = ha.mkStyleProp { "grid-template-areas" = ''"i" "n"''; };
-          };
-      }
-      // lib.optionalAttrs (entity != null) { inherit entity; }
-      // lib.optionalAttrs (states != [ ]) { state = states; };
-    in
-    base;
-
-  mkSonosSpeakerToggle =
-    {
-      name,
-      entity,
       service,
     }:
     mkSonosBtn {
-      inherit name entity;
-      icon = "mdi:volume-high";
-      height = 89;
-      padding = "13px 0px 16px 20px";
-      iconColor = "var(--white)";
-      nameColor = "var(--white)";
+      inherit name icon;
+      service = name;
       tapAction = {
         action = "perform-action";
         haptic = "medium";
         perform_action = service;
+        data.entity_id = alle;
       };
-      states = [
-        (ha.mkStateStyleFull {
-          value = "[[[ return entity.attributes.is_volume_muted === true; ]]]";
-          inherit name;
-          icon = "mdi:volume-mute";
-          bg = "var(--red)";
-          iconColor = "var(--black)";
-          styles.name = {
-            "text-decoration" = "line-through";
-            color = "var(--black)";
-          };
-        })
-      ];
+      height = 184;
+      padding = "108px 0px 16px 20px";
     };
 
-  mkVolumeSlider = entity: height: {
-    type = "custom:my-slider-v2";
-    inherit entity;
-    attribute = "volume_level";
-    vertical = true;
-    styles = {
-      container = ha.mkStyleProp {
-        "border-radius" = "100px";
-        overflow = "visible";
-        background = "none";
-      };
-      card = ha.mkStyleProp {
-        height = "${toString height}px";
-        padding = "0 20px";
-        background = "var(--saturation)";
-      };
-      track = ha.mkStyleProp {
-        overflow = "visible";
-        background = "none";
-      };
-      progress = ha.mkStyleProp { background = "none"; };
-      thumb = ha.mkStyleProp {
-        background = "var(--black)";
-        top = "-36px";
-        height = "36px";
-        width = "36px";
-        "border-radius" = "100px";
-        left = "-18px";
-      };
-    };
-  };
-
-  mkVolumeSliderCard =
+  # Seek button (10s back/forward) — 84px tall, calls the seek script.
+  mkSeekBtn =
     {
       name,
-      entity,
-      height,
+      icon,
+      seek,
     }:
+    mkSonosBtn {
+      inherit name icon;
+      service = e.script.media_seek;
+      serviceData = {
+        seek_amount = seek;
+        media_player = alle;
+      };
+      height = 84;
+      padding = "8px 0px 16px 20px";
+    };
+
+  # Two-state media_player attribute toggle: tap calls `service` with
+  # `attribute = attrValue`, and the button recolors yellow when
+  # `activeWhen` evaluates true. Default `attrValue` flips a boolean
+  # attribute, and `activeWhen` checks for `=== true` — override
+  # either for multi-mode attributes (e.g. repeat: off/all cycle).
+  mkAttrToggle =
     {
-      type = "custom:button-card";
-      inherit name;
-      custom_fields.slider.card = mkVolumeSlider entity height;
-      styles =
-        (ha.mkStyles {
-          card = {
-            padding = "16px";
-            "--mdc-ripple-press-opacity" = 0;
-          };
-          name = {
-            "justify-self" = "start";
-            "font-size" = "14px";
-            margin = "4px 0 12px 0";
-            color = "var(--contrast20)";
-          };
+      attribute,
+      offName,
+      offIcon,
+      onName,
+      onIcon,
+      service,
+      attrValue ? "[[[ return !entity.attributes.${attribute}; ]]]",
+      activeWhen ? "[[[ return entity.attributes.${attribute} === true; ]]]",
+    }:
+    mkSonosBtn {
+      name = offName;
+      icon = offIcon;
+      entity = alle;
+      inherit service;
+      serviceData = {
+        entity_id = alle;
+        ${attribute} = attrValue;
+      };
+      state = [
+        (ha.mkStateStyleFull {
+          value = activeWhen;
+          name = onName;
+          icon = onIcon;
+          bg = "var(--yellow)";
+          nameColor = "var(--black)";
+          iconColor = "var(--black)";
         })
-        // {
-          grid = ha.mkStyleProp {
-            "grid-template-areas" = ''"n" "slider"'';
-            "grid-template-columns" = "1fr";
-            "grid-template-rows" = "1fr auto";
-            "align-items" = "center";
-            "justify-items" = "center";
-          };
-        };
+      ];
     };
 in
 {
@@ -157,41 +100,11 @@ in
   max_columns = 1;
   icon = "mdi:music-note";
   path = "";
-  header = {
-    card = ha.mkBadgeTitleCard {
-      name = "Sonos";
-      badgeCard = {
-        type = "custom:button-card";
-        name = ''[[[ return states["${e.media_player.alle}"].state.charAt(0).toUpperCase() + states["${e.media_player.alle}"].state.slice(1); ]]]'';
-        show_icon = false;
-        entity = e.media_player.alle;
-        tap_action = {
-          action = "more-info";
-          haptic = "medium";
-        };
-        styles =
-          (ha.mkStyles {
-            card = {
-              padding = "6px 10px";
-              "font-size" = "12px";
-              "line-height" = "18px";
-              "font-weight" = 500;
-              background = "var(--contrast20)";
-            };
-            name = {
-              color = "var(--contrast1)";
-            };
-            label = {
-              color = "var(--contrast12)";
-            };
-          })
-          // {
-            grid = ha.mkStyleProp {
-              "grid-template-areas" = ''"n gutter l"'';
-              "grid-template-rows" = "min-content";
-            };
-          };
-      };
+  header.card = ha.mkBadgeTitleCard {
+    name = "Sonos";
+    badgeCard = ha.mkHeaderBadge {
+      entity = alle;
+      name = ''[[[ return states["${alle}"].state.charAt(0).toUpperCase() + states["${alle}"].state.slice(1); ]]]'';
     };
   };
   sections = [
@@ -199,133 +112,19 @@ in
       type = "grid";
       cards = [
 
-        # Album art with blurred background
-        {
-          type = "custom:button-card";
-          entity = e.media_player.alle;
-          show_entity_picture = true;
-          entity_picture = "[[[ return states['${e.media_player.alle}'].attributes.entity_picture ]]]";
-          show_name = false;
-          tap_action = {
-            action = "navigate";
-            navigation_path = "/music_assistant";
-          };
-          custom_fields.info.card = {
-            type = "custom:button-card";
-            entity = e.media_player.alle;
-            show_entity_picture = true;
-            entity_picture = "[[[ return states['${e.media_player.alle}'].attributes.entity_picture ]]]";
-            tap_action = {
-              action = "navigate";
-              navigation_path = "/music_assistant";
-            };
-            name = ''
-              [[[
-                if (states['${e.media_player.alle}'].attributes.media_title)
-                  return states['${e.media_player.alle}'].attributes.media_title;
-                else
-                  return "-";
-              ]]]
-            '';
-            label = ''
-              [[[
-                if (states['${e.media_player.alle}'].attributes.media_artist)
-                  return states['${e.media_player.alle}'].attributes.media_artist;
-                else
-                  return "";
-              ]]]
-            '';
-            show_label = true;
-            show_icon = true;
-            styles =
-              (ha.mkStyles {
-                card = {
-                  "font-family" = "hk nova medium";
-                  background = "none";
-                  "border-radius" = 0;
-                  padding = "24px";
-                  "--mdc-ripple-press-opacity" = 0;
-                };
-                img_cell = {
-                  height = "100px";
-                  width = "100px";
-                  "border-radius" = "16px";
-                };
-                icon = {
-                  height = "100%";
-                  width = "100%";
-                };
-                name = {
-                  "font-size" = "18px";
-                  color = "var(--contrast20)";
-                  width = "100%";
-                  "text-align" = "left";
-                  "align-self" = "end";
-                };
-                label = {
-                  "font-size" = "16px";
-                  color = "var(--contrast20)";
-                  opacity = 0.5;
-                  width = "100%";
-                  "text-align" = "left";
-                  "align-self" = "start";
-                };
-              })
-              // {
-                grid = ha.mkStyleProp {
-                  "grid-template-areas" = ''"i gutter n" "i gutter l"'';
-                  "grid-template-columns" = "min-content 24px 1fr";
-                  "grid-template-rows" = "min-content";
-                };
-                custom_fields = ha.mkStyles {
-                  image = {
-                    "--mdc-ripple-press-opacity" = 0.5;
-                  };
-                };
-              };
-          };
-          styles =
-            (ha.mkStyles {
-              card = {
-                background = "none";
-                padding = 0;
-                position = "relative";
-                "--mdc-ripple-press-opacity" = 0;
-              };
-              img_cell = {
-                position = "absolute";
-              };
-              icon = {
-                width = "125%";
-                opacity = "var(--color-tint)";
-                "-webkit-filter" = "blur(15px)";
-                filter = "blur(15px)";
-              };
-            })
-            // {
-              grid = ha.mkStyleProp {
-                "grid-template-areas" = ''"info"'';
-                "grid-template-columns" = "1fr";
-                "grid-template-rows" = "min-content";
-              };
-            };
-        }
+        (ha.mkSonosAlbumArt alle)
 
-        # Play/pause + speaker toggles row
+        # Play/Pause + speaker toggles
         (ha.mkHStack [
-          (mkSonosBtn {
+          (ha.mkButtonGreen {
             name = "Abspielen";
             icon = "mdi:play";
             entity = e.media_player.office;
-            bg = "var(--green)";
-            iconColor = "var(--black)";
-            nameColor = "var(--black)";
-            tapAction = {
-              action = "perform-action";
-              haptic = "medium";
-              perform_action = e.script.sonos_play_pause;
-            };
-            states = [
+            service = e.script.sonos_play_pause;
+            height = 184;
+            align = "start";
+            padding = "108px 0px 16px 20px";
+            state = [
               (ha.mkStateStyleFull {
                 value = "[[[ return entity?.state === 'playing'; ]]]";
                 name = "Pausieren";
@@ -335,12 +134,12 @@ in
             ];
           })
           (ha.mkVStack [
-            (mkSonosSpeakerToggle {
+            (ha.mkSpeakerToggle {
               name = "Wohnzimmer";
               entity = e.media_player.living_room;
               service = e.script.sonos_wohnzimmer_toggle;
             })
-            (mkSonosSpeakerToggle {
+            (ha.mkSpeakerToggle {
               name = "Büro";
               entity = e.media_player.office;
               service = e.script.sonos_buro_toggle;
@@ -348,134 +147,73 @@ in
           ])
         ])
 
-        # Previous / Next / Shuffle+Loop row
+        # Previous / Next / Shuffle+Loop
         (ha.mkHStack [
-          (mkSonosBtn {
+          (mkStepBtn {
             name = "Voriger";
             icon = "mdi:skip-previous";
-            tapAction = {
-              action = "perform-action";
-              haptic = "medium";
-              perform_action = "media_player.media_previous_track";
-              data.entity_id = e.media_player.alle;
-            };
+            service = "media_player.media_previous_track";
           })
-          (mkSonosBtn {
+          (mkStepBtn {
             name = "Nächster";
             icon = "mdi:skip-next";
-            tapAction = {
-              action = "perform-action";
-              haptic = "medium";
-              perform_action = "media_player.media_next_track";
-              data.entity_id = e.media_player.alle;
-            };
+            service = "media_player.media_next_track";
           })
           (ha.mkVStack [
-            (mkSonosBtn {
-              name = "Shuffle aus";
-              icon = "mdi:shuffle-disabled";
-              entity = e.media_player.alle;
-              height = 88;
-              padding = "13px 0px 16px 20px";
-              iconColor = "var(--white)";
-              nameColor = "var(--white)";
-              tapAction = {
-                action = "perform-action";
-                haptic = "medium";
-                perform_action = "media_player.shuffle_set";
-                data = {
-                  entity_id = e.media_player.alle;
-                  shuffle = "[[[\n  return !entity.attributes.shuffle;\n]]]\n";
-                };
-              };
-              states = [
-                (ha.mkStateStyleFull {
-                  value = "[[[\n  return entity.attributes.shuffle === true;\n]]]\n";
-                  name = "Shuffle an";
-                  icon = "mdi:shuffle";
-                  bg = "var(--yellow)";
-                  nameColor = "var(--black)";
-                  iconColor = "var(--black)";
-                })
-              ];
+            (mkAttrToggle {
+              attribute = "shuffle";
+              offName = "Shuffle aus";
+              offIcon = "mdi:shuffle-disabled";
+              onName = "Shuffle an";
+              onIcon = "mdi:shuffle";
+              service = "media_player.shuffle_set";
             })
-            (mkSonosBtn {
-              name = "Loop aus";
-              icon = "mdi:repeat-off";
-              entity = e.media_player.alle;
-              height = 88;
-              padding = "13px 0px 16px 20px";
-              iconColor = "var(--white)";
-              nameColor = "var(--white)";
-              tapAction = {
-                action = "perform-action";
-                haptic = "medium";
-                perform_action = "media_player.repeat_set";
-                data = {
-                  entity_id = e.media_player.alle;
-                  repeat = "[[[\n  const modes = ['off', 'all'];\n  const current = entity.attributes.repeat ?? 'off';\n  return modes[(modes.indexOf(current) + 1) % modes.length];\n]]]\n";
-                };
-              };
-              states = [
-                (ha.mkStateStyleFull {
-                  value = "[[[\n  return entity.attributes.repeat === \"all\";\n]]]\n";
-                  name = "Loop an";
-                  icon = "mdi:repeat";
-                  bg = "var(--yellow)";
-                  nameColor = "var(--black)";
-                  iconColor = "var(--black)";
-                })
-              ];
+            (mkAttrToggle {
+              attribute = "repeat";
+              offName = "Loop aus";
+              offIcon = "mdi:repeat-off";
+              onName = "Loop an";
+              onIcon = "mdi:repeat";
+              service = "media_player.repeat_set";
+              attrValue = ''
+                [[[
+                  const modes = ['off', 'all'];
+                  const current = entity.attributes.repeat ?? 'off';
+                  return modes[(modes.indexOf(current) + 1) % modes.length];
+                ]]]
+              '';
+              activeWhen = ''[[[ return entity.attributes.repeat === "all"; ]]]'';
             })
           ])
         ])
 
-        # Volume sliders + seek + per-room volume
+        # Volume sliders: full-volume on the left, per-room on the
+        # right with seek buttons stacked above each.
         (ha.mkHStack [
-          (mkVolumeSliderCard {
+          (ha.mkVolumeSliderCard {
             name = "";
-            entity = e.media_player.alle;
+            entity = alle;
             height = 400;
           })
           (ha.mkVStack [
-            (mkSonosBtn {
+            (mkSeekBtn {
               name = "Zurück";
               icon = "mdi:rewind-10";
-              height = 84;
-              padding = "8px 0px 16px 20px";
-              tapAction = {
-                action = "perform-action";
-                haptic = "medium";
-                perform_action = e.script.media_seek;
-                data = {
-                  seek_amount = -10;
-                  media_player = e.media_player.alle;
-                };
-              };
+              seek = -10;
             })
-            (mkVolumeSliderCard {
+            (ha.mkVolumeSliderCard {
               name = "Wohnzimmer";
               entity = e.media_player.living_room;
               height = 276;
             })
           ])
           (ha.mkVStack [
-            (mkSonosBtn {
+            (mkSeekBtn {
               name = "Vorwärts";
               icon = "mdi:fast-forward-10";
-              height = 84;
-              padding = "8px 0px 16px 20px";
-              tapAction = {
-                action = "perform-action";
-                haptic = "medium";
-                perform_action = e.script.media_seek;
-                data = {
-                  seek_amount = 10;
-                  media_player = e.media_player.alle;
-                };
-              };
+              seek = 10;
             })
-            (mkVolumeSliderCard {
+            (ha.mkVolumeSliderCard {
               name = "Büro";
               entity = e.media_player.office;
               height = 276;
@@ -483,23 +221,18 @@ in
           ])
         ])
 
-        # Player reset button
+        # Player reset — red when the speaker group reports "off".
         (mkSonosBtn {
           name = "Player neu starten";
           icon = "mdi:restart";
-          entity = e.media_player.alle;
-          height = 88;
+          entity = alle;
+          service = e.script.sonos_reset;
+          align = "center";
           padding = "13px 0px 16px 20px";
-          iconColor = "var(--white)";
-          nameColor = "var(--white)";
-          centered = true;
-          tapAction = {
-            action = "perform-action";
-            perform_action = e.script.sonos_reset;
-          };
-          states = [
+          haptic = "light";
+          state = [
             (ha.mkStateStyleFull {
-              value = "[[[\n  return entity.state === \"off\";\n]]]\n";
+              value = ''[[[ return entity.state === "off"; ]]]'';
               name = "Player ist aus";
               icon = "mdi:restart-alert";
               bg = "var(--red)";

@@ -344,5 +344,68 @@ in
         z-index: 1;
       }
 
+      /* Gauge: title pinned top-left so the needle has room to breathe. */
+
+      .gauge ha-card {
+        padding-top: 32px !important;
+        position: relative;
+      }
+
+      .gauge .title {
+        position: absolute !important;
+        top: 12px;
+        left: 16px;
+        font-size: var(--ha-font-size-l) !important;
+        color: var(--secondary-text-color) !important;
+        margin: 0 !important;
+        text-align: left !important;
+      }
+
+      /* Picture-elements wrapper used by the X1C view: no chrome,
+         no background, no shadow — the printer/AMS/spool image IS the
+         card. */
+
+      .picture-bare ha-card {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Botty vacuum map: project our brand palette onto the
+         xiaomi-vacuum-map-card's internal CSS vars and round the
+         map's clip rect to match the rest of the dashboard. */
+
+      .vacuum-map ha-card {
+        background: none !important;
+        box-shadow: none !important;
+        border-radius: 0px !important;
+        overflow: visible !important;
+        --map-card-internal-primary-color: var(--blue) !important;
+        --map-card-internal-secondary-color: var(--contrast2) !important;
+        --map-card-internal-primary-text-color: var(--black) !important;
+        --map-card-internal-secondary-text-color: var(--contrast20) !important;
+        --map-card-internal-manual-rectangle-fill-color: rgba(var(--blue-rgb),0.4) !important;
+        --map-card-internal-manual-rectangle-fill-color-selected: rgba(var(--blue-rgb),0.3) !important;
+      }
+
+      .vacuum-map .map-wrapper {
+        border-radius: 24px !important;
+        overflow: hidden;
+      }
+
+      .vacuum-map .controls-wrapper {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+        margin-bottom: 0 !important;
+      }
+
+      .vacuum-map .controls-wrapper .map-controls-wrapper {
+        margin: 0 !important;
+      }
+
+      .vacuum-map mwc-list-item {
+        background: var(--contrast2) !important;
+      }
+
   '';
 }

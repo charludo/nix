@@ -7,72 +7,6 @@
 let
   ha = lib.ha;
 
-  # Mini variant of `mkToggleCard` for the watering slot row: same
-  # contrast2/blue palette and icon-over-name layout, but shorter so
-  # six of them fit comfortably in one horizontal-stack row.
-  mkWateringSlotButton =
-    t:
-    let
-      slug = lib.replaceStrings [ ":" ] [ "_" ] t;
-    in
-    {
-      type = "custom:button-card";
-      entity = "input_boolean.bewasserung_zeit_${slug}";
-      name = t;
-      icon = "mdi:clock-outline";
-      tap_action = {
-        action = "toggle";
-        haptic = "selection";
-      };
-      styles = ha.mkStyles {
-        card = {
-          background = "var(--contrast2)";
-          padding = "8px 4px";
-          "--mdc-ripple-press-opacity" = 0;
-        };
-        img_cell = {
-          "justify-self" = "center";
-          width = "20px";
-        };
-        icon = {
-          width = "20px";
-          height = "20px";
-          color = "var(--contrast8)";
-        };
-        name = {
-          "justify-self" = "center";
-          "font-size" = "12px";
-          margin = "4px 0 0 0";
-          color = "var(--contrast8)";
-        };
-      };
-      state = [
-        (ha.mkStateStyle "on" {
-          card.background = "var(--blue)";
-          icon.color = "var(--black)";
-          name.color = "var(--black)";
-        })
-        (ha.mkStateStyle "off" {
-          icon.color = "var(--contrast20)";
-          name.color = "var(--contrast20)";
-        })
-      ];
-    };
-
-  mkAutoToggle =
-    {
-      entity,
-      name,
-      onColor,
-    }:
-    ha.mkToggleCard {
-      inherit entity name onColor;
-      icon = ha.robotIcon;
-    };
-
-  # Pre-made broadcast messages rendered as one-per-row buttons above
-  # the input field when the broadcast form is open. Tapping fills the
-  # input_text but doesn't send, so the user can tweak first.
   broadcastPresets = [
     {
       name = "Gleich da";
@@ -91,84 +25,41 @@ let
     }
   ];
 
-  # Shared styles for the buttons in the broadcast form (input_text
-  # presets + Send). Same shape as the Türalarm button but without
-  # state-based recolouring: name/icon stay white (contrast20) at all
-  # times so they read as "normal" interactive controls rather than
-  # the muted contrast8 look the form had before.
-  broadcastBtnStyles = ha.mkStyles {
-    card = {
-      background = "var(--contrast2)";
-      padding = "16px";
-      "--mdc-ripple-press-opacity" = 0;
+  # Watering-slot toggle (input_boolean named after the time string),
+  # rendered as a compact pill row.
+  mkWateringSlot =
+    t:
+    let
+      slug = lib.replaceStrings [ ":" ] [ "_" ] t;
+    in
+    ha.mkPillButton {
+      entity = "input_boolean.bewasserung_zeit_${slug}";
+      name = t;
     };
-    img_cell = {
-      "justify-self" = "start";
-      width = "24px";
-    };
-    icon = {
-      width = "24px";
-      height = "24px";
-      color = "var(--contrast20)";
-    };
-    name = {
-      "justify-self" = "start";
-      "font-size" = "14px";
-      margin = "4px 0 12px 0";
-      color = "var(--contrast20)";
-    };
-  };
 
-  mkBroadcastPreset = preset: {
-    type = "custom:button-card";
-    inherit (preset) name icon;
-    tap_action = {
-      action = "perform-action";
-      perform_action = "input_text.set_value";
-      haptic = "selection";
-      data = {
-        entity_id = "input_text.broadcast_message";
-        value = preset.text;
-      };
-    };
-    styles = broadcastBtnStyles;
-  };
-
-  # One status banner per timer in the pool, visible only while running.
-  # Tapping cancels the timer (with confirmation). Label shows end time;
-  # it refreshes when the timer state changes.
   timerBanner =
     timer:
-    ha.mkConditional [ (ha.stateIs timer "active") ] (
-      ha.mkActionCard {
-        name = "Timer";
-        icon = "mdi:timer-sand";
-        label = "[[[ const f = new Date(states['${timer}'].attributes.finishes_at); return 'Endet um ' + f.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); ]]]";
-        service = "timer.cancel";
-        serviceData.entity_id = timer;
-        confirmation = "Timer wirklich abbrechen?";
-        cardBg = "var(--yellow)";
-        iconColor = "var(--black)";
-        nameColor = "var(--black)";
-        labelColor = "var(--black)";
-        zIndex = 1;
-        extraCardProps."margin-top" = "24px";
-      }
-    );
+    ha.mkActiveBanner {
+      conditions = [ (ha.stateIs timer "active") ];
+      name = "Timer";
+      icon = "mdi:timer-sand";
+      label = "[[[ const f = new Date(states['${timer}'].attributes.finishes_at); return 'Endet um ' + f.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); ]]]";
+      service = "timer.cancel";
+      serviceData.entity_id = timer;
+      confirmation = "Timer wirklich abbrechen?";
+    };
 in
 {
   type = "sections";
   max_columns = 1;
   icon = "mdi:home";
-  header = {
-    card = ha.mkTitleCard "Home";
-  };
+  header.card = ha.mkTitleCard "Home";
   sections = [
     {
       type = "grid";
       cards = [
 
-        # Temperature swipe carousel
+        # Temperature swipe carousel.
         {
           type = "custom:swipe-card";
           card_width = "calc(100% - 48px)";
@@ -200,183 +91,134 @@ in
           ];
         }
 
-        # Conditional status banners (music, door, botty)
+        # Conditional status banners (printer, music, door, battery,
+        # botty, timers). Each adds itself to the column only while its
+        # condition holds; otherwise it disappears entirely.
         {
           square = false;
           type = "grid";
           columns = 1;
           cards = [
-            # X1C printing banner — same shape as the sonos one. Tap
-            # navigates to the X1C dashboard; the cancel-print path
-            # stays gated behind a long-press / the dedicated control.
-            (ha.mkConditional [ (ha.stateIs "sensor.x1c_druckstatus" "running") ] (
-              (ha.mkActionCard {
-                name = "X1C druckt";
-                icon = "mdi:printer-3d-nozzle";
-                entity = "sensor.x1c_druckstatus";
-                label = "[[[ const rem = states['sensor.x1c_verbleibende_zeit']?.state ?? '?'; const lay = states['sensor.x1c_aktuelle_schicht']?.state ?? '?'; const tot = states['sensor.x1c_gesamtzahl_der_schichten']?.state ?? '?'; return 'noch ' + rem + ' min · Layer ' + lay + '/' + tot; ]]]";
-                # mkActionCard requires `service`; we override
-                # tap_action below to navigate instead of perform.
-                service = "homeassistant.update_entity";
-                serviceData.entity_id = "sensor.x1c_druckstatus";
-                cardBg = "var(--green)";
-                iconColor = "var(--black)";
-                nameColor = "var(--black)";
-                labelColor = "var(--black)";
-                extraCardProps."margin-top" = "24px";
-              })
-              // {
-                tap_action = {
-                  action = "navigate";
-                  navigation_path = "/lovelace/x1c";
-                  haptic = "medium";
-                };
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.media_player.office "playing") ] (
-              ha.mkActionCard {
-                name = "Musik anhalten";
-                icon = "mdi:pause";
-                entity = e.media_player.alle;
-                label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
-                service = e.script.sonos_play_pause;
+            (ha.mkSuccessBanner {
+              conditions = [ (ha.stateIs "sensor.x1c_druckstatus" "running") ];
+              name = "X1C druckt";
+              icon = "mdi:printer-3d-nozzle";
+              entity = "sensor.x1c_druckstatus";
+              label = "[[[ const rem = states['sensor.x1c_verbleibende_zeit']?.state ?? '?'; const lay = states['sensor.x1c_aktuelle_schicht']?.state ?? '?'; const tot = states['sensor.x1c_gesamtzahl_der_schichten']?.state ?? '?'; return 'noch ' + rem + ' min · Layer ' + lay + '/' + tot; ]]]";
+              # mkStatusBanner requires a `service`; tapNavigatePath
+              # overrides tap_action to navigate instead. The service
+              # is harmless because it never fires.
+              service = "homeassistant.update_entity";
+              serviceData.entity_id = "sensor.x1c_druckstatus";
+              tapNavigatePath = "/lovelace/x1c";
+            })
+            (ha.mkActiveBanner {
+              conditions = [ (ha.stateIs e.media_player.office "playing") ];
+              name = "Musik anhalten";
+              icon = "mdi:pause";
+              entity = e.media_player.alle;
+              label = "[[[ return states['${e.media_player.alle}'].attributes.media_title ]]]";
+              service = e.script.sonos_play_pause;
+              haptic = "medium";
+            })
+            (ha.mkAlertBanner {
+              conditions = [ (ha.stateIs e.binary_sensor.tursensor.opening "on") ];
+              name = "Wohnungstür offen";
+              icon = "mdi:door-open";
+              entity = e.binary_sensor.tursensor.opening;
+              label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
+              service = e.script.botty_zurueckkehren;
+              holdAction = {
+                action = "more-info";
                 haptic = "medium";
-                cardBg = "var(--yellow)";
-                iconColor = "var(--black)";
-                nameColor = "var(--black)";
-                extraCardProps."margin-top" = "24px";
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.binary_sensor.tursensor.opening "on") ] (
-              ha.mkActionCard {
-                name = "Wohnungstür offen";
-                icon = "mdi:door-open";
-                entity = e.binary_sensor.tursensor.opening;
-                label = ''[[[return "seit: " + states["${e.sensor.tursensor_last_changed}"].state ]]]'';
-                service = e.script.botty_zurueckkehren;
-                holdAction = {
-                  action = "more-info";
-                  haptic = "medium";
-                };
-                cardBg = "var(--red)";
-                iconColor = "var(--contrast1)";
-                nameColor = "var(--contrast1)";
-                zIndex = 1;
-                extraCardProps."margin-top" = "24px";
-              }
-            ))
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.turalarm_persistent "on") ] (
-              ha.mkActionCard {
-                name = "Wohnungstür wurde geöffnet";
-                icon = "mdi:door-open";
-                entity = e.binary_sensor.tursensor.opening;
-                label = ''[[[return "letzte Änderung: " + states["${e.sensor.tursensor_last_changed}"].state + ", jetzt: " + states["${e.binary_sensor.tursensor.opening}"].state ]]]'';
-                service = "input_boolean.turn_off";
-                serviceData.entity_id = e.input_boolean.turalarm_persistent;
-                holdAction = {
-                  action = "more-info";
-                  haptic = "medium";
-                };
-                confirmation = "Sicher, dass du die Warnung deaktivieren möchtest?";
-                cardBg = "var(--red)";
-                iconColor = "var(--contrast1)";
-                nameColor = "var(--contrast1)";
-                zIndex = 1;
-                extraCardProps."margin-top" = "24px";
-              }
-            ))
+              };
+            })
+            (ha.mkAlertBanner {
+              conditions = [ (ha.stateIs e.input_boolean.turalarm_persistent "on") ];
+              name = "Wohnungstür wurde geöffnet";
+              icon = "mdi:door-open";
+              entity = e.binary_sensor.tursensor.opening;
+              label = ''[[[return "letzte Änderung: " + states["${e.sensor.tursensor_last_changed}"].state + ", jetzt: " + states["${e.binary_sensor.tursensor.opening}"].state ]]]'';
+              service = "input_boolean.turn_off";
+              serviceData.entity_id = e.input_boolean.turalarm_persistent;
+              holdAction = {
+                action = "more-info";
+                haptic = "medium";
+              };
+              confirmation = "Sicher, dass du die Warnung deaktivieren möchtest?";
+            })
             # Driven by sensor.zigbee_min_battery (a min-aggregation
             # group sensor over all zigbee battery entities; see
             # config/helpers.nix). Threshold lives in lib.ha so this
             # condition can't drift from the alerting automation.
-            (ha.mkConditional
-              [
+            (ha.mkAlertBanner {
+              conditions = [
                 {
                   condition = "numeric_state";
                   entity = e.sensor.zigbee_min_battery;
                   below = ha.lowBatteryThreshold;
                 }
-              ]
-              (
-                ha.mkActionCard {
-                  name = "Zigbee Akku schwach";
-                  icon = "mdi:battery-alert";
-                  entity = e.sensor.zigbee_min_battery;
-                  label = ''
-                    [[[
-                      const names = [];
-                      for (const id of Object.keys(states)) {
-                        if (!id.endsWith('_battery')) continue;
-                        const s = states[id];
-                        const v = parseFloat(s.state);
-                        if (!isNaN(v) && v < ${toString ha.lowBatteryThreshold}) {
-                          names.push((s.attributes.friendly_name || id) + ' (' + s.state + '%)');
-                        }
-                      }
-                      return names.join(', ');
-                    ]]]
-                  '';
-                  # mkActionCard requires a service for tap; refreshing the
-                  # group is harmless and a long-press still opens more-info.
-                  service = "homeassistant.update_entity";
-                  serviceData.entity_id = e.sensor.zigbee_min_battery;
-                  holdAction = {
-                    action = "more-info";
-                    haptic = "medium";
-                  };
-                  cardBg = "var(--red)";
-                  iconColor = "var(--contrast1)";
-                  nameColor = "var(--contrast1)";
-                  labelColor = "var(--contrast1)";
-                  zIndex = 1;
-                  extraCardProps."margin-top" = "24px";
-                }
-              )
-            )
-            (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] (
-              ha.mkActionCard {
-                name = "Botty anhalten";
-                icon = "mdi:robot-vacuum";
-                label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
-                service = e.script.botty_pausieren;
-                cardBg = "var(--blue)";
-                iconColor = "var(--contrast1)";
-                nameColor = "var(--contrast1)";
-                zIndex = 1;
-                extraCardProps."margin-top" = "24px";
-              }
-            ))
+              ];
+              name = "Zigbee Akku schwach";
+              icon = "mdi:battery-alert";
+              entity = e.sensor.zigbee_min_battery;
+              label = ''
+                [[[
+                  const names = [];
+                  for (const id of Object.keys(states)) {
+                    if (!id.endsWith('_battery')) continue;
+                    const s = states[id];
+                    const v = parseFloat(s.state);
+                    if (!isNaN(v) && v < ${toString ha.lowBatteryThreshold}) {
+                      names.push((s.attributes.friendly_name || id) + ' (' + s.state + '%)');
+                    }
+                  }
+                  return names.join(', ');
+                ]]]
+              '';
+              service = "homeassistant.update_entity";
+              serviceData.entity_id = e.sensor.zigbee_min_battery;
+              holdAction = {
+                action = "more-info";
+                haptic = "medium";
+              };
+            })
+            (ha.mkInfoBanner {
+              conditions = [ (ha.stateNot e.vacuum.botty "docked") ];
+              name = "Botty anhalten";
+              icon = "mdi:robot-vacuum";
+              label = ''[[[return states["${e.sensor.botty_current_clean_area}"].state + "m² gereinigt"]]]'';
+              service = e.script.botty_pausieren;
+            })
           ]
           ++ map timerBanner (builtins.attrValues e.timer);
         }
 
-        # Licht & Co grid
+        # Licht & Co
         {
           square = false;
           type = "grid";
           columns = 2;
           title = "Licht & Co";
           cards = [
-            (ha.mkToggleCard {
+            (ha.mkToggleYellow {
               entity = e.light.strahler.light;
               name = "Strahler";
-              onColor = "var(--yellow)";
               withSlider = true;
             })
-            (ha.mkToggleCard {
+            (ha.mkToggleBlue {
               entity = e.fan.xiaomi_smart_fan;
               name = "Ventilator";
-              onColor = "var(--blue)";
               withSlider = true;
               sliderColorMode = "fan";
             })
           ];
         }
 
-        # Garten grid — columns=1 so each child is a full-width row; the
-        # per-feature rows below are wrapped in conditionals so a feature
-        # being off hides its whole row instead of leaving a half-empty
-        # one.
+        # Garten — each row is itself a conditional, so disabled
+        # features simply disappear instead of leaving half-empty rows.
+        # Visibility of each conditional is gated by an input_boolean
+        # toggled from view-einstellungen.
         {
           square = false;
           type = "grid";
@@ -387,317 +229,110 @@ in
             navigation_path = "/dashboard-garten";
           };
           cards = [
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] {
-              type = "horizontal-stack";
-              cards = [
-                (ha.mkToggleCard {
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_anzucht "on") ] (
+              ha.mkHStack [
+                (ha.mkToggleGreen {
                   entity = e.switch.steckdose_pflanzenlicht.switch;
                   name = "Pflanzenlicht";
                   icon = "mdi:flower-pollen";
-                  onColor = "var(--green)";
                 })
-                {
-                  type = "custom:button-card";
+                (ha.mkAutoToggleWithSettingGreen {
                   entity = e.automation.pflanzenlicht_automatik;
                   name = "Pflanzlicht-Automatik";
-                  icon = ha.robotIcon;
-                  tap_action = {
-                    action = "toggle";
-                    haptic = "medium";
-                  };
-                  hold_action = {
-                    action = "more-info";
-                    haptic = "medium";
-                  };
-                  custom_fields = {
-                    uren = "[[[ return states['${e.input_number.stunden_sonnenlicht_setzlinge}'].state + 'h' ]]]";
-                    slider.card = {
-                      type = "custom:my-slider-v2";
-                      entity = e.input_number.stunden_sonnenlicht_setzlinge;
-                      min = 1;
-                      max = 24;
-                      step = 1;
-                      styles = {
-                        container = {
-                          background = "none";
-                          "border-radius" = "100px";
-                          overflow = "visible";
-                        };
-                        card = {
-                          height = "16px";
-                          padding = "0 8px";
-                          background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,1) 100%)' : 'var(--contrast4)'; ]]]";
-                        };
-                        track = {
-                          overflow = "visible";
-                          background = "none";
-                        };
-                        progress.background = "none";
-                        thumb = {
-                          background = "[[[ return states['${e.automation.pflanzenlicht_automatik}']?.state === 'on' ? 'var(--black)' : 'var(--contrast20)'; ]]]";
-                          top = "2px";
-                          right = "-6px";
-                          height = "12px";
-                          width = "12px";
-                          "border-radius" = "100px";
-                        };
-                      };
-                    };
-                  };
-                  styles =
-                    (ha.mkStyles {
-                      card = {
-                        background = "var(--contrast2)";
-                        padding = "16px";
-                        "--mdc-ripple-press-opacity" = 0;
-                      };
-                      img_cell = {
-                        "justify-self" = "start";
-                        width = "24px";
-                      };
-                      icon = {
-                        width = "24px";
-                        height = "24px";
-                        color = "var(--contrast8)";
-                      };
-                      name = {
-                        "justify-self" = "start";
-                        "font-size" = "14px";
-                        margin = "4px 0 12px 0";
-                        color = "var(--contrast8)";
-                      };
-                    })
-                    // {
-                      grid = ha.mkStyleProp {
-                        "grid-template-areas" = ''"i i" "n uren" "slider slider"'';
-                        "grid-template-columns" = "1fr min-content";
-                        "grid-template-rows" = "1fr min-content min-content";
-                      };
-                      custom_fields = ha.mkStyles {
-                        uren = {
-                          "font-size" = "12px";
-                          color = "var(--contrast9)";
-                          "padding-left" = "2px";
-                          "align-self" = "center";
-                          "margin-bottom" = "12px";
-                        };
-                      };
-                    };
-                  state = [
-                    (ha.mkStateStyle "on" {
-                      card.background = "var(--green)";
-                      icon.color = "var(--black)";
-                      name.color = "var(--black)";
-                    })
-                    (ha.mkStateStyle "off" {
-                      icon.color = "var(--contrast20)";
-                      name.color = "var(--contrast20)";
-                    })
-                  ];
-                }
-              ];
-            })
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] {
-              # The Bewässerung row is itself a vertical stack: the
-              # standard Wasserpumpe + Automatik pair, and beneath them
-              # the per-slot enable pills (shown only while the
-              # automation is on). Keeping them nested means the pills
-              # always sit directly under their Automatik toggle no
-              # matter which other Garten features happen to be enabled.
-              type = "vertical-stack";
-              cards = [
-                {
-                  type = "horizontal-stack";
-                  cards = [
-                    (ha.mkToggleCard {
-                      entity = e.switch.steckdose_wasserpumpe.switch;
-                      name = "Wasserpumpe";
-                      icon = "mdi:water-pump";
-                      onColor = "var(--blue)";
-                    })
-                    # Card shows wasserpumpe_an's enabled state, but tap
-                    # toggles both halves of the watering cycle at once so
-                    # they stay in sync — leaving the off-automation
-                    # enabled while the on-automation is disabled would
-                    # be a footgun.
-                    (
-                      (mkAutoToggle {
-                        entity = e.automation.wasserpumpe_an;
-                        name = "Bewässerungs-Automatik";
-                        onColor = "var(--blue)";
-                      })
-                      // {
-                        tap_action = {
-                          action = "perform-action";
-                          perform_action = "automation.toggle";
-                          haptic = "medium";
-                          data.entity_id = [
-                            e.automation.wasserpumpe_an
-                            e.automation.wasserpumpe_aus
-                          ];
-                        };
-                      }
-                    )
-                  ];
-                }
-                (ha.mkConditional [ (ha.stateIs e.automation.wasserpumpe_an "on") ] {
-                  type = "horizontal-stack";
-                  cards = map mkWateringSlotButton wateringTimes;
+                  settingEntity = e.input_number.stunden_sonnenlicht_setzlinge;
+                  settingMin = 1;
+                  settingMax = 24;
                 })
-              ];
-            })
-            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] {
-              type = "horizontal-stack";
-              cards = [
-                (ha.mkToggleCard {
+              ]
+            ))
+            # Bewässerung sits in its own vstack so the per-slot pill
+            # row always lives directly under the Automatik toggle.
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_bewasserung "on") ] (
+              ha.mkVStack [
+                (ha.mkHStack [
+                  (ha.mkToggleBlue {
+                    entity = e.switch.steckdose_wasserpumpe.switch;
+                    name = "Wasserpumpe";
+                    icon = "mdi:water-pump";
+                  })
+                  # Tap toggles BOTH halves of the watering cycle at
+                  # once so they stay in sync.
+                  (ha.mkAutoToggleBlue {
+                    entity = e.automation.wasserpumpe_an;
+                    name = "Bewässerungs-Automatik";
+                    tapAction = {
+                      action = "perform-action";
+                      perform_action = "automation.toggle";
+                      haptic = "medium";
+                      data.entity_id = [
+                        e.automation.wasserpumpe_an
+                        e.automation.wasserpumpe_aus
+                      ];
+                    };
+                  })
+                ])
+                (ha.mkConditional [ (ha.stateIs e.automation.wasserpumpe_an "on") ] (
+                  ha.mkHStack (map mkWateringSlot wateringTimes)
+                ))
+              ]
+            ))
+            (ha.mkConditional [ (ha.stateIs e.input_boolean.settings_garten_heizung "on") ] (
+              ha.mkHStack [
+                (ha.mkToggleYellow {
                   entity = e.switch.steckdose_gewachshaus_heizung.switch;
                   name = "Gewächshaus Heizung";
                   icon = "mdi:radiator";
-                  onColor = "var(--yellow)";
                 })
-                (mkAutoToggle {
+                (ha.mkAutoToggleYellow {
                   entity = e.automation.heat_greenhouse;
                   name = "Heizungs-Automatik";
-                  onColor = "var(--yellow)";
                 })
-              ];
-            })
+              ]
+            ))
           ];
         }
 
-        # Alarme grid
         {
           square = false;
           type = "grid";
           columns = 2;
           title = "Alarme";
           cards = [
-            {
-              type = "custom:button-card";
+            (ha.mkToggleRed {
               entity = e.input_boolean.turalarm;
-              name = ''[[[ return entity.state === "on" ? "Türalarm: Armed" : "Türalarm:  Disarmed"; ]]]'';
+              name = ''[[[ return entity.state === "on" ? "Türalarm: Armed" : "Türalarm: Disarmed"; ]]]'';
               icon = "[[[ return entity.attributes.icon ]]]";
-              show_label = true;
-              confirmation.text = "Sicher, dass du Alarm an/aus schalten willst?";
-              styles = ha.mkStyles {
-                card = {
-                  background = "var(--contrast2)";
-                  padding = "16px";
-                  "--mdc-ripple-press-opacity" = 0;
-                };
-                img_cell = {
-                  "justify-self" = "start";
-                  width = "24px";
-                };
-                icon = {
-                  width = "24px";
-                  height = "24px";
-                  color = "var(--contrast8)";
-                };
-                name = {
-                  "justify-self" = "start";
-                  "font-size" = "14px";
-                  margin = "4px 0 12px 0";
-                  color = "var(--contrast8)";
-                };
-              };
-              state = [
-                (ha.mkStateStyle "on" {
-                  card = {
-                    background = "var(--red)";
-                  };
-                  icon = {
-                    color = "var(--black)";
-                  };
-                  name = {
-                    color = "var(--black)";
-                  };
-                })
-                (ha.mkStateStyle "off" {
-                  icon = {
-                    color = "var(--contrast20)";
-                  };
-                  name = {
-                    color = "var(--contrast20)";
-                  };
-                })
-              ];
-            }
-
-            # Broadcast button — toggles input_boolean.broadcast_open,
-            # which gates the inline form (text input + Send) revealed
-            # in the conditional card below this grid. See
-            # config/scripts/broadcast.nix for the script.
-            {
-              type = "custom:button-card";
+              confirmation = "Sicher, dass du Alarm an/aus schalten willst?";
+            })
+            # Toggles input_boolean.broadcast_open, which gates the
+            # broadcast form revealed beneath this grid.
+            (ha.mkToggleYellow {
               entity = "input_boolean.broadcast_open";
               name = "Broadcast";
               icon = "mdi:bullhorn";
-              tap_action = {
-                action = "toggle";
-                haptic = "medium";
-              };
-              styles = ha.mkStyles {
-                card = {
-                  background = "var(--contrast2)";
-                  padding = "16px";
-                  "--mdc-ripple-press-opacity" = 0;
-                };
-                img_cell = {
-                  "justify-self" = "start";
-                  width = "24px";
-                };
-                icon = {
-                  width = "24px";
-                  height = "24px";
-                  color = "var(--contrast8)";
-                };
-                name = {
-                  "justify-self" = "start";
-                  "font-size" = "14px";
-                  margin = "4px 0 12px 0";
-                  color = "var(--contrast8)";
-                };
-              };
-              state = [
-                (ha.mkStateStyle "on" {
-                  card = {
-                    background = "var(--yellow)";
-                  };
-                  icon = {
-                    color = "var(--black)";
-                  };
-                  name = {
-                    color = "var(--black)";
-                  };
-                })
-                (ha.mkStateStyle "off" {
-                  icon = {
-                    color = "var(--contrast20)";
-                  };
-                  name = {
-                    color = "var(--contrast20)";
-                  };
-                })
-              ];
-            }
+            })
           ];
         }
 
-        # Broadcast form — revealed by the Alarme-grid Broadcast button
-        # (toggles input_boolean.broadcast_open). Single-line text
-        # input plus a Send button whose tap_action templates the
-        # sender from `hass.user.name` client-side, so no user UUIDs
-        # need to be pinned in Nix. Script collapses the form on
-        # completion (resets input_text + turns the toggle off).
-        (ha.mkConditional [ (ha.stateIs "input_boolean.broadcast_open" "on") ] {
-          type = "vertical-stack";
-          cards = [
+        # Broadcast form. The preset buttons fill input_text without
+        # sending, so the user can tweak before tapping Send. The Send
+        # button reads the focused DOM input directly because HA's
+        # input_text card only commits to state on blur/Enter — tapping
+        # Send isn't a blur, so the entity state is almost always stale.
+        (ha.mkConditional [ (ha.stateIs "input_boolean.broadcast_open" "on") ] (
+          ha.mkVStack [
             {
               square = false;
               type = "grid";
               columns = 3;
-              cards = map mkBroadcastPreset broadcastPresets;
+              cards = map (
+                preset:
+                ha.mkInputTextPreset {
+                  inherit (preset) name icon;
+                  target = "input_text.broadcast_message";
+                  value = preset.text;
+                }
+              ) broadcastPresets;
             }
             {
               type = "entities";
@@ -709,20 +344,15 @@ in
               ];
               show_header_toggle = false;
             }
-            {
-              type = "custom:button-card";
+            (ha.mkServiceButton {
               name = "Senden";
               icon = "mdi:send";
-              tap_action = {
+              haptic = "medium";
+              align = "start";
+              padding = "16px";
+              tapAction = {
                 action = "call-service";
                 service = "script.broadcast_announce";
-                # input_text card only commits to HA state on blur or
-                # Enter — tapping Send isn't a real blur, so the state
-                # is almost always stale at tap time. Workaround: read
-                # the value directly from the focused DOM input (walks
-                # shadow roots because HA uses shadow DOM extensively).
-                # Falls back to state if no input is focused (e.g.
-                # user already tapped outside first).
                 data = {
                   sender = "[[[ return hass.user.name; ]]]";
                   message = ''
@@ -760,12 +390,10 @@ in
                 '';
                 haptic = "medium";
               };
-              styles = broadcastBtnStyles;
-            }
-          ];
-        })
+            })
+          ]
+        ))
 
-        # Dashboards nav grid
         {
           square = false;
           type = "grid";
@@ -779,7 +407,6 @@ in
           ];
         }
 
-        # Rooms swipe-card
         {
           square = false;
           type = "grid";
@@ -797,9 +424,6 @@ in
                 freeMode = true;
                 centerInsufficientSlides = true;
                 snapToSlideEdge = true;
-                # See the carousel above — restrict the swipe to a
-                # narrower horizontal cone so diagonal/vertical gestures
-                # don't get captured.
                 touchAngle = 30;
                 threshold = 8;
               };

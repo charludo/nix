@@ -62,7 +62,7 @@ in
     ];
 
     services.home-assistant.config.grocery_categorize = {
-      inherit (cfg) todoEntity;
+      todo_entity = cfg.todoEntity;
       supermarkets = lib.mapAttrs (_: s: s.categories) cfg.supermarkets;
     };
   };

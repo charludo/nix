@@ -7,6 +7,10 @@
 let
   ha = lib.ha;
   e = config.hass.entities;
+
+  gh = e.sensor.thermometer_gewachshaus;
+  ws = e.sensor.wetterstation;
+
   cfg = (pkgs.formats.yaml { }).generate "dashboard-garten.yaml" {
     views = [
       {
@@ -21,12 +25,12 @@ let
               name = "Gewächshaus vs Wetterstation";
               entities = [
                 {
-                  entity = e.sensor.thermometer_gewachshaus.temperature;
+                  entity = gh.temperature;
                   show_state = true;
                   state_adaptive_color = true;
                 }
                 {
-                  entity = e.sensor.wetterstation.temperature;
+                  entity = ws.temperature;
                   show_state = true;
                   show_indicator = true;
                   state_adaptive_color = true;
@@ -36,50 +40,45 @@ let
               upper_bound = "~30";
               lower_bound_secondary = "~0";
               upper_bound_secondary = "~25";
-              extraConfig = {
-                show = {
-                  legend = false;
-                  extrema = true;
-                };
+              extraConfig.show = {
+                legend = false;
+                extrema = true;
               };
             })
             (ha.mkHStack [
               (ha.mkTempHumGraph {
                 name = "Gewächshaus";
-                tempEntity = e.sensor.thermometer_gewachshaus.temperature;
-                humEntity = e.sensor.thermometer_gewachshaus.humidity;
+                tempEntity = gh.temperature;
+                humEntity = gh.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
               (ha.mkTempHumGraph {
                 name = "Wetterstation";
-                tempEntity = e.sensor.wetterstation.temperature;
-                humEntity = e.sensor.wetterstation.humidity;
+                tempEntity = ws.temperature;
+                humEntity = ws.humidity;
                 lowerBound = "~0";
                 upperBound = "~30";
               })
             ])
             (ha.mkHStack [
-              {
-                type = "sensor";
+              (ha.mkSensorCard {
                 entity = e.sensor.cumulative_rain_8h;
                 name = "Regen (letzte 8h)";
-                graph = "none";
-                detail = 2;
                 unit = "mm";
                 hours_to_show = 8;
-              }
-              {
-                type = "sensor";
+                graph = "none";
+              })
+              (ha.mkSensorCard {
                 entity = e.sensor.cumulative_rain_24h;
                 name = "Regen (letzte 24h)";
-                graph = "none";
-                detail = 2;
                 unit = "mm";
                 hours_to_show = 24;
-              }
+                graph = "none";
+              })
             ])
           ])
+
           (ha.mkGridSection [
             (ha.mkMushTitle "Automatisierungen")
             {
@@ -112,6 +111,7 @@ let
               icon = "mdi:sprout";
             }
           ])
+
           (ha.mkGridSection [
             (ha.mkPowerStack {
               title = "Wasserpumpe";

@@ -7,9 +7,7 @@ in
   max_columns = 1;
   path = "einstellungen";
   icon = "mdi:cog";
-  header = {
-    card = ha.mkTitleCard "Ansichten";
-  };
+  header.card = ha.mkTitleCard "Ansichten";
   sections = [
     {
       type = "grid";
@@ -20,24 +18,20 @@ in
           columns = 3;
           title = "Garten";
           cards = [
-            (ha.mkToggleCard {
+            (ha.mkToggleGreen {
               entity = e.input_boolean.settings_garten_anzucht;
               name = "Anzucht";
-              onColor = "var(--green)";
             })
-            (ha.mkToggleCard {
+            (ha.mkToggleBlue {
               entity = e.input_boolean.settings_garten_bewasserung;
               name = "Bewässerung";
-              onColor = "var(--blue)";
             })
-            (ha.mkToggleCard {
+            (ha.mkToggleYellow {
               entity = e.input_boolean.settings_garten_heizung;
               name = "Heizung";
-              onColor = "var(--yellow)";
             })
           ];
         }
-
       ];
     }
   ];

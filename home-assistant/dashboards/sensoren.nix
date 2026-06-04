@@ -7,6 +7,36 @@
 let
   ha = lib.ha;
   e = config.hass.entities;
+
+  # Standard temperature/humidity ranges for the detail plotly view.
+  outdoorY2 = [
+    (-5)
+    20
+  ];
+  indoorY2 = [
+    18
+    28
+  ];
+  deviceY2 = [
+    20
+    40
+  ];
+
+  # Detail-view plot for one room/device: full y for humidity 0–100,
+  # configurable temperature range.
+  mkDetail =
+    name: tempEntity: humEntity: y2Range:
+    ha.mkGridSection [
+      (ha.mkTempHumPlot {
+        inherit
+          name
+          tempEntity
+          humEntity
+          y2Range
+          ;
+      })
+    ];
+
   cfg = (pkgs.formats.yaml { }).generate "dashboard-umwelt.yaml" {
     views = [
       {
@@ -117,6 +147,7 @@ let
         icon = "mdi:chart-scatter-plot-hexbin";
         header = ha.mkViewHeader "Sensordetails";
         sections = [
+          # One-off comparison plot — two temperatures only, no humidity.
           (ha.mkGridSection [
             (ha.mkPlotlyGraph {
               title = "Gewächshaus vs Wetterstation";
@@ -145,132 +176,39 @@ let
               ];
             })
           ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Wetterstation";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.wetterstation.humidity e.sensor.wetterstation.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                (-5)
-                20
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Gewächshaus";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_gewachshaus.humidity e.sensor.thermometer_gewachshaus.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                (-5)
-                20
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Nordseite";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_nordseite.humidity e.sensor.thermometer_nordseite.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                (-5)
-                20
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Badezimmer";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_badezimmer.humidity e.sensor.thermometer_badezimmer.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                18
-                28
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Wohnzimmer";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_wohnzimmer.humidity e.sensor.thermometer_wohnzimmer.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                18
-                28
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Schlafzimmer";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_schlafzimmer.humidity e.sensor.thermometer_schlafzimmer.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                18
-                28
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Büro";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_buro.humidity e.sensor.thermometer_buro.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                18
-                28
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Serverschrank";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_serverschrank.humidity e.sensor.thermometer_serverschrank.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                20
-                40
-              ];
-            })
-          ])
-          (ha.mkGridSection [
-            (ha.mkPlotlyGraph {
-              title = "Filamentbox";
-              entities = ha.mkTempHumPlotlyEntities e.sensor.thermometer_filamentbox.humidity e.sensor.thermometer_filamentbox.temperature;
-              yRange = [
-                0
-                100
-              ];
-              y2Range = [
-                20
-                40
-              ];
-            })
-          ])
+
+          (mkDetail "Wetterstation" e.sensor.wetterstation.temperature e.sensor.wetterstation.humidity
+            outdoorY2
+          )
+          (mkDetail "Gewächshaus" e.sensor.thermometer_gewachshaus.temperature
+            e.sensor.thermometer_gewachshaus.humidity
+            outdoorY2
+          )
+          (mkDetail "Nordseite" e.sensor.thermometer_nordseite.temperature
+            e.sensor.thermometer_nordseite.humidity
+            outdoorY2
+          )
+          (mkDetail "Badezimmer" e.sensor.thermometer_badezimmer.temperature
+            e.sensor.thermometer_badezimmer.humidity
+            indoorY2
+          )
+          (mkDetail "Wohnzimmer" e.sensor.thermometer_wohnzimmer.temperature
+            e.sensor.thermometer_wohnzimmer.humidity
+            indoorY2
+          )
+          (mkDetail "Schlafzimmer" e.sensor.thermometer_schlafzimmer.temperature
+            e.sensor.thermometer_schlafzimmer.humidity
+            indoorY2
+          )
+          (mkDetail "Büro" e.sensor.thermometer_buro.temperature e.sensor.thermometer_buro.humidity indoorY2)
+          (mkDetail "Serverschrank" e.sensor.thermometer_serverschrank.temperature
+            e.sensor.thermometer_serverschrank.humidity
+            deviceY2
+          )
+          (mkDetail "Filamentbox" e.sensor.thermometer_filamentbox.temperature
+            e.sensor.thermometer_filamentbox.humidity
+            deviceY2
+          )
         ];
       }
     ];

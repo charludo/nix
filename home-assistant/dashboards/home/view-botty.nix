@@ -1,58 +1,38 @@
 { lib, e }:
 let
   ha = lib.ha;
+
+  bottyDocked = ha.stateIs e.vacuum.botty "docked";
+  bottyNotDocked = ha.stateNot e.vacuum.botty "docked";
+  bottyRunning = ha.orConditions [
+    (ha.stateIs e.vacuum.botty "returning")
+    (ha.stateIs e.vacuum.botty "cleaning")
+  ];
+  bottyPaused = ha.stateIs e.vacuum.botty "paused";
+
+  cleaningDuration = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
 in
 {
   type = "sections";
   max_columns = 1;
   path = "botty";
   icon = "mdi:robot-vacuum";
-  header = {
-    card = ha.mkBadgeTitleCard {
-      name = "Botty";
-      badgeCard = {
-        type = "custom:button-card";
-        name = ''[[[return states["${e.vacuum.botty}"].attributes.status]]]'';
-        label = ''[[[return states["${e.vacuum.botty}"].attributes.battery_level + "%"]]]'';
-        show_label = true;
-        show_icon = false;
-        entity = e.vacuum.botty;
-        tap_action = {
-          action = "more-info";
-          haptic = "medium";
-        };
-        styles =
-          (ha.mkStyles {
-            card = {
-              padding = "6px 10px";
-              "font-size" = "12px";
-              "line-height" = "18px";
-              "font-weight" = 500;
-              background = "var(--contrast20)";
-            };
-            name = {
-              color = "var(--contrast1)";
-            };
-            label = {
-              color = "var(--contrast12)";
-            };
-          })
-          // {
-            grid = ha.mkStyleProp {
-              "grid-template-areas" = ''"n gutter l"'';
-              "grid-template-columns" = "min-content 5px min-content";
-              "grid-template-rows" = "min-content";
-            };
-          };
-      };
+  header.card = ha.mkBadgeTitleCard {
+    name = "Botty";
+    badgeCard = ha.mkHeaderBadge {
+      entity = e.vacuum.botty;
+      name = ''[[[return states["${e.vacuum.botty}"].attributes.status]]]'';
+      label = ''[[[return states["${e.vacuum.botty}"].attributes.battery_level + "%"]]]'';
     };
   };
   sections = [
     {
       type = "grid";
       cards = [
-
-        # Xiaomi vacuum map
+        # Xiaomi vacuum map. The map's internal palette is reskinned via
+        # the `vacuum-map` card_mod class defined in theme.nix; only the
+        # github-issue-481 hover-menu fix stays inline because it
+        # targets a deeply nested shadow root.
         {
           type = "custom:xiaomi-vacuum-map-card";
           language = "de";
@@ -76,36 +56,18 @@ in
             { template = "vacuum_clean_zone"; }
             { template = "vacuum_goto"; }
           ];
-          card_mod.style = {
-            "ha-button-menu"."$"."mwc-menu"."$"."mwc-menu-surface"."$" = ''
+          card_mod = {
+            class = "vacuum-map";
+            style."ha-button-menu"."$"."mwc-menu"."$"."mwc-menu-surface"."$" = ''
               /* Temporary fix for github issue 481 */ div {
                 left: 0 !important;
                 top: 0 !important;
                 position: absolute !important;
               }
             '';
-            "." = ''
-              ha-card {
-                background: none !important;
-                box-shadow: none !important;
-                border-radius: 0px !important;
-                overflow: visible !important;
-                --map-card-internal-primary-color: var(--blue) !important;
-                --map-card-internal-secondary-color: var(--contrast2) !important;
-                --map-card-internal-primary-text-color: var(--black) !important;
-                --map-card-internal-secondary-text-color: var(--contrast20) !important;
-                --map-card-internal-manual-rectangle-fill-color: rgba(var(--blue-rgb),0.4) !important;
-                --map-card-internal-manual-rectangle-fill-color-selected: rgba(var(--blue-rgb),0.3) !important;
-              }
-              .map-wrapper { border-radius: 24px !important; overflow: hidden; }
-              .controls-wrapper { margin-right: 0 !important; margin-left: 0 !important; margin-bottom: 0 !important; }
-              .controls-wrapper .map-controls-wrapper { margin: 0 !important; }
-              mwc-list-item { background: var(--contrast2) !important; }
-            '';
           };
         }
 
-        # Room toggles row 1: Wohnzimmer, Büro, Küche
         (ha.mkHStack [
           (ha.mkRoomToggleCard {
             entity = e.input_boolean.botty_wohnzimmer_reinigen;
@@ -124,15 +86,17 @@ in
           })
         ])
 
-        # Room toggles row 2: Sofa + repeat count + control buttons
+        # Row 2: Sofa selector + state-driven control buttons. Each
+        # control is conditional on the vacuum's state so only the
+        # currently-relevant actions are visible.
         (ha.mkHStack [
           (ha.mkRoomToggleCard {
             entity = e.input_boolean.botty_sofa_reinigen;
             name = "Sofa";
             icon = "mdi:sofa-single";
           })
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] (
-            ha.mkActionCard {
+          (ha.mkConditional [ bottyDocked ] (
+            ha.mkActionCardWhite {
               name = "Anzahl";
               icon = "mdi:numeric-1-box";
               label = "Wiederholungen";
@@ -153,75 +117,47 @@ in
                   icon = "mdi:numeric-3-box";
                 }
               ];
-              cardBg = "var(--contrast20)";
-              iconColor = "var(--contrast1)";
-              nameColor = "var(--contrast1)";
-              labelColor = "var(--contrast1)";
               zIndex = 1;
             }
           ))
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "docked") ] (
-            ha.mkActionCard {
+          (ha.mkConditional [ bottyDocked ] (
+            ha.mkActionCardGreen {
               name = "Reinigung";
               icon = "mdi:robot-vacuum";
               label = "starten";
               service = e.script.botty_reinigung;
-              cardBg = "var(--green)";
-              iconColor = "var(--black)";
-              nameColor = "var(--black)";
-              labelColor = "var(--black)";
               zIndex = 1;
             }
           ))
-          (ha.mkConditional
-            [
-              (ha.orConditions [
-                (ha.stateIs e.vacuum.botty "returning")
-                (ha.stateIs e.vacuum.botty "cleaning")
-              ])
-            ]
-            (
-              ha.mkActionCard {
-                name = "Pausieren";
-                icon = "mdi:pause";
-                label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
-                service = e.script.botty_pausieren;
-                cardBg = "var(--white)";
-                iconColor = "var(--black)";
-                nameColor = "var(--black)";
-                labelColor = "var(--contrast7)";
-                zIndex = 1;
-              }
-            )
-          )
-          (ha.mkConditional [ (ha.stateIs e.vacuum.botty "paused") ] (
-            ha.mkActionCard {
+          (ha.mkConditional [ bottyRunning ] (
+            ha.mkActionCardWhite {
+              name = "Pausieren";
+              icon = "mdi:pause";
+              label = cleaningDuration;
+              service = e.script.botty_pausieren;
+              zIndex = 1;
+            }
+          ))
+          (ha.mkConditional [ bottyPaused ] (
+            ha.mkActionCardWhite {
               name = "Fortsetzen";
               icon = "mdi:play";
-              label = ''[[[return Math.round(states["${e.sensor.botty_aktuelle_reinigungsdauer}"].state / 60) + " Minuten"]]]'';
+              label = cleaningDuration;
               service = e.script.botty_fortsetzen;
-              cardBg = "var(--white)";
-              iconColor = "var(--black)";
-              nameColor = "var(--black)";
-              labelColor = "var(--contrast7)";
               zIndex = 1;
             }
           ))
-          (ha.mkConditional [ (ha.stateNot e.vacuum.botty "docked") ] (
-            ha.mkActionCard {
+          (ha.mkConditional [ bottyNotDocked ] (
+            ha.mkActionCardRed {
               name = "Beenden";
               icon = "mdi:home";
               label = ''[[[return states["${e.sensor.botty_aktueller_reinigungsbereich}"].state + "m² gereinigt"]]]'';
               service = e.script.botty_zurueckkehren;
-              cardBg = "var(--red)";
-              iconColor = "var(--contrast1)";
-              nameColor = "var(--contrast1)";
               zIndex = 1;
             }
           ))
         ])
 
-        # Brush remaining counters row 1
         (ha.mkHStack [
           (ha.mkRemainingCard {
             sensorTemplate = e.sensor.botty_restkapazitat_der_hauptburste;
@@ -237,7 +173,6 @@ in
           })
         ])
 
-        # Brush remaining counters row 2
         (ha.mkHStack [
           (ha.mkRemainingCard {
             sensorTemplate = e.sensor.botty_filter_restkapazitat;
@@ -252,7 +187,6 @@ in
             resetConfirmation = "Sicher, dass du die Sensorreinigung zurücksetzen möchtest?";
           })
         ])
-
       ];
     }
   ];
