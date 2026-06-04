@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   secrets,
   ...
 }:
@@ -15,6 +14,7 @@
     ./areas.nix
     ./assets.nix
     ./buttons.nix
+    ./database.nix
     ./lgtv.nix
     ./misc.nix
     ./music-assistant.nix
@@ -34,25 +34,8 @@
     lovelaceConfigWritable = false;
 
     extraPackages =
-      python3Packages:
-      let
-        p = pkgs.ours.home-assistant.custom-components.mkVacuumParsers python3Packages;
-      in
-      with python3Packages;
-      [
-        psycopg2
-
+      python3Packages: with python3Packages; [
         ical
-        python-miio
-        joserfc
-        vacuum-map-parser-base
-        vacuum-map-parser-roborock
-        pkgs.ours.home-assistant.grocery-categorize-cli
-        p.vacuum-map-parser-dreame
-        p.vacuum-map-parser-ijai
-        p.vacuum-map-parser-roidmi
-        p.vacuum-map-parser-viomi
-        p.vacuum-map-parser-xiaomi
       ];
 
     extraComponents = [
@@ -60,13 +43,9 @@
       "mobile_app"
       "isal"
 
-      "sun"
       "history"
-      "statistics"
 
       "google_translate"
-      "met"
-      "webostv"
     ];
 
     config = {
@@ -90,23 +69,10 @@
         ];
       };
 
-      recorder.db_url = "postgresql://@/hass";
       logger.default = "warn";
       mobile_app = { };
       history = { };
-      sun = { };
     };
-  };
-
-  services.postgresql = {
-    enable = true;
-    ensureDatabases = [ "hass" ];
-    ensureUsers = [
-      {
-        name = "hass";
-        ensureDBOwnership = true;
-      }
-    ];
   };
 
   age.secrets.hass-secrets = {
@@ -127,5 +93,4 @@
     hassTokenPath = config.age.secrets.hass-mass-token.path;
   };
   hass.closestIntent.enable = true;
-  hass.openweathermap.enable = true;
 }

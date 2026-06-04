@@ -5,7 +5,10 @@ let
   };
 in
 {
-  services.home-assistant.extraComponents = [ "rest_command" ];
+  services.home-assistant.extraComponents = [
+    "rest_command"
+    "webostv"
+  ];
 
   services.home-assistant.config.rest_command = {
     lgtv_picture_day = mk "picture/day";

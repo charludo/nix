@@ -1,5 +1,7 @@
 { pkgs, ... }:
 {
+  services.home-assistant.extraPackages = python3Packages: [ python3Packages.joserfc ];
+
   services.home-assistant.customComponents = [
     pkgs.ours.home-assistant.custom-components.auth_oidc
   ];

@@ -1,4 +1,9 @@
+{ pkgs, ... }:
 {
+  services.home-assistant.extraPackages = _: [
+    pkgs.ours.home-assistant.grocery-categorize-cli
+  ];
+
   hass.shopping = {
     todoEntity = "todo.shopping_list";
     supermarkets = {

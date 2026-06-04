@@ -3,7 +3,17 @@ let
   e = config.hass.entities;
 in
 {
+  hass.openweathermap.enable = true;
+
+  services.home-assistant.extraComponents = [
+    "sun"
+    "met"
+    "statistics"
+  ];
+
   services.home-assistant.config = {
+    sun = { };
+
     sensor = [
       {
         platform = "statistics";
