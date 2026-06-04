@@ -1,4 +1,3 @@
-_:
 let
   status = "sensor.x1c_druckstatus";
   remaining = "sensor.x1c_verbleibende_zeit";

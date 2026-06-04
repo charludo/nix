@@ -3,23 +3,17 @@ let
   e = config.hass.entities;
   pool = builtins.attrValues e.timer;
 
-  # Jinja: pick the first idle timer from the pool, fall back to first.
-  pickIdle = ''
-    {% set free = states.timer | selectattr('state', 'eq', 'idle') | list %}
-    {{ free[0].entity_id if free else '${builtins.head pool}' }}
-  '';
-
-  # HH:MM:SS from total seconds, handling overflows past 59 minutes.
-  fmtDuration = secsExpr: ''
-    {% set s = ${secsExpr} %}
-    {{ '%02d:%02d:%02d' | format(s // 3600, (s % 3600) // 60, s % 60) }}
-  '';
-
   startTimer = secsExpr: [
     {
       action = "timer.start";
-      target.entity_id = pickIdle;
-      data.duration = fmtDuration secsExpr;
+      target.entity_id = ''
+        {% set free = states.timer | selectattr('state', 'eq', 'idle') | list %}
+        {{ free[0].entity_id if free else '${builtins.head pool}' }}
+      '';
+      data.duration = ''
+        {% set s = ${secsExpr} %}
+        {{ '%02d:%02d:%02d' | format(s // 3600, (s % 3600) // 60, s % 60) }}
+      '';
     }
   ];
 in
@@ -27,53 +21,48 @@ in
   hass.voice.intents = {
     TimerStellenMinuten = {
       sentences = [
-        "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
-        "Timer (für|auf) {timer_minutes:minutes} Minuten"
-        "Timer {timer_minutes:minutes} Minuten"
+        "[Stelle|Starte] [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
       ];
       script = {
         action = startTimer "(minutes | int) * 60";
-        speech.text = "Timer für {{ minutes }} Minuten gestartet.";
+        speech.text = "{{ minutes }} Minuten Timer - ab jetzt.";
       };
     };
 
     TimerStellenSekunden = {
       sentences = [
-        "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_seconds:seconds} Sekunden"
-        "Timer {timer_seconds:seconds} Sekunden"
+        "[Stelle|Starte] [einen] Timer (für|auf) {timer_seconds:seconds} Sekunden"
       ];
       script = {
         action = startTimer "seconds | int";
-        speech.text = "Timer für {{ seconds }} Sekunden gestartet.";
+        speech.text = "{{ seconds }} Sekunden Timer - ab jetzt.";
       };
     };
 
     TimerStellenStunden = {
       sentences = [
-        "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden"
-        "Timer {timer_hours:hours} Stunden"
+        "[Stelle|Starte] [einen] Timer (für|auf) {timer_hours:hours} Stunden"
       ];
       script = {
         action = startTimer "(hours | int) * 3600";
-        speech.text = "Timer für {{ hours }} Stunden gestartet.";
+        speech.text = "{{ hours }} Stunden Timer - ab jetzt.";
       };
     };
 
     TimerStellenKombiniert = {
       sentences = [
-        "(Stelle|Setze|Starte) [einen] Timer (für|auf) {timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten"
+        "[Stelle|Starte] [einen] Timer (für|auf) {timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten"
       ];
       script = {
         action = startTimer "(hours | int) * 3600 + (minutes | int) * 60";
-        speech.text = "Timer für {{ hours }} Stunden und {{ minutes }} Minuten gestartet.";
+        speech.text = "{{ hours }} Stunden und {{ minutes }} Minuten Timer - ab jetzt.";
       };
     };
 
     TimerAbbrechen = {
       sentences = [
-        "(Brich|Stoppe) [den|alle] Timer ab"
-        "Timer (abbrechen|stoppen|löschen)"
-        "alle Timer (abbrechen|stoppen)"
+        "(Brich|Stoppe) alle Timer ab"
+        "Alle Timer (abbrechen|stoppen|löschen)"
       ];
       script = {
         action = [
@@ -82,15 +71,14 @@ in
             target.entity_id = pool;
           }
         ];
-        speech.text = "Timer abgebrochen.";
+        speech.text = "Alle Timer abgebrochen.";
       };
     };
 
     TimerRestzeit = {
       sentences = [
-        "Wie viel Zeit (ist|bleibt) [noch] [auf dem Timer]"
-        "(Wann|Wie lange noch) [bis der] Timer (klingelt|fertig)"
-        "Timer (Status|Restzeit)"
+        "Wie lang [geht der Timer] noch"
+        "Wie viel Zeit (ist|bleibt|verbleibt) ([noch] [auf dem Timer]|bis der Timer (geht|klingelt))"
       ];
       script.speech.text = ''
         {% set active = states.timer | selectattr('state', 'eq', 'active') | list %}

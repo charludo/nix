@@ -5,44 +5,54 @@ let
   w = e.weather.openweathermap;
   daily = s.openweathermap_forecast_daily;
   hourly = s.openweathermap_forecast_hourly;
-  # Local Wetterstation (Sonoff, Terrasse) — preferred for "current" queries.
   local = s.wetterstation;
 
-  # `num e` formats `e` to one decimal with German comma; `pct e` rounds to a whole percent.
   num = expr: "{{ (${expr} | float(0) | round(1) | string).replace('.', ',') }}";
   pct = expr: "{{ ${expr} | float(0) | round(0) | int }}";
 
-  # Translate an HA weather `condition` string into German.
   cond =
     expr:
     "{{ {'sunny':'sonnig','clear-night':'klar','cloudy':'bewölkt','partlycloudy':'teilweise bewölkt','rainy':'regnerisch','pouring':'stark regnerisch','lightning':'gewittrig','lightning-rainy':'gewittrig mit Regen','snowy':'schneit','snowy-rainy':'Schneeregen','fog':'neblig','hail':'Hagel','windy':'windig','windy-variant':'windig','exceptional':'außergewöhnlich'}.get(${expr}, ${expr}) }}";
 
-  # German weekday name from an ISO datetime string.
   weekday =
     expr:
     "{{ ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][as_datetime(${expr}).weekday()] }}";
 
-  hoursList.lists.hours.range = {
-    from = 0;
-    to = 23;
+  withDailyForecast =
+    i: body:
+    ''
+      {% set f = state_attr('${daily}', 'forecast')[${toString i}] %}
+    ''
+    + body;
+
+  findHourly = ''
+    {% set h = hours | int %}
+    {% set ns = namespace(m=none) %}
+    {% for e in state_attr('${hourly}', 'forecast') %}
+      {% if ns.m is none and as_local(as_datetime(e.datetime)).hour == h %}
+        {% set ns.m = e %}
+      {% endif %}
+    {% endfor %}
+    {% set m = ns.m %}
+  '';
+
+  hourIntent = sentences: body: {
+    inherit sentences;
+    lists.hours.range = {
+      from = 0;
+      to = 23;
+    };
+    script.speech.text = findHourly + body;
   };
 
-  # Speech for "{Sonnenaufgang,Sonnenuntergang} {heute,morgen}". `attr` selects the
-  # sun.sun attribute (next_rising/next_setting), `particle` is the German verb
-  # particle (auf/unter), `past` the participle (aufgegangen/untergegangen).
-  # We use `next_*` from sun.sun and a ±1-day shift to derive today/tomorrow when
-  # the next event is on the other day.
   sunSpeech =
     {
       attr,
       day,
       particle,
-      past,
+      past ? null,
     }:
     let
-      # `next_rising`/`next_setting` are UTC ISO strings; `as_datetime`
-      # preserves that offset, so `.strftime('%H:%M')` would render UTC.
-      # `as_local` converts into the configured HA timezone.
       t = "as_local(as_datetime(state_attr('${e.sun.sun}', '${attr}')))";
     in
     if day == "heute" then
@@ -57,23 +67,16 @@ let
     else
       ''
         {% set t = ${t} %}
-        {% if t.date() == now().date() %}
-          Die Sonne geht morgen um {{ (t + timedelta(days=1)).strftime('%H:%M') }} Uhr ${particle}.
-        {% else %}
-          Die Sonne geht morgen um {{ t.strftime('%H:%M') }} Uhr ${particle}.
-        {% endif %}
+        {% set shifted = t if t.date() != now().date() else t + timedelta(days=1) %}
+        Die Sonne geht morgen um {{ shifted.strftime('%H:%M') }} Uhr ${particle}.
       '';
 in
 {
   hass.voice.intents = {
     WetterHeute = {
       sentences = [
-        "Wie ist das Wetter [heute|draußen|gerade|jetzt|aktuell]"
-        "Wie warm ist es [draußen|gerade|jetzt|aktuell]"
+        "Wie (ist das Wetter|warm ist es) [heute|draußen|gerade|jetzt|aktuell]"
       ];
-      # Temperature, humidity, pressure straight from the local Wetterstation;
-      # condition string comes from OWM (categorical, not measured locally),
-      # gefühlte Temperatur stays OWM-derived.
       script.speech.text = ''
         Aktuell ist es ${cond "states('${w}')"} bei ${num "states('${local.temperature}')"} Grad, gefühlt ${num "states('${s.openweathermap_gefuhlte_temperatur}')"} Grad.
       '';
@@ -81,11 +84,9 @@ in
 
     WetterMorgen = {
       sentences = [
-        "Wie wird das Wetter morgen [früh|nachmittag|abend]"
-        "Wie warm wird es morgen"
+        "Wie ((wird|ist) das Wetter|warm wird es) morgen"
       ];
-      script.speech.text = ''
-        {% set f = state_attr('${daily}', 'forecast')[1] %}
+      script.speech.text = withDailyForecast 1 ''
         Morgen wird es ${cond "f.condition"} mit ${num "f.temperature"} Grad und einer Tiefsttemperatur von ${num "f.templow"} Grad. Niederschlag: ${num "f.precipitation"} Millimeter.
       '';
     };
@@ -102,35 +103,22 @@ in
       '';
     };
 
-    WetterStunde = hoursList // {
-      sentences = [
-        "Wie [wird|ist] das Wetter um {hours} Uhr"
-        "Wie warm wird es um {hours} Uhr"
-      ];
-      # OWM stores `datetime` as UTC ISO; compare the *local* hour to the
-      # requested {hours} slot, otherwise we'd be off by the TZ offset.
-      script.speech.text = ''
-        {% set h = hours | int %}
-        {% set entries = state_attr('${hourly}', 'forecast') %}
-        {% set ns = namespace(m=none) %}
-        {% for e in entries %}
-          {% if ns.m is none and as_local(as_datetime(e.datetime)).hour == h %}
-            {% set ns.m = e %}
+    WetterStunde =
+      hourIntent
+        [
+          "Wie ((wird|ist) das Wetter|warm (wird|ist) es) um {hours} Uhr"
+        ]
+        ''
+          {% if m %}
+            Um {{ h }} Uhr wird es ${cond "m.condition"} bei ${num "m.temperature"} Grad, Niederschlag ${num "m.precipitation | default(0)"} Millimeter mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
+          {% else %}
+            Für {{ h }} Uhr habe ich keine Vorhersage.
           {% endif %}
-        {% endfor %}
-        {% if ns.m %}
-          {% set m = ns.m %}
-          Um {{ h }} Uhr wird es ${cond "m.condition"} bei ${num "m.temperature"} Grad, Niederschlag ${num "m.precipitation | default(0)"} Millimeter mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
-        {% else %}
-          Für {{ h }} Uhr habe ich keine Vorhersage.
-        {% endif %}
-      '';
-    };
+        '';
 
     WetterWindAktuell = {
       sentences = [
-        "Wie windig ist es [heute|jetzt|gerade]"
-        "Wie stark weht der Wind"
+        "Wie windig ist es [heute|draußen|gerade|jetzt|aktuell]"
       ];
       script.speech.text = ''
         Aktuell weht der Wind mit ${num "states('${local.wind_speed}')"} Kilometern pro Stunde, bei Böen bis ${num "states('${local.gust_speed}')"} km/h.
@@ -139,34 +127,29 @@ in
 
     WetterWindHeuteNacht = {
       sentences = [
-        "Wie windig wird es (heute Nacht|nachts|heute Abend)"
+        "Wie windig (wird|ist) es (heute Nacht|nachts|heute Abend)"
       ];
-      script.speech.text = ''
-        {% set f = state_attr('${daily}', 'forecast')[0] %}
+      script.speech.text = withDailyForecast 0 ''
         Heute Nacht weht der Wind mit etwa ${num "f.wind_speed | default(0)"} Kilometern pro Stunde.
       '';
     };
 
     WetterTemperaturMaxHeute = {
       sentences = [
-        "Wie wird das Wetter [heute]"
-        "Wie warm wird es heute [noch]"
-        "Was ist die Höchsttemperatur heute"
+        "Wie (wird das Wetter|(warm|kalt) wird es) heute [noch]"
+        "Was ist die (Höchsttemperatur|Tiefsttemperatur) heute"
       ];
-      script.speech.text = ''
-        {% set f = state_attr('${daily}', 'forecast')[0] %}
+      script.speech.text = withDailyForecast 0 ''
         Heute werden es bis zu ${num "f.temperature"} Grad bei einer Tiefsttemperatur von ${num "f.templow"} Grad.
       '';
     };
 
     WetterRegenHeute = {
       sentences = [
-        "Regnet es [heute|heute noch]"
-        "Wird es heute regnen"
-        "Gibt es heute Regen"
+        "(Wird|Gibt) es heute [noch] (regnen|Regen)"
+        "Regnet es heute [noch]"
       ];
-      script.speech.text = ''
-        {% set f = state_attr('${daily}', 'forecast')[0] %}
+      script.speech.text = withDailyForecast 0 ''
         {% set p = f.precipitation | default(0) | float(0) %}
         {% set prob = f.precipitation_probability | default(0) | float(0) %}
         {% if p > 0 or prob > 30 %}
@@ -177,34 +160,24 @@ in
       '';
     };
 
-    WetterRegenStunde = hoursList // {
-      sentences = [
-        "Regnet es um {hours} Uhr"
-        "Wird es um {hours} Uhr regnen"
-        "Gibt es um {hours} Uhr Regen"
-      ];
-      script.speech.text = ''
-        {% set h = hours | int %}
-        {% set entries = state_attr('${hourly}', 'forecast') %}
-        {% set ns = namespace(m=none) %}
-        {% for e in entries %}
-          {% if ns.m is none and as_local(as_datetime(e.datetime)).hour == h %}
-            {% set ns.m = e %}
+    WetterRegenStunde =
+      hourIntent
+        [
+          "(Wird|Gibt) es [heute] um {hours} Uhr (regnen|Regen)"
+          "Regnet es [heute] um {hours} Uhr"
+        ]
+        ''
+          {% if m %}
+            Um {{ h }} Uhr: ${num "m.precipitation | default(0)"} Millimeter Regen mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
+          {% else %}
+            Für {{ h }} Uhr habe ich keine Regenvorhersage.
           {% endif %}
-        {% endfor %}
-        {% if ns.m %}
-          {% set m = ns.m %}
-          Um {{ h }} Uhr: ${num "m.precipitation | default(0)"} Millimeter Regen mit ${pct "m.precipitation_probability | default(0)"} Prozent Wahrscheinlichkeit.
-        {% else %}
-          Für {{ h }} Uhr habe ich keine Regenvorhersage.
-        {% endif %}
-      '';
-    };
+        '';
 
     SonnenaufgangHeute = {
       sentences = [
-        "Wann geht die Sonne [heute] auf"
-        "Wann ist [heute] [der ]Sonnenaufgang"
+        "Wann (ist|geht) die Sonne [heute] auf[gegangen]"
+        "Wann ist heute [der|früh] Sonnenaufgang [gewesen]"
       ];
       script.speech.text = sunSpeech {
         attr = "next_rising";
@@ -217,20 +190,19 @@ in
     SonnenaufgangMorgen = {
       sentences = [
         "Wann geht die Sonne morgen auf"
-        "Wann ist morgen [der ]Sonnenaufgang"
+        "Wann ist morgen [der|früh] Sonnenaufgang"
       ];
       script.speech.text = sunSpeech {
         attr = "next_rising";
         day = "morgen";
         particle = "auf";
-        past = "aufgegangen";
       };
     };
 
     SonnenuntergangHeute = {
       sentences = [
-        "Wann geht die Sonne [heute] unter"
-        "Wann ist [heute] [der ]Sonnenuntergang"
+        "Wann (ist|geht) die Sonne [heute] unter[gegangen]"
+        "Wann ist heute [der|Abend] Sonnenuntergang [gewesen]"
       ];
       script.speech.text = sunSpeech {
         attr = "next_setting";
@@ -243,13 +215,12 @@ in
     SonnenuntergangMorgen = {
       sentences = [
         "Wann geht die Sonne morgen unter"
-        "Wann ist morgen [der ]Sonnenuntergang"
+        "Wann ist morgen [der|Abend] Sonnenuntergang"
       ];
       script.speech.text = sunSpeech {
         attr = "next_setting";
         day = "morgen";
         particle = "unter";
-        past = "untergegangen";
       };
     };
   };

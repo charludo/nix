@@ -1,4 +1,3 @@
-{ ... }:
 {
   hass.voice.intents = {
     ZeitUhrzeit = {

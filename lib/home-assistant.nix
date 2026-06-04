@@ -70,6 +70,17 @@ rec {
       # Sonos), where a spoken confirmation would just talk over it.
       silentAction = mkEffect "silent";
 
+      # One-step action sequence flipping `is_volume_muted` on the
+      # given media_player. Drop-in for `script.action` /  `sequence`
+      # at any intent or script site.
+      muteAction = entity: muted: [
+        {
+          action = "media_player.volume_mute";
+          target.entity_id = entity;
+          data.is_volume_muted = muted;
+        }
+      ];
+
       # Body wrapper that prepends a satellite-resolution + unmute
       # pair of steps. Loads an `area_to_target` script variable from
       # the host's tts_relay routes, then flips `is_volume_muted` off
