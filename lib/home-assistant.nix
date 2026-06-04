@@ -70,21 +70,40 @@ rec {
       # Sonos), where a spoken confirmation would just talk over it.
       silentAction = mkEffect "silent";
 
-      # Intent-body wrapper composable with silentAction /
-      # acknowledgeAction. Prepends a conditional-unmute step to the
-      # body's `script.action` so the satellite the command was spoken
-      # on is audible before the rest of the sequence fires. Loads an
-      # `area_to_target` script variable from the host's tts_relay
-      # routes, then flips `is_volume_muted` off on the matching
-      # media_player only when `preferred_area_id` maps to a known
-      # target — chat path and area-less satellites no-op the `if`.
+      # Body wrapper that prepends a satellite-resolution + unmute
+      # pair of steps. Loads an `area_to_target` script variable from
+      # the host's tts_relay routes, then flips `is_volume_muted` off
+      # on the resolved speaker. The `area_to_target` variable stays
+      # in scope for the rest of the sequence, so downstream steps
+      # can resolve "the satellite's speaker (or a fallback)" via a
+      # Jinja lookup.
+      #
+      # `fallback` (entity_id string, optional) controls what happens
+      # when `preferred_area_id` doesn't map to a known target — chat
+      # path, automation, non-routed satellite. With no fallback the
+      # unmute step is gated by an `if` and silently no-ops; with one,
+      # the unmute fires unconditionally against
+      # `area_to_target.get(…) or fallback` — same Jinja shape the
+      # downstream play step uses, so the unmuted speaker is always
+      # the one playback lands on.
+      #
+      # Composable with silentAction / acknowledgeAction. Dispatches
+      # on the body's shape: voice intents get the steps prepended to
+      # `script.action`, HA scripts get them prepended to `sequence`.
       unmuteSatellite =
-        config: body:
-        body
-        // {
-          script = (body.script or { }) // {
-            action = [
-              { variables.area_to_target = satelliteAreaToTarget config; }
+        {
+          config,
+          fallback ? null,
+        }:
+        body:
+        let
+          unmuteStep = target: {
+            action = "media_player.volume_mute";
+            target.entity_id = target;
+            data.is_volume_muted = false;
+          };
+          unmute =
+            if fallback == null then
               {
                 "if" = [
                   {
@@ -92,18 +111,24 @@ rec {
                     value_template = ''{{ area_to_target.get(preferred_area_id | default("")) is not none }}'';
                   }
                 ];
-                "then" = [
-                  {
-                    action = "media_player.volume_mute";
-                    target.entity_id = "{{ area_to_target[preferred_area_id] }}";
-                    data.is_volume_muted = false;
-                  }
-                ];
+                "then" = [ (unmuteStep "{{ area_to_target[preferred_area_id] }}") ];
               }
-            ]
-            ++ (body.script.action or [ ]);
+            else
+              unmuteStep ''{{ area_to_target.get(preferred_area_id | default("")) or "${fallback}" }}'';
+          steps = [
+            { variables.area_to_target = satelliteAreaToTarget config; }
+            unmute
+          ];
+        in
+        if body ? sequence then
+          body // { sequence = steps ++ body.sequence; }
+        else
+          body
+          // {
+            script = (body.script or { }) // {
+              action = steps ++ ((body.script or { }).action or [ ]);
+            };
           };
-        };
     };
 
   # ---------------------------------------------------------------------------

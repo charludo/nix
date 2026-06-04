@@ -15,7 +15,7 @@ let
 
   silent = lib.ha.voice.silentAction;
   ack = lib.ha.voice.acknowledgeAction;
-  unmute = lib.ha.voice.unmuteSatellite config;
+  unmute = lib.ha.voice.unmuteSatellite { inherit config; };
 in
 {
   hass.voice.intents = {

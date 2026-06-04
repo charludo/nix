@@ -18,6 +18,7 @@
     ./lgtv.nix
     ./misc.nix
     ./music-assistant.nix
+    ./news.nix
     ./oidc.nix
     ./shopping.nix
     ./sonos.nix
