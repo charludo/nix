@@ -6,6 +6,32 @@ rec {
   lowBatteryThreshold = 10;
 
   # ---------------------------------------------------------------------------
+  # Measure the duration of a sound asset in milliseconds, minus a
+  # 50 ms head-room so chained "play chime → delay → TTS" steps don't
+  # overlap. Returns 0 for `null` (caller is opting out of the chime).
+  # Build-time `ffprobe` invocation via runCommand — the path must be
+  # in the Nix store (or auto-imported as such).
+  soundDurationMs =
+    pkgs: path:
+    if path == null then
+      0
+    else
+      lib.toInt (
+        lib.strings.removeSuffix "\n" (
+          builtins.readFile (
+            pkgs.runCommand "chime-duration-${baseNameOf path}"
+              {
+                nativeBuildInputs = [ pkgs.ffmpeg-headless ];
+              }
+              ''
+                ffprobe -v error -show_entries format=duration -of csv=p=0 ${path} \
+                  | awk '{ printf "%d", $1 * 1000 - 50 }' > $out
+              ''
+          )
+        )
+      );
+
+  # ---------------------------------------------------------------------------
   # Voice intent helpers (satellite vs. chat response differentiation)
   # ---------------------------------------------------------------------------
   #
@@ -60,6 +86,8 @@ rec {
         );
     in
     {
+      inherit satelliteAreaToTarget;
+
       # Voice path: play the "acknowledge" sound on the target Sonos
       # instead of speaking the TTS. Use for intents whose only output
       # is a confirmation ("Licht eingeschaltet", "Pausiert", ...).

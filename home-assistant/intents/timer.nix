@@ -5,15 +5,23 @@ let
 
   startTimer = secsExpr: [
     {
-      action = "timer.start";
-      target.entity_id = ''
+      variables.chosen = ''
         {% set free = states.timer | selectattr('state', 'eq', 'idle') | list %}
         {{ free[0].entity_id if free else '${builtins.head pool}' }}
       '';
+    }
+    {
+      action = "timer.start";
+      target.entity_id = "{{ chosen }}";
       data.duration = ''
         {% set s = ${secsExpr} %}
         {{ '%02d:%02d:%02d' | format(s // 3600, (s % 3600) // 60, s % 60) }}
       '';
+    }
+    {
+      action = "input_text.set_value";
+      target.entity_id = ''input_text.{{ chosen | replace("timer.", "") }}_area'';
+      data.value = ''{{ preferred_area_id | default("") }}'';
     }
   ];
 in
@@ -22,6 +30,7 @@ in
     TimerStellenMinuten = {
       sentences = [
         "[Stelle|Starte] [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
+        "{timer_minutes:minutes} Minuten an jetzt"
       ];
       script = {
         action = startTimer "(minutes | int) * 60";
@@ -32,6 +41,7 @@ in
     TimerStellenSekunden = {
       sentences = [
         "[Stelle|Starte] [einen] Timer (für|auf) {timer_seconds:seconds} Sekunden"
+        "{timer_seconds:seconds} Sekunden ab jetzt"
       ];
       script = {
         action = startTimer "seconds | int";
@@ -42,6 +52,7 @@ in
     TimerStellenStunden = {
       sentences = [
         "[Stelle|Starte] [einen] Timer (für|auf) {timer_hours:hours} Stunden"
+        "{timer_hours:hours} Stunden ab jetzt"
       ];
       script = {
         action = startTimer "(hours | int) * 3600";
@@ -52,6 +63,7 @@ in
     TimerStellenKombiniert = {
       sentences = [
         "[Stelle|Starte] [einen] Timer (für|auf) {timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten"
+        "{timer_hours:hours} Stunden [und] {timer_minutes:minutes} Minuten ab jetzt"
       ];
       script = {
         action = startTimer "(hours | int) * 3600 + (minutes | int) * 60";

@@ -9,24 +9,7 @@ let
 
   reminderPath = config.hass.voice.sounds.reminder;
   reminderUrl = if reminderPath == null then null else "/local/sounds/${baseNameOf reminderPath}";
-  reminderDurationMs =
-    if reminderPath == null then
-      0
-    else
-      lib.toInt (
-        lib.strings.removeSuffix "\n" (
-          builtins.readFile (
-            pkgs.runCommand "chime-duration-${baseNameOf reminderPath}"
-              {
-                nativeBuildInputs = [ pkgs.ffmpeg-headless ];
-              }
-              ''
-                ffprobe -v error -show_entries format=duration -of csv=p=0 ${reminderPath} \
-                  | awk '{ printf "%d", $1 * 1000 - 50 }' > $out
-              ''
-          )
-        )
-      );
+  reminderDurationMs = lib.ha.soundDurationMs pkgs reminderPath;
 
   playOnAll = mediaUrl: {
     repeat = {

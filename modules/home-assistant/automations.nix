@@ -38,6 +38,11 @@ in
             default = null;
             description = "Execution mode (single, restart, queued, parallel)";
           };
+          variables = lib.mkOption {
+            type = lib.types.attrsOf lib.types.anything;
+            default = { };
+            description = "Variables in scope for the trigger and action sequence";
+          };
         };
       }
     );

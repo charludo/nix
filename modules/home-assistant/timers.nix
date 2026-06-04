@@ -29,5 +29,14 @@
     services.home-assistant.config.timer = lib.mapAttrs (
       _: v: lib.filterAttrs (_: x: x != null) { inherit (v) name icon duration; }
     ) config.hass.timers;
+
+    services.home-assistant.config.input_text = lib.mapAttrs' (
+      id: v:
+      lib.nameValuePair "${id}_area" {
+        name = "${v.name} area";
+        max = 255;
+        initial = "";
+      }
+    ) config.hass.timers;
   };
 }
