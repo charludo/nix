@@ -296,6 +296,7 @@ in
           "privacy.resistFingerprinting" = false;
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "webgl.disabled" = false;
+          "librewolf.webgl.prompt" = false;
         }
         // cfg.extraConfig;
         userChrome = # css
