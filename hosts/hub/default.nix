@@ -31,53 +31,6 @@
   suspend.gigabyteFix = true;
   tailscale.enable = true;
   wifi.enable = true;
-  wyomingSatellite.enable = true;
-  wyomingSatellite.wakeWordThreshold = 0.6;
-  wyomingSatellite.customWakeWordModel = ../../home-assistant/assets/wakewords/computer_v2.tflite;
-  wyomingSatellite.leds.enable = true;
-  wyomingSatellite.leds.brightness = 12;
-  wyomingSatellite.tuning = {
-    # --- Acoustic echo handling -------------------------------------------
-    # Linear AEC: cancels the played-back TTS so we don't hear ourselves.
-    ECHOONOFF = 1;
-    # Non-linear echo attenuation: catches residual echo after the linear AEC.
-    NLATTENONOFF = 1;
-    # Short transient echo suppression.
-    TRANSIENTONOFF = 1;
-    # Estimate room reverb time so the AES adapts to the actual acoustics.
-    RT60ONOFF = 1;
-
-    # --- Automatic gain control ------------------------------------------
-    AGCONOFF = 1;
-    AGCMAXGAIN = 30.0; # up to ~30 dB; needed for far-field speakers
-    AGCDESIREDLEVEL = 0.03; # ≈ -15 dBov target
-    AGCTIME = 1.0;
-    # 1 s ramp (chip max). Prevents pumping during
-    # natural pauses; faster ramps confuse ASR.
-
-    # --- High-pass filter -------------------------------------------------
-    # 180 Hz: more aggressive rumble removal. Safe here because the lowest
-    # female fundamentals (~165-200 Hz) lose only the fundamental itself —
-    # ASR relies on formants/harmonics well above that, so intelligibility
-    # is unaffected.
-    HPFONOFF = 3;
-
-    # --- Noise suppression -----------------------------------------------
-    # Keep stationary + non-stationary on, but raise the ASR-path gain
-    # floors so we don't carve out speech transients. Default floors are
-    # -16 dB / -10 dB; we raise them to ~-10 dB / -8 dB. ASR / wake-word
-    # models tolerate background noise better than over-processed audio.
-    STATNOISEONOFF = 1;
-    STATNOISEONOFF_SR = 1;
-    NONSTATNOISEONOFF = 1;
-    NONSTATNOISEONOFF_SR = 1;
-    MIN_NS_SR = 0.3; # -10 dB floor (vs default 0.15 = -16 dB)
-    MIN_NN_SR = 0.4; # -8 dB floor (vs default 0.3 = -10 dB)
-
-    # --- Comfort noise ---------------------------------------------------
-    # Off for ASR — don't inject synthetic noise into silence.
-    CNIONOFF = 0;
-  };
   programs.dconf.enable = true;
 
   age.secrets.yubikey-sudo.rekeyFile = private-settings.yubikeys.zakalwe.sudoFile;
@@ -147,6 +100,7 @@
     "video=DP-2:2560x1440@59.91"
     "video=DP-3:2560x1440@59.91"
   ];
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   networking.networkmanager.enable = true;
   networking.hostName = "hub";

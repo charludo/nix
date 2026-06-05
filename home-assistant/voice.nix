@@ -25,8 +25,8 @@ in
 
   hass.ttsRelay = [
     {
-      satellite = "assist_satellite.hub_satellite";
-      target = e.media_player.office;
+      satellite = "satellite-wohnzimmer";
+      target = e.media_player.living_room;
       volume = 0.30;
     }
   ];

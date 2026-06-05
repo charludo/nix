@@ -18,6 +18,9 @@ _: prev: {
       aiojellyfin = pyprev.aiojellyfin.overrideAttrs (a: {
         patches = (a.patches or [ ]) ++ [ ./patches/aiojellyfin-genres-field.patch ];
       });
+      pyopen-wakeword = pyprev.pyopen-wakeword.overridePythonAttrs (_: {
+        doCheck = false;
+      });
     })
   ];
 }

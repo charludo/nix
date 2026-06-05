@@ -22,9 +22,10 @@ in
           hostname = "192.168.30.16";
           user = "root";
         };
-        home-assistant = {
-          hostname = "192.168.24.27";
-          user = "root";
+
+        satellite-wohnzimmer = {
+          hostname = "192.168.24.208";
+          user = "paki";
         };
 
         "${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}" = {

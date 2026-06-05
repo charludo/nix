@@ -33,9 +33,6 @@ in
 
     systemd.services.ha-reconciler =
       let
-        # ZHA pass: name + area on the zigbee device itself. The
-        # `entities` map carries the per-HA-domain suffix list — ZHA's
-        # `diagnostic` sub-entities collapse into the `sensor` domain.
         zhaManifestFile = pkgs.writeText "ha-reconciler-zha.json" (
           builtins.toJSON (
             lib.mapAttrsToList (deviceName: dev: {
@@ -65,11 +62,6 @@ in
           )
         );
 
-        # Generic pass: every non-zigbee entity whose `area` is set.
-        # The reconciler prefers setting area on the owning device when
-        # one exists, otherwise falls back to entity-level. Satellite
-        # entries inherit area from their target media_player (resolved
-        # via `hass.ttsRelay` routes).
         entityManifestFile = pkgs.writeText "ha-reconciler-entities.json" (
           builtins.toJSON (
             lib.concatLists (
@@ -92,19 +84,23 @@ in
                   weather = config.hass.devices.weathers;
                   sensor = config.hass.devices.sensors;
                 }
-              ++ [
-                (lib.concatMap (
-                  r:
-                  let
-                    area = config.hass.devices.media_players.${lib.removePrefix "media_player." r.target}.area or null;
-                  in
-                  lib.optional (area != null) {
-                    entity_id = r.satellite;
-                    area_slug = lib.ha.mkSlug area;
-                  }
-                ) (config.hass.ttsRelay or [ ]))
-              ]
             )
+          )
+        );
+
+        wyomingManifestFile = pkgs.writeText "ha-reconciler-wyoming.json" (
+          builtins.toJSON (
+            map (
+              r:
+              let
+                area = config.hass.devices.media_players.${lib.removePrefix "media_player." r.target}.area or null;
+              in
+              {
+                match_name = "${r.satellite}-satellite";
+                name = r.satellite;
+                area_slug = if area == null then null else lib.ha.mkSlug area;
+              }
+            ) (config.hass.ttsRelay or [ ])
           )
         );
       in
@@ -116,28 +112,22 @@ in
         restartTriggers = [
           zhaManifestFile
           entityManifestFile
+          wyomingManifestFile
           pkgs.ours.home-assistant.ha-reconciler
         ];
         serviceConfig = {
-          # Type=simple so the unit reports "active" the moment the
-          # script is exec'd. With Type=oneshot the unit stays
-          # "activating" until the script returns, which makes
-          # switch-to-configuration block on long reconciles (e.g. an
-          # unreachable battery device) and time out the whole rebuild.
           Type = "simple";
           DynamicUser = true;
           SupplementaryGroups = [ "hass" ];
           LoadCredential = [ "token:${cfg.tokenPath}" ];
         };
-        # Swallow non-zero exits so a partial reconcile (e.g. a device
-        # offline because its battery is dead) doesn't fail activation.
-        # The script logs each per-device failure; check the journal.
         script = ''
           ${lib.getExe pkgs.ours.home-assistant.ha-reconciler} \
             --url ${lib.escapeShellArg cfg.url} \
             --token-file "$CREDENTIALS_DIRECTORY/token" \
             --manifest ${zhaManifestFile} \
             --entity-manifest ${entityManifestFile} \
+            --wyoming-manifest ${wyomingManifestFile} \
             || true
         '';
       };

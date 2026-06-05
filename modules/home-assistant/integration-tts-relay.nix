@@ -41,7 +41,8 @@ in
       routes = map (
         r:
         {
-          inherit (r) satellite target;
+          satellite = "assist_satellite.${lib.ha.mkSlug r.satellite}";
+          inherit (r) target;
         }
         // lib.optionalAttrs (r.volume != null) { inherit (r) volume; }
       ) cfg;

@@ -9,6 +9,7 @@ let
 
   hostPath = ../../hosts/${config.networking.hostName}/ssh_host_ed25519_key.pub;
   vmPath = ../../vms/keys/ssh_host_${config.networking.hostName}_ed25519_key.pub;
+  satellitePath = ../../home-assistant/satellite/ssh_host_${config.networking.hostName}_ed25519_key.pub;
   userPath = ../../users/${config.home.username}/keys/ssh.pub;
 in
 {
@@ -23,13 +24,12 @@ in
           (
             if lib.pathExists hostPath then
               hostPath
+            else if lib.pathExists vmPath then
+              vmPath
+            else if lib.pathExists satellitePath then
+              satellitePath
             else
-              (
-                if lib.pathExists vmPath then
-                  vmPath
-                else
-                  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN8hb7uYM6Nwlshdc9n7YmnDSyXkOK2CqbizvA1Gr4rO dummy"
-              )
+              "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN8hb7uYM6Nwlshdc9n7YmnDSyXkOK2CqbizvA1Gr4rO dummy"
           )
         else
           userPath

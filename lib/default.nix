@@ -1,5 +1,5 @@
 {
-  pkgs,
+  pkgsFor,
   inputs,
   outputs,
 }:
@@ -20,7 +20,7 @@ let
         mkConfigs = import ./mkConfigs.nix {
           inherit
             lib
-            pkgs
+            pkgsFor
             inputs
             outputs
             ;

@@ -142,8 +142,12 @@ in
         PrivateDevices = lib.mkForce false;
         DeviceAllow = lib.mkForce [ "char-alsa rw" ];
         DevicePolicy = lib.mkForce "closed";
+        Restart = lib.mkForce "on-failure";
+        RestartSec = 5;
+        StartLimitBurst = 30;
       };
-      after = lib.mkIf cfg.leds.enable [ "respeaker-led-bridge.service" ];
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ] ++ lib.optional cfg.leds.enable "respeaker-led-bridge.service";
       requires = lib.mkIf cfg.leds.enable [ "respeaker-led-bridge.service" ];
     };
 
