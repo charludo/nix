@@ -14,6 +14,12 @@ in
     "HassGetState"
   ];
 
+  # Tighten assist_pipeline's end-of-speech detection. Upstream defaults
+  # (0.7s silence / 15s timeout) make the satellite feel sluggish to
+  # respond and prone to picking up unrelated noise during the long tail.
+  hass.voice.vad.silenceSeconds = 0.4;
+  hass.voice.vad.timeoutSeconds = 6.0;
+
   hass.voice.sounds = {
     acknowledge = ./assets/sounds/acknowledge-synth.mp3;
     timer = ./assets/sounds/timer-chimes.mp3;

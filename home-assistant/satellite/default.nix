@@ -38,11 +38,10 @@
 
   wyomingSatellite = {
     enable = true;
-    # Slight tightening (0.5 → 0.55). Cleaner audio from the tuning below
-    # raises real-wake confidence enough to absorb this, while cutting the
-    # false-wake rate in the larger / noisier living room.
-    wakeWordThreshold = 0.55;
-    customWakeWordModel = ../assets/wakewords/computer_v2.tflite;
+    area = "Wohnzimmer";
+    wakeWord = "alexa";
+    wakeWordThreshold = 0.5;
+    # customWakeWordModel = ../assets/wakewords/computer_v2.tflite;
 
     leds.enable = true;
     leds.brightness = 12;
@@ -160,12 +159,13 @@
       STATNOISEONOFF_SR = 1;
 
       # Over-subtraction factor for ASR path. Default: 1.0.
-      GAMMA_NS_SR = 1.0;
+      # Bumped to 1.5 to subtract more aggressively below the floor.
+      GAMMA_NS_SR = 1.5;
 
       # Gain floor for stationary NS on ASR path. Default: 0.15 (-16 dB).
-      # Back to chip default (was 0.3 / -10 dB). In the noisier room, the
-      # extra suppression headroom is worth more than transient fidelity.
-      MIN_NS_SR = 0.15;
+      # 0.1 (-20 dB) deepens silence so HA's server-side VAD trips faster
+      # and the chip's residual noise floor doesn't reach the wake model.
+      MIN_NS_SR = 0.05;
 
       # ===== Non-stationary noise suppression (ASR path) ==================
 
@@ -173,11 +173,13 @@
       NONSTATNOISEONOFF_SR = 1;
 
       # Over-subtraction factor for ASR path. Default: 1.1.
-      GAMMA_NN_SR = 1.1;
+      # Bumped to 1.6 for more aggressive subtraction of transient noise.
+      GAMMA_NN_SR = 1.6;
 
       # Gain floor for non-stationary NS on ASR path.
-      # Default: 0.3 (-10 dB). Back to default (was 0.4 / -8 dB).
-      MIN_NN_SR = 0.3;
+      # Default: 0.3 (-10 dB). 0.2 (-14 dB) for quieter silence between
+      # words and fewer false "still speaking" reads by the server VAD.
+      MIN_NN_SR = 0.2;
 
       # ===== Chip-internal voice activity detection =======================
 
@@ -192,7 +194,6 @@
       CNIONOFF = 0;
     };
   };
-
 
   nvim.enable = true;
 

@@ -23,6 +23,12 @@ in
       description = "Satellite name advertised to Home Assistant";
     };
 
+    area = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "HA area name this satellite belongs to; used by Assist to scope intent resolution (e.g. \"Wohnzimmer\")";
+    };
+
     wakeWord = lib.mkOption {
       type = lib.types.str;
       default = "computer";
@@ -116,6 +122,7 @@ in
       user = "wyoming-satellite";
       group = "wyoming-satellite";
       name = cfg.name;
+      area = lib.mkIf (cfg.area != null) cfg.area;
       uri = "tcp://0.0.0.0:10700";
 
       microphone.command = "${pkgs.alsa-utils}/bin/arecord -D ${cfg.alsaDevice} -r 16000 -c 1 -f S16_LE -t raw";
@@ -128,8 +135,6 @@ in
         "tcp://127.0.0.1:10400"
         "--wake-word-name"
         cfg.wakeWord
-        "--mic-volume-multiplier"
-        "3.0"
       ]
       ++ lib.optionals cfg.leds.enable [
         "--event-uri"

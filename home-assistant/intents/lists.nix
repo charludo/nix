@@ -3,8 +3,7 @@
   hass.voice.intents = {
     EinkaufAdd = {
       sentences = [
-        "[setze|setz|pack|tu|schreib] {item} auf (die|meine) Einkaufsliste"
-        "Einkaufsliste {item}"
+        "(setze|setz|pack|tu|schreib) {item} auf (die|meine) Einkaufsliste"
         "Füge {item} zur Einkaufsliste hinzu"
       ];
       lists.item.wildcard = true;
@@ -23,7 +22,6 @@
     ToDoAdd = {
       sentences = [
         "(setze|setz|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
-        "ToDo-Liste {item}"
         "Füge {item} zur ToDo-Liste hinzu"
       ];
       script = {

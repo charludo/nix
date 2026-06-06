@@ -146,7 +146,7 @@ in
           url=$(curl -fsSL --max-time 15 "$feed" | grep -oE 'https?://[^"]+\.mp3' | head -1)
           [ -n "$url" ] || { echo "No MP3 URL found in $feed" >&2; return 1; }
           echo "Fetching $url -> $out"
-          curl -fsSL --retry 3 --max-time 60 -o "$out.tmp" "$url" && mv "$out.tmp" "$out"
+          curl -fsSL --retry 3 --max-time 60 -o "$out.tmp.mp3" "$url" && mv "$out.tmp.mp3" "$out"
         }
 
         fetch_adjusted() {
@@ -157,8 +157,8 @@ in
           echo "Fetching $url -> $out (volume × $mult)"
           curl -fsSL --retry 3 --max-time 60 -o "$out.dl" "$url" \
             && ffmpeg -y -loglevel error -i "$out.dl" \
-                 -filter:a "volume=$mult" -c:a libmp3lame -b:a 128k "$out.tmp" \
-            && mv "$out.tmp" "$out" \
+                 -filter:a "volume=$mult" -c:a libmp3lame -b:a 128k "$out.tmp.mp3" \
+            && mv "$out.tmp.mp3" "$out" \
             && rm -f "$out.dl"
         }
 
@@ -192,8 +192,8 @@ in
                 ${inputs} \
                 -filter_complex "${filter}" \
                 -map "[out]" -c:a libmp3lame -b:a 128k \
-                ${lib.escapeShellArg "${summary}.tmp"} \
-                && mv ${lib.escapeShellArg "${summary}.tmp"} ${lib.escapeShellArg summary}
+                ${lib.escapeShellArg "${summary}.tmp.mp3"} \
+                && mv ${lib.escapeShellArg "${summary}.tmp.mp3"} ${lib.escapeShellArg summary}
             fi
           ''
         )}

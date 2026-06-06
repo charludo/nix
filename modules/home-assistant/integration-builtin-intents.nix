@@ -19,8 +19,8 @@ in
   };
 
   config = lib.mkIf (cfg != [ ]) {
-    services.home-assistant.package = pkgs.home-assistant.override {
-      packageOverrides = self: super: {
+    hass.package.pythonPackageOverrides = [
+      (self: super: {
         home-assistant-intents = super.home-assistant-intents.overrideAttrs (old: {
           nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.jq ];
           postInstall =
@@ -48,7 +48,7 @@ in
               done
             '';
         });
-      };
-    };
+      })
+    ];
   };
 }
