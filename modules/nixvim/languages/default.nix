@@ -14,7 +14,6 @@
   lsp.servers = {
     # config languages
     nixd.enable = true;
-    statix.enable = true;
     lua_ls.enable = true;
 
     # bash
@@ -25,10 +24,36 @@
     yamlls.enable = true;
   };
 
+  plugins.lint.lintersByFt.nix = [
+    "deadnix"
+    "statix"
+  ];
+  plugins.lint.linters.statix.args = [
+    "check"
+    "-o"
+    "errfmt"
+    "--stdin"
+    "--config"
+    "${pkgs.writeText "statix.toml" ''
+      disabled = ['repeated_keys']
+    ''}"
+  ];
+
   plugins.conform-nvim.settings.formatters_by_ft = {
-    nix = [ "nixfmt" ];
+    nix = [
+      "statix"
+      "nixfmt"
+    ];
     lua = [ "stylua" ];
     sh = [ "shfmt" ];
+  };
+  plugins.conform-nvim.settings.formatters.statix = {
+    command = "statix";
+    args = [
+      "fix"
+      "--stdin"
+    ];
+    stdin = true;
   };
   plugins.conform-nvim.settings.formatters.shfmt.args = [
     "-sr"
@@ -42,5 +67,7 @@
     nixfmt
     stylua
     shfmt
+    deadnix
+    statix
   ];
 }
