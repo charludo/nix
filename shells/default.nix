@@ -2,9 +2,6 @@
   age,
   agenix-rekey,
   openssh,
-  nixfmt,
-  deadnix,
-  ruff,
   mkShell,
   ...
 }:
@@ -13,10 +10,5 @@ mkShell {
     age
     agenix-rekey
     openssh
-
-    # used by nix fmt
-    nixfmt
-    deadnix
-    ruff
   ];
 }

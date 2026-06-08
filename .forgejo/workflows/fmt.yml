@@ -10,11 +10,5 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.PAT }}
-      - name: Check nixfmt formatting
+      - name: Format and Lint
         run: nix fmt -- --ci
-      - name: Check for dead code
-        run: deadnix -f
-      - name: Check ruff linting
-        run: ruff check
-      - name: Check ruff formatting
-        run: ruff format --check

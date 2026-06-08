@@ -15,6 +15,9 @@
     nixos-generators.url = "github:nix-community/nixos-generators";
     nixos-generators.inputs.nixpkgs.follows = "nixpkgs";
 
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     jovian.url = "github:Jovian-Experiments/Jovian-NixOS";
     jovian.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -71,6 +74,7 @@
         };
       };
       inherit (pkgs) lib;
+      treefmtEval = inputs.treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
     in
     {
       nixosConfigurations =
@@ -122,7 +126,8 @@
         remux = pkgs.callPackage ./shells/remux.nix { };
       };
 
-      formatter.${system} = pkgs.nixfmt-tree;
+      formatter.${system} = treefmtEval.config.build.wrapper;
+      checks.${system}.formatting = treefmtEval.config.build.check self;
 
       nixvimModules.common = import ./modules/nixvim;
       nixosModules.common = import ./modules/nixos;
