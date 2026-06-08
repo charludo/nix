@@ -121,10 +121,7 @@
       packages.${system} = import ./pkgs { inherit inputs pkgs; };
       lib = import ./lib { inherit inputs outputs pkgs; };
 
-      devShells.${system} = {
-        default = pkgs.callPackage ./shells { };
-        remux = pkgs.callPackage ./shells/remux.nix { };
-      };
+      devShells.${system} = pkgs.callPackages ./shells { };
 
       formatter.${system} = treefmtEval.config.build.wrapper;
       checks.${system}.formatting = treefmtEval.config.build.check self;

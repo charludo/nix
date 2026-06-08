@@ -1,14 +1,16 @@
 {
-  age,
-  agenix-rekey,
-  openssh,
-  mkShell,
-  ...
+  lib,
+  callPackage,
 }:
-mkShell {
-  nativeBuildInputs = [
-    age
-    agenix-rekey
-    openssh
-  ];
-}
+
+let
+  self =
+    lib.packagesFromDirectoryRecursive {
+      inherit callPackage;
+      directory = ./by-name;
+    }
+    // {
+      default = self.dev;
+    };
+in
+self
