@@ -149,22 +149,18 @@ in
 
   extraConfigLua = # lua
     ''
-      -- shamelessly copied from: https://github.com/NvChad/ui/blob/v2.5/lua/nvchad/lsp/init.lua
-      local function lspSymbol(name, icon)
-        local hl = "DiagnosticSign" .. name
-        vim.fn.sign_define(hl, { text = icon, numhl = hl, texthl = hl })
-      end
-
-      lspSymbol("Error", "󰅙")
-      lspSymbol("Info", "󰋼")
-      lspSymbol("Hint", "󰌵")
-      lspSymbol("Warn", "")
-
       vim.diagnostic.config {
         virtual_text = {
           prefix = "",
         },
-        signs = true,
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "󰅙",
+            [vim.diagnostic.severity.WARN] = "",
+            [vim.diagnostic.severity.INFO] = "󰋼",
+            [vim.diagnostic.severity.HINT] = "󰌵",
+          },
+        },
         underline = true,
 
         float = {
