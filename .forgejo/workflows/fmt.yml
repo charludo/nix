@@ -1,14 +1,17 @@
 name: Check formatting
 run-name: ${{ forgejo.actor }} is checking the code formatting
 on: [push]
+permissions:
+  contents: read
 jobs:
   ensure-formatting:
     runs-on: nix
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           submodules: true
           token: ${{ secrets.PAT }}
+          persist-credentials: false
       - name: Format and Lint
         run: nix fmt -- --ci

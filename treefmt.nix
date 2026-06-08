@@ -11,5 +11,16 @@
 
     ruff-check.enable = true;
     ruff-format.enable = true;
+
+    shellcheck.enable = true;
+    shfmt.enable = true;
+    yamlfmt.enable = true;
+    zizmor.enable = true;
+    zizmor.includes = [
+      ".forgejo/workflows/*.yml"
+      ".forgejo/workflows/*.yaml"
+      ".forgejo/actions/**/*.yml"
+      ".forgejo/actions/**/*.yaml"
+    ];
   };
 }
