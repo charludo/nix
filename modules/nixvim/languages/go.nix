@@ -32,7 +32,10 @@ in
 
     plugins.neotest.adapters.go = {
       enable = true;
-      settings.args = [ "-coverprofile=coverage.out" ];
+      settings.args = [
+        "-coverprofile=coverage.out"
+        "-tags=e2e,linux,!linux,contrast_unstable_api"
+      ];
     };
     plugins.dap-go.enable = true;
 

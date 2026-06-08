@@ -3,6 +3,14 @@ let
   colors = config.palette;
 in
 {
+  # TODO: check if all test adapters have migrated to the new function
+  extraConfigLua = # lua
+    ''
+      vim.tbl_flatten = function(t)
+        return vim.iter(t):flatten(math.huge):totable()
+      end
+    '';
+
   plugins.neotest = {
     enable = true;
     settings = {
