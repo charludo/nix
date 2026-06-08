@@ -17,6 +17,7 @@
           container.cpus = "6";
           container.memory = "48G";
           container.memory_swap = "0";
+          runner.timeout = "6h";
         };
       };
     };
