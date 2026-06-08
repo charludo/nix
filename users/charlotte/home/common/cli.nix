@@ -31,27 +31,27 @@ in
   age.secrets.bitwarden-key.rekeyFile = secrets.charlotte-bitwarden-pass;
 
   programs.ssh = {
-    matchBlocks = {
+    settings = {
       gsv = {
-        hostname = gsv.ip;
-        user = gsv.user;
-        port = gsv.port;
+        HostName = gsv.ip;
+        User = gsv.user;
+        Port = gsv.port;
       };
       gsv-boot = {
-        hostname = gsv.ip;
-        user = gsv.user;
-        port = gsv.port-boot;
+        HostName = gsv.ip;
+        User = gsv.user;
+        Port = gsv.port-boot;
       };
       rmpp = {
-        hostname = "192.168.50.130"; # DHCP reservation
-        user = "root";
+        HostName = "192.168.50.130"; # DHCP reservation
+        User = "root";
       };
       eschaton = {
-        hostname = "192.168.50.133"; # DHCP reservation
-        user = "charlotte";
-        port = private-settings.paretoSSH;
+        HostName = "192.168.50.133"; # DHCP reservation
+        User = "charlotte";
+        Port = private-settings.paretoSSH;
       };
-      "*".identityFile = lib.mkForce [
+      "*".IdentityFile = lib.mkForce [
         "~/.ssh/id_yubikey"
         "~/.ssh/id_charlotte"
       ];

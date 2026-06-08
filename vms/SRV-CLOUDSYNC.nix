@@ -24,7 +24,7 @@
       "${config.nas.location}/Paperless"
       "${config.nas.backup.stateLocation}"
     ];
-    exclude = (options.borg.type.functor.wrapped.getSubOptions [ ]).exclude.default ++ [
+    exclude = (options.borg.type.nestedTypes.elemType.getSubOptions [ ]).exclude.default ++ [
       "${config.nas.backup.stateLocation}/immich/upload" # transit dir, vanishing files cause backup error
     ];
     startAt = "03:15";

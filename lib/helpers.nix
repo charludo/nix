@@ -12,9 +12,9 @@ rec {
       }) attrs
     );
   allVMSSHConfigs = toLowercaseKeys (
-    lib.filterAttrs (_: v: v.hostname != null) (
+    lib.filterAttrs (_: v: v.HostName != null) (
       builtins.mapAttrs (name: _: {
-        hostname =
+        HostName =
           if lib.pathExists ../vms/keys/ssh_host_${name}_ed25519_key.pub then
             let
               interfaces = outputs.nixosConfigurations.${name}.config.networking.interfaces;

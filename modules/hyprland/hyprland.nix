@@ -10,6 +10,9 @@
     systemd.enable = true;
     xwayland.enable = true;
 
+    # TODO: migrate to lua.
+    configType = "hyprlang";
+
     settings =
       let
         primary = "0xff${config.colorScheme.palette.base0E}";

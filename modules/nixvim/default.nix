@@ -22,6 +22,11 @@
   };
 
   config = {
+    nixpkgs.config = {
+      allowUnfree = true;
+      allowUnfreePredicate = (_: true);
+    };
+
     opts = {
       shell = "${lib.getExe pkgs.fish}";
       termguicolors = true;

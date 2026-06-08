@@ -74,6 +74,7 @@ in
   fileSystems."/boot-2".options = [ "nofail" ];
   fileSystems."/boot-3".options = [ "nofail" ];
   boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.forceImportRoot = false;
 
   # Set up GRUB
   boot.loader.systemd-boot.enable = false;

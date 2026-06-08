@@ -9,50 +9,50 @@ in
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks = {
+      settings = {
         proxmox-gpu = {
-          hostname = "192.168.30.14";
-          user = "root";
+          HostName = "192.168.30.14";
+          User = "root";
         };
         proxmox = {
-          hostname = "192.168.30.15";
-          user = "root";
+          HostName = "192.168.30.15";
+          User = "root";
         };
         proxmox2 = {
-          hostname = "192.168.30.16";
-          user = "root";
+          HostName = "192.168.30.16";
+          User = "root";
         };
         home-assistant = {
-          hostname = "192.168.24.27";
-          user = "root";
+          HostName = "192.168.24.27";
+          User = "root";
         };
 
         "${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}" = {
-          user = "paki";
+          User = "paki";
         };
-        "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}".extraOptions =
+        "proxmox home-assistant ${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}" =
           {
-            "StrictHostKeyChecking" = "no";
-            "LogLevel" = "quiet";
+            StrictHostKeyChecking = "no";
+            LogLevel = "quiet";
           };
         "*" = {
-          addKeysToAgent = "yes";
-          identityFile = [ "~/.ssh/id_ed25519" ];
-          identitiesOnly = true;
-          setEnv = {
+          AddKeysToAgent = "yes";
+          IdentityFile = [ "~/.ssh/id_ed25519" ];
+          IdentitiesOnly = true;
+          SetEnv = {
             TERM = "xterm-256color";
             COLORTERM = "truecolor";
           };
 
-          forwardAgent = false;
-          compression = false;
-          serverAliveInterval = 0;
-          serverAliveCountMax = 3;
-          hashKnownHosts = false;
-          userKnownHostsFile = "~/.ssh/known_hosts";
-          controlMaster = "no";
-          controlPath = "~/.ssh/master-%r@%n:%p";
-          controlPersist = "no";
+          ForwardAgent = false;
+          Compression = false;
+          ServerAliveInterval = 0;
+          ServerAliveCountMax = 3;
+          HashKnownHosts = false;
+          UserKnownHostsFile = "~/.ssh/known_hosts";
+          ControlMaster = "no";
+          ControlPath = "~/.ssh/master-%r@%n:%p";
+          ControlPersist = "no";
         };
       }
       // lib.helpers.allVMSSHConfigs;

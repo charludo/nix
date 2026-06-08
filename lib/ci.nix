@@ -11,7 +11,9 @@ rec {
   fromNixvimPackages =
     flake: system:
     lib.attrValues (
-      lib.filterAttrs (_: v: lib.isDerivation v) (lib.attrByPath [ "packages" system "nvim" ] { } flake)
+      lib.filterAttrs (n: v: n != "nixvimExtend" && lib.isDerivation v) (
+        lib.attrByPath [ "packages" system "nvim" ] { } flake
+      )
     );
 
   fromNixosConfigurations =
