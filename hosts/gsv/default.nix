@@ -95,6 +95,7 @@ in
       }
     ];
   };
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   # Start an SSH server in initrd via which we can unlock the drives
   boot.initrd.availableKernelModules = [ gsv.interfaceDriver ];

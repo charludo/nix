@@ -100,6 +100,7 @@
     "video=DP-2:2560x1440@59.91"
     "video=DP-3:2560x1440@59.91"
   ];
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
 
   networking.networkmanager.enable = true;
   networking.hostName = "hub";
