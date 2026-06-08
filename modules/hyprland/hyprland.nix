@@ -76,7 +76,6 @@
         };
 
         dwindle = {
-          pseudotile = true;
           preserve_split = true;
         };
 
@@ -203,7 +202,6 @@
             # Window behavior
             "${mainMod},v,toggleFloating"
             "${shiftMod},v,pseudo"
-            "${mainMod},j,toggleSplit"
             "${mainMod},f,fullscreen"
 
             # Single-workspace window navigation & sizing
