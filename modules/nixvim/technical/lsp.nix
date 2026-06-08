@@ -35,6 +35,10 @@ in
       key = "gE";
       action.__raw = "require('telescope.builtin').diagnostics";
     }
+    {
+      key = "P";
+      action.__raw = "vim.diagnostic.open_float";
+    }
   ];
 
   highlight = {
