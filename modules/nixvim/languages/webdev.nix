@@ -13,7 +13,16 @@ in
   config = lib.mkIf cfg.enable {
     lsp.servers = {
       html.enable = true;
-      htmx.enable = true;
+      htmx = {
+        enable = true;
+        config.filetypes = [
+          "html"
+          "htmx"
+          "htmldjango"
+          "jinja.html"
+          "twig"
+        ];
+      };
       eslint.enable = true;
       phpactor.enable = true;
     };
