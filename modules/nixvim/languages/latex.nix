@@ -38,7 +38,7 @@ in
     };
     opts.conceallevel = 2;
 
-    plugins.lsp.servers.ltex.enable = true;
+    lsp.servers.ltex.enable = true;
     plugins.conform-nvim.settings.formatters_by_ft = {
       bib = [ "latexindent" ];
       plaintex = [ "latexindent" ];

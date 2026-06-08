@@ -11,7 +11,7 @@
     ./sql.nix
     ./webdev.nix
   ];
-  plugins.lsp.servers = {
+  lsp.servers = {
     # config languages
     nixd.enable = true;
     lua_ls.enable = true;

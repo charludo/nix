@@ -10,9 +10,9 @@ in
   options.languages.python.enable = lib.mkEnableOption "Language config for python";
 
   config = lib.mkIf cfg.enable {
-    plugins.lsp.servers.ruff = {
+    lsp.servers.ruff = {
       enable = true;
-      filetypes = [ "python" ];
+      config.filetypes = [ "python" ];
     };
 
     plugins.conform-nvim.settings.formatters_by_ft = {

@@ -51,9 +51,9 @@ in
       ];
 
       # Largely copied from: https://github.com/MattSturgeon/nix-config/blob/5dd1b19bc69fa33bfc950c10083490187c3d58a2/nvim/config/lsp.nix#L24-L48
-      plugins.lsp.servers.nixd = {
+      lsp.servers.nixd = {
         enable = true;
-        settings =
+        config.settings =
           let
             flake = ''(builtins.getFlake "${inputs.self}")'';
             system = "\${builtins.currentSystem}";

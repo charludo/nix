@@ -3,44 +3,39 @@ let
   colors = config.palette;
 in
 {
-  plugins.lsp = {
-    enable = true;
-    keymaps.lspBuf = {
-      K = "hover";
-    };
-    keymaps.extra = [
-      {
-        key = "gd";
-        action = {
-          __raw = "require('telescope.builtin').lsp_definitions ";
-        };
-      }
-      {
-        key = "gD";
-        action = {
-          __raw = "require('telescope.builtin').lsp_references ";
-        };
-      }
-      {
-        key = "gi";
-        action = {
-          __raw = "require('telescope.builtin').lsp_implementations ";
-        };
-      }
-      {
-        key = "gt";
-        action = {
-          __raw = "require('telescope.builtin').lsp_type_definitions ";
-        };
-      }
-      {
-        key = "gE";
-        action = {
-          __raw = "require('telescope.builtin').diagnostics ";
-        };
-      }
-    ];
-  };
+  plugins.lspconfig.enable = true;
+
+  # Register defaults for all servers.
+  lsp.servers."*".config.capabilities.__raw = ''
+    require('cmp_nvim_lsp').default_capabilities()
+  '';
+
+  lsp.keymaps = [
+    {
+      key = "K";
+      lspBufAction = "hover";
+    }
+    {
+      key = "gd";
+      action.__raw = "require('telescope.builtin').lsp_definitions";
+    }
+    {
+      key = "gD";
+      action.__raw = "require('telescope.builtin').lsp_references";
+    }
+    {
+      key = "gi";
+      action.__raw = "require('telescope.builtin').lsp_implementations";
+    }
+    {
+      key = "gt";
+      action.__raw = "require('telescope.builtin').lsp_type_definitions";
+    }
+    {
+      key = "gE";
+      action.__raw = "require('telescope.builtin').diagnostics";
+    }
+  ];
 
   highlight = {
     LspReferenceText = {
@@ -177,26 +172,6 @@ in
         },
       }
 
-      --  LspInfo window borders
-      local win = require "lspconfig.ui.windows"
-      local _default_opts = win.default_opts
-
-      win.default_opts = function(options)
-        local opts = _default_opts(options)
-        opts.border = "single"
-        return opts
-      end
-      vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-        border = {
-          { "╭" },
-          { "─" },
-          { "╮" },
-          { "│" },
-          { "╯" },
-          { "─" },
-          { "╰" },
-          { "│" },
-        }
-      })
+      vim.o.winborder = "rounded"
     '';
 }

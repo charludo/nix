@@ -11,15 +11,15 @@ in
   options.languages.rust.enable = lib.mkEnableOption "Language config for rust";
 
   config = lib.mkIf cfg.enable {
-    plugins.lsp.servers.rust_analyzer = {
+    lsp.servers.rust_analyzer = {
       enable = true;
-      installCargo = false;
-      installRustc = false;
-      settings.cargo.features = "all";
-      settings.diagnostics.styleLints.enable = true;
-      settings.completion.privateEditable.enable = true;
-      settings.inlayHints.lifetimeElisionHints.enable = "skip_trivial";
-      settings.check.command = "clippy";
+      config.settings = {
+        cargo.features = "all";
+        diagnostics.styleLints.enable = true;
+        completion.privateEditable.enable = true;
+        inlayHints.lifetimeElisionHints.enable = "skip_trivial";
+        check.command = "clippy";
+      };
     };
 
     plugins.conform-nvim.settings.formatters_by_ft.rust = [ "rustfmt" ];

@@ -11,7 +11,7 @@ in
   options.languages.webdev.enable = lib.mkEnableOption "Language configs for webdev things";
 
   config = lib.mkIf cfg.enable {
-    plugins.lsp.servers = {
+    lsp.servers = {
       html.enable = true;
       htmx.enable = true;
       eslint.enable = true;

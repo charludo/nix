@@ -11,9 +11,9 @@ in
   options.languages.go.enable = lib.mkEnableOption "Language config for go";
 
   config = lib.mkIf cfg.enable {
-    plugins.lsp.servers.gopls = {
+    lsp.servers.gopls = {
       enable = true;
-      settings.gopls = {
+      config.settings.gopls = {
         completeUnimported = true;
         usePlaceholders = true;
         analyses = {

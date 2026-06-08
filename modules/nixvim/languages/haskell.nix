@@ -11,8 +11,7 @@ in
   options.languages.haskell.enable = lib.mkEnableOption "Language config for haskell";
 
   config = lib.mkIf cfg.enable {
-    plugins.lsp.servers.hls.enable = true;
-    plugins.lsp.servers.hls.installGhc = true;
+    lsp.servers.hls.enable = true;
     extraPackages = [ pkgs.ghc ];
   };
 }
