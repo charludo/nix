@@ -23,4 +23,6 @@
       ".forgejo/actions/**/*.yaml"
     ];
   };
+
+  settings.formatter.zizmor.options = [ "--offline" ];
 }
