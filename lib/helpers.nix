@@ -8,7 +8,7 @@ rec {
     lib.listToAttrs (
       lib.mapAttrsToList (key: value: {
         name = lib.toLower (builtins.head (builtins.match "^[^-]*-(.*)" key));
-        value = value;
+        inherit value;
       }) attrs
     );
   allVMSSHConfigs = toLowercaseKeys (
@@ -17,7 +17,7 @@ rec {
         HostName =
           if lib.pathExists ../vms/keys/ssh_host_${name}_ed25519_key.pub then
             let
-              interfaces = outputs.nixosConfigurations.${name}.config.networking.interfaces;
+              inherit (outputs.nixosConfigurations.${name}.config.networking) interfaces;
               iface = lib.findFirst (i: interfaces ? ${i}) null [
                 "ens18"
                 "enp6s18"

@@ -29,9 +29,7 @@ in
     home.pointerCursor = {
       gtk.enable = true;
       x11.enable = true;
-      name = cfg.name;
-      package = cfg.package;
-      size = cfg.size;
+      inherit (cfg) name package size;
     };
 
     home.sessionVariables = {

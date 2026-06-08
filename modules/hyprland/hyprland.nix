@@ -130,7 +130,7 @@
               position = "${toString m.x}x${toString m.y}";
             in
             "${m.name},${if m.enabled then "${resolution},${position},${toString m.scaling}" else "disable"}"
-          ) (config.monitors)
+          ) config.monitors
           ++ [ ",preferred,auto,auto" ];
         workspace = lib.lists.flatten (
           map (m: map (w: "${w},monitor:${m.name}") m.workspaces) (

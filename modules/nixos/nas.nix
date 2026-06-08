@@ -41,13 +41,13 @@ in
     };
 
     extraUsers = mkOption {
-      type = types.listOf (types.str);
+      type = types.listOf types.str;
       description = "additional users who should be allowed to use the NAS";
       default = [ ];
     };
 
     extraServices = mkOption {
-      type = types.listOf (types.str);
+      type = types.listOf types.str;
       description = "additional services who should be allowed to use the NAS. Useful for dynamicUser services.";
       default = [ ];
     };

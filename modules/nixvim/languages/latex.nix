@@ -7,22 +7,20 @@
 let
   cfg = config.languages.latex;
 
-  tex = (
-    pkgs.texlive.combine {
-      inherit (pkgs.texlive)
-        scheme-full
-        supertabular
-        csquotes
-        textpos
-        appendix
-        inconsolata
-        lstaddons
-        pgfplots
-        todonotes
-        xetex
-        ;
-    }
-  );
+  tex = pkgs.texlive.combine {
+    inherit (pkgs.texlive)
+      scheme-full
+      supertabular
+      csquotes
+      textpos
+      appendix
+      inconsolata
+      lstaddons
+      pgfplots
+      todonotes
+      xetex
+      ;
+  };
 in
 {
   options.languages.latex.enable = lib.mkEnableOption "Language config for latex";

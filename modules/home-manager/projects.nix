@@ -1,8 +1,8 @@
 { config, lib, ... }:
 
 let
-  cfg = config.projects;
   inherit (lib) mkOption types;
+  cfg = config.projects;
 in
 {
   options.projects = mkOption {

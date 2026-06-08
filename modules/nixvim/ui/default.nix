@@ -1,7 +1,6 @@
 { config, ... }:
 let
-  colors = config.colors;
-  palette = config.palette;
+  inherit (config) colors palette;
 in
 {
   imports = [

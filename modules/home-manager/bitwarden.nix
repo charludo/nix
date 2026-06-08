@@ -43,7 +43,7 @@ in
         enable = true;
         settings = {
           pinentry = pinentry-fake;
-          email = cfg.email;
+          inherit (cfg) email;
           base_url = cfg.url;
         };
       };

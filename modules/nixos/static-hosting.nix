@@ -28,7 +28,7 @@ in
   config = mkIf cfg.enable {
     users.users = builtins.listToAttrs (
       map (site: {
-        name = site.name;
+        inherit (site) name;
         value = {
           home = "/var/www/${site.name}";
           group = "sftponly";

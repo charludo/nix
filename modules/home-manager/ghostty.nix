@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.desktop.ghostty;
   inherit (config.colorScheme) palette;
+  cfg = config.desktop.ghostty;
 in
 {
   options.desktop.ghostty.enable = lib.mkEnableOption "Ghostty terminal emulator";

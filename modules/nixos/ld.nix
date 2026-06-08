@@ -15,7 +15,7 @@ in
     enable = lib.mkEnableOption "dynamic linking of libraries";
 
     additionalPackages = mkOption {
-      type = types.listOf (types.path);
+      type = types.listOf types.path;
       default = [ pkgs.ruff ];
       defaultText = lib.literalExpression "[ pkgs.ruff ]";
       description = "add additional packages for which to enable dynamic linking";

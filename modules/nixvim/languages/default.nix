@@ -14,6 +14,7 @@
   lsp.servers = {
     # config languages
     nixd.enable = true;
+    statix.enable = true;
     lua_ls.enable = true;
 
     # bash

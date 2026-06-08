@@ -66,7 +66,7 @@
         ];
         config = {
           allowUnfree = true;
-          allowUnfreePredicate = (_: true);
+          allowUnfreePredicate = _: true;
           permittedInsecurePackages = import ./overlays/insecure.nix;
         };
       };
@@ -130,8 +130,7 @@
 
       agenix-rekey = inputs.agenix-rekey.configure {
         userFlake = self;
-        nixosConfigurations = self.nixosConfigurations;
-        homeConfigurations = self.homeConfigurations;
+        inherit (self) nixosConfigurations homeConfigurations;
         collectHomeManagerConfigurations = true;
       };
 

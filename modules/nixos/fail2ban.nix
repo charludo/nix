@@ -49,7 +49,7 @@ in
     age.secrets =
       builtins.listToAttrs (
         map (zone: {
-          name = zone.name;
+          inherit (zone) name;
           value.rekeyFile = zone.path;
         }) cfg.secrets.cloudflareZones
       )

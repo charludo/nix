@@ -32,7 +32,7 @@ in
       p2p = {
         stunServers =
           let
-            coturn = config.services.coturn;
+            inherit (config.services) coturn;
             domain = "turn.${domains.blog}";
             port = toString coturn.listening-port;
             portTls = toString coturn.tls-listening-port;

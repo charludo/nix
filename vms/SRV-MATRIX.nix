@@ -29,7 +29,7 @@ in
   age.secrets.turn = {
     rekeyFile = secrets.gsv-turn;
     owner = config.services.matrix-continuwuity.user;
-    group = config.services.matrix-continuwuity.group;
+    inherit (config.services.matrix-continuwuity) group;
   };
 
   services.matrix-continuwuity = {
@@ -47,7 +47,7 @@ in
 
       turn_uris =
         let
-          coturn = outputs.nixosConfigurations.gsv.config.services.coturn;
+          inherit (outputs.nixosConfigurations.gsv.config.services) coturn;
         in
         [
           "turns:turn.${domains.blog}:${toString coturn.tls-listening-port}"

@@ -11,7 +11,7 @@
     certsFor = [
       {
         name = "actual";
-        port = config.services.actual.settings.port;
+        inherit (config.services.actual.settings) port;
       }
     ];
   };

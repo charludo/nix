@@ -44,36 +44,36 @@ in
       diziet = {
         publicKeyFile = ./keys/diziet_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-diziet-ssh.path;
-        serial = private-settings.yubikeys.diziet.serial;
+        inherit (private-settings.yubikeys.diziet) serial;
       };
       diziet_age = {
         publicKeyFile = ./keys/diziet_age.pub;
         privateKeyFile = private-settings.yubikeys.diziet.identityFile;
-        serial = private-settings.yubikeys.diziet.serial;
+        inherit (private-settings.yubikeys.diziet) serial;
         keyType = "age";
       };
 
       perostek = {
         publicKeyFile = ./keys/perostek_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-perostek-ssh.path;
-        serial = private-settings.yubikeys.perostek.serial;
+        inherit (private-settings.yubikeys.perostek) serial;
       };
       perostek_age = {
         publicKeyFile = ./keys/perostek_age.pub;
         privateKeyFile = private-settings.yubikeys.perostek.identityFile;
-        serial = private-settings.yubikeys.perostek.serial;
+        inherit (private-settings.yubikeys.perostek) serial;
         keyType = "age";
       };
 
       zakalwe = {
         publicKeyFile = ./keys/zakalwe_ssh.pub;
         privateKeyFile = config.age.secrets.yubikey-zakalwe-ssh.path;
-        serial = private-settings.yubikeys.zakalwe.serial;
+        inherit (private-settings.yubikeys.zakalwe) serial;
       };
       zakalwe_age = {
         publicKeyFile = ./keys/zakalwe_age.pub;
         privateKeyFile = private-settings.yubikeys.zakalwe.identityFile;
-        serial = private-settings.yubikeys.zakalwe.serial;
+        inherit (private-settings.yubikeys.zakalwe) serial;
         keyType = "age";
       };
     };
@@ -94,7 +94,7 @@ in
 
   yubikey = {
     enable = lib.mkDefault true;
-    identities = config.users.users.charlotte.identities;
+    inherit (config.users.users.charlotte) identities;
     sshDir = "${config.users.users.charlotte.home}/.ssh";
     sudoAuthFile = config.age.secrets.yubikey-sudo.path;
   };

@@ -6,7 +6,6 @@
 }:
 
 let
-  cfg = config.services.wanderer;
   inherit (lib)
     mkEnableOption
     mkPackageOption
@@ -18,6 +17,7 @@ let
     boolToString
     ;
 
+  cfg = config.services.wanderer;
   stateDir = "/var/lib/wanderer";
   user = "wanderer";
   group = "wanderer";
@@ -216,7 +216,7 @@ in
 
         ExecStart =
           let
-            url = cfg.services.pocketbase.url;
+            inherit (cfg.services.pocketbase) url;
             scheme =
               if lib.hasPrefix "https://" url then
                 "https"
@@ -262,9 +262,9 @@ in
 
         StateDirectory = baseNameOf stateDir;
         BindReadOnlyPaths =
-          (lib.optional (cfg.settings.about != null) (
+          (lib.optional (cfg.settings.about != null)
             "${pkgs.writeText "wanderer-about.md" cfg.settings.about}:${stateDir}/web/build/client/md/about.md"
-          ))
+          )
           ++ [
             "${cfg.package}/share/web:${stateDir}/web"
           ];

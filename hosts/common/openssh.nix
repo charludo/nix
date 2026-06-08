@@ -31,7 +31,7 @@ in
     knownHosts = lib.filterAttrs (_: v: v.publicKeyFile != null) (
       builtins.mapAttrs (name: _: {
         publicKeyFile = if builtins.pathExists (pubKey name) then (pubKey name) else null;
-        extraHostNames = (lib.optional (name == hostName) "localhost");
+        extraHostNames = lib.optional (name == hostName) "localhost";
       }) hosts
     );
   };

@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.desktop.sioyek;
   inherit (config.colorScheme) palette;
+  cfg = config.desktop.sioyek;
 in
 {
   options.desktop.sioyek.enable = lib.mkEnableOption "Sioyek PDF viewer";

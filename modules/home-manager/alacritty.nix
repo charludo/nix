@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
-  cfg = config.desktop.alacritty;
   inherit (config.colorScheme) palette;
+  cfg = config.desktop.alacritty;
 in
 {
   options.desktop.alacritty.enable = lib.mkEnableOption "alacritty terminal emulator";
@@ -11,7 +11,7 @@ in
       enable = true;
       settings = {
         font = {
-          size = config.fontProfiles.monospace.size;
+          inherit (config.fontProfiles.monospace) size;
           bold.family = "${config.fontProfiles.monospace.family}";
           bold.style = "Bold";
           normal.family = "${config.fontProfiles.monospace.family}";

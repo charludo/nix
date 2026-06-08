@@ -11,7 +11,7 @@
     certsFor = [
       {
         name = "pinchflat";
-        port = config.services.pinchflat.port;
+        inherit (config.services.pinchflat) port;
         defaultProxySettings = false;
       }
     ];

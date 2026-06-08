@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  wyoming = config.services.wyoming;
+  inherit (config.services) wyoming;
   toPort = uri: lib.toInt (lib.last (lib.splitString ":" uri));
 in
 {

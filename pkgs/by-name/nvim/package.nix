@@ -29,33 +29,29 @@ in
 
 # nvim.common includes support for commonly used languages
 // {
-  common = (
-    import ./mkNixvim.nix {
-      inherit lib nixvim;
-      languages = {
-        go.enable = true;
-        python.enable = true;
-        rust.enable = true;
-        webdev.enable = true;
-      };
-    }
-  );
+  common = import ./mkNixvim.nix {
+    inherit lib nixvim;
+    languages = {
+      go.enable = true;
+      python.enable = true;
+      rust.enable = true;
+      webdev.enable = true;
+    };
+  };
 }
 
 # nvim.full includes support for all languages defined in the nixvim module
 # CAUTION: quite heavy due to the contained full texlive distribution
 // {
-  full = (
-    import ./mkNixvim.nix {
-      inherit lib nixvim;
-      languages = builtins.listToAttrs (
-        map (language: {
-          name = language;
-          value = {
-            enable = true;
-          };
-        }) languages
-      );
-    }
-  );
+  full = import ./mkNixvim.nix {
+    inherit lib nixvim;
+    languages = builtins.listToAttrs (
+      map (language: {
+        name = language;
+        value = {
+          enable = true;
+        };
+      }) languages
+    );
+  };
 }

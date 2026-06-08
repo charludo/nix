@@ -43,7 +43,7 @@ in
       environmentFile = config.age.secrets.cloudflare.path;
     };
     certs."xmpp.${domains.home}" = {
-      group = config.services.prosody.group;
+      inherit (config.services.prosody) group;
       extraDomainNames = map (v: "${v}.xmpp.${domains.home}") [
         "upload"
         "muc"

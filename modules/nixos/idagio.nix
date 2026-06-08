@@ -129,7 +129,7 @@ in
 
     users.users = mkIf (cfg.user == "idagio") {
       idagio = {
-        group = cfg.group;
+        inherit (cfg) group;
         uid = UID;
       };
     };

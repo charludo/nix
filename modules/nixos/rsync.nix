@@ -13,10 +13,10 @@ in
   options.rsync = lib.mkOption {
     type =
       with lib.types;
-      attrsOf (submodule ({
+      attrsOf (submodule {
         options = {
           tasks = lib.mkOption {
-            type = listOf (submodule ({
+            type = listOf (submodule {
               options = {
                 from = lib.mkOption {
                   type = types.str;
@@ -53,7 +53,7 @@ in
                   '';
                 };
               };
-            }));
+            });
             description = "a list of `{ from, to }` tuples describing backup task origins and destinations";
           };
           extraFlags = lib.mkOption {
@@ -83,47 +83,43 @@ in
             default = true;
           };
         };
-      }));
+      });
     default = { };
     description = "an arbitrary number of rsync tasks";
   };
 
   config = mkIf (cfg != { }) {
-    systemd.services = (
-      lib.mapAttrs' (name: rsync: {
-        name = "rsync-task-${name}";
-        value = {
-          inherit (rsync) requires;
-          script = lib.concatStringsSep "\n" (
-            lib.map (
-              task:
-              let
-                from = lib.removeSuffix "/" (lib.trim task.from);
-                to = lib.removeSuffix "/" (lib.trim task.to);
-              in
-              # bash
-              ''
-                ${task.prefixCommand} ${lib.getExe pkgs.rsync} -avz --stats --delete --inplace ${rsync.extraFlags} ${task.extraFlags} "${from}/" "${to}" ${task.suffixCommand}
-              ''
-            ) rsync.tasks
-          );
-          serviceConfig = {
-            Type = "oneshot";
-            User = "root";
-          };
+    systemd.services = lib.mapAttrs' (name: rsync: {
+      name = "rsync-task-${name}";
+      value = {
+        inherit (rsync) requires;
+        script = lib.concatStringsSep "\n" (
+          lib.map (
+            task:
+            let
+              from = lib.removeSuffix "/" (lib.trim task.from);
+              to = lib.removeSuffix "/" (lib.trim task.to);
+            in
+            # bash
+            ''
+              ${task.prefixCommand} ${lib.getExe pkgs.rsync} -avz --stats --delete --inplace ${rsync.extraFlags} ${task.extraFlags} "${from}/" "${to}" ${task.suffixCommand}
+            ''
+          ) rsync.tasks
+        );
+        serviceConfig = {
+          Type = "oneshot";
+          User = "root";
         };
-      }) cfg
-    );
+      };
+    }) cfg;
 
-    systemd.timers = (
-      lib.mapAttrs' (name: rsync: {
-        name = "rsync-task-${name}";
-        value = {
-          inherit (rsync) timerConfig;
-          wantedBy = [ "timers.target" ];
-        };
-      }) cfg
-    );
+    systemd.timers = lib.mapAttrs' (name: rsync: {
+      name = "rsync-task-${name}";
+      value = {
+        inherit (rsync) timerConfig;
+        wantedBy = [ "timers.target" ];
+      };
+    }) cfg;
 
     environment.systemPackages =
       lib.concatLists (
@@ -146,7 +142,7 @@ in
               ) rsync.tasks
             );
           })
-        ]) (filterAttrs (_: rsync: rsync.restore == true) cfg)
+        ]) (filterAttrs (_: rsync: rsync.restore) cfg)
       )
       ++ [
         pkgs.rsync

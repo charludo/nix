@@ -27,7 +27,7 @@ in
         ];
         bootstrapDns = {
           upstream = private-settings.upstreamDNS.url;
-          ips = private-settings.upstreamDNS.ips;
+          inherit (private-settings.upstreamDNS) ips;
         };
         blocking = {
           blackLists = {

@@ -32,7 +32,7 @@ in
       enable = true;
       colors = lib.mkDefault config.colorScheme.palette;
       palette = lib.colors.extendPalette config.colorScheme.palette;
-      languages = cfg.languages;
+      inherit (cfg) languages;
 
       opts = lib.mkIf cfg.spellChecking {
         spell = true;

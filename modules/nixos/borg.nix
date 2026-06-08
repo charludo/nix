@@ -12,7 +12,7 @@ in
   options.borg = lib.mkOption {
     type =
       with lib.types;
-      attrsOf (submodule ({
+      attrsOf (submodule {
         options = {
           paths = lib.mkOption {
             type = listOf str;
@@ -52,35 +52,31 @@ in
             description = "path to a secret containing the private SSH key used for authentication with the borg machine. Agenix secret created automatically";
           };
         };
-      }));
+      });
     default = { };
     description = "an arbitrary number of borgbackup instances";
   };
 
   config = {
-    age.secrets = (
-      lib.concatMapAttrs (name: borg: {
-        "borg-password-${name}".rekeyFile = borg.secrets.password;
-        "borg-ssh-key-${name}".rekeyFile = borg.secrets.sshKey;
-      }) cfg
-    );
+    age.secrets = lib.concatMapAttrs (name: borg: {
+      "borg-password-${name}".rekeyFile = borg.secrets.password;
+      "borg-ssh-key-${name}".rekeyFile = borg.secrets.sshKey;
+    }) cfg;
 
-    services.borgbackup.jobs = (
-      builtins.mapAttrs (name: borg: {
-        inherit (borg) paths exclude startAt;
+    services.borgbackup.jobs = builtins.mapAttrs (name: borg: {
+      inherit (borg) paths exclude startAt;
 
-        repo = "${borg.remote}:${name}";
-        encryption = {
-          mode = "repokey";
-          passCommand = "cat ${config.age.secrets."borg-password-${name}".path}";
-        };
-        environment = {
-          BORG_RSH = "ssh -p ${toString borg.port} -i ${config.age.secrets."borg-ssh-key-${name}".path}";
-        };
-        compression = "auto,lzma";
-        doInit = false; # instead, provide script below
-      }) cfg
-    );
+      repo = "${borg.remote}:${name}";
+      encryption = {
+        mode = "repokey";
+        passCommand = "cat ${config.age.secrets."borg-password-${name}".path}";
+      };
+      environment = {
+        BORG_RSH = "ssh -p ${toString borg.port} -i ${config.age.secrets."borg-ssh-key-${name}".path}";
+      };
+      compression = "auto,lzma";
+      doInit = false; # instead, provide script below
+    }) cfg;
 
     environment.systemPackages = lib.concatLists (
       lib.mapAttrsToList (

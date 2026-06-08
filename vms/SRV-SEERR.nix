@@ -17,7 +17,7 @@
     certsFor = [
       {
         name = "seerr";
-        port = config.services.seerr.port;
+        inherit (config.services.seerr) port;
       }
     ];
   };

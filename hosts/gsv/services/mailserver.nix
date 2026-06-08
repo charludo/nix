@@ -18,7 +18,7 @@ in
       autoIndex = true;
     };
     accounts = loginAccounts;
-    forwards = forwards;
+    inherit forwards;
     localDnsResolver = false;
   };
 }

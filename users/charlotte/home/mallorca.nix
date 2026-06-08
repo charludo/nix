@@ -12,7 +12,7 @@
     kb_variant = "";
   };
 
-  projects = private-settings.projects;
+  inherit (private-settings) projects;
   nixvim.languages = {
     python.enable = true;
     webdev.enable = true;

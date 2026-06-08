@@ -21,7 +21,7 @@
     certsFor = [
       {
         name = "ca-issuing-1";
-        port = config.services.step-ca.port;
+        inherit (config.services.step-ca) port;
       }
     ];
   };

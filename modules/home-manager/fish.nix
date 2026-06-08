@@ -16,16 +16,16 @@ in
 
       plugins = [
         {
+          inherit (pkgs.fishPlugins.tide) src;
           name = "tide";
-          src = pkgs.fishPlugins.tide.src;
         }
         {
+          inherit (pkgs.fishPlugins.plugin-sudope) src;
           name = "plugin-sudope";
-          src = pkgs.fishPlugins.plugin-sudope.src;
         }
         {
+          inherit (pkgs.fishPlugins.autopair) src;
           name = "autopair";
-          src = pkgs.fishPlugins.autopair.src;
         }
       ];
 

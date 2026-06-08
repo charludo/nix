@@ -20,7 +20,7 @@
 
   home.packages = [ pkgs.tmux ];
 
-  projects = private-settings.projects;
+  inherit (private-settings) projects;
   nixvim.addDesktopEntry = false;
   nixvim.languages = {
     python.enable = true;

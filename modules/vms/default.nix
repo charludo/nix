@@ -117,10 +117,9 @@ in
       virtio0 = lib.mkDefault "vm_datastore:vm-${toString config.vm.id}-disk-0";
       boot = "order=virtio0";
       ostype = "l26";
-      cores = config.vm.hardware.cores;
-      memory = config.vm.hardware.memory;
+      inherit (config.vm.hardware) cores memory;
       bios = "ovmf";
-      name = config.vm.name;
+      inherit (config.vm) name;
       additionalSpace = "1G";
       bootSize = "256M";
       net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
@@ -152,7 +151,7 @@ in
       targetHost = lib.mkDefault "paki@${config.vm.networking.address}";
 
       vm = {
-        id = cfg.id;
+        inherit (cfg) id;
         ip = cfg.networking.address;
         proxmoxHost = lib.mkDefault "proxmox";
         proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
@@ -170,12 +169,11 @@ in
       hostName = config.vm.name;
       interfaces.${cfg.networking.interface}.ipv4.addresses = [
         {
-          address = config.vm.networking.address;
-          prefixLength = config.vm.networking.prefixLength;
+          inherit (config.vm.networking) address prefixLength;
         }
       ];
       defaultGateway = config.vm.networking.gateway;
-      nameservers = config.vm.networking.nameservers;
+      inherit (config.vm.networking) nameservers;
       firewall = {
         allowedTCPPorts = config.vm.networking.openPorts.tcp;
         allowedUDPPorts = config.vm.networking.openPorts.udp;

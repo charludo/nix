@@ -101,9 +101,9 @@ let
       description = "[omitted]";
     };
   };
-  enabledMonitOptions = (
-    lib.filterAttrs (_name: option: option ? enable && option.enable == true) config.monitConfig
-  );
+  enabledMonitOptions = lib.filterAttrs (
+    _name: option: option ? enable && option.enable
+  ) config.monitConfig;
   monitConfigBlocks = lib.concatStringsSep "\n\n" (
     lib.mapAttrsToList (_name: option: option.config) enabledMonitOptions
   );

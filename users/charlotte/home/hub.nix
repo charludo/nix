@@ -54,7 +54,7 @@
     "${config.xdg.userDirs.videos}".source = config.lib.file.mkOutOfStoreSymlink "/media/Media/Videos";
   };
 
-  projects = private-settings.projects;
+  inherit (private-settings) projects;
   nixvim.languages = {
     c.enable = false;
     godot.enable = false;

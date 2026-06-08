@@ -17,23 +17,23 @@
     certsFor = [
       {
         name = "sonarr";
-        port = config.services.sonarr.settings.server.port;
+        inherit (config.services.sonarr.settings.server) port;
       }
       {
         name = "radarr";
-        port = config.services.radarr.settings.server.port;
+        inherit (config.services.radarr.settings.server) port;
       }
       {
         name = "lidarr";
-        port = config.services.lidarr.settings.server.port;
+        inherit (config.services.lidarr.settings.server) port;
       }
       {
         name = "readarr-audio";
-        port = config.services.readarr.settings.server.port;
+        inherit (config.services.readarr.settings.server) port;
       }
       {
         name = "prowlarr";
-        port = config.services.prowlarr.settings.server.port;
+        inherit (config.services.prowlarr.settings.server) port;
       }
       {
         name = "qbittorrent";
@@ -45,7 +45,7 @@
       }
       {
         name = "idagio";
-        port = config.services.idagio.port;
+        inherit (config.services.idagio) port;
       }
     ];
   };

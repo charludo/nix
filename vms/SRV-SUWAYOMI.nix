@@ -11,11 +11,11 @@
     certsFor = [
       {
         name = "suwayomi";
-        port = config.services.suwayomi-server.settings.server.port;
+        inherit (config.services.suwayomi-server.settings.server) port;
       }
       {
         name = "readarr";
-        port = config.services.readarr.settings.server.port;
+        inherit (config.services.readarr.settings.server) port;
       }
     ];
   };

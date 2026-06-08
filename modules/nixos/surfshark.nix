@@ -91,7 +91,7 @@ in
     };
 
     iptables.enforceForUsers = mkOption {
-      type = types.listOf (types.str);
+      type = types.listOf types.str;
       default = [ ];
       description = "which users to enforce the surfshark iptables rules for";
     };

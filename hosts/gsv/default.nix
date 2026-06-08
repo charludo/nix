@@ -37,21 +37,21 @@ in
 
   # Networking config
   networking = {
-    hostName = hostName;
+    inherit hostName;
     nameservers = private-settings.upstreamDNS.ips;
     domain = null;
-    hostId = gsv.hostId;
+    inherit (gsv) hostId;
     useDHCP = false;
     enableIPv6 = false;
     interfaces.${gsv.interface}.ipv4.addresses = [
       {
         address = gsv.ip;
-        prefixLength = gsv.prefixLength;
+        inherit (gsv) prefixLength;
       }
     ];
     defaultGateway = {
       address = gsv.gateway;
-      interface = gsv.interface;
+      inherit (gsv) interface;
     };
     firewall = {
       allowedTCPPorts = [

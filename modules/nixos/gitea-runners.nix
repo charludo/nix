@@ -34,7 +34,7 @@ in
     runners = lib.mkOption {
       type =
         with lib.types;
-        attrsOf (submodule ({
+        attrsOf (submodule {
           options = {
             makeNixRunner = lib.mkEnableOption "necessary settings to make the runner use the host's nix store";
             url = lib.mkOption {
@@ -57,7 +57,7 @@ in
               default = { };
             };
           };
-        }));
+        });
       default = { };
       description = "an arbitrary number of gitea-actions-runner instances";
     };
@@ -242,31 +242,29 @@ in
       in
       {
         package = pkgs.forgejo-runner;
-        instances = (
-          builtins.mapAttrs (name: runner: {
-            inherit name;
-            inherit (runner) labels;
+        instances = builtins.mapAttrs (name: runner: {
+          inherit name;
+          inherit (runner) labels;
 
-            enable = true;
+          enable = true;
 
-            url = if (!isNull runner.url) then runner.url else cfg.defaultUrl;
-            tokenFile =
-              config.age.secrets."gitea-runner-token-${name}".path
-                or config.age.secrets.gitea-runner-token-default.path;
-            settings = lib.mkMerge [
-              runner.settings
-              (lib.mkIf runner.makeNixRunner {
-                container.options = "-e NIX_BUILD_SHELL=/bin/bash -e NIX_PATH=nixpkgs=${inputs.nixpkgs.outPath} -e PAGER=cat -e PATH=/bin -e SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt -v /nix:/nix -v ${storeDeps}/bin:/bin -v ${storeDeps}/etc/ssl:/etc/ssl --user nixuser";
-                container.network = "host";
-                container.valid_volumes = [
-                  "/nix"
-                  "${storeDeps}/bin"
-                  "${storeDeps}/etc/ssl"
-                ];
-              })
-            ];
-          }) cfg.runners
-        );
+          url = if (runner.url != null) then runner.url else cfg.defaultUrl;
+          tokenFile =
+            config.age.secrets."gitea-runner-token-${name}".path
+              or config.age.secrets.gitea-runner-token-default.path;
+          settings = lib.mkMerge [
+            runner.settings
+            (lib.mkIf runner.makeNixRunner {
+              container.options = "-e NIX_BUILD_SHELL=/bin/bash -e NIX_PATH=nixpkgs=${inputs.nixpkgs.outPath} -e PAGER=cat -e PATH=/bin -e SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt -v /nix:/nix -v ${storeDeps}/bin:/bin -v ${storeDeps}/etc/ssl:/etc/ssl --user nixuser";
+              container.network = "host";
+              container.valid_volumes = [
+                "/nix"
+                "${storeDeps}/bin"
+                "${storeDeps}/etc/ssl"
+              ];
+            })
+          ];
+        }) cfg.runners;
       };
   };
 }

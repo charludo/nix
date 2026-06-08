@@ -43,7 +43,7 @@
 
   accounts.email.accounts = private-settings.charlotte.accountsWork;
 
-  projects = private-settings.projects;
+  inherit (private-settings) projects;
   nixvim.languages = {
     go.enable = true;
     python.enable = true;
