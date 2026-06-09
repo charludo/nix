@@ -12,6 +12,15 @@ in
     enable = true;
     hostName = "mail.${domains.personal}";
     configureNginx = true;
+    package = pkgs.roundcube.withPlugins (p: [
+      p.contextmenu
+      p.custom_from
+    ]);
+    plugins = [
+      "attachment_reminder"
+      "contextmenu"
+      "custom_from"
+    ];
     dicts = with pkgs.aspellDicts; [
       de
       en

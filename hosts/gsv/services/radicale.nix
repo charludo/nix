@@ -23,26 +23,8 @@ in
       htpasswd_filename = toString htpasswd;
       htpasswd_encryption = "bcrypt";
     };
-    settings.web = {
-      type = "radicale_infcloud";
-      infcloud_config = ''
-        globalInterfaceLanguage = "de_DE";
-                        globalTimeZone = "Europe/Berlin";
-      '';
-    };
+    settings.web.type = "internal";
   };
-
-  systemd.services.radicale.environment.PYTHONPATH =
-    let
-      python = pkgs.python313.withPackages (
-        pkgs: with pkgs; [
-          radicale-infcloud
-          pytz
-          setuptools
-        ]
-      );
-    in
-    "${python}/${pkgs.python313.sitePackages}";
 
   services.nginx = {
     virtualHosts = {
@@ -63,7 +45,7 @@ in
         enableACME = true;
         locations."/" = {
           extraConfig = ''
-            return 301 https://dav.${domains.personal}/.web/infcloud/;
+            return 301 https://dav.${domains.personal}/.web/;
           '';
         };
       };
