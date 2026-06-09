@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   inputs,
   ...
 }:
@@ -53,18 +54,17 @@ in
       # Largely copied from: https://github.com/MattSturgeon/nix-config/blob/5dd1b19bc69fa33bfc950c10083490187c3d58a2/nvim/config/lsp.nix#L24-L48
       lsp.servers.nixd = {
         enable = true;
-        config.settings =
+        config.settings.nixd =
           let
-            flake = ''(builtins.getFlake "${inputs.self}")'';
-            system = "\${builtins.currentSystem}";
+            flake = ''(builtins.getFlake "path:${inputs.self}?narHash=${inputs.self.narHash}")'';
+            system = pkgs.stdenv.hostPlatform.system;
           in
           {
-            nixpkgs.expr = "import ${flake}.inputs.nixpkgs { }";
+            nixpkgs.expr = ''import ${flake}.inputs.nixpkgs { system = "${system}"; }'';
             options = {
               # Hardcoding flake outputs here is not nice, but the options are the same everywhere. So. Eh.
               nixvim.expr = "${flake}.packages.${system}.nvim.options";
-              nixos.expr = "${flake}.nixosConfigurations.hub.options";
-              vms.expr = "${flake}.nixosConfigurations.SRV-GIT.options";
+              nixos.expr = "${flake}.nixosConfigurations.SRV-GIT.options"; # both nixos + vm modules
               home-manager.expr = ''${flake}.homeConfigurations."charlotte@hub".options'';
             };
           };
