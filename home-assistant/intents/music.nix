@@ -236,6 +236,7 @@ in
     MusikKuenstler = unmute {
       sentences = [
         "(Spiele|Spiel) (was|etwas|Musik|etwas Musik) von {mass_artist}"
+        "Musik von {mass_artist}"
       ];
       script = {
         action = [ (playMA "artist" "{{ mass_artist }}") ];
