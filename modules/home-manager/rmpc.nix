@@ -15,10 +15,10 @@ in
     default = "/media/NAS/Musik";
     description = "where mpd looks for music";
   };
-  options.cli.rmpc.stateLocation = lib.mkOption {
+  options.cli.rmpc.playlistLocation = lib.mkOption {
     type = lib.types.str;
-    default = "$XDG_DATA_HOME/mpd";
-    description = "where mpd saves its state";
+    default = "/media/NAS/Musik/.mpd/playlists";
+    description = "where mpd saves playlists";
   };
   options.programs.rmpc.theme = lib.mkOption {
     type = lib.types.lines;
@@ -484,6 +484,7 @@ in
     services.mpd = {
       enable = true;
       musicDirectory = cfg.musicLocation;
+      playlistDirectory = cfg.playlistLocation;
 
       extraConfig = ''
         audio_output {
