@@ -6,7 +6,7 @@
 }:
 
 let
-  inherit (config.colorScheme) palette;
+  palette = config.colors.paletteStripped;
   cfg = config.desktop.gtkProfile;
   config' = config;
 in

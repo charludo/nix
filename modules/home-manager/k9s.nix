@@ -7,7 +7,7 @@
 
 let
   cfg = config.cli.k9s;
-  colors = lib.colors.extendPalette config.colorScheme.palette;
+  colors = config.colors.palette;
 in
 {
   options.cli.k9s.enable = lib.mkEnableOption "themed k9s";

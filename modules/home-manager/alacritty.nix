@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  inherit (config.colorScheme) palette;
+  palette = config.colors.paletteStripped;
   cfg = config.desktop.alacritty;
 in
 {

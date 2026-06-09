@@ -3,14 +3,14 @@ let
   inherit (config.lib.formats.rasi) mkLiteral;
   rofi-theme = {
     "*" = {
-      bg-col = mkLiteral "#${config.colorScheme.palette.base00}";
-      bg-col-light = mkLiteral "#${config.colorScheme.palette.base00}";
-      border-col = mkLiteral "#${config.colorScheme.palette.base00}";
-      selected-col = mkLiteral "#${config.colorScheme.palette.base00}";
-      blue = mkLiteral "#${config.colorScheme.palette.base0D}";
-      fg-col = mkLiteral "#${config.colorScheme.palette.base05}";
-      fg-col2 = mkLiteral "#${config.colorScheme.palette.base08}";
-      grey = mkLiteral "#${config.colorScheme.palette.base03}";
+      bg-col = mkLiteral "#${config.colors.paletteStripped.base00}";
+      bg-col-light = mkLiteral "#${config.colors.paletteStripped.base00}";
+      border-col = mkLiteral "#${config.colors.paletteStripped.base00}";
+      selected-col = mkLiteral "#${config.colors.paletteStripped.base00}";
+      blue = mkLiteral "#${config.colors.paletteStripped.base0D}";
+      fg-col = mkLiteral "#${config.colors.paletteStripped.base05}";
+      fg-col2 = mkLiteral "#${config.colors.paletteStripped.base08}";
+      grey = mkLiteral "#${config.colors.paletteStripped.base03}";
 
       font = "${config.fontProfiles.regular.family} 13";
     };

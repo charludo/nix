@@ -31,8 +31,8 @@ in
     programs.nixvim = {
       imports = [ ../nixvim ];
       enable = true;
-      colors = lib.mkDefault config.colorScheme.palette;
-      palette = lib.colors.extendPalette config.colorScheme.palette;
+      colors = lib.mkDefault config.colors.base;
+      palette = config.colors.palette;
       inherit (cfg) languages;
 
       opts = lib.mkIf cfg.spellChecking {

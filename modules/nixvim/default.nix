@@ -18,7 +18,6 @@
   options.palette = lib.mkOption {
     type = lib.types.anything;
     description = "48 color palette used for neovim. Usually auto-generated from a 16 color palette.";
-    defaultText = lib.literalExpression "lib.colors.extendPalette config.colors";
   };
 
   config = {

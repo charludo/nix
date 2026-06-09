@@ -5,7 +5,7 @@
   ...
 }:
 {
-  colorScheme = lib.mkDefault inputs.nix-colors.colorSchemes.primer-dark-dimmed;
+  colors.base = lib.mkDefault inputs.nix-colors.colorSchemes.primer-dark-dimmed.palette;
 
   fontProfiles = {
     enable = true;

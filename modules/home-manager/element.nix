@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.desktop.element;
-  palette = lib.colors.extendPalette config.colorScheme.palette;
+  inherit (config.colors) palette;
 in
 {
   options.desktop.element.enable = lib.mkEnableOption "Element Matrix client";

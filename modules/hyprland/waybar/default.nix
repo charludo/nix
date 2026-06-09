@@ -35,7 +35,7 @@ in
     };
     style =
       let
-        inherit (config.colorScheme) palette;
+        palette = config.colors.paletteStripped;
       in
       # css
       ''

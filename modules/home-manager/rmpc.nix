@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (config.colorScheme) palette;
+  palette = config.colors.paletteStripped;
   cfg = config.cli.rmpc;
 in
 {

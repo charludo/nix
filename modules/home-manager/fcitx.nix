@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.desktop.fcitx;
-  palette = lib.colors.extendPalette config.colorScheme.palette;
+  inherit (config.colors) palette;
   format = pkgs.formats.ini { };
 in
 {

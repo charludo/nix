@@ -15,10 +15,10 @@
 
     settings =
       let
-        primary = "0xff${config.colorScheme.palette.base0E}";
-        accent = "0xff${config.colorScheme.palette.base09}";
-        inactive = "0xaa${config.colorScheme.palette.base02}";
-        base = "0xaa${config.colorScheme.palette.base00}";
+        primary = "0xff${config.colors.paletteStripped.base0E}";
+        accent = "0xff${config.colors.paletteStripped.base09}";
+        inactive = "0xaa${config.colors.paletteStripped.base02}";
+        base = "0xaa${config.colors.paletteStripped.base00}";
 
         mainMod = "SUPER";
         shiftMod = "SUPERSHIFT";
