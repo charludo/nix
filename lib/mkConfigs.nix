@@ -80,9 +80,7 @@ rec {
             # Ensures we use pkgs.ours as well here
             { nixpkgs.pkgs = pkgs; }
 
-            inputs.nixos-generators.nixosModules.all-formats
             "${inputs.nixpkgs}/nixos/modules/profiles/qemu-guest.nix"
-            "${inputs.nixpkgs}/nixos/modules/virtualisation/proxmox-image.nix"
 
             ../vms/${name}.nix
             ../modules/vms

@@ -13,13 +13,15 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf (cfg.runOnGPUHost || cfg.hardware.gpu.enable) {
-      proxmox.qemuConf = {
-        scsihw = "virtio-scsi-pci";
-        virtio0 = "vm_datastore_local_gpu:vm-${toString config.vm.id}-disk-0";
-      };
-      proxmox.qemuExtraConf = {
-        balloon = "0";
-        machine = "q35";
+      image.modules.proxmox = {
+        proxmox.qemuConf = {
+          scsihw = "virtio-scsi-pci";
+          virtio0 = "vm_datastore_local_gpu:vm-${toString config.vm.id}-disk-0";
+        };
+        proxmox.qemuExtraConf = {
+          balloon = "0";
+          machine = "q35";
+        };
       };
 
       boot.kernelModules = lib.mkForce [ "kvm-intel" ];
@@ -36,8 +38,10 @@ in
         nvtopPackages.intel
       ];
 
-      proxmox.qemuExtraConf.hostpci0 = "0000:00:02,pcie=1";
-      proxmox.qemuExtraConf.hostpci1 = "0000:00:1f,pcie=1";
+      image.modules.proxmox.proxmox.qemuExtraConf = {
+        hostpci0 = "0000:00:02,pcie=1";
+        hostpci1 = "0000:00:1f,pcie=1";
+      };
 
       hardware.graphics = {
         enable = true;

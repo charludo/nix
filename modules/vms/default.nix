@@ -112,30 +112,32 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    proxmox.qemuConf = {
-      scsihw = lib.mkDefault "virtio-scsi-single";
-      virtio0 = lib.mkDefault "vm_datastore:vm-${toString config.vm.id}-disk-0";
-      boot = "order=virtio0";
-      ostype = "l26";
-      inherit (config.vm.hardware) cores memory;
-      bios = "ovmf";
-      inherit (config.vm) name;
-      additionalSpace = "1G";
-      bootSize = "256M";
-      net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
-        builtins.substring 0 2 (toString config.vm.id)
-      },firewall=1";
-      agent = true;
-    };
+    image.modules.proxmox = {
+      proxmox.qemuConf = {
+        scsihw = lib.mkDefault "virtio-scsi-single";
+        virtio0 = lib.mkDefault "vm_datastore:vm-${toString config.vm.id}-disk-0";
+        boot = "order=virtio0";
+        ostype = "l26";
+        inherit (config.vm.hardware) cores memory;
+        bios = "ovmf";
+        inherit (config.vm) name;
+        additionalSpace = "1G";
+        bootSize = "256M";
+        net0 = "virtio=00:00:00:00:00:00,bridge=VLAN${
+          builtins.substring 0 2 (toString config.vm.id)
+        },firewall=1";
+        agent = true;
+      };
 
-    proxmox.cloudInit.enable = false;
-    proxmox.partitionTableType = lib.mkDefault "efi";
-    proxmox.qemuExtraConf = {
-      cpu = "host";
-      ide2 = lib.mkForce "none,media=cdrom";
-      kvm = 1;
+      proxmox.cloudInit.enable = false;
+      proxmox.partitionTableType = lib.mkDefault "efi";
+      proxmox.qemuExtraConf = {
+        cpu = "host";
+        ide2 = lib.mkForce "none,media=cdrom";
+        kvm = 1;
+      };
+      virtualisation.diskSize = "auto";
     };
-    virtualisation.diskSize = "auto";
 
     nvim.enable = true;
 
