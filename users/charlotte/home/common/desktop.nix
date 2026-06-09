@@ -36,6 +36,8 @@
   ];
 
   accounts.email.accounts = lib.mkDefault private-settings.charlotte.accounts;
+  accounts.calendar.accounts = lib.mkDefault private-settings.charlotte.calendars;
+  accounts.contact.accounts = lib.mkDefault private-settings.charlotte.contacts;
 
   age.secrets.lemmy-username.rekeyFile = secrets.charlotte-lemmy-username;
   age.secrets.lemmy-password.rekeyFile = secrets.charlotte-lemmy-password;
