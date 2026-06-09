@@ -3,14 +3,14 @@ let
   inherit (config.lib.formats.rasi) mkLiteral;
   rofi-theme = {
     "*" = {
-      bg-col = mkLiteral "#${config.colors.paletteStripped.base00}";
-      bg-col-light = mkLiteral "#${config.colors.paletteStripped.base00}";
-      border-col = mkLiteral "#${config.colors.paletteStripped.base00}";
-      selected-col = mkLiteral "#${config.colors.paletteStripped.base00}";
-      blue = mkLiteral "#${config.colors.paletteStripped.base0D}";
-      fg-col = mkLiteral "#${config.colors.paletteStripped.base05}";
-      fg-col2 = mkLiteral "#${config.colors.paletteStripped.base08}";
-      grey = mkLiteral "#${config.colors.paletteStripped.base03}";
+      bg-col = mkLiteral config.colors.palette.base00;
+      bg-col-light = mkLiteral config.colors.palette.base00;
+      border-col = mkLiteral config.colors.palette.base00;
+      selected-col = mkLiteral config.colors.palette.base00;
+      blue = mkLiteral config.colors.palette.base0D;
+      fg-col = mkLiteral config.colors.palette.base05;
+      fg-col2 = mkLiteral config.colors.palette.base08;
+      grey = mkLiteral config.colors.palette.base03;
 
       font = "${config.fontProfiles.regular.family} 13";
     };

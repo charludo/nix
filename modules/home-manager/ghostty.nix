@@ -1,6 +1,6 @@
 { config, lib, ... }:
 let
-  palette = config.colors.paletteStripped;
+  inherit (config.colors) palette paletteStripped;
   cfg = config.desktop.ghostty;
 in
 {
@@ -28,29 +28,29 @@ in
         confirm-close-surface = false;
       };
       themes.custom = {
-        background = "${palette.base00}";
-        cursor-color = "${palette.base07}";
-        foreground = "${palette.base07}";
+        background = paletteStripped.base00;
+        cursor-color = paletteStripped.base07;
+        foreground = paletteStripped.base07;
         palette = [
-          "0=#${palette.base00}"
-          "1=#${palette.base01}"
-          "2=#${palette.base02}"
-          "3=#${palette.base03}"
-          "4=#${palette.base04}"
-          "5=#${palette.base05}"
-          "6=#${palette.base06}"
-          "7=#${palette.base07}"
-          "8=#${palette.base08}"
-          "9=#${palette.base09}"
-          "10=#${palette.base0A}"
-          "11=#${palette.base0B}"
-          "12=#${palette.base0C}"
-          "13=#${palette.base0D}"
-          "14=#${palette.base0E}"
-          "15=#${palette.base0F}"
+          "0=${palette.base00}"
+          "1=${palette.base01}"
+          "2=${palette.base02}"
+          "3=${palette.base03}"
+          "4=${palette.base04}"
+          "5=${palette.base05}"
+          "6=${palette.base06}"
+          "7=${palette.base07}"
+          "8=${palette.base08}"
+          "9=${palette.base09}"
+          "10=${palette.base0A}"
+          "11=${palette.base0B}"
+          "12=${palette.base0C}"
+          "13=${palette.base0D}"
+          "14=${palette.base0E}"
+          "15=${palette.base0F}"
         ];
-        selection-background = "${palette.base07}";
-        selection-foreground = "${palette.base00}";
+        selection-background = paletteStripped.base07;
+        selection-foreground = paletteStripped.base00;
       };
     };
   };

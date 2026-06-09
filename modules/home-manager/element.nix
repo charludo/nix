@@ -50,7 +50,7 @@ in
                             "other-user-pill-bg-color": "${palette.base0D}",
                             "eventbubble-self-bg": "${palette.dark_blue}80",
                             "eventbubble-others-bg": "${palette.black2}",
-                            "eventbubble-bg-hover": "#${palette.base01}22",
+                            "eventbubble-bg-hover": "${palette.base01}22",
                             "avatar-background-colors": [
                                 "${palette.base08}",
                                 "${palette.base09}",

@@ -35,11 +35,11 @@ in
     };
     style =
       let
-        palette = config.colors.paletteStripped;
+        palette = config.colors.palette;
       in
       # css
       ''
-        @define-color progress  alpha(#${palette.base0E}, 0.1);
+        @define-color progress  alpha(${palette.base0E}, 0.1);
         window {
           background-color: transparent;
         }
@@ -78,7 +78,7 @@ in
           margin: 0px 4px;
           padding: 0px 12px;
           border-radius: 64px;
-          background-color: alpha(#${palette.base0E}, 0.05);
+          background-color: alpha(${palette.base0E}, 0.05);
         }
 
         #custom-playerctl {
@@ -92,13 +92,13 @@ in
         }
 
         #workspaces button.persistent {
-            color: alpha(#${palette.base05}, 0.7);
+            color: alpha(${palette.base05}, 0.7);
         }
         #workspaces button.empty {
           opacity: 0.7;
         }
         #workspaces button.active {
-          color: #${palette.base09};
+          color: ${palette.base09};
         }
 
         /* Is this an ugly hack? Yes! Does it Work? Also yes! */

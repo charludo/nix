@@ -5,7 +5,7 @@
   ...
 }:
 let
-  palette = config.colors.paletteStripped;
+  palette = config.colors.palette;
   cfg = config.cli.rmpc;
 in
 {
@@ -141,19 +141,19 @@ in
             modal_background_color: None,
             progress_bar: (
               symbols: ["", "", ""],
-              track_style: (fg: "#${palette.base02}"),
-              elapsed_style: (fg: "#${palette.base0D}"),
-              thumb_style: (fg: "#${palette.base0D}", bg: "#${palette.base00}"),
+              track_style: (fg: "${palette.base02}"),
+              elapsed_style: (fg: "${palette.base0D}"),
+              thumb_style: (fg: "${palette.base0D}", bg: "${palette.base00}"),
             ),
             tab_bar: (
               enabled: true,
-              active_style: (fg: "#${palette.base00}", bg: "#${palette.base0D}", modifiers: "Bold"),
+              active_style: (fg: "${palette.base00}", bg: "${palette.base0D}", modifiers: "Bold"),
               inactive_style: (),
             ),
-            highlighted_item_style: (fg: "#${palette.base0D}", modifiers: "Bold"),
-            current_item_style: (fg: "#${palette.base00}", bg: "#${palette.base0D}", modifiers: "Bold"),
-            borders_style: (fg: "#${palette.base0D}"),
-            highlight_border_style: (fg: "#${palette.base0D}"),
+            highlighted_item_style: (fg: "${palette.base0D}", modifiers: "Bold"),
+            current_item_style: (fg: "${palette.base00}", bg: "${palette.base0D}", modifiers: "Bold"),
+            borders_style: (fg: "${palette.base0D}"),
+            highlight_border_style: (fg: "${palette.base0D}"),
             symbols: (
               song: "",
               dir: "󱍙",
@@ -168,7 +168,7 @@ in
               symbols: ["│", "█", "│", "│"],
               track_style: (),
               ends_style: (),
-              thumb_style: (fg: "#${palette.base0D}"),
+              thumb_style: (fg: "${palette.base0D}"),
             ),
             song_table_format: [
               (
@@ -184,8 +184,8 @@ in
                 width: "35%",
               ),
               (
-                prop: (kind: Property(Album), style: (fg: "#${palette.base07}"),
-                  default: (kind: Text("Unknown Album"), style: (fg: "#${palette.base07}"))
+                prop: (kind: Property(Album), style: (fg: "${palette.base07}"),
+                  default: (kind: Text("Unknown Album"), style: (fg: "${palette.base07}"))
                 ),
                 width: "30%",
               ),
@@ -291,7 +291,7 @@ in
                   right: [
                     (
                       kind: Property(Widget(Volume)),
-                      style: (fg: "#${palette.base0D}"),
+                      style: (fg: "${palette.base0D}"),
                     ),
                   ],
                 ),
@@ -300,41 +300,41 @@ in
                     (
                       kind: Text("[ "),
                       style: (
-                        fg: "#${palette.base05}",
+                        fg: "${palette.base05}",
                         modifiers: "Bold",
                       ),
                     ),
                     (
                       kind: Property(Status(Elapsed)),
-                      style: (fg: "#${palette.base07}"),
+                      style: (fg: "${palette.base07}"),
                     ),
                     (
                       kind: Text(" / "),
                       style: (
-                        fg: "#${palette.base05}",
+                        fg: "${palette.base05}",
                         modifiers: "Bold",
                       ),
                     ),
                     (
                       kind: Property(Status(Duration)),
-                      style: (fg: "#${palette.base07}"),
+                      style: (fg: "${palette.base07}"),
                     ),
                     (
                       kind: Text(" | "),
-                      style: (fg: "#${palette.base05}"),
+                      style: (fg: "${palette.base05}"),
                     ),
                     (
                       kind: Property(Status(Bitrate)),
-                      style: (fg: "#${palette.base07}"),
+                      style: (fg: "${palette.base07}"),
                     ),
                     (
                       kind: Text(" kbps "),
-                      style: (fg: "#${palette.base05}"),
+                      style: (fg: "${palette.base05}"),
                     ),
                     (
                       kind: Text("]"),
                       style: (
-                        fg: "#${palette.base05}",
+                        fg: "${palette.base05}",
                         modifiers: "Bold",
                       ),
                     ),
@@ -343,13 +343,13 @@ in
                     (
                       kind: Property(Song(Artist)),
                       style: (
-                        fg: "#${palette.base0C}",
+                        fg: "${palette.base0C}",
                         modifiers: "Bold",
                       ),
                       default: (
                         kind: Text("Unknown Artist"),
                         style: (
-                          fg: "#${palette.base0C}",
+                          fg: "${palette.base0C}",
                           modifiers: "Bold",
                         ),
                       ),
@@ -357,11 +357,11 @@ in
                     (kind: Text(" - ")),
                     (
                       kind: Property(Song(Album)),
-                      style: (fg: "#${palette.base05}"),
+                      style: (fg: "${palette.base05}"),
                       default: (
                         kind: Text("Unknown Album"),
                         style: (
-                          fg: "#${palette.base05}",
+                          fg: "${palette.base05}",
                           modifiers: "Bold",
                         ),
                       ),
@@ -370,7 +370,7 @@ in
                   right: [
                     (
                       kind: Text("["),
-                      style: (fg: "#${palette.base05}"),
+                      style: (fg: "${palette.base05}"),
                     ),
                     (
                       kind: Property(
@@ -379,11 +379,11 @@ in
                             on_label: "    ",
                             off_label: "    ",
                             on_style: (
-                              fg: "#${palette.base07}",
+                              fg: "${palette.base07}",
                               modifiers: "Bold",
                             ),
                             off_style: (
-                              fg: "#${palette.base03}",
+                              fg: "${palette.base03}",
                               modifiers: "Bold",
                             ),
                           ),
@@ -397,11 +397,11 @@ in
                             on_label: "    ",
                             off_label: "    ",
                             on_style: (
-                              fg: "#${palette.base07}",
+                              fg: "${palette.base07}",
                               modifiers: "Bold",
                             ),
                             off_style: (
-                              fg: "#${palette.base03}",
+                              fg: "${palette.base03}",
                               modifiers: "Bold",
                             ),
                           ),
@@ -416,11 +416,11 @@ in
                             off_label: "  󰮯  ",
                             oneshot_label: " 󰮯 󰇊 ",
                             on_style: (
-                              fg: "#${palette.base07}",
+                              fg: "${palette.base07}",
                               modifiers: "Bold",
                             ),
                             off_style: (
-                              fg: "#${palette.base03}",
+                              fg: "${palette.base03}",
                               modifiers: "Bold",
                             ),
                           ),
@@ -436,11 +436,11 @@ in
                             oneshot_label: " 󰇊  ",
                             off_oneshot_label: " 󱅊  ",
                             on_style: (
-                              fg: "#${palette.base07}",
+                              fg: "${palette.base07}",
                               modifiers: "Bold",
                             ),
                             off_style: (
-                              fg: "#${palette.base03}",
+                              fg: "${palette.base03}",
                               modifiers: "Bold",
                             ),
                           ),
@@ -449,7 +449,7 @@ in
                     ),
                     (
                       kind: Text(" ]"),
-                      style: (fg: "#${palette.base05}"),
+                      style: (fg: "${palette.base05}"),
                     ),
                   ],
                 ),

@@ -53,10 +53,10 @@ in
         };
 
         InputPanel = {
-          NormalColor = "${palette.base07}";
-          HighlightCandidateColor = "${palette.darker_black}";
-          HighlightColor = "${palette.darker_black}";
-          HighlightBackgroundColor = "${palette.darker_black}";
+          NormalColor = palette.base07;
+          HighlightCandidateColor = palette.darker_black;
+          HighlightColor = palette.darker_black;
+          HighlightBackgroundColor = palette.darker_black;
           Spacing = 6;
         };
 
@@ -75,11 +75,11 @@ in
         };
 
         "InputPanel/Background" = {
-          Color = "${palette.darker_black}";
+          Color = palette.darker_black;
         };
 
         "InputPanel/Highlight" = {
-          Color = "${palette.base0D}";
+          Color = palette.base0D;
         };
 
         "InputPanel/Background/Margin" = {
@@ -97,19 +97,19 @@ in
         };
 
         Menu = {
-          NormalColor = "${palette.darker_black}";
+          NormalColor = palette.darker_black;
         };
 
         "Menu/Background" = {
-          Color = "${palette.darker_black}";
+          Color = palette.darker_black;
         };
 
         "Menu/Highlight" = {
-          Color = "${palette.base0D}";
+          Color = palette.base0D;
         };
 
         "Menu/Separator" = {
-          Color = "${palette.base0D}";
+          Color = palette.base0D;
         };
 
         "Menu/Background/Margin" = {
