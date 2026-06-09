@@ -25,9 +25,8 @@ in
   config = lib.mkIf cfg.enable {
     programs.librewolf = {
       enable = true;
-      pkcs11Modules = [ pkgs.eid-mw ];
       nativeMessagingHosts = [ pkgs.web-eid-app ];
-      policies.SecurityDevices.p11-kit-proxy = "${pkgs.p11-kit}/lib/p11-kit-proxy.so";
+      policies.SecurityDevices."Belgian eID" = "${pkgs.eid-mw}/lib/libbeidpkcs11.so";
       profiles.${cfg.profileName} = {
         extensions.packages = with pkgs.firefox-addons; [
           facebook-container

@@ -18,8 +18,8 @@ in
     services.pcscd.enable = true;
     environment.systemPackages = [ pkgs.eid-mw ];
 
-    environment.etc."pkcs11/modules/opensc-pkcs11".text = ''
-      module: ${pkgs.opensc}/lib/opensc-pkcs11.so
+    environment.etc."pkcs11/modules/beid.module".text = ''
+      module: ${pkgs.eid-mw}/lib/libbeidpkcs11.so
     '';
   };
 }
