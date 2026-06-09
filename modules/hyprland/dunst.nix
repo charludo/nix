@@ -2,8 +2,6 @@
 {
   services.dunst = {
     enable = true;
-    iconTheme.package = config.iconsProfile.package;
-    iconTheme.name = "${config.iconsProfile.name}";
     settings = {
       global = {
         frame_color = config.colors.palette.base0E;
@@ -14,6 +12,8 @@
         mouse_middle_click = "close_current";
         origin = "bottom-right";
         offset = "20x20";
+        enable_recursive_icon_lookup = true;
+        icon_theme = config.iconsProfile.name;
       };
       urgency_low = {
         background = "${config.colors.palette.base00}CC";
