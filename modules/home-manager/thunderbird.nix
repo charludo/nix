@@ -50,6 +50,12 @@ in
             #chatButton, #tasksButton, #today-pane-panel {
               display:none;
             }
+
+            :root {
+              @media not (forced-colors) {
+                --tree-view-bg: var(--layout-background-0) !important;
+              };
+            };
           '';
       };
     };
