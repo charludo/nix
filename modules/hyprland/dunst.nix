@@ -28,6 +28,11 @@
         foreground = config.colors.palette.base05;
         frame_color = config.colors.palette.base09;
       };
+      # Some apps do not send their icon, resolve manually.
+      thunderbird = {
+        desktop_entry = "thunderbird";
+        new_icon = "thunderbird";
+      };
     };
   };
 }
