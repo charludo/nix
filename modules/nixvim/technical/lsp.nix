@@ -36,7 +36,7 @@ in
       action.__raw = "require('telescope.builtin').diagnostics";
     }
     {
-      key = "P";
+      key = "M";
       action.__raw = "vim.diagnostic.open_float";
     }
   ];
