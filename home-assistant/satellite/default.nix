@@ -36,15 +36,36 @@
   sdImage.compressImage = false;
   boot.supportedFilesystems.zfs = pkgs.lib.mkForce false;
 
+  # Silent virtual sound card used as wyoming's playback sink (see
+  # wyomingSatellite.soundDevice below). Creates ALSA CARD=Dummy.
+  boot.kernelModules = [ "snd-dummy" ];
+
   wyomingSatellite = {
     enable = true;
     area = "Wohnzimmer";
-    wakeWord = "alexa";
+    # wakeWord = "alexa";
     wakeWordThreshold = 0.5;
-    # customWakeWordModel = ../assets/wakewords/computer_v2.tflite;
+    customWakeWordModel = ../assets/wakewords/computer_v2.tflite;
 
     leds.enable = true;
     leds.brightness = 12;
+
+    # Response audio goes to the Sonos (via tts-relay), not this device. If
+    # wyoming plays TTS into the ReSpeaker, the XMOS chip loops it straight
+    # back into the capture (audible on the monitor tap even with no speaker
+    # attached). Send playback to a silent snd-dummy card instead — it still
+    # paces in real time, so the LED ring's speak animation lasts the whole
+    # response.
+    soundDevice = "plughw:CARD=Dummy";
+
+    # Live-listen to the exact post-DSP audio the satellite hears. The
+    # satellite's VLAN blocks it from reaching out, so we pull over SSH
+    # instead: the audio is tee'd to a localhost socket and rides back over
+    # the SSH session you open. From a machine that can SSH in:
+    #   ssh <this-host> wyoming-mic-tap \
+    #     | ffplay -nodisp -f s16le -ar 16000 -ch_layout mono -
+    monitor.enable = true;
+    monitor.mode = "pull";
 
     # XMOS XVF-3000 DSP parameters. All writable parameters are listed
     # explicitly with their chip defaults; values we deliberately diverge
@@ -103,7 +124,7 @@
       # 180 Hz: aggressive rumble removal. Safe for ASR — only the lowest
       # female fundamentals (~165-200 Hz) lose their fundamental tone;
       # formants/harmonics above that carry intelligibility.
-      HPFONOFF = 3;
+      HPFONOFF = 2;
 
       # ===== Beamformer ===================================================
 
@@ -114,17 +135,20 @@
       # ===== Automatic Gain Control =======================================
 
       # AGC. 0 = OFF, 1 = ON. Default: 0.
-      AGCONOFF = 1;
+      # OFF: AGC scales voice and noise together, so it can't lift far-field
+      # voice out of the noise floor — it only shifts the absolute level. We
+      # run fixed-gain for predictable behaviour and let the wake-word model
+      # and HA's VAD work on the unmodified signal.
+      AGCONOFF = 0;
 
       # Maximum AGC gain factor (linear). Range [1 .. 1000] = [0 .. 60] dB.
-      # Chip default: 31.6 (= 30 dB).
-      # 100 (= 40 dB) to extend far-field reach in the new room.
-      AGCMAXGAIN = 100.0;
+      # Chip default: 31.6 (= 30 dB). Inert while AGCONOFF = 0; kept at the
+      # default so it's sane if AGC is ever re-enabled.
+      AGCMAXGAIN = 31.6;
 
       # Target output power level (linear). Range [1e-08 .. 0.99].
-      # Chip default: 0.005 (= -23 dBov).
-      # 0.05 (≈ -13 dBov) gives the wake-word model a hotter signal.
-      AGCDESIREDLEVEL = 0.05;
+      # Chip default: 0.005 (= -23 dBov). Inert while AGCONOFF = 0.
+      AGCDESIREDLEVEL = 0.01;
 
       # Ramp up/down time constant in seconds. Range [0.1 .. 1.0].
       # 1 s (chip max) prevents pumping during natural pauses; faster
@@ -140,7 +164,8 @@
       GAMMA_NS = 1.0;
 
       # Gain floor for stationary NS. Default: 0.15 (= -16 dB).
-      MIN_NS = 0.15;
+      # 0.9 (≈ -0.9 dB): effectively almost no flooring on this (comms) path.
+      MIN_NS = 0.9;
 
       # ===== Non-stationary noise suppression (microphone path) ===========
 
@@ -148,44 +173,46 @@
       NONSTATNOISEONOFF = 1;
 
       # Over-subtraction factor. Range [0 .. 3]. Chip default: 1.1.
-      GAMMA_NN = 1.1;
+      GAMMA_NN = 2.1;
 
       # Gain floor for non-stationary NS. Default: 0.3 (= -10 dB).
-      MIN_NN = 0.3;
+      MIN_NN = 0.1;
 
       # ===== Stationary noise suppression (ASR path) ======================
 
       # 0 = OFF, 1 = ON. Default: 0.
       STATNOISEONOFF_SR = 1;
 
-      # Over-subtraction factor for ASR path. Default: 1.0.
-      # Bumped to 1.5 to subtract more aggressively below the floor.
-      GAMMA_NS_SR = 1.5;
+      # Over-subtraction factor for ASR path. Range [0 .. 3]. Default: 1.0.
+      # 3.0 (max): aggressive stationary-noise subtraction on the ASR path.
+      GAMMA_NS_SR = 3.0;
 
       # Gain floor for stationary NS on ASR path. Default: 0.15 (-16 dB).
       # 0.1 (-20 dB) deepens silence so HA's server-side VAD trips faster
       # and the chip's residual noise floor doesn't reach the wake model.
-      MIN_NS_SR = 0.05;
+      MIN_NS_SR = 0.1;
 
       # ===== Non-stationary noise suppression (ASR path) ==================
 
       # 0 = OFF, 1 = ON. Default: 0.
       NONSTATNOISEONOFF_SR = 1;
 
-      # Over-subtraction factor for ASR path. Default: 1.1.
-      # Bumped to 1.6 for more aggressive subtraction of transient noise.
-      GAMMA_NN_SR = 1.6;
+      # Over-subtraction factor for ASR path. Range [0 .. 3]. Default: 1.1.
+      # 3.0 (max): aggressive transient-noise subtraction on the ASR path.
+      GAMMA_NN_SR = 3.0;
 
       # Gain floor for non-stationary NS on ASR path.
-      # Default: 0.3 (-10 dB). 0.2 (-14 dB) for quieter silence between
+      # Default: 0.3 (-10 dB). 0.1 (-20 dB) for quieter silence between
       # words and fewer false "still speaking" reads by the server VAD.
-      MIN_NN_SR = 0.2;
+      MIN_NN_SR = 0.1;
 
       # ===== Chip-internal voice activity detection =======================
 
       # Threshold for the chip's internal VAD (drives AGC etc.).
-      # Range [-inf .. 60] dB. Default: 1.5 (= 3.5 dB).
-      GAMMAVAD_SR = 1.5;
+      # Range [-inf .. 60] dB. Default: 1.5 (= 3.5 dB). 3.5 linear (≈ 11 dB)
+      # makes the gate stricter so low-level background isn't treated as
+      # voice. (Mostly relevant only if AGC is re-enabled.)
+      GAMMAVAD_SR = 3.5;
 
       # ===== Comfort noise ================================================
 

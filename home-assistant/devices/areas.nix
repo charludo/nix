@@ -21,6 +21,7 @@ in
       rain_rate.area = a.terrasse;
       cumulative_rain_8h.area = a.terrasse;
       cumulative_rain_24h.area = a.terrasse;
+      max_temp_90min.area = a.terrasse;
       zigbee_min_battery = { };
       botty_current_clean_area.area = a.wohnzimmer;
       botty_aktuelle_reinigungsdauer.area = a.wohnzimmer;

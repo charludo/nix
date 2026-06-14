@@ -6,10 +6,12 @@ in
   hass.bewasserung.times = [
     "07:00"
     "10:00"
-    "13:00"
+    {
+      time = "13:00";
+      degrees = 29;
+    }
     "16:00"
     "19:00"
-    "22:00"
   ];
 
   hass.automations = {

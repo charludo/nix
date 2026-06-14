@@ -1,6 +1,6 @@
 { lib }:
 let
-  ha = lib.ha;
+  inherit (lib) ha;
 
   p = "x1c";
   ams = "x1c_ams";
@@ -507,12 +507,50 @@ in
 
   sections =
     let
-      # All three columns hide when the printer is offline (powered off
-      # via the wall switch). The header badge stays visible above and
-      # surfaces the "Offline" state on its own.
-      onlineOnly = [ (ha.stateNot ent.status "offline") ];
+      # The three columns only render while the printer is actually
+      # reachable. They hide when it's powered off (status "offline", via
+      # the wall switch) and when the integration can't reach it at all
+      # ("unavailable"/"unknown"). The header badge stays visible above
+      # and surfaces the state on its own.
+      onlineOnly = [
+        {
+          condition = "state";
+          entity = ent.status;
+          state_not = [
+            "offline"
+            "unavailable"
+            "unknown"
+          ];
+        }
+      ];
+      # Only the "can't reach the printer" case gets an explicit notice;
+      # "offline" is a normal powered-down state the badge already covers.
+      unreachable = [
+        {
+          condition = "state";
+          entity = ent.status;
+          state = [
+            "unavailable"
+            "unknown"
+          ];
+        }
+      ];
     in
     [
+      # ── Unreachable notice: shown only when the integration can't talk
+      #    to the printer; the three columns below stay hidden then. ──
+      (ha.mkGridSection [
+        (ha.mkInfoBanner {
+          conditions = unreachable;
+          name = "Drucker nicht erreichbar";
+          icon = "mdi:printer-3d-nozzle-alert";
+          entity = ent.status;
+          label = "X1 Carbon ist aktuell nicht verbunden.";
+          service = "homeassistant.update_entity";
+          serviceData.entity_id = ent.status;
+        })
+      ])
+
       # ── Left column: live view, AMS, printer image, external spool ──
       (
         (ha.mkGridSection [

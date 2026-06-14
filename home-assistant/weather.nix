@@ -30,6 +30,13 @@ in
         max_age.hours = 8;
       }
       {
+        platform = "statistics";
+        name = "Max Temp 90min";
+        entity_id = e.sensor.wetterstation.temperature;
+        state_characteristic = "value_max";
+        max_age.minutes = 90;
+      }
+      {
         platform = "derivative";
         name = "Rain Rate";
         source = e.sensor.wetterstation.precipitation;

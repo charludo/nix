@@ -20,15 +20,54 @@ let
           total;
     in
     "${pad (wrapped / 60)}:${pad (wrapped - (wrapped / 60) * 60)}:00";
+
+  slots = map (
+    t:
+    if builtins.isString t then
+      {
+        time = t;
+        degrees = null;
+      }
+    else
+      t
+  ) cfg.times;
+  heatSlots = lib.filter (s: s.degrees != null) slots;
+  heatThresholds =
+    "{"
+    + lib.concatStringsSep ", " (map (s: "'${timeSlug s.time}': ${toString s.degrees}") heatSlots)
+    + "}";
+  heatSlugList = "[" + lib.concatStringsSep ", " (map (s: "'${timeSlug s.time}'") heatSlots) + "]";
 in
 {
   options.hass.bewasserung = {
     times = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+      type = lib.types.listOf (
+        lib.types.either lib.types.str (
+          lib.types.submodule {
+            options = {
+              time = lib.mkOption {
+                type = lib.types.str;
+                description = "Slot time as \"HH:MM\".";
+              };
+              degrees = lib.mkOption {
+                type = lib.types.nullOr (lib.types.either lib.types.int lib.types.float);
+                default = null;
+                description = ''
+                  Optional heat override in °C. ~10 min before the slot (5 min before the pump turns on)
+                  the slot's toggle is switched on if the outdoor temperature in the prior exceeded this value in the past 90min
+                '';
+              };
+            };
+          }
+        )
+      );
       default = [ ];
       example = [
         "07:00"
-        "13:00"
+        {
+          time = "13:00";
+          degrees = 28;
+        }
         "19:00"
       ];
       description = "For each slot the pump turns on 5 minutes before and off 5 minutes after, rain not forbidding";
@@ -38,24 +77,24 @@ in
   config = lib.mkIf (cfg.times != [ ]) {
     hass.devices.input_booleans = lib.listToAttrs (
       map (
-        t:
-        lib.nameValuePair "bewasserung_zeit_${timeSlug t}" {
-          name = "Bewässerung ${t}";
+        s:
+        lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}" {
+          name = "Bewässerung ${s.time}";
           icon = "mdi:water-outline";
           area = e.area.terrasse.name;
         }
-      ) cfg.times
+      ) slots
     );
 
     hass.automations = {
       wasserpumpe_an = {
         alias = "Wasserpumpe an";
         mode = "single";
-        trigger = map (t: {
-          at = shiftTime t (-5);
+        trigger = map (s: {
+          at = shiftTime s.time (-5);
           trigger = "time";
-          id = timeSlug t;
-        }) cfg.times;
+          id = timeSlug s.time;
+        }) slots;
         action = [
           {
             "if" = [
@@ -134,14 +173,65 @@ in
       wasserpumpe_aus = {
         alias = "Wasserpumpe aus";
         mode = "single";
-        trigger = map (t: {
-          at = shiftTime t 5;
+        trigger = map (s: {
+          at = shiftTime s.time 5;
           trigger = "time";
-        }) cfg.times;
+          id = timeSlug s.time;
+        }) slots;
         action = [
           {
             action = "switch.turn_off";
             target.entity_id = e.switch.steckdose_wasserpumpe.switch;
+          }
+          {
+            "if" = [
+              {
+                condition = "template";
+                value_template = "{{ trigger.id in ${heatSlugList} }}";
+              }
+            ];
+            "then" = [
+              {
+                action = "input_boolean.turn_off";
+                target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id }}";
+              }
+            ];
+          }
+        ];
+      };
+    }
+    // lib.optionalAttrs (heatSlots != [ ]) {
+      wasserpumpe_hitze = {
+        alias = "Wasserpumpe Hitze-Vorabaktivierung";
+        mode = "single";
+        trigger = map (s: {
+          at = shiftTime s.time (-10);
+          trigger = "time";
+          id = timeSlug s.time;
+        }) heatSlots;
+        action = [
+          {
+            "if" = [
+              {
+                condition = "template";
+                value_template = ''
+                  {% set thr = ${heatThresholds}.get(trigger.id, -999) %}
+                  {{ (states('${e.sensor.max_temp_90min}') | float(-999)) > thr }}
+                '';
+              }
+            ];
+            "then" = [
+              {
+                action = "input_boolean.turn_on";
+                target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id }}";
+              }
+              {
+                action = e.person.charlotte.notify;
+                data.message = ''
+                  Hitze: Bewässerung {{ trigger.id | replace('_', ':') }} vorgemerkt ({{ '%.0f' | format(states('${e.sensor.max_temp_90min}') | float(0)) }}°C). Pumpe startet in 5 min.
+                '';
+              }
+            ];
           }
         ];
       };
