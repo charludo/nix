@@ -185,8 +185,17 @@ in
       --------------------------- autocmds -------------------------------
       api.nvim_create_autocmd("TermClose", {
         callback = function(args)
-          vim.api.nvim_input("<CR>")
           chadterm_save_term_info(args.buf, nil)
+          vim.schedule(function()
+            for _, win in ipairs(api.nvim_list_wins()) do
+              if api.nvim_win_is_valid(win) and api.nvim_win_get_buf(win) == args.buf then
+                pcall(api.nvim_win_close, win, true)
+              end
+            end
+            if api.nvim_buf_is_valid(args.buf) then
+              pcall(api.nvim_buf_delete, args.buf, { force = true })
+            end
+          end)
         end,
       })
 
