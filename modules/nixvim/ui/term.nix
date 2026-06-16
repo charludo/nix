@@ -88,6 +88,8 @@ in
         vim.wo[win].relativenumber = false
         vim.wo[win].foldcolumn = "0"
         vim.wo[win].signcolumn = "no"
+        vim.wo[win].foldmethod = "manual"
+        vim.wo[win].foldexpr = "0"
         vim.bo[opts.buf].buflisted = false
         vim.wo[win].winhl = opts.hl or config.hl
         vim.cmd "startinsert"
