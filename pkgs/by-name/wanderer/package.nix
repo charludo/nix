@@ -6,12 +6,12 @@
   fetchFromGitHub,
 }:
 let
-  version = "0.18.3";
+  version = "0.19.2";
   src = fetchFromGitHub {
     owner = "Flomp";
     repo = "wanderer";
     rev = "v${version}";
-    hash = "sha256-DZSRSN0+jWTeuoabkQAC5SwJxwqcUj1DdMq9Tdt2DFU=";
+    hash = "sha256-w4DcM+0Rya5Q12VPWjyWXISXb3e0If7CmU5OJhQ0hvg=";
   };
 
   wanderer = buildGoModule {
@@ -19,7 +19,7 @@ let
 
     pname = "wanderer";
     sourceRoot = "${src.name}/db";
-    vendorHash = "sha256-j8X5I8j2QV4uo9M3elt4hB66VZIS4cMoEvWMkCRzX1Q=";
+    vendorHash = "sha256-F7ax+Sk4+oaX2tA3/jUuvZPLOjLrpfiL/ZHEf3Cg8Kk=";
   };
 
   wanderer-web = buildNpmPackage {
@@ -27,7 +27,7 @@ let
     pname = "wanderer-web";
 
     src = "${src}/web";
-    npmDepsHash = "sha256-rR+df6IS/jnmugotrPC8im73bLrTsF3onp2/x/m9cag=";
+    npmDepsHash = "sha256-nJD5cf+PG8etjl/z3FUtGyygiBgGuhjtFe54buDSqm8=";
 
     makeCacheWritable = true;
     npmFlags = [ "--legacy-peer-deps" ];
