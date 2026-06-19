@@ -84,6 +84,13 @@ in
           area = e.area.terrasse.name;
         }
       ) slots
+      ++ map (
+        s:
+        lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}_auto" {
+          name = "Bewässerung ${s.time} (Auto)";
+          icon = "mdi:water-circle";
+        }
+      ) heatSlots
     );
 
     hass.automations = {
@@ -186,14 +193,20 @@ in
           {
             "if" = [
               {
+                # Only auto-disable a heat slot that was auto-enabled by the heat
+                # override; a slot the user enabled manually stays on.
                 condition = "template";
-                value_template = "{{ trigger.id in ${heatSlugList} }}";
+                value_template = "{{ trigger.id in ${heatSlugList} and is_state('input_boolean.bewasserung_zeit_' ~ trigger.id ~ '_auto', 'on') }}";
               }
             ];
             "then" = [
               {
                 action = "input_boolean.turn_off";
                 target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id }}";
+              }
+              {
+                action = "input_boolean.turn_off";
+                target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id ~ '_auto' }}";
               }
             ];
           }
@@ -213,14 +226,23 @@ in
           {
             "if" = [
               {
+                # Heat threshold exceeded AND the slot is still off — if the user
+                # already manually enabled it, do nothing so it is not marked auto.
                 condition = "template";
                 value_template = ''
                   {% set thr = ${heatThresholds}.get(trigger.id, -999) %}
-                  {{ (states('${e.sensor.max_temp_90min}') | float(-999)) > thr }}
+                  {{ (states('${e.sensor.max_temp_90min}') | float(-999)) > thr
+                     and is_state('input_boolean.bewasserung_zeit_' ~ trigger.id, 'off') }}
                 '';
               }
             ];
             "then" = [
+              {
+                # Remember this slot was auto-enabled, so wasserpumpe_aus knows it
+                # may auto-disable it again (manual enables stay untouched).
+                action = "input_boolean.turn_on";
+                target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id ~ '_auto' }}";
+              }
               {
                 action = "input_boolean.turn_on";
                 target.entity_id = "{{ 'input_boolean.bewasserung_zeit_' ~ trigger.id }}";
