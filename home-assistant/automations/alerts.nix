@@ -18,6 +18,20 @@ let
     (notify e.person.charlotte.notify msg)
     (notify e.person.marie.notify msg)
   ];
+
+  # Wind thresholds in km/h (both stations report km/h).
+  windSpeedThreshold = 32; # sustained wind, live measurement
+  gustThreshold = 40; # gusts, live measurement
+  forecastWindThreshold = 50; # peak predicted wind over the next 12h
+  forecastHorizon = 2; # number of hourly forecast entries to scan
+
+  # Peak hourly forecast wind speed over the next `forecastHorizon` hours,
+  # or 0 if no forecast is available. Shared by the trigger and the message.
+  forecastPeakWind = ''
+    {% set hours = (state_attr('${e.sensor.openweathermap_forecast_hourly}', 'forecast') or [])[:${toString forecastHorizon}] %}
+    {% set speeds = hours | map(attribute='wind_speed', default=0) | map('float', 0) | list %}
+    {% set peak = (speeds | max) if speeds else 0 %}
+  '';
 in
 {
   hass.automations = {
@@ -85,8 +99,8 @@ in
             e.sensor.thermometer_schlafzimmer.humidity
             e.sensor.thermometer_buro.humidity
           ];
-          above = 65;
-          for.minutes = 4;
+          above = 70;
+          for.minutes = 20;
         }
       ];
       action = notifyBoth {
@@ -124,6 +138,55 @@ in
             target.entity_id = e.input_boolean.turalarm_persistent;
           }
         ];
+    };
+
+    wind_wetterstation = {
+      alias = "Windwarnung Wetterstation";
+      mode = "single";
+      trigger = [
+        {
+          platform = "numeric_state";
+          entity_id = e.sensor.wetterstation.wind_speed;
+          above = windSpeedThreshold;
+          for.minutes = 5;
+        }
+        {
+          platform = "numeric_state";
+          entity_id = e.sensor.wetterstation.gust_speed;
+          above = gustThreshold;
+          for.minutes = 1;
+        }
+      ];
+      action = notifyBoth {
+        title = "Starker Wind";
+        message = ''
+          Aktuell {{ states('${e.sensor.wetterstation.wind_speed}') }} km/h, Böen bis {{ states('${e.sensor.wetterstation.gust_speed}') }} km/h.
+          Gewächshaus zu machen!
+        '';
+      };
+    };
+
+    wind_vorhersage = {
+      alias = "Windwarnung Vorhersage (OpenWeatherMap)";
+      mode = "single";
+      trigger = [
+        {
+          platform = "template";
+          value_template = ''
+            ${forecastPeakWind}
+            {{ peak > ${toString forecastWindThreshold} }}
+          '';
+          for.minutes = 5;
+        }
+      ];
+      action = notifyBoth {
+        title = "Starker Wind vorhergesagt";
+        message = ''
+          ${forecastPeakWind}
+          In den nächsten ${toString forecastHorizon} Stunden bis zu {{ '%.0f' | format(peak) }} km/h Wind vorhergesagt.
+          Gewächshaus zu machen!
+        '';
+      };
     };
 
     zigbee_low_battery = {
