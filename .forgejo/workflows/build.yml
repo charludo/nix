@@ -1,6 +1,9 @@
 name: Build all flake outputs
 run-name: ${{ forgejo.actor }} is building all flake outputs (this may take a while)
-on: [push]
+on:
+  push:
+    branches:
+      - main
 permissions:
   contents: read
 jobs:

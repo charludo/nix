@@ -1,6 +1,9 @@
 name: Check formatting
 run-name: ${{ forgejo.actor }} is checking the code formatting
-on: [push]
+on:
+  push:
+    branches:
+      - main
 permissions:
   contents: read
 jobs:
