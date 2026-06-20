@@ -544,6 +544,10 @@ rec {
       withSlider ? false,
       sliderEntity ? entity,
       sliderColorMode ? "brightness",
+      # Optional small text rendered to the right of the name (like the
+      # hours indicator on mkAutoToggleWithSetting). Pass a button-card JS
+      # template; return '' to hide it for a given state.
+      indicator ? null,
       tapAction ? {
         action = "toggle";
         haptic = "medium";
@@ -556,6 +560,7 @@ rec {
       state ? null,
     }:
     let
+      hasIndicator = indicator != null;
       baseStyles = mkStyles {
         card = {
           background = "var(--contrast2)";
@@ -578,15 +583,41 @@ rec {
           color = "var(--contrast8)";
         };
       };
+      # The grid only needs overriding when a slider row or a corner
+      # indicator is present; otherwise button-card's default stack is fine.
+      gridAreas =
+        if withSlider && hasIndicator then
+          ''"i i" "n ind" "slider slider"''
+        else if withSlider then
+          ''"i" "n" "slider"''
+        else if hasIndicator then
+          ''"i i" "n ind"''
+        else
+          null;
       gridStyle = mkStyleProp {
-        "grid-template-areas" = ''"i" "n" "slider"'';
-        "grid-template-columns" = "1fr";
-        "grid-template-rows" = "1fr min-content min-content";
+        "grid-template-areas" = gridAreas;
+        "grid-template-columns" = if hasIndicator then "1fr min-content" else "1fr";
+        "grid-template-rows" =
+          if withSlider then "1fr min-content min-content" else "1fr min-content";
       };
-      styles = if withSlider then baseStyles // { grid = gridStyle; } else baseStyles;
-      sliderField = optionalAttrs withSlider {
-        custom_fields.slider.card = mkBrightnessSlider sliderEntity sliderColorMode;
+      indicatorStyle = optionalAttrs hasIndicator {
+        custom_fields = mkStyles {
+          ind = {
+            "font-size" = "12px";
+            color = "var(--contrast9)";
+            "padding-left" = "2px";
+            "align-self" = "center";
+            "margin-bottom" = "12px";
+          };
+        };
       };
+      styles =
+        baseStyles
+        // optionalAttrs (gridAreas != null) { grid = gridStyle; }
+        // indicatorStyle;
+      customFields =
+        optionalAttrs withSlider { slider.card = mkBrightnessSlider sliderEntity sliderColorMode; }
+        // optionalAttrs hasIndicator { ind = indicator; };
       defaultStates = mkOnOffStates { inherit onColor onIconColor onNameColor; };
     in
     filterAttrs (_: v: v != null) {
@@ -602,7 +633,7 @@ rec {
       confirmation = if confirmation == null then null else { text = confirmation; };
       state = if state == null then defaultStates else state;
     }
-    // sliderField;
+    // optionalAttrs (customFields != { }) { custom_fields = customFields; };
 
   # Compact toggle pill: tight padding, 20px icon, 12px name. Designed
   # for rows of small period/slot buttons (e.g. watering time slots).

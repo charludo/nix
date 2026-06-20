@@ -75,23 +75,31 @@ in
   };
 
   config = lib.mkIf (cfg.times != [ ]) {
-    hass.devices.input_booleans = lib.listToAttrs (
-      map (
-        s:
-        lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}" {
-          name = "Bewässerung ${s.time}";
-          icon = "mdi:water-outline";
+    hass.devices.input_booleans =
+      lib.listToAttrs (
+        map (
+          s:
+          lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}" {
+            name = "Bewässerung ${s.time}";
+            icon = "mdi:water-outline";
+            area = e.area.terrasse.name;
+          }
+        ) slots
+        ++ map (
+          s:
+          lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}_auto" {
+            name = "Bewässerung ${s.time} (Auto)";
+            icon = "mdi:water-circle";
+          }
+        ) heatSlots
+      )
+      // {
+        bewasserung_regen_ignorieren = {
+          name = "Bewässerung: Regen ignorieren";
+          icon = "mdi:weather-pouring";
           area = e.area.terrasse.name;
-        }
-      ) slots
-      ++ map (
-        s:
-        lib.nameValuePair "bewasserung_zeit_${timeSlug s.time}_auto" {
-          name = "Bewässerung ${s.time} (Auto)";
-          icon = "mdi:water-circle";
-        }
-      ) heatSlots
-    );
+        };
+      };
 
     hass.automations = {
       wasserpumpe_an = {
@@ -113,6 +121,11 @@ in
             "then" = [
               {
                 "if" = [
+                  {
+                    condition = "state";
+                    entity_id = e.input_boolean.bewasserung_regen_ignorieren;
+                    state = "off";
+                  }
                   {
                     condition = "or";
                     conditions = [

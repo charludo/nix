@@ -256,7 +256,8 @@ in
                     icon = "mdi:water-pump";
                   })
                   # Tap toggles BOTH halves of the watering cycle at
-                  # once so they stay in sync.
+                  # once so they stay in sync. Long-press flips the
+                  # rain-override (always water), shown as the corner text.
                   (ha.mkAutoToggleBlue {
                     entity = e.automation.wasserpumpe_an;
                     name = "Bewässerungs-Automatik";
@@ -269,6 +270,13 @@ in
                         e.automation.wasserpumpe_aus
                       ];
                     };
+                    holdAction = {
+                      action = "perform-action";
+                      perform_action = "input_boolean.toggle";
+                      haptic = "medium";
+                      data.entity_id = e.input_boolean.bewasserung_regen_ignorieren;
+                    };
+                    indicator = "[[[ return states['${e.input_boolean.bewasserung_regen_ignorieren}']?.state === 'on' ? '<ha-icon icon=\"mdi:weather-pouring\" style=\"--mdc-icon-size: 18px;\"></ha-icon>' : ''; ]]]";
                   })
                 ])
                 (ha.mkConditional [ (ha.stateIs e.automation.wasserpumpe_an "on") ] (
