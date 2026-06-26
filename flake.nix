@@ -49,8 +49,8 @@
     idagio.url = "github:charludo/IDAGIO-Downloader-Rust-ver";
     idagio.inputs.nixpkgs.follows = "nixpkgs";
 
-    hass-closest-intent.url = "path:/home/charlotte/Projekte/hass-closest-intent";
-    hass-closest-intent.flake = false;
+    hass-closest-intent.url = "github:charludo/hass-closest-intent";
+    hass-closest-intent.inputs.nixpkgs.follows = "nixpkgs";
     hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
     hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -77,7 +77,7 @@
           ];
           config = {
             allowUnfree = true;
-            allowUnfreePredicate = (_: true);
+            allowUnfreePredicate = _: true;
             permittedInsecurePackages = import ./overlays/insecure.nix;
           };
         };
@@ -152,8 +152,8 @@
 
       agenix-rekey = inputs.agenix-rekey.configure {
         userFlake = self;
-        nixosConfigurations = self.nixosConfigurations;
-        homeConfigurations = self.homeConfigurations;
+        inherit (self) nixosConfigurations;
+        inherit (self) homeConfigurations;
         collectHomeManagerConfigurations = true;
       };
 

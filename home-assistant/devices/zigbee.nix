@@ -94,9 +94,9 @@ in
     "Thermometer Nordseite" = thermometerPressure "00:15:8d:00:09:45:18:3a" a.terrasse;
 
     "Steckdose Serverschrank" = steckdose "a4:c1:38:a7:09:97:ff:85" a.buro;
-    "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" a.terrasse;
-    "Steckdose Wasserpumpe" = steckdose "a4:c1:38:7a:85:ae:fb:a3" a.terrasse;
-    "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:5a:fc:f5:62:61" a.wohnzimmer;
+    "Steckdose Gewächshaus Heizung" = steckdose "a4:c1:38:e4:68:4c:2e:f8" a.terrasse; # DEAD!
+    "Steckdose Wasserpumpe" = steckdose "a4:c1:38:5a:fc:f5:62:61" a.terrasse;
+    "Steckdose Pflanzenlicht" = steckdose "a4:c1:38:7a:85:ae:fb:a3" a.wohnzimmer; # DEAD!
 
     "Button Sofa" = button "f0:44:d3:ff:fe:f9:8a:60" a.wohnzimmer;
     "Button Gewächshaus" = button "f0:44:d3:ff:fe:f9:86:c4" a.terrasse;
