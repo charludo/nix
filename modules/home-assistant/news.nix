@@ -57,7 +57,7 @@ in
     fetchInterval = lib.mkOption {
       type = lib.types.str;
       default = "45min";
-      description = "systemd `OnUnitActiveSec` for the fetch timer";
+      description = "systemd `OnCalendar` for the fetch timer";
     };
 
     fetchBootDelay = lib.mkOption {
@@ -205,7 +205,7 @@ in
       wantedBy = [ "timers.target" ];
       timerConfig = {
         OnBootSec = cfg.fetchBootDelay;
-        OnUnitActiveSec = cfg.fetchInterval;
+        OnCalendar = cfg.fetchInterval;
         Persistent = true;
       };
     };

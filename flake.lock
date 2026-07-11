@@ -960,8 +960,8 @@
         ]
       },
       "locked": {
-        "lastModified": 1782454516,
-        "narHash": "sha256-C5pLd9/Ze15k8zFyqqF1Z2DW/6Dk1W2eK+KPWnJkMIk=",
+        "lastModified": 1781946086,
+        "narHash": "sha256-3BF/IkhIaMYHp33s8pQ5EFvWfPsLQYM4/vKaZ/eac8s=",
         "path": "/home/charlotte/Projekte/hass-custom-integrations",
         "type": "path"
       },
