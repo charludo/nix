@@ -939,11 +939,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780420736,
-        "narHash": "sha256-AvI9vX2RnN3ALQY4Q2mF3E9mkEV9VBOvk9HOH6i7RbQ=",
+        "lastModified": 1783927513,
+        "narHash": "sha256-rfmQso2UJsyyCA5F+0B/7gszxy6+RUpTJtil0CxdtyY=",
         "owner": "charludo",
         "repo": "hass-closest-intent",
-        "rev": "9a59c7f398d518c8043d9c16d1b1c722c33fbfca",
+        "rev": "405cf4d7a8cec9568688b1782495ac1afc5e33a0",
         "type": "github"
       },
       "original": {
