@@ -1,4 +1,4 @@
-{ private-settings, ... }:
+{ pkgs, private-settings, ... }:
 {
   imports = [
     ./common
@@ -15,8 +15,14 @@
   };
   cli.rmpc.enable = true;
 
+  home.packages = with pkgs; [
+    anki
+    teams-for-linux
+  ];
+
   inherit (private-settings) projects;
   nixvim.languages = {
+    go.enable = true;
     python.enable = true;
     rust.enable = true;
     webdev.enable = true;

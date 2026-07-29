@@ -20,6 +20,7 @@
   screensharing.enable = true;
   surfshark.enable = true;
   suspend.enable = true;
+  suspend.powertop = true;
   wifi.enable = true;
   programs.dconf.enable = true;
 
@@ -53,19 +54,19 @@
     };
   };
 
-  musnix = {
-    alsaSeq.enable = false;
-
-    rtcqs.enable = true;
-    kernel.realtime = false; # currently broken
-
-    rtirq = {
-      resetAll = 1;
-      prioLow = 0;
-      enable = true;
-      nameList = "rtc0 snd";
-    };
-  };
+  # musnix = {
+  #   alsaSeq.enable = false;
+  #
+  #   rtcqs.enable = true;
+  #   kernel.realtime = false; # currently broken
+  #
+  #   rtirq = {
+  #     resetAll = 1;
+  #     prioLow = 0;
+  #     enable = true;
+  #     nameList = "rtc0 snd";
+  #   };
+  # };
 
   snow = {
     useRemoteSudo = true;
