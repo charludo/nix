@@ -27,8 +27,10 @@ in
     home.packages = [ cfg.package ];
 
     home.pointerCursor = {
+      enable = true;
       gtk.enable = true;
       x11.enable = true;
+      hyprcursor.enable = true;
       inherit (cfg) name package size;
     };
 

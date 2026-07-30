@@ -7,8 +7,8 @@
 let
   cfg = config.languages.latex;
 
-  tex = pkgs.texlive.combine {
-    inherit (pkgs.texlive)
+  tex = pkgs.texliveSmall.withPackages (
+    ps: with ps; [
       scheme-full
       supertabular
       csquotes
@@ -19,8 +19,8 @@ let
       pgfplots
       todonotes
       xetex
-      ;
-  };
+    ]
+  );
 in
 {
   options.languages.latex.enable = lib.mkEnableOption "Language config for latex";
