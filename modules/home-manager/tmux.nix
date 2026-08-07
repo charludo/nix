@@ -31,8 +31,8 @@ in
         set -g display-time 4000
         set -g status-interval 5
 
-        bind -n M-Left previous-window
-        bind -n M-Right next-window
+        bind -n C-M-Left previous-window
+        bind -n C-M-Right next-window
 
         set-option -sa terminal-overrides ",xterm*:Tc"
         set-option -g renumber-windows on
