@@ -16,11 +16,11 @@
     ./mailserver.nix
     ./minecraft.nix
     ./monit.nix
-    ./personal-site.nix
     ./radicale.nix
     ./rmfakecloud.nix
     ./roundcube.nix
     # ./rustdesk.nix
+    ./static-sites.nix
     ./turn.nix
     ./wireguard.nix
   ];
@@ -34,19 +34,6 @@
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       environmentFile = config.age.secrets.cloudflare.path;
-    };
-    certs = {
-      "${private-settings.domains.webdesign}" = {
-        group = config.services.nginx.group;
-        dnsProvider = "hetzner";
-        dnsResolver = "213.239.204.242:53";
-        # TODO: replace with agenix path!
-        environmentFile = "/var/lib/webdesign/acme";
-        extraDomainNames = [
-          "mail.${private-settings.domains.webdesign}"
-          "www.${private-settings.domains.webdesign}"
-        ];
-      };
     };
   };
 

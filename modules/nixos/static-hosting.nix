@@ -21,6 +21,9 @@ in
         - an ssh public key corresponding to the private key used by
           the forgejo automation to publish the built site
         - whether to enable SSL
+        - optionally, acmeHost: the name of a certificate declared in
+          `security.acme.certs` to use, instead of having nginx declare one
+        - optionally, aliases: further domains the site is served under
       '';
     };
   };
@@ -70,7 +73,9 @@ in
         name = site.url;
         value = {
           forceSSL = site.enableSSL;
-          enableACME = site.enableSSL;
+          enableACME = site.enableSSL && !(site ? acmeHost);
+          useACMEHost = site.acmeHost or null;
+          serverAliases = site.aliases or [ ];
           locations."~* \.(jpg|jpeg|png|gif|ico|webp|css|js|woff2?|ttf|eot|svg)$" = {
             root = "/var/www/${site.name}/public";
             tryFiles = "$uri $uri/ =404";
