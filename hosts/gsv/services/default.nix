@@ -35,6 +35,19 @@
       dnsResolver = "1.1.1.1:53";
       environmentFile = config.age.secrets.cloudflare.path;
     };
+    certs = {
+      "${private-settings.domains.webdesign}" = {
+        group = config.services.nginx.group;
+        dnsProvider = "hetzner";
+        dnsResolver = "213.239.204.242:53";
+        # TODO: replace with agenix path!
+        environmentFile = "/var/lib/webdesign/acme";
+        extraDomainNames = [
+          "mail.${private-settings.domains.webdesign}"
+          "www.${private-settings.domains.webdesign}"
+        ];
+      };
+    };
   };
 
   # Setup reverse proxy settings common for all services

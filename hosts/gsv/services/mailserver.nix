@@ -10,6 +10,7 @@ in
     domains = [
       domains.personal
       domains.blog
+      domains.webdesign
     ];
     messageSizeLimit = 209715200;
     x509.useACMEHost = config.mailserver.fqdn;
