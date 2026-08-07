@@ -63,6 +63,9 @@ in
   security.pki.certificates = lib.mkForce [ ];
   networking.search = lib.mkForce [ ];
 
+  # The stateless hetzner firewall only lets inbound UDP through to destination ports >= 49152.
+  boot.kernel.sysctl."net.ipv4.ip_local_port_range" = "49152 60999";
+
   # Debugging tools
   environment.systemPackages = [
     pkgs.dig
