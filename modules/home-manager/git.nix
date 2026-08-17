@@ -61,6 +61,8 @@ in
         user.name = cfg.user.name;
         user.email = cfg.user.email;
 
+        submodule.recurse = true;
+
         safe = {
           directory = "${config.home.homeDirectory}/Documents";
         };
