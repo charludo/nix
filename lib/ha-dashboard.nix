@@ -8,7 +8,8 @@
 #
 # Sections, top to bottom:
 #   - Style primitives          mkStyles, mkStyleProp, mkStateStyle…
-#   - Layout                    mkHStack, mkVStack, mkGridSection, mkButtonGrid
+#   - Layout                    mkHStack, mkVStack, mkGridSection, mkButtonGrid,
+#                               mkMainSideRow
 #   - Conditions                stateIs, stateNot, orConditions, mkConditional
 #   - Headers                   mkTitleCard, mkMushTitle, mkBadgeTitleCard, mkHeaderBadge
 #   - Buttons                   mkServiceButton, mkActionCard, mkToggleCard, mkRoomToggleCard,
@@ -124,10 +125,92 @@ rec {
     type = "vertical-stack";
     inherit cards;
   };
+  # Nested lists are flattened, so helpers that expand to several grid items
+  # (mkButtonGrid, mkMainSideRow) can be written inline between plain cards.
   mkGridSection = cards: {
     type = "grid";
-    inherit cards;
+    cards = lib.flatten cards;
   };
+
+  # Append CSS to whatever card_mod style a card already carries.
+  _addCardModStyle =
+    style: card:
+    card
+    // {
+      card_mod = (card.card_mod or { }) // {
+        style = (card.card_mod.style or "") + style;
+      };
+    };
+
+  # A sensor-ish card squeezed into whatever height its parent gives it:
+  # fills the box, tighter padding, smaller value. Selectors that don't
+  # match a given card type are simply ignored.
+  compactCardStyle = ''
+    ha-card {
+      height: 100% !important;
+      justify-content: center !important;
+    }
+    .header {
+      padding: 4px 12px 0 !important;
+      line-height: 1 !important;
+    }
+    .name {
+      font-size: var(--ha-font-size-m) !important;
+    }
+    .info {
+      padding: 0 12px 16px !important;
+      margin-top: -2px !important;
+      font-size: var(--ha-font-size-xl) !important;
+      line-height: 1 !important;
+    }
+  '';
+
+  # One section-grid row: <main> takes `mainColumns` of the 12 columns, the
+  # <side> cards are stacked in the remainder and split the row's height
+  # evenly. Returns the two grid items — put it straight into a
+  # mkGridSection list, which flattens.
+  #
+  # Both items use `rows = "auto"` on purpose: a numeric rows pins a card to
+  # n * 56px + gaps, which never matches the natural height of the cards
+  # around it. Auto lets <main> size the row and the side stack follow.
+  # The side stack likewise needs `flex-basis: auto` — with an auto-sized row
+  # there is no definite height to divide and a zero basis collapses it.
+  mkMainSideRow =
+    {
+      main,
+      side,
+      mainColumns ? 8,
+      compact ? true,
+    }:
+    [
+      (_addCardModStyle "ha-card { height: 100% !important; }" (
+        main
+        // {
+          grid_options = {
+            columns = mainColumns;
+            rows = "auto";
+          };
+        }
+      ))
+      (
+        (mkVStack (if compact then map (_addCardModStyle compactCardStyle) side else side))
+        // {
+          grid_options = {
+            columns = 12 - mainColumns;
+            rows = "auto";
+          };
+          card_mod.style = ''
+            #root {
+              height: 100%;
+            }
+            #root > * {
+              flex: 1 1 auto;
+              min-height: 0;
+            }
+          '';
+        }
+      )
+    ];
 
   # Wrap a flat list of buttons into rows of <perRow>: returns a list of
   # mkHStacks (caller wraps in grid/vstack). mkHStack itself doesn't have
@@ -597,8 +680,7 @@ rec {
       gridStyle = mkStyleProp {
         "grid-template-areas" = gridAreas;
         "grid-template-columns" = if hasIndicator then "1fr min-content" else "1fr";
-        "grid-template-rows" =
-          if withSlider then "1fr min-content min-content" else "1fr min-content";
+        "grid-template-rows" = if withSlider then "1fr min-content min-content" else "1fr min-content";
       };
       indicatorStyle = optionalAttrs hasIndicator {
         custom_fields = mkStyles {
@@ -611,10 +693,7 @@ rec {
           };
         };
       };
-      styles =
-        baseStyles
-        // optionalAttrs (gridAreas != null) { grid = gridStyle; }
-        // indicatorStyle;
+      styles = baseStyles // optionalAttrs (gridAreas != null) { grid = gridStyle; } // indicatorStyle;
       customFields =
         optionalAttrs withSlider { slider.card = mkBrightnessSlider sliderEntity sliderColorMode; }
         // optionalAttrs hasIndicator { ind = indicator; };

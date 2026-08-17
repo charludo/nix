@@ -5,7 +5,7 @@
   ...
 }:
 let
-  ha = lib.ha;
+  inherit (lib) ha;
   e = config.hass.entities;
 
   gh = e.sensor.thermometer_gewachshaus;

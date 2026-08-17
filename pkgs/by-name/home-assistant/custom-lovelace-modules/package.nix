@@ -71,13 +71,6 @@ in
     sha256 = "sha256-qn7S8BC3RTaHsCpU3FNyuwyYRRJEwapA6F1vfHFggZE=";
   };
 
-  weather-radar-card = mkCard {
-    pname = "weather-radar-card";
-    version = "3.6.0";
-    url = "https://github.com/Makin-Things/weather-radar-card/releases/download/v3.6.0/weather-radar-card.js";
-    sha256 = "sha256-Pvwb7sKBG5fWOUmMv+8qKZ/wLCy0HvI0mkgVh1MLD3w=";
-  };
-
   config-template-card = mkCard {
     pname = "config-template-card";
     version = "1.3.6";

@@ -1,9 +1,14 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 let
   e = config.hass.entities;
 in
 {
   hass.openweathermap.enable = true;
+
+  # Blitzdaten für die weather-radar-card (Einrichtung per Config-Flow im UI).
+  services.home-assistant.customComponents = [
+    pkgs.home-assistant-custom-components.blitzortung
+  ];
 
   services.home-assistant.extraComponents = [
     "sun"
