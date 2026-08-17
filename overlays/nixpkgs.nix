@@ -45,6 +45,17 @@ _: prev: {
         entrypoint = "custom-sidebar.js";
       };
     });
+
+    # nixpkgs only rewrites the HACS asset path in radar-toolbar.ts; the marker
+    # icons, colour bars and preview image are still looked up under
+    # /local/community/. buildEnv puts every file of the package into
+    # /local/nixos-lovelace-modules/, so rewrite the path everywhere.
+    weather-radar-card = prev.home-assistant-custom-lovelace-modules.weather-radar-card.overrideAttrs (old: {
+      postPatch = ''
+        grep -rlF "/local/community/weather-radar-card/" src \
+          | xargs sed -i "s|/local/community/weather-radar-card/|/local/nixos-lovelace-modules/|g"
+      '';
+    });
   };
 
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [

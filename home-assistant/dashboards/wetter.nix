@@ -5,7 +5,7 @@
   ...
 }:
 let
-  ha = lib.ha;
+  inherit (lib) ha;
   e = config.hass.entities;
 
   st = e.sensor.wetterstation;
@@ -58,19 +58,46 @@ let
               };
               cardModStyle = "ha-card { height: 100% !important; }";
             })
-            (ha.mkHStack [
-              (ha.mkSensorCard {
+            (ha.mkMainSideRow {
+              main = ha.mkSensorCard {
                 entity = e.sensor.rain_rate;
-                name = "Niederschlag";
+                name = "Niederschlag (2h)";
                 icon = "mdi:weather-pouring";
                 unit = "mm/h";
-              })
+                hours_to_show = 2;
+              };
+              side = [
+                (ha.mkSensorCard {
+                  entity = e.sensor.cumulative_rain_8h;
+                  name = "Gesamt (8h)";
+                  icon = "mdi:sigma";
+                  unit = "mm";
+                  hours_to_show = 8;
+                  graph = "none";
+                })
+                (ha.mkSensorCard {
+                  entity = e.sensor.cumulative_rain_24h;
+                  name = "Gesamt (24h)";
+                  icon = "mdi:sigma";
+                  unit = "mm";
+                  hours_to_show = 24;
+                  graph = "none";
+                })
+              ];
+            })
+            (ha.mkHStack [
               (ha.mkSensorCard {
                 entity = e.sensor.openweathermap_bewolkung;
                 name = "Wolkendecke (OWM)";
                 icon = "mdi:clouds";
               })
+              (ha.mkSensorCard {
+                entity = st.illuminance;
+                name = "Lichtintensität";
+                icon = "mdi:white-balance-sunny";
+              })
             ])
+            (ha.mkUvGauge st.uv_index)
             (ha.mkHStack [
               (ha.mkSensorCard {
                 entity = st.humidity;
@@ -80,13 +107,7 @@ let
                 entity = st.pressure;
                 name = "Luftdruck";
               })
-              (ha.mkSensorCard {
-                entity = st.illuminance;
-                name = "Lichtintensität";
-                icon = "mdi:white-balance-sunny";
-              })
             ])
-            (ha.mkUvGauge st.uv_index)
             (ha.mkGlanceCard {
               title = "Nordseite";
               columns = 3;
@@ -190,14 +211,45 @@ let
             }
             {
               type = "custom:weather-radar-card";
-              data_source = "RainViewer-DarkSky";
-              map_style = "Dark";
-              zoom_level = 10;
+              data_source = "DWD";
+              map_style = "Satellite";
+              zoom_level = 11;
               static_map = false;
+
+              past_minutes = 60;
+              forecast_minutes = 60;
+              frame_stride_minutes = 5;
+
+              show_playback = true;
+              show_progress_bar = true;
+              show_color_bar = true;
               show_zoom = false;
-              show_marker = true;
-              show_playback = false;
+              show_recenter = true;
+              show_scale = true;
               extra_labels = false;
+
+              start_paused = true;
+              animated_transitions = true;
+              smooth_animation = true;
+              smooth_overlap = 0;
+              motion_compensation = true;
+
+              show_lightning = true;
+              lightning_pulse = true;
+              lightning_max_age_minutes = 30;
+
+              dwd_wind = "arrows";
+              dwd_wind_density = 0.5;
+              dwd_wind_flow = true;
+              dwd_wind_flow_color_sat = "rgba(255,255,255,0.5)";
+              dwd_wind_flow_color_dark = "rgba(220,225,235,0.25)";
+
+              markers = [
+                {
+                  entity = "zone.home";
+                  icon = "mdi:home";
+                }
+              ];
             }
           ])
         ];
