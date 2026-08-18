@@ -56,7 +56,7 @@ in
 
     fetchInterval = lib.mkOption {
       type = lib.types.str;
-      default = "45min";
+      default = "hourly";
       description = "systemd `OnCalendar` for the fetch timer";
     };
 

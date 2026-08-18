@@ -217,7 +217,7 @@ let
               static_map = false;
 
               past_minutes = 60;
-              forecast_minutes = 60;
+              forecast_minutes = 30;
               frame_stride_minutes = 5;
 
               show_playback = true;

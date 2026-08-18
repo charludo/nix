@@ -71,7 +71,6 @@ in
         my-slider-v2
         xiaomi-vacuum-map-card
         layout-card
-        weather-radar-card
         windrose-card
         config-template-card
         google-fonts-quicksand

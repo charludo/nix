@@ -53,6 +53,8 @@
     hass-closest-intent.inputs.nixpkgs.follows = "nixpkgs";
     hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
     hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
+    dwd-proxy.url = "path:./dwd-proxy";
+    dwd-proxy.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
