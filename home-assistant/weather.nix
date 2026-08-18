@@ -1,14 +1,42 @@
-{ config, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  private-settings,
+  ...
+}:
 let
   e = config.hass.entities;
 in
 {
+  imports = [ inputs.dwd-proxy.nixosModules.default ];
+
   hass.openweathermap.enable = true;
 
-  # Blitzdaten für die weather-radar-card (Einrichtung per Config-Flow im UI).
+  hass.weatherRadar = {
+    enable = true;
+    wmsBaseUrl = "https://map-cache.${private-settings.domains.home}";
+  };
+
   services.home-assistant.customComponents = [
     pkgs.home-assistant-custom-components.blitzortung
   ];
+
+  services.dwd-proxy = {
+    enable = true;
+    latitude = 50.7192;
+    longitude = 6.0344;
+
+    radiusKm = 600;
+    masterSize = 2048;
+
+    past = "65m";
+    forecast = "35m";
+    interval = "4m";
+
+    port = 8080;
+    openFirewall = true;
+  };
 
   services.home-assistant.extraComponents = [
     "sun"
@@ -19,6 +47,9 @@ in
   services.home-assistant.config = {
     sun = { };
 
+    # Recommended by blitzortung to protect DB from data floods.
+    recorder.exclude.domains = [ "geo_location" ];
+
     sensor = [
       {
         platform = "statistics";
@@ -26,6 +57,7 @@ in
         entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "change";
         max_age.hours = 24;
+        keep_last_sample = true;
       }
       {
         platform = "statistics";
@@ -33,6 +65,7 @@ in
         entity_id = e.sensor.wetterstation.precipitation;
         state_characteristic = "change";
         max_age.hours = 8;
+        keep_last_sample = true;
       }
       {
         platform = "statistics";
@@ -40,6 +73,7 @@ in
         entity_id = e.sensor.wetterstation.temperature;
         state_characteristic = "value_max";
         max_age.minutes = 90;
+        keep_last_sample = true;
       }
       {
         platform = "derivative";

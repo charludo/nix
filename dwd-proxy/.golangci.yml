@@ -1,0 +1,85 @@
+version: "2"
+run:
+  modules-download-mode: readonly
+output:
+  formats:
+    tab:
+      path: stderr
+linters:
+  enable:
+    # keep-sorted start
+    - bodyclose
+    - contextcheck
+    - copyloopvar
+    - errchkjson
+    - errname
+    - errorlint
+    - exptostd
+    - forcetypeassert
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - godot
+    - intrange
+    - misspell
+    - nilerr
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - predeclared
+    - reassign
+    - revive
+    - sloglint
+    - testifylint
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    # keep-sorted end
+  settings:
+    testifylint:
+      disable:
+        - require-error
+    revive:
+      rules:
+        # These are the recommended rules from
+        # https://github.com/mgechev/revive/blob/v1.9.0/README.md?plain=1#L419-L441
+        # without 'package-comments'.
+        # keep-sorted start
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: empty-block
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: errorf
+        - name: exported
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: superfluous-else
+        - name: time-naming
+        - name: unexported-return
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: var-declaration
+        - name: var-naming
+          # keep-sorted end
+  exclusions:
+    generated: strict
+    warn-unused: true
+    presets:
+      - std-error-handling
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 20
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: strict
