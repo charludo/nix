@@ -12,7 +12,7 @@ let
   UID = 9417;
   GID = 9417;
   idagio-web =
-    pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python313Packages.flask ]; } # python
+    pkgs.writers.writePython3Bin "idagio-web" { libraries = [ pkgs.python3Packages.flask ]; } # python
       ''
         from flask import Flask, request, render_template_string
         import os
