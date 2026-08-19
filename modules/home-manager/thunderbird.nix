@@ -9,9 +9,38 @@ in
     description = "name of the profile to use";
   };
 
+  options.desktop.thunderbird.languagePacks = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ "en-US" ];
+    description = "Language packs to install and activate.";
+  };
+
+  options.desktop.thunderbird.extensions = lib.mkOption {
+    type = lib.types.attrsOf lib.types.str;
+    default = { };
+    example = {
+      "addoncompatibility@opto.one" = "addon-compatibility-check";
+    };
+    description = ''
+      Extensions to force-install via enterprise policy.
+      Key is extension ID, value is its addons.thunderbird.net slug.
+    '';
+  };
+
   config = lib.mkIf cfg.enable {
     programs.thunderbird = {
       enable = true;
+      inherit (cfg) languagePacks;
+
+      policies = {
+        ExtensionSettings = lib.mapAttrs (_: slug: {
+          installation_mode = "normal_installed";
+          install_url = "https://addons.thunderbird.net/thunderbird/downloads/latest/${slug}/latest.xpi";
+        }) cfg.extensions;
+
+        DisableTelemetry = true;
+      };
+
       profiles.${cfg.profileName} = {
         isDefault = true;
         settings = {
@@ -28,6 +57,7 @@ in
           "browser.visited_color" = config.colors.palette.base0E;
           "font.name.serif.x-western" = "${config.fontProfiles.regular.family}";
           "font.name.sans-serif.x-western" = "${config.fontProfiles.regular.family}";
+          "mailnews.oauth.useExternalBrowser" = false;
           "mailnews.start_page.enabled" = false;
           "mail.chat.enabled" = false;
           "mail.spam.markAsReadOnSpam" = true;
