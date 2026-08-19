@@ -176,7 +176,10 @@
       "sys-devices-virtual-net-tun0.device"
       "media-NAS.mount"
     ];
-    services.nzbget.path = [ pkgs.python313 ];
+    services.nzbget.path = [
+      pkgs.python313
+      pkgs.which
+    ];
     services.qbittorrent.bindsTo = [
       "sys-devices-virtual-net-tun0.device"
       "media-NAS.mount"
