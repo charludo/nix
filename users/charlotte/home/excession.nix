@@ -18,19 +18,34 @@
   fontProfiles.monospace.size = 13;
 
   wayland.windowManager.hyprland.settings = {
-    exec = [
+    exec_cmd = [
       "steam -bigpicture"
       "librewolf"
       "discord"
       "jellyfinmediaplayer"
     ];
 
-    windowrule = [
-      "opaque, match:class (steam$)"
-      "workspace 2, match:class steam"
-      "workspace 1 silent, match:class librewolf"
-      "workspace 3 silent, match:class discord"
-      "workspace 3 silent, match:class org.jellyfin.JellyfinDesktop"
+    window_rule = [
+      {
+        match.class = "(steam$)";
+        opaque = true;
+      }
+      {
+        match.class = "steam";
+        workspace = "2";
+      }
+      {
+        match.class = "librewolf";
+        workspace = "1 silent";
+      }
+      {
+        match.class = "discord";
+        workspace = "3 silent";
+      }
+      {
+        match.class = "org.jellyfin.JellyfinDesktop";
+        workspace = "3 silent";
+      }
     ];
   };
 

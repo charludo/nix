@@ -7,7 +7,7 @@
   ];
   home.hostname = "mallorca";
 
-  wayland.windowManager.hyprland.settings.input = lib.mkForce {
+  wayland.windowManager.hyprland.settings.config.input = lib.mkForce {
     kb_layout = "es";
     kb_variant = "";
   };

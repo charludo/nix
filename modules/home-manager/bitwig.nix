@@ -33,8 +33,18 @@ in
 
     # Bitwig otherwise looses focus when turning nobs/sliders under hyprland
     # https://github.com/hyprwm/Hyprland/issues/2034#issuecomment-1650278502
-    wayland.windowManager.hyprland.settings.windowrule = [
-      "no_focus 1, match:class ^$, match:title ^$, match:xwayland 1, float 1, fullscreen 0, pin 0"
+    wayland.windowManager.hyprland.settings.window_rule = [
+      {
+        match = {
+          class = "^$";
+          title = "^$";
+          xwayland = true;
+          float = true;
+          fullscreen = false;
+          pin = false;
+        };
+        no_focus = true;
+      }
     ];
   };
 }

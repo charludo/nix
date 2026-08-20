@@ -468,11 +468,23 @@ in
       lrcget
       cava
     ];
-    wayland.windowManager.hyprland.settings.windowrule = [
-      "no_focus 1, match:class ^(ueberzugpp_).*"
-      "no_anim 1, match:class ^(ueberzugpp_).*"
-      "workspace special:magic silent, match:class ^(ueberzugpp_).*"
-      "workspace special:magic silent, match:title ^(rmpc).*"
+    wayland.windowManager.hyprland.settings.window_rule = [
+      {
+        match.class = "^(ueberzugpp_).*";
+        no_focus = true;
+      }
+      {
+        match.class = "^(ueberzugpp_).*";
+        no_anim = true;
+      }
+      {
+        match.class = "^(ueberzugpp_).*";
+        workspace = "special:magic silent";
+      }
+      {
+        match.title = "^(rmpc).*";
+        workspace = "special:magic silent";
+      }
     ];
 
     # use same music player widget as for jellyfin

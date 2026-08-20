@@ -9,9 +9,7 @@
     enable = true;
     systemd.enable = true;
     xwayland.enable = true;
-
-    # TODO: migrate to lua.
-    configType = "hyprlang";
+    configType = "lua";
 
     settings =
       let
@@ -21,139 +19,248 @@
         base = "0xaa${config.colors.paletteStripped.base00}";
 
         mainMod = "SUPER";
-        shiftMod = "SUPERSHIFT";
-        ctrlMod = "SUPERCTRL";
+        shiftMod = "SUPER + SHIFT";
+        ctrlMod = "SUPER + CTRL";
       in
       {
-        general = {
-          layout = "master";
-          allow_tearing = false;
+        config = {
+          general = {
+            layout = "master";
+            allow_tearing = false;
 
-          gaps_in = 5;
-          gaps_out = 20;
-          border_size = 2;
+            gaps_in = 5;
+            gaps_out = 20;
+            border_size = 2;
 
-          "col.active_border" = "${primary} ${accent} 45deg";
-          "col.inactive_border" = inactive;
-        };
-
-        decoration = {
-          rounding = 10;
-          active_opacity = 1.0;
-          inactive_opacity = 0.85;
-          fullscreen_opacity = 1.0;
-
-          blur = {
-            enabled = true;
-            size = 2;
-            passes = 3;
-            new_optimizations = true;
-            ignore_opacity = true;
+            col = {
+              active_border = {
+                colors = [
+                  primary
+                  accent
+                ];
+                angle = 45;
+              };
+              inactive_border = inactive;
+            };
           };
 
-          shadow = {
+          decoration = {
+            rounding = 10;
+            active_opacity = 1.0;
+            inactive_opacity = 0.85;
+            fullscreen_opacity = 1.0;
+
+            blur = {
+              enabled = true;
+              size = 2;
+              passes = 3;
+              new_optimizations = true;
+              ignore_opacity = true;
+            };
+
+            shadow = {
+              enabled = true;
+              range = 4;
+              render_power = 3;
+              offset = [
+                3
+                3
+              ];
+              color = base;
+            };
+          };
+
+          animations = {
             enabled = true;
-            range = 4;
-            render_power = 3;
-            offset = "3 3";
-            color = "${base}";
+          };
+
+          dwindle = {
+            preserve_split = true;
+          };
+
+          misc = {
+            disable_hyprland_logo = true;
+            disable_splash_rendering = true;
+            animate_manual_resizes = true;
+            on_focus_under_fullscreen = 2;
+            enable_anr_dialog = false;
+            disable_watchdog_warning = true;
+          };
+
+          binds = {
+            movefocus_cycles_fullscreen = false;
+          };
+
+          input = {
+            kb_layout = "us";
+            kb_variant = "intl";
+
+            follow_mouse = 1;
+            sensitivity = 0;
+
+            touchpad = {
+              natural_scroll = false;
+              disable_while_typing = false;
+            };
+          };
+
+          xwayland = {
+            force_zero_scaling = true;
+          };
+
+          ecosystem = {
+            no_update_news = true;
+            no_donation_nag = true;
           };
         };
 
-        animations = {
-          enabled = true;
-          bezier = [
-            "myBezier, 0.05, 0.9, 0.1, 1.05"
-          ];
-          animation = [
-            "windows, 1, 7, myBezier"
-            "windowsOut, 1, 7, default, popin 80%"
-            "border, 1, 10, default"
-            "borderangle, 1, 8, default"
-            "fade, 1, 3, default"
-            "workspaces, 1, 6, default"
-          ];
-        };
-
-        dwindle = {
-          preserve_split = true;
-        };
-
-        windowrule = [
-          "fullscreen_state 0, match:class org.jellyfin.JellyfinDesktop"
+        curve = [
+          {
+            _args = [
+              "myBezier"
+              {
+                type = "bezier";
+                points = [
+                  [
+                    0.05
+                    0.9
+                  ]
+                  [
+                    0.1
+                    1.05
+                  ]
+                ];
+              }
+            ];
+          }
         ];
 
-        misc = {
-          disable_hyprland_logo = true;
-          disable_splash_rendering = true;
-          animate_manual_resizes = true;
-          on_focus_under_fullscreen = 2;
-          enable_anr_dialog = false;
-          disable_watchdog_warning = true;
-        };
-
-        layerrule = [
-          "blur on,match:namespace waybar"
-          "ignore_alpha 0,match:namespace waybar"
-
-          "blur on,match:namespace rofi"
-          "animation fade,match:namespace rofi"
+        animation = [
+          {
+            leaf = "windows";
+            enabled = true;
+            speed = 7;
+            bezier = "myBezier";
+          }
+          {
+            leaf = "windowsOut";
+            enabled = true;
+            speed = 7;
+            bezier = "default";
+            style = "popin 80%";
+          }
+          {
+            leaf = "border";
+            enabled = true;
+            speed = 10;
+            bezier = "default";
+          }
+          {
+            leaf = "borderangle";
+            enabled = true;
+            speed = 8;
+            bezier = "default";
+          }
+          {
+            leaf = "fade";
+            enabled = true;
+            speed = 3;
+            bezier = "default";
+          }
+          {
+            leaf = "workspaces";
+            enabled = true;
+            speed = 6;
+            bezier = "default";
+          }
         ];
 
-        binds = {
-          movefocus_cycles_fullscreen = false;
-        };
+        window_rule = [
+          {
+            match.class = "org.jellyfin.JellyfinDesktop";
+            fullscreen_state = "0";
+          }
+        ];
 
-        input = {
-          kb_layout = "us";
-          kb_variant = "intl";
-
-          follow_mouse = 1;
-          sensitivity = 0;
-
-          touchpad = {
-            natural_scroll = false;
-            disable_while_typing = false;
-          };
-        };
+        layer_rule = [
+          {
+            match.namespace = "waybar";
+            blur = true;
+            ignore_alpha = 0;
+          }
+          {
+            match.namespace = "rofi";
+            blur = true;
+            animation = "fade";
+          }
+        ];
 
         gesture = [
-          "3, horizontal, workspace"
+          {
+            fingers = 3;
+            direction = "horizontal";
+            action = "workspace";
+          }
         ];
 
         monitor =
           map (
             m:
-            let
-              resolution = "${toString m.width}x${toString m.height}"; # @${toString m.refreshRate}";
-              position = "${toString m.x}x${toString m.y}";
-            in
-            "${m.name},${if m.enabled then "${resolution},${position},${toString m.scaling}" else "disable"}"
+            if m.enabled then
+              {
+                output = m.name;
+                mode = "${toString m.width}x${toString m.height}"; # @${toString m.refreshRate}";
+                position = "${toString m.x}x${toString m.y}";
+                scale = m.scaling;
+              }
+            else
+              {
+                output = m.name;
+                disabled = true;
+              }
           ) config.monitors
-          ++ [ ",preferred,auto,auto" ];
-        workspace = lib.lists.flatten (
-          map (m: map (w: "${w},monitor:${m.name}") m.workspaces) (
-            lib.filter (m: m.enabled && m.workspaces != null) config.monitors
-          )
+          ++ [
+            {
+              output = "";
+              mode = "preferred";
+              position = "auto";
+              scale = "auto";
+            }
+          ];
+        workspace_rule = lib.lists.flatten (
+          map (
+            m:
+            map (w: {
+              workspace = w;
+              monitor = m.name;
+            }) m.workspaces
+          ) (lib.filter (m: m.enabled && m.workspaces != null) config.monitors)
         );
 
-        xwayland = {
-          force_zero_scaling = true;
-        };
-
-        exec = [
+        exec_cmd = [
           "systemctl --user import-environment"
           "hyprctl setcursor ${config.cursorProfile.name} ${toString config.cursorProfile.size}"
           "wl-paste --watch cliphist store"
         ];
 
-        bindm = [
-          "${mainMod},mouse:272,movewindow"
-          "${mainMod},mouse:273,resizewindow"
-        ];
-
         bind =
           let
+            inherit (lib.generators) mkLuaInline;
+            luaStr = lib.generators.toLua { };
+
+            # `hl.bind(keys, dispatcher [, opts])`
+            mkBind = keys: dispatcher: {
+              _args = [
+                keys
+                dispatcher
+              ];
+            };
+
+            exec = cmd: mkLuaInline "hl.dsp.exec_cmd(${luaStr cmd})";
+            focus = args: mkLuaInline "hl.dsp.focus(${luaStr args})";
+            window = fn: args: mkLuaInline "hl.dsp.window.${fn}(${luaStr args})";
+            windowBare = fn: mkLuaInline "hl.dsp.window.${fn}()";
+
             workspaces = [
               "0"
               "1"
@@ -183,80 +290,130 @@
           in
           [
             # Program bindings
-            "${mainMod},Return,exec,${terminal}"
-            "${mainMod},q,killactive"
-            "${shiftMod},q,exec,${lib.getExe' pkgs.hyprland "hyprctl"} kill"
-            "${mainMod},l,exec,${hyprlock}"
-            "${shiftMod},l,exec,${lib.getExe' pkgs.systemd "systemctl"} suspend"
+            (mkBind "${mainMod} + Return" (exec terminal))
+            (mkBind "${mainMod} + q" (windowBare "close"))
+            (mkBind "${shiftMod} + q" (exec "${lib.getExe' pkgs.hyprland "hyprctl"} kill"))
+            (mkBind "${mainMod} + l" (exec hyprlock))
+            (mkBind "${shiftMod} + l" (exec "${lib.getExe' pkgs.systemd "systemctl"} suspend"))
 
-            "${mainMod},Tab,cyclenext"
-            "${mainMod},Tab,bringactivetotop"
+            (mkBind "${mainMod} + Tab" (windowBare "cycle_next"))
+            (mkBind "${mainMod} + Tab" (windowBare "bring_to_top"))
 
             # Rofi
-            "${mainMod},d,exec,${menu}"
-            "${shiftMod},d,exec,${projects}"
-            "${mainMod},p,exec,${clipboard}"
-            "${shiftMod},p,exec,${rbw}"
-            ",PRINT,exec,${screenshots}"
+            (mkBind "${mainMod} + d" (exec menu))
+            (mkBind "${shiftMod} + d" (exec projects))
+            (mkBind "${mainMod} + p" (exec clipboard))
+            (mkBind "${shiftMod} + p" (exec rbw))
+            (mkBind "PRINT" (exec screenshots))
 
             # Window behavior
-            "${mainMod},v,toggleFloating"
-            "${shiftMod},v,pseudo"
-            "${mainMod},f,fullscreen"
+            (mkBind "${mainMod} + v" (window "float" { action = "toggle"; }))
+            (mkBind "${shiftMod} + v" (windowBare "pseudo"))
+            (mkBind "${mainMod} + f" (windowBare "fullscreen"))
 
             # Single-workspace window navigation & sizing
-            "${mainMod},left,moveFocus,l"
-            "${mainMod},right,moveFocus,r"
-            "${mainMod},up,moveFocus,u"
-            "${mainMod},down,moveFocus,d"
-            "${ctrlMod},right,resizeactive,60 0"
-            "${ctrlMod},left,resizeactive,-60 0"
-            "${ctrlMod},up,resizeactive,0 -60"
-            "${ctrlMod},down,resizeactive,0 60"
+            (mkBind "${mainMod} + left" (focus {
+              direction = "left";
+            }))
+            (mkBind "${mainMod} + right" (focus {
+              direction = "right";
+            }))
+            (mkBind "${mainMod} + up" (focus {
+              direction = "up";
+            }))
+            (mkBind "${mainMod} + down" (focus {
+              direction = "down";
+            }))
+            (mkBind "${ctrlMod} + right" (
+              window "resize" {
+                x = 60;
+                y = 0;
+                relative = true;
+              }
+            ))
+            (mkBind "${ctrlMod} + left" (
+              window "resize" {
+                x = -60;
+                y = 0;
+                relative = true;
+              }
+            ))
+            (mkBind "${ctrlMod} + up" (
+              window "resize" {
+                x = 0;
+                y = -60;
+                relative = true;
+              }
+            ))
+            (mkBind "${ctrlMod} + down" (
+              window "resize" {
+                x = 0;
+                y = 60;
+                relative = true;
+              }
+            ))
 
             # Brightness control (only works if the system has lightd)
-            ",XF86MonBrightnessUp,exec,brightnessctl s +10%"
-            ",XF86MonBrightnessDown,exec,brightnessctl s 10%-"
+            (mkBind "XF86MonBrightnessUp" (exec "brightnessctl s +10%"))
+            (mkBind "XF86MonBrightnessDown" (exec "brightnessctl s 10%-"))
 
             # Volume
-            ",XF86AudioRaiseVolume,exec,${pactl} set-sink-volume @DEFAULT_SINK@ +5%"
-            ",XF86AudioLowerVolume,exec,${pactl} set-sink-volume @DEFAULT_SINK@ -5%"
-            ",XF86AudioMute,exec,${pactl} set-sink-mute @DEFAULT_SINK@ toggle"
-            "SHIFT,XF86AudioMute,exec,${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"
-            ",XF86AudioMicMute,exec,${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"
+            (mkBind "XF86AudioRaiseVolume" (exec "${pactl} set-sink-volume @DEFAULT_SINK@ +5%"))
+            (mkBind "XF86AudioLowerVolume" (exec "${pactl} set-sink-volume @DEFAULT_SINK@ -5%"))
+            (mkBind "XF86AudioMute" (exec "${pactl} set-sink-mute @DEFAULT_SINK@ toggle"))
+            (mkBind "SHIFT + XF86AudioMute" (exec "${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"))
+            (mkBind "XF86AudioMicMute" (exec "${pactl} set-source-mute @DEFAULT_SOURCE@ toggle"))
           ]
           ++
 
             (lib.optionals config.services.playerctld.enable [
               # Media control
-              ",XF86AudioNext,exec,${playerctl} next"
-              ",XF86AudioPrev,exec,${playerctl} previous"
-              ",XF86AudioPlay,exec,${playerctl} play-pause"
-              ",XF86AudioStop,exec,${playerctl} stop"
-              "ALT,XF86AudioNext,exec,${playerctld} shift"
-              "ALT,XF86AudioPrev,exec,${playerctld} unshift"
-              "ALT,XF86AudioPlay,exec,systemctl --user restart playerctld"
+              (mkBind "XF86AudioNext" (exec "${playerctl} next"))
+              (mkBind "XF86AudioPrev" (exec "${playerctl} previous"))
+              (mkBind "XF86AudioPlay" (exec "${playerctl} play-pause"))
+              (mkBind "XF86AudioStop" (exec "${playerctl} stop"))
+              (mkBind "ALT + XF86AudioNext" (exec "${playerctld} shift"))
+              (mkBind "ALT + XF86AudioPrev" (exec "${playerctld} unshift"))
+              (mkBind "ALT + XF86AudioPlay" (exec "systemctl --user restart playerctld"))
             ])
           ++
 
             # Movement
             [
-              "${mainMod},apostrophe,workspace,previous"
-              "${mainMod},s,togglespecialworkspace,magic"
-              "${shiftMod},s,movetoworkspacesilent,special:magic"
+              (mkBind "${mainMod} + apostrophe" (focus {
+                workspace = "previous";
+              }))
+              (mkBind "${mainMod} + s" (mkLuaInline "hl.dsp.workspace.toggle_special(\"magic\")"))
+              (mkBind "${shiftMod} + s" (
+                window "move" {
+                  workspace = "special:magic";
+                  follow = false;
+                }
+              ))
 
-              "${shiftMod},left,movewindow,l"
-              "${shiftMod},right,movewindow,r"
-              "${shiftMod},up,movewindow,u"
-              "${shiftMod},down,movewindow,d"
+              (mkBind "${shiftMod} + left" (window "move" { direction = "left"; }))
+              (mkBind "${shiftMod} + right" (window "move" { direction = "right"; }))
+              (mkBind "${shiftMod} + up" (window "move" { direction = "up"; }))
+              (mkBind "${shiftMod} + down" (window "move" { direction = "down"; }))
+
+              (mkBind "${mainMod} + mouse:272" (windowBare "drag"))
+              (mkBind "${mainMod} + mouse:273" (windowBare "resize"))
             ]
-          ++ (map (n: "${mainMod},${n},workspace,${n}") workspaces)
-          ++ (map (n: "${shiftMod},${n},movetoworkspacesilent,${n}") workspaces);
-
-        ecosystem = {
-          no_update_news = true;
-          no_donation_nag = true;
-        };
+          ++ (map (
+            n:
+            mkBind "${mainMod} + ${n}" (focus {
+              workspace = n;
+            })
+          ) workspaces)
+          ++ (map (
+            n:
+            mkBind "${shiftMod} + ${n}" (
+              window "move" {
+                workspace = n;
+                follow = false;
+              }
+            )
+          ) workspaces);
       };
     extraConfig = "";
   };
