@@ -34,6 +34,14 @@ in
           set fish_greeting
           _tide_find_and_remove kubectl tide_right_prompt_items
         '';
+
+      functions.fish_user_key_bindings.body = # fish
+        ''
+          bind ctrl-left backward-word
+          bind ctrl-right forward-word
+          bind ctrl-backspace backward-kill-word
+          bind ctrl-delete kill-word
+        '';
     };
 
     home.activation.configure-tide =
