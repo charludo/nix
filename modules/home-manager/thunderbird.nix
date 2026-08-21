@@ -61,6 +61,8 @@ in
           "mailnews.start_page.enabled" = false;
           "mail.chat.enabled" = false;
           "mail.spam.markAsReadOnSpam" = true;
+          "extensions.autoDisableScopes" = 14; # allows auto-enable profile-scope extensions
+          "mail.compose.catchAllHeaders" = "x-original-to, envelope-to, to, cc"; # delivered-to throws this off for us
           "mail.openpgp.allow_external_gnupg" = true;
           "mail.openpgp.fetch_pubkeys_from_gnupg" = true;
           "mailnews.default_news_view_flags" = 0;
