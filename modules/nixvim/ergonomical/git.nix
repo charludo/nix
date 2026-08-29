@@ -25,7 +25,34 @@
         };
       };
     };
+    git-worktree = {
+      enable = true;
+      enableTelescope = true;
+    };
   };
+
+  # Shorthand: prompt for a branch name only, and create the worktree at <main repo root>/.worktree/<branch>.
+  extraConfigLua = ''
+    function git_worktree_new()
+      local common = vim.fn.systemlist({ "git", "rev-parse", "--path-format=absolute", "--git-common-dir" })[1]
+      if vim.v.shell_error ~= 0 or not common or common == "" then
+        vim.notify("git-worktree: not inside a git repository", vim.log.levels.ERROR)
+        return
+      end
+
+      local root = common
+      if vim.fn.fnamemodify(common, ":t") == ".git" then
+        root = vim.fn.fnamemodify(common, ":h")
+      end
+
+      vim.ui.input({ prompt = "New worktree branch: " }, function(branch)
+        if not branch or branch == "" then
+          return
+        end
+        require("git-worktree").create_worktree(root .. "/.worktree/" .. branch, branch)
+      end)
+    end
+  '';
 
   keymaps = [
     {
@@ -34,6 +61,31 @@
       action = "<cmd>Gitsigns toggle_current_line_blame<cr>";
       options = {
         desc = "toggle current line blame";
+      };
+    }
+    {
+      mode = [ "n" ];
+      key = "<leader>gw";
+      action = "<cmd>Telescope git_worktree git_worktree<cr>";
+      options = {
+        # in-picker: <cr> switch, <m-d> delete, <m-c> create, <c-f> toggle force
+        desc = "Telescope Git worktrees";
+      };
+    }
+    {
+      mode = [ "n" ];
+      key = "<leader>gW";
+      action = "<cmd>Telescope git_worktree create_git_worktree<cr>";
+      options = {
+        desc = "Telescope Git worktree create (pick branch + path)";
+      };
+    }
+    {
+      mode = [ "n" ];
+      key = "<leader>gn";
+      action = "<cmd>lua git_worktree_new()<cr>";
+      options = {
+        desc = "Git worktree new (branch name only, into .worktree/)";
       };
     }
   ];

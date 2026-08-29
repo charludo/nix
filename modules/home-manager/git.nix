@@ -52,6 +52,7 @@ in
         ".claude"
         ".dmypy.json"
         "coverage.out"
+        ".worktree"
       ];
       settings = {
         init.defaultBranch = "main";
@@ -62,6 +63,9 @@ in
         user.email = cfg.user.email;
 
         submodule.recurse = true;
+
+        rerere.enabled = true;
+        rerere.autoUpdate = true;
 
         safe = {
           directory = "${config.home.homeDirectory}/Documents";

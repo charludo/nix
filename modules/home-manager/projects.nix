@@ -65,6 +65,7 @@ in
                     git init
                     git remote add origin "${entry.repo}"
                     branch=$(git remote show origin | sed -n '/HEAD branch/s/.*: //p')
+                    git branch --set-upstream-to=origin/"$branch"
                     git pull origin "$branch"
                   fi
                 '';
@@ -82,7 +83,7 @@ in
             bash_path = "/run/current-system/sw/bin/bash"
 
             [whitelist]
-            exact = [ ${paths} ]
+            prefix = [ ${paths} ]
           '';
       };
   };
