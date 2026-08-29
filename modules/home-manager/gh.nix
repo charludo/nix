@@ -23,5 +23,6 @@ in
         prompt = "enabled";
       };
     };
+    home.packages = [ pkgs.forgejo-cli ];
   };
 }
