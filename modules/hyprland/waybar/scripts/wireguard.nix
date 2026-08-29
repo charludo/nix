@@ -2,21 +2,18 @@
 pkgs.writeShellApplication {
   name = "waybar-wireguard";
   runtimeInputs = [
-    pkgs.networkmanager
-    pkgs.gawk
-    pkgs.gnugrep
+    pkgs.systemd
   ];
   text = ''
     set +o errexit
     set +o pipefail
     CONN="hoehle"
-    ACTIVE=0;
-    conn_exists=$(nmcli connection show | grep -icP "(''${CONN}).*wireguard")
-    if [ "$conn_exists" -eq "1" ]; then
-        conn_status=$(nmcli -t -f ACTIVE,NAME con show --active | grep ''${CONN} | awk '{print $1}')
-        if [ "$conn_status" == "yes:''${CONN}" ]; then
-            ACTIVE=1
-        fi
+    SERVICE="wireguard-''${CONN}.service"
+
+    if systemctl is-active --quiet "$SERVICE"; then
+        ACTIVE=1
+    else
+        ACTIVE=0
     fi
 
     if [[ $# -eq 0 ]]; then
@@ -27,9 +24,9 @@ pkgs.writeShellApplication {
         fi
     elif [[ $1 == "--switch" ]]; then
         if [ "$ACTIVE" -eq "0" ]; then
-            systemctl start "wireguard-''$CONN.service"
+            systemctl start "$SERVICE"
         else
-            systemctl stop "wireguard-''$CONN.service"
+            systemctl stop "$SERVICE"
         fi
     else
         exit 1

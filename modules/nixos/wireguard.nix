@@ -9,6 +9,11 @@
 with lib;
 let
   cfg = config.wireguard;
+
+  ip = lib.getExe' pkgs.iproute2 "ip";
+  dig = lib.getExe pkgs.dig;
+  awk = lib.getExe' pkgs.gawk "awk";
+  resolvconf = lib.getExe' config.networking.resolvconf.package "resolvconf";
 in
 {
   options.wireguard = {
@@ -77,6 +82,10 @@ in
       checkReversePath = "loose";
     };
 
+    networking.resolvconf.extraConfig = mkIf (cfg.dns != [ ]) ''
+      interface_order='lo lo[0-9]* ${cfg.interface}'
+    '';
+
     age.secrets.wg-private.rekeyFile = cfg.secrets.secretsFilePrivate;
     age.secrets.wg-preshared.rekeyFile = cfg.secrets.secretsFilePreshared;
 
@@ -99,19 +108,19 @@ in
         ];
 
         preSetup = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${lib.getExe' pkgs.iproute2 "ip"} route add $(${lib.getExe pkgs.dig} +short ${cfg.endpoint}) via $(${lib.getExe' pkgs.iproute2 "ip"} route show 0.0.0.0/0 | ${lib.getExe' pkgs.gawk "awk"} '{print $3}')
+          ${ip} route replace $(${dig} +short ${cfg.endpoint}) via $(${ip} route show 0.0.0.0/0 | ${awk} '{print $3}')
         '';
         postShutdown = optional (cfg.allowedIPs == "0.0.0.0/0") ''
-          ${lib.getExe' pkgs.iproute2 "ip"} route del $(${lib.getExe pkgs.dig} +short ${cfg.endpoint}) via $(${lib.getExe' pkgs.iproute2 "ip"} route show 0.0.0.0/0 | ${lib.getExe' pkgs.gawk "awk"} '{print $3}')
+          ${ip} route del $(${dig} +short ${cfg.endpoint}) via $(${ip} route show 0.0.0.0/0 | ${awk} '{print $3}')
         '';
 
         postSetup = optional (cfg.dns != [ ]) ''
           printf "${
             concatStringsSep "\n" (map (entry: "nameserver ${entry}") cfg.dns)
-          }" | ${lib.getExe' pkgs.openresolv "resolvconf"} -a ${cfg.interface} -m 0
+          }\n" | ${resolvconf} -a ${cfg.interface} -m 0
         '';
         preShutdown = optional (cfg.dns != [ ]) ''
-          "${lib.getExe' pkgs.openresolv "resolvconf"} -d ${cfg.interface}"
+          ${resolvconf} -d ${cfg.interface} || true
         '';
       };
     };

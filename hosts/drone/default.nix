@@ -46,7 +46,7 @@
     interface = "hoehle";
     port = 51865;
     ip = "192.168.150.12/32";
-    dns = [ "192.168.30.13" ];
+    dns = [ private-settings.ad.dnsServer ];
     secrets = {
       secretsFilePrivate = secrets.drone-wg-private;
       secretsFilePreshared = secrets.drone-wg-preshared;
