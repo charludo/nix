@@ -135,6 +135,7 @@ in
         cpu = "host";
         ide2 = lib.mkForce "none,media=cdrom";
         kvm = 1;
+        onboot = 1;
       };
       virtualisation.diskSize = "auto";
     };
