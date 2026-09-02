@@ -38,6 +38,10 @@
 
   # Needed to bootstrap signing the actual server URL's certificate
   security.acme.defaults.server = "https://${config.vm.networking.address}:${toString config.services.step-ca.port}/acme/acme/directory";
+  systemd.services."acme-ca-issuing-1.${private-settings.domains.ad}" = {
+    wants = [ "step-ca.service" ];
+    after = [ "step-ca.service" ];
+  };
   services.nginx.virtualHosts."${builtins.head private-settings.caIssuing1.dnsNames}".locations."/".proxyPass =
     lib.mkForce "https://127.0.0.1:${toString config.services.step-ca.port}";
   networking.hosts."127.0.0.1" = lib.mkForce [ ];
