@@ -2,6 +2,7 @@
 {
   imports = [
     ./common
+    ./common/cli.nix
   ];
   home.hostname = "CL-ROU";
 
