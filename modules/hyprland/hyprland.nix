@@ -261,18 +261,10 @@
             window = fn: args: mkLuaInline "hl.dsp.window.${fn}(${luaStr args})";
             windowBare = fn: mkLuaInline "hl.dsp.window.${fn}()";
 
-            workspaces = [
-              "0"
-              "1"
-              "2"
-              "3"
-              "4"
-              "5"
-              "6"
-              "7"
-              "8"
-              "9"
-            ];
+            workspaces = map (n: {
+              key = toString (lib.mod n 10);
+              name = toString n;
+            }) (lib.range 1 10);
             terminal = config.home.sessionVariables.TERMINAL;
 
             rofi = "${lib.getExe (pkgs.rofi.override { plugins = [ pkgs.rofi-emoji ]; })}";
@@ -400,16 +392,16 @@
               (mkBind "${mainMod} + mouse:273" (windowBare "resize"))
             ]
           ++ (map (
-            n:
-            mkBind "${mainMod} + ${n}" (focus {
-              workspace = n;
+            w:
+            mkBind "${mainMod} + ${w.key}" (focus {
+              workspace = w.name;
             })
           ) workspaces)
           ++ (map (
-            n:
-            mkBind "${shiftMod} + ${n}" (
+            w:
+            mkBind "${shiftMod} + ${w.key}" (
               window "move" {
-                workspace = n;
+                workspace = w.name;
                 follow = false;
               }
             )

@@ -62,6 +62,7 @@
         "tray"
       ];
       "hyprland/workspaces" = {
+        tooltip = false;
         warp-on-scroll = false;
         all-outputs = false;
         format = "{icon}";
