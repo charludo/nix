@@ -24,6 +24,8 @@
     secrets = config.age.secrets.ffsync.path;
     settings.host = "0.0.0.0";
 
+    database.type = "mysql";
+
     singleNode = {
       enable = true;
       capacity = 2;

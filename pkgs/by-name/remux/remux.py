@@ -82,7 +82,7 @@ def get_file():
         )
         sys.exit(os.EX_IOERR)
 
-    if not file_type.mime_type == "video/x-matroska":
+    if file_type.mime_type != "video/x-matroska":
         logger.error(
             f'File "{in_file}" does not appear to be of type mkv. Cannot remux.'
         )
@@ -154,10 +154,10 @@ def track_numbers_match(in_file, tmp_file):
     if not video:
         logger.critical("FATAL: subtitle conversion removed video stream!")
         return False
-    if not len(audio) == len(original_audio):
+    if len(audio) != len(original_audio):
         logger.critical("FATAL: subtitle conversion altered audio!")
         return False
-    if not len(subtitles) == len(original_subtitles):
+    if len(subtitles) != len(original_subtitles):
         logger.critical("FATAL: subtitle conversion altered subtitles!")
         return False
     return True
@@ -282,7 +282,7 @@ def remove_unwanted_tracks(in_file):
             check=True,
             shell=True,
         )
-    except Exception:
+    except (subprocess.CalledProcessError, OSError):
         logger.error(f'Something went wrong during the remux of "{in_file}". Skipping.')
         os.remove(tmp_file)
         return
@@ -322,7 +322,7 @@ def convert_subtitles(in_file):
             check=True,
             shell=True,
         )
-    except Exception:
+    except (subprocess.CalledProcessError, OSError):
         logger.error(
             f'Something went wrong during the subtitle conversion of "{in_file}". Skipping.'
         )
@@ -366,7 +366,7 @@ def convert_unsupported_audio(in_file):
             check=True,
             shell=True,
         )
-    except Exception:
+    except (subprocess.CalledProcessError, OSError):
         logger.error(
             f'Something went wrong during the audio conversion of "{in_file}". Skipping.'
         )
@@ -404,17 +404,17 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 2 and sys.argv[1] == "all":
         for path in Path("/media/NAS/Filme & Serien/Anime").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
         for path in Path("/media/NAS/Filme & Serien/Anime Movies").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
         for path in Path("/media/NAS/Filme & Serien/Filme").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
         for path in Path("/media/NAS/Filme & Serien/Kids Movies").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
         for path in Path("/media/NAS/Filme & Serien/Klassiker").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
         for path in Path("/media/NAS/Filme & Serien/Serien").rglob("*.mkv"):
-            subprocess.run(f'remux "{path}"', shell=True)
+            subprocess.run(f'remux "{path}"', shell=True, check=False)
 
         sys.exit(os.EX_OK)
 
