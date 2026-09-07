@@ -34,9 +34,25 @@
 
   nas.backup.enable = true;
   services.mysql.package = pkgs.mariadb;
+
   services.mysqlBackup = {
     enable = true;
     databases = config.services.mysql.ensureDatabases;
-    location = "${config.nas.backup.stateLocation}/ffsync";
+    singleTransaction = true;
+    calendar = "01:15:00";
+  };
+
+  rsync."ffsync" = {
+    tasks = [
+      {
+        from = config.services.mysqlBackup.location;
+        to = "${config.nas.backup.stateLocation}/ffsync";
+        chown = "${config.services.mysqlBackup.user}:${config.services.mysqlBackup.user}";
+      }
+    ];
+    timerConfig = {
+      OnCalendar = "*-*-* 01:30:00";
+      Persistent = true;
+    };
   };
 }
