@@ -2,7 +2,7 @@
   lib,
   buildNpmPackage,
   fetchFromGitHub,
-  nodejs,
+  nodejs_22,
   python3,
   pkg-config,
   autoPatchelfHook,
@@ -10,6 +10,9 @@
   stdenv,
 }:
 
+let
+  nodejs = nodejs_22;
+in
 buildNpmPackage (finalAttrs: {
   pname = "trek";
   version = "4.2.1";
@@ -40,6 +43,12 @@ buildNpmPackage (finalAttrs: {
   };
   autoPatchelfIgnoreMissingDeps = true;
   dontCheckForBrokenSymlinks = true;
+
+  postPatch = ''
+    substituteInPlace client/src/components/Planner/placeNavigation.ts \
+      --replace-fail "  return targets" \
+        "  const g = targets.filter(x => x.id === 'google'); return g.length ? g : targets"
+  '';
 
   buildPhase = ''
     runHook preBuild
