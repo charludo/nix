@@ -1,4 +1,4 @@
-{ pkgs, private-settings, ... }:
+{ private-settings, ... }:
 {
   imports = [
     ./common
@@ -17,9 +17,15 @@
       user.name = private-settings.git.charlotte.name;
       user.email = private-settings.git.charlotte.email;
     };
+    tmux.enable = true;
   };
 
-  home.packages = [ pkgs.tmux ];
+  programs.fish.interactiveShellInit = # fish
+    ''
+      if set -q SSH_TTY; and not set -q TMUX
+        exec tmux new-session -A -s main
+      end
+    '';
 
   inherit (private-settings) projects;
   nixvim.addDesktopEntry = false;
