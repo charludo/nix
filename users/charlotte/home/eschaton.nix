@@ -29,7 +29,6 @@
   home.packages = with pkgs; [
     anki
     teams-for-linux
-    jitsi-meet-electron
     ours.nsenter
 
     (pkgs.writeShellApplication {

@@ -490,7 +490,7 @@ in
     # use same music player widget as for jellyfin
     services.mpdris2 = {
       enable = true;
-      multimediaKeys = true;
+      settings.Bling.mmkeys = true;
     };
 
     services.mpd = {

@@ -43,8 +43,8 @@
     username = "nixpkgs";
     passwordFile = config.age.secrets.nixpkgs-update-notifier.path;
 
-    timers.update = "24h0m0s";
-    timers.jsblob = "30m0s";
+    timers.check-errors = "24h0m0s";
+    timers.fetch-packages = "30m0s";
   };
 
   systemd.services.nixpkgs-update-notifier.serviceConfig.ExecStart =
@@ -56,8 +56,12 @@
       "-matrix.homeserver matrix.${private-settings.domains.home}"
       "-matrix.username ${cfg.username}"
       "-db ${cfg.dataDir}/data.db"
-      (lib.optionalString (cfg.timers.update != null) "-timers.update ${cfg.timers.update}")
-      (lib.optionalString (cfg.timers.jsblob != null) "-timers.jsblob ${cfg.timers.jsblob}")
+      (lib.optionalString (
+        cfg.timers.check-errors != null
+      ) "-timers.check-errors ${cfg.timers.check-errors}")
+      (lib.optionalString (
+        cfg.timers.fetch-packages != null
+      ) "-timers.fetch-packages ${cfg.timers.fetch-packages}")
       (lib.optionalString cfg.debug "-debug")
     ]);
 }

@@ -12,10 +12,6 @@ let
   userPath = ../../users/${config.home.username}/keys/ssh.pub;
 in
 {
-  options.age = {
-    enable = lib.mkEnableOption "age secrets management";
-  };
-
   config = lib.mkIf cfg.enable {
     age.rekey = {
       hostPubkey = lib.mkDefault (

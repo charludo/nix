@@ -374,15 +374,15 @@ in
 
   programs.rofi = {
     enable = true;
-    font = "${config.fontProfiles.regular.family} 13";
-    location = "center";
     plugins = [
       pkgs.rofi-power-menu
       pkgs.rofi-emoji
     ];
-    terminal = "${config.home.sessionVariables.TERMINAL}";
     theme = rofi-theme;
-    extraConfig = {
+    settings = {
+      font = "${config.fontProfiles.regular.family} 13";
+      terminal = "${config.home.sessionVariables.TERMINAL}";
+      location = 0; # "center"
       icon-theme = "${config.iconsProfile.name}       ";
       show-icons = true;
       drun-display-format = "{icon} {name}";

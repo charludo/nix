@@ -38,6 +38,7 @@
         "cache.${private-settings.domains.blog}-1:uh2KzANysUoaMiEesTO2IkE2h/ycuJKE3Jx8yz4XYJI="
       ];
       netrc-file = config.age.secrets.nix-cache-netrc.path;
+      nix-path = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];
     };
 
     gc = {
@@ -45,8 +46,6 @@
       dates = lib.mkDefault "weekly";
       options = lib.mkDefault "--delete-older-than 7d";
     };
-
-    nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];
   };
 
   # git credential store for fetching (private) repos and submodules.
