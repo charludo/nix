@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   services.music-assistant.providers = [
-    "jellyfin"
+    "opensubsonic"
     "audiobookshelf"
 
     "hass_players"
