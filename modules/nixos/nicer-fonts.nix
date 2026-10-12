@@ -10,6 +10,8 @@ in
   };
 
   config = mkIf cfg.enable {
+    fonts.enableDefaultPackages = false;
+
     fonts.fontconfig = {
       enable = true;
 

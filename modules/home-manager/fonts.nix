@@ -26,6 +26,7 @@ let
     };
 
   };
+
   cfg = config.fontProfiles;
 in
 {
@@ -33,21 +34,57 @@ in
     enable = lib.mkEnableOption "font profiles";
     monospace = mkFontOption "monospace";
     regular = mkFontOption "regular";
+    serif = mkFontOption "serif";
     emoji = mkFontOption "emoji";
-    japanese = lib.mkEnableOption "Japanese font support";
+    japanese = mkFontOption "Japanese";
+    japanese_serif = mkFontOption "Japanese serif";
   };
 
   config = lib.mkIf cfg.enable {
-    fonts.fontconfig.enable = true;
+    fonts.fontconfig = {
+      enable = true;
+
+      defaultFonts = {
+        sansSerif = [
+          cfg.regular.family
+          cfg.emoji.family
+          cfg.japanese.family
+        ];
+        serif = [
+          cfg.serif.family
+          cfg.emoji.family
+          cfg.japanese_serif.family
+        ];
+        monospace = [
+          cfg.monospace.family
+          cfg.emoji.family
+          cfg.japanese.family
+        ];
+        emoji = [ cfg.emoji.family ];
+      };
+
+      configFile.ignore-generic-family = {
+        enable = true;
+        priority = 50;
+        settings.match = {
+          "@target" = "pattern";
+          edit = {
+            "@name" = "genericfamily";
+            "@mode" = "delete";
+          };
+        };
+      };
+    };
 
     home.packages = [
       cfg.monospace.package
       cfg.regular.package
+      cfg.serif.package
       cfg.emoji.package
-    ]
-    ++ lib.optionals cfg.japanese [
-      pkgs.noto-fonts-cjk-sans
-      pkgs.noto-fonts-cjk-serif
+      cfg.japanese.package
+      cfg.japanese_serif.package
+
+      pkgs.liberation_ttf
     ];
 
     gtk.font.name = cfg.regular.family;

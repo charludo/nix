@@ -18,9 +18,21 @@
       family = "Cantarell";
       package = pkgs.cantarell-fonts;
     };
+    serif = {
+      family = "DejaVu Serif";
+      package = pkgs.dejavu_fonts;
+    };
     emoji = {
       family = "Noto Color Emoji";
       package = pkgs.noto-fonts-color-emoji;
+    };
+    japanese = {
+      family = "Noto Sans CJK JP";
+      package = pkgs.noto-fonts-cjk-sans-static;
+    };
+    japanese_serif = {
+      family = "Noto Serif CJK JP";
+      package = pkgs.noto-fonts-cjk-serif-static;
     };
   };
 

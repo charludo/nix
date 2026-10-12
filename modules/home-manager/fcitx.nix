@@ -13,8 +13,6 @@ in
   options.desktop.fcitx.enable = lib.mkEnableOption "fcitx5 input method (e.g. for Japanese)";
 
   config = lib.mkIf cfg.enable {
-    fontProfiles.japanese = true;
-
     i18n.inputMethod = {
       enable = true;
       type = "fcitx5";
