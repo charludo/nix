@@ -288,7 +288,7 @@ in
         /* Swipe-card full width on mobile */
 
         @media screen and (max-width: 599px) {
-          #columns .column swipe-card {
+          #columns .column simple-swipe-card {
             margin-left: -4px;
             margin-right: -4px;
           }

@@ -15,7 +15,7 @@ in
   config = lib.mkIf cfg.enable {
     services.home-assistant.customComponents = [
       pkgs.ours.home-assistant.custom-components.bambu_lab
-      pkgs.ours.home-assistant.custom-components.custom_icons
+      pkgs.home-assistant-custom-components.custom_icons
     ];
     services.home-assistant.extraComponents = [
       "stream"

@@ -49,8 +49,6 @@
     idagio.url = "github:charludo/IDAGIO-Downloader-Rust-ver";
     idagio.inputs.nixpkgs.follows = "nixpkgs";
 
-    hass-closest-intent.url = "github:charludo/hass-closest-intent";
-    hass-closest-intent.inputs.nixpkgs.follows = "nixpkgs";
     hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
     hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
     dwd-proxy.url = "path:./dwd-proxy";

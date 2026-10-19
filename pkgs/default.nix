@@ -18,10 +18,5 @@ basePackages
 
   home-assistant =
     basePackages.home-assistant
-    // {
-      custom-components = callPackage ./by-name/home-assistant/custom-components/package.nix {
-        hass-closest-intent-src = inputs.hass-closest-intent;
-      };
-    }
     // inputs.hass-custom-integrations.packages.${pkgs.stdenv.hostPlatform.system};
 }
