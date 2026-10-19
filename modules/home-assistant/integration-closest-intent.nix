@@ -12,13 +12,8 @@ in
 
   config = lib.mkIf cfg.enable {
     services.home-assistant.customComponents = [
-      pkgs.ours.home-assistant.custom-components.closest_intent
+      pkgs.home-assistant-custom-components.closest_intent
     ];
-
-    services.home-assistant.extraPackages =
-      python3Packages: with python3Packages; [
-        rapidfuzz
-      ];
 
     services.home-assistant.config.closest_intent = {
       threshold = 70;

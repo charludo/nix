@@ -62,12 +62,11 @@ in
         auto-entities
         button-card
         custom-sidebar
-        card-mod
         mini-graph-card
         mushroom
         plotly-chart-card
-        swipe-card
-        lg-remote-control
+        simple-swipe-card
+        lg-webos-remote-control
         my-slider-v2
         xiaomi-vacuum-map-card
         layout-card
@@ -75,6 +74,10 @@ in
         config-template-card
         google-fonts-quicksand
       ];
+
+    # Successor of card-mod; serves its own frontend script and reads the
+    # existing `card_mod:` / `card-mod-*` keys.
+    customComponents = [ pkgs.ours.home-assistant.custom-components.uix ];
 
     config.frontend = {
       themes = "!include_dir_merge_named ${themesDir}";

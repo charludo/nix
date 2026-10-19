@@ -48,6 +48,10 @@ in
               done
             '';
         });
+
+        # Its test suite asserts parses against the stock intents corpus,
+        # which the override above deliberately changes.
+        gazetteer-matcher = super.gazetteer-matcher.overridePythonAttrs { doCheck = false; };
       })
     ];
   };

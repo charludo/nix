@@ -1,7 +1,7 @@
 {
   stdenv,
   fetchFromGitHub,
-  hass-closest-intent-src,
+  callPackage,
 }:
 let
   mkComponent =
@@ -35,55 +35,9 @@ let
         isHomeAssistantComponent = true;
       };
     };
-
-  # Same shape as `mkComponent` but takes a local source tree instead of
-  # fetching from GitHub. Used while a component is still in-tree; swap to
-  # `mkComponent` once the component lives in its own repo.
-  mkLocalComponent =
-    {
-      pname,
-      version,
-      src,
-      domain ? pname,
-      componentPath ? "custom_components/${domain}",
-    }:
-    stdenv.mkDerivation {
-      inherit pname version src;
-      dontBuild = true;
-      installPhase = ''
-        mkdir -p $out/custom_components
-        cp -r ${componentPath} $out/custom_components/${domain}
-      '';
-      passthru = {
-        inherit domain;
-        isHomeAssistantComponent = true;
-      };
-    };
 in
 {
-  closest_intent = mkLocalComponent {
-    pname = "closest_intent";
-    version = "0.1.0";
-    src = hass-closest-intent-src;
-  };
-
-  auth_oidc = mkComponent {
-    pname = "auth_oidc";
-    version = "1.0.2";
-    owner = "christiaangoossens";
-    repo = "hass-oidc-auth";
-    rev = "v1.0.2";
-    sha256 = "sha256-ZYJD0PVh2E07cdY1a7uxSxdooAMz78HwJpwr4uWofZM=";
-  };
-
-  custom_icons = mkComponent {
-    pname = "custom_icons";
-    version = "1.0.1";
-    owner = "thomasloven";
-    repo = "hass-custom_icons";
-    rev = "v1.0.1";
-    sha256 = "sha256-3H3McTVvNytmJ0At4K+Z0gvOTFdk415t0MWAI2EDnCc=";
-  };
+  uix = callPackage ./uix.nix { };
 
   bambu_lab = mkComponent {
     pname = "bambu_lab";

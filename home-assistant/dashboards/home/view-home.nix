@@ -5,7 +5,7 @@
   wateringTimes ? [ ],
 }:
 let
-  ha = lib.ha;
+  inherit (lib) ha;
 
   broadcastPresets = [
     {
@@ -61,23 +61,13 @@ in
 
         # Temperature swipe carousel.
         {
-          type = "custom:swipe-card";
-          card_width = "calc(100% - 48px)";
-          parameters = {
-            centeredSlides = true;
-            centeredSlidesBounds = true;
-            slidesPerView = "auto";
-            spaceBetween = 16;
-            initialSlide = 2;
-            touchAngle = 65;
-            # Recalculate slide widths when the carousel's DOM
-            # (re)attaches on view switch — without these, Swiper
-            # measures the container before HA finishes sizing it and
-            # snaps to the last reachable position.
-            observer = true;
-            observeParents = true;
-            observeSlideChildren = true;
-          };
+          type = "custom:simple-swipe-card";
+          view_mode = "carousel";
+          carousel_alignment = "center";
+          cards_visible = 1.15;
+          card_spacing = 16;
+          reset_target_card = 3;
+          show_pagination = false;
           cards = [
             (ha.mkTempTile "Terrasse" e.sensor.thermometer_nordseite.temperature)
             (ha.mkTempTile "Gewächshaus" e.sensor.thermometer_gewachshaus.temperature)
@@ -422,19 +412,14 @@ in
           title = "Räume";
           cards = [
             {
-              type = "custom:swipe-card";
-              parameters = {
-                centeredSlides = true;
-                centeredSlidesBounds = true;
-                slidesPerView = 2.5;
-                initialSlide = 0;
-                spaceBetween = 16;
-                freeMode = true;
-                centerInsufficientSlides = true;
-                snapToSlideEdge = true;
-                touchAngle = 30;
-                threshold = 8;
-              };
+              type = "custom:simple-swipe-card";
+              view_mode = "carousel";
+              carousel_alignment = "start";
+              cards_visible = 2.5;
+              card_spacing = 16;
+              show_pagination = false;
+              swipe_behavior = "free";
+              loop_mode = "infinite";
               cards = map (
                 nv:
                 let

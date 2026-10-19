@@ -1,4 +1,8 @@
-{ stdenv, fetchurl }:
+{
+  stdenv,
+  fetchurl,
+  callPackage,
+}:
 let
   mkCard =
     {
@@ -36,32 +40,13 @@ let
     };
 in
 {
-  swipe-card = mkCard {
-    pname = "swipe-card";
-    version = "5.0.0";
-    url = "https://raw.githubusercontent.com/bramkragten/swipe-card/v5.0.0/dist/swipe-card.js";
-    sha256 = "0caf1pkscl12pxdyr0acmxb6d1ia1b3z2khdnik7zk06g8h4cgy1";
-  };
-
-  lg-remote-control = mkCard {
-    pname = "lg-remote-control";
-    version = "2.0.4";
-    url = "https://github.com/madmicio/LG-WebOS-Remote-Control/releases/download/2.0.4/lg-remote-control.js";
-    sha256 = "1j7b0j7a5wp27z0vrlby8dngcz385h2icqpn3xdr7nam6gckxfzd";
-  };
+  simple-swipe-card = callPackage ./simple-swipe-card.nix { };
 
   my-slider-v2 = mkCard {
     pname = "my-slider-v2";
     version = "1.0.6";
     url = "https://github.com/AnthonMS/my-cards/releases/download/v1.0.6/my-slider-v2.js";
     sha256 = "1widw930kvgh3bbkqwnr5m3v33yq56hljlv8q7hnnrnk1bcq7cs5";
-  };
-
-  xiaomi-vacuum-map-card = mkCard {
-    pname = "xiaomi-vacuum-map-card";
-    version = "2.3.2";
-    url = "https://github.com/PiotrMachowski/lovelace-xiaomi-vacuum-map-card/releases/download/v2.3.2/xiaomi-vacuum-map-card.js";
-    sha256 = "1q4asrbv9vgrbs96gf1kqm0bxd2qa7llvblrzqaj2vi0s4vl5ddb";
   };
 
   layout-card = mkCard {
