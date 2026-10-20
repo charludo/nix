@@ -11,6 +11,7 @@ in
       domains.personal
       domains.blog
       domains.webdesign
+      domains.marie
     ];
     messageSizeLimit = 209715200;
     x509.useACMEHost = config.mailserver.fqdn;
