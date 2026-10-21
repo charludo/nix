@@ -14,6 +14,10 @@
       package = pkgs.nerd-fonts.geist-mono;
       size = lib.mkDefault 14;
     };
+    monospace_symbols = {
+      family = "DejaVu Sans Mono";
+      package = pkgs.dejavu_fonts;
+    };
     regular = {
       family = "Cantarell";
       package = pkgs.cantarell-fonts;

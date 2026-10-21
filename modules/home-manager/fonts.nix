@@ -33,6 +33,7 @@ in
   options.fontProfiles = {
     enable = lib.mkEnableOption "font profiles";
     monospace = mkFontOption "monospace";
+    monospace_symbols = mkFontOption "monospace symbols";
     regular = mkFontOption "regular";
     serif = mkFontOption "serif";
     emoji = mkFontOption "emoji";
@@ -57,6 +58,7 @@ in
         ];
         monospace = [
           cfg.monospace.family
+          cfg.monospace_symbols.family
           cfg.emoji.family
           cfg.japanese.family
         ];
@@ -78,6 +80,7 @@ in
 
     home.packages = [
       cfg.monospace.package
+      cfg.monospace_symbols.package
       cfg.regular.package
       cfg.serif.package
       cfg.emoji.package
