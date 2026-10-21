@@ -240,7 +240,6 @@
         exec_cmd = [
           "systemctl --user import-environment"
           "hyprctl setcursor ${config.cursorProfile.name} ${toString config.cursorProfile.size}"
-          "wl-paste --watch cliphist store"
         ];
 
         bind =

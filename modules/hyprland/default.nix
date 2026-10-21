@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   imports = [
     ./dunst.nix
@@ -25,6 +25,10 @@
     XDG_CURRENT_DESKTOP = "Hyprland";
     XDG_SESSION_DESKTOP = "Hyprland";
   };
+
+  services.cliphist.enable = true;
+  systemd.user.services.cliphist.Service.Restart = lib.mkForce "always";
+  systemd.user.services.cliphist-images.Service.Restart = lib.mkForce "always";
 
   systemd.user.services.polkit-gnome-authentication-agent-1 = {
     Unit = {
