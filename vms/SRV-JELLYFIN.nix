@@ -1,4 +1,9 @@
-{ config, private-settings, ... }:
+{
+  config,
+  pkgs,
+  private-settings,
+  ...
+}:
 {
   vm = {
     id = 2201;
@@ -28,6 +33,11 @@
       "/dev/dri/renderD128"
     ];
   };
+
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-cjk-sans
+  ];
 
   users.users."${config.services.jellyfin.user}".extraGroups = [
     "render"
