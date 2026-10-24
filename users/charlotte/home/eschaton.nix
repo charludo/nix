@@ -21,6 +21,7 @@
   desktop = {
     bitwig.enable = true;
     daw.enable = true;
+    discord.enable = true;
     fcitx.enable = true;
     musescore.enable = true;
     pdfpc.enable = true;
