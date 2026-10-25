@@ -88,20 +88,10 @@ in
           )
         );
 
-        wyomingManifestFile = pkgs.writeText "ha-reconciler-wyoming.json" (
-          builtins.toJSON (
-            map (
-              r:
-              let
-                area = config.hass.devices.media_players.${lib.removePrefix "media_player." r.target}.area or null;
-              in
-              {
-                match_name = "${r.satellite}-satellite";
-                name = r.satellite;
-                area_slug = if area == null then null else lib.ha.mkSlug area;
-              }
-            ) (config.hass.ttsRelay or [ ])
-          )
+        # Pins each tts_relay satellite to `assist_satellite.<slug(name)>`, the
+        # id its route addresses. Rename-only; device name and area are UI-managed.
+        satelliteManifestFile = pkgs.writeText "ha-reconciler-satellites.json" (
+          builtins.toJSON (map (r: { name = r.satellite; }) (config.hass.ttsRelay or [ ]))
         );
       in
       {
@@ -112,7 +102,7 @@ in
         restartTriggers = [
           zhaManifestFile
           entityManifestFile
-          wyomingManifestFile
+          satelliteManifestFile
           pkgs.ours.home-assistant.ha-reconciler
         ];
         serviceConfig = {
@@ -127,7 +117,7 @@ in
             --token-file "$CREDENTIALS_DIRECTORY/token" \
             --manifest ${zhaManifestFile} \
             --entity-manifest ${entityManifestFile} \
-            --wyoming-manifest ${wyomingManifestFile} \
+            --satellite-manifest ${satelliteManifestFile} \
             || true
         '';
       };

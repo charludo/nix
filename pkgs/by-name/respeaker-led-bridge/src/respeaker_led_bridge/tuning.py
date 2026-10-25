@@ -9,7 +9,6 @@ import struct
 import usb.core
 import usb.util
 
-
 # id, offset, type, max, min, access
 PARAMETERS = {
     "AECFREEZEONOFF": (18, 7, "int", 1, 0, "rw"),
@@ -114,7 +113,7 @@ class Tuning:
         a, b = struct.unpack(b"ii", bytes(response))
         if type_ == "int":
             return a
-        return a * (2.0 ** b)
+        return a * (2.0**b)
 
     def close(self):
         usb.util.dispose_resources(self.dev)

@@ -14,15 +14,12 @@ in
     hardware.storage = "32G";
 
     networking.openPorts.tcp = [
-      (toPort wyoming.openwakeword.uri)
       (toPort wyoming.piper.servers.default.uri)
       (toPort wyoming.faster-whisper.servers.de.uri)
     ];
   };
 
   services.wyoming = {
-    openwakeword.enable = true;
-
     piper.servers.default = {
       enable = true;
       voice = "de_DE-thorsten-high";
@@ -33,7 +30,7 @@ in
       enable = true;
       model = "base";
       beamSize = 0;
-      language = "en";
+      language = "de";
       uri = "tcp://0.0.0.0:10300";
       # initialPrompt = ''
       # Das Folgende ist ein Befehl an einen Sprachassistenten.
@@ -41,5 +38,4 @@ in
       # '';
     };
   };
-  systemd.services."wyoming-faster-whisper-en".serviceConfig.ProcSubset = lib.mkForce "all";
 }
