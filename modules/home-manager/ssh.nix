@@ -25,7 +25,7 @@ in
 
         satellite-wohnzimmer = {
           hostname = "192.168.24.208";
-          User = "root";
+          User = "paki";
         };
 
         "${lib.concatStringsSep " " (builtins.attrNames lib.helpers.allVMSSHConfigs)}" = {

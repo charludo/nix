@@ -149,6 +149,7 @@ in
   config = lib.mkIf (cfg.intents != { }) {
     services.home-assistant.extraComponents = [
       "wyoming"
+      "esphome" # Linux-Voice-Assistant satellites speak the ESPHome API
       "assist_pipeline"
       "conversation"
       "intent_script"
