@@ -38,7 +38,23 @@
     mattermost-desktop
 
     anki
-    orca-slicer
+    (symlinkJoin {
+      name = "orca-slicer-${orca-slicer.version}-xwayland";
+      paths = [
+        (orca-slicer.override {
+          glew = glew.override {
+            enableEGL = false;
+          };
+        })
+      ];
+      nativeBuildInputs = [ makeWrapper ];
+      postBuild = ''
+        wrapProgram $out/bin/orca-slicer --set GDK_BACKEND x11
+      '';
+      meta = orca-slicer.meta // {
+        mainProgram = "orca-slicer";
+      };
+    })
 
     ours.nsenter
   ];
