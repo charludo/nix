@@ -486,7 +486,9 @@ in
       name = ''
         [[[
           const st = states["${ent.status}"]?.state ?? "unknown";
-          const rem = states["${ent.remaining}"]?.state;
+          const rs = states["${ent.remaining}"];
+          const mins = Math.round(parseFloat(rs?.state) * (({ d: 1440, h: 60, min: 1, s: 1 / 60 })[rs?.attributes?.unit_of_measurement] ?? 1));
+          const rem = isNaN(mins) ? "?" : mins >= 60 ? Math.floor(mins / 60) + " h " + (mins % 60) : String(mins);
           const lay = states["${ent.layer}"]?.state;
           const tot = states["${ent.layerTotal}"]?.state;
           if (st === "running") {

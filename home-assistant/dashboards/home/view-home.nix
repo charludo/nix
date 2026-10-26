@@ -94,7 +94,7 @@ in
               name = "X1C druckt";
               icon = "mdi:printer-3d-nozzle";
               entity = "sensor.x1c_druckstatus";
-              label = "[[[ const rem = states['sensor.x1c_verbleibende_zeit']?.state ?? '?'; const lay = states['sensor.x1c_aktuelle_schicht']?.state ?? '?'; const tot = states['sensor.x1c_gesamtzahl_der_schichten']?.state ?? '?'; return 'noch ' + rem + ' min · Layer ' + lay + '/' + tot; ]]]";
+              label = "[[[ const rs = states['sensor.x1c_verbleibende_zeit']; const mins = Math.round(parseFloat(rs?.state) * (({ d: 1440, h: 60, min: 1, s: 1 / 60 })[rs?.attributes?.unit_of_measurement] ?? 1)); const rem = isNaN(mins) ? '?' : mins >= 60 ? Math.floor(mins / 60) + ' h ' + (mins % 60) : String(mins); const lay = states['sensor.x1c_aktuelle_schicht']?.state ?? '?'; const tot = states['sensor.x1c_gesamtzahl_der_schichten']?.state ?? '?'; return 'noch ' + rem + ' min · Layer ' + lay + '/' + tot; ]]]";
               # mkStatusBanner requires a `service`; tapNavigatePath
               # overrides tap_action to navigate instead. The service
               # is harmless because it never fires.

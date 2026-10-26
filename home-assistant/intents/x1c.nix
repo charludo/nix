@@ -15,7 +15,9 @@ in
       script.speech.text = ''
         {% set st = states('${status}') %}
         {% if st == 'running' or st == 'pause' %}
-          {% set rem = states('${remaining}') | int(0) %}
+          {% set unit = state_attr('${remaining}', 'unit_of_measurement') %}
+          {% set factor = {'d': 1440, 'h': 60, 'min': 1, 's': 1 / 60}.get(unit, 1) %}
+          {% set rem = (states('${remaining}') | float(0) * factor) | round(0) | int %}
           {% set tot = states('${layerTotal}') | int(0) %}
           {% set lay = tot - (states('${layer}') | int(0)) %}
           {% if rem >= 60 %}
