@@ -8,7 +8,7 @@ Done: satellite, speech-to-text and text-to-speech. Open: wake word reliability 
 
 **Satellite (Pi 4, `home-assistant/satellite`)**
 
-- ReSpeaker Mic Array v2.0 with the 1-channel firmware v3.0.0 (`respeaker-dfu`); DSP on chip defaults, the earlier tuning kept in `dsp-tuning.nix`.
+- ReSpeaker Mic Array v2.0 with the 1-channel firmware v3.0.0 (`respeaker-dfu`); DSP on chip defaults except a small noise/high-pass tuning (section 4).
 - Linux-Voice-Assistant as a system service (`services.linux-voice-assistant`), microWakeWord on the Pi, HA connects via the ESPHome integration. LED ring follows LVA (`hardware.respeaker-mic-array.leds`).
 - Wi-Fi: Nix-written profile pinned to 2.4 GHz, power saving and PMF off (NetworkManager 1.58 picks WPA3/SAE on the mixed-mode AP; brcmfmac can't do it).
 
@@ -68,7 +68,7 @@ Benchmark corpus, scripts, results and TTS samples: `voice-pipeline-scratchpad-2
 
 Not possible / dropped: Qwen3-ASR on the NPU (GenAI hands the NPU dynamic shapes; [PR #4389](https://github.com/openvinotoolkit/openvino.genai/pull/4389) would fix it, closed unmerged), FluidInference's Whisper turbo NPU export (incompatible with GenAI), Whisper large-v3 on the NPU (compiles, then the first inference fails with `ZE_RESULT_ERROR_UNINITIALIZED`), whisper-tiny-german (crashes in PyTorch), distil-whisper-large-v3-german and the generic turbo on the NPU (not worth it).
 
-Deployed: transcripts identical to the benchmark run.
+Deployed: transcripts identical to the benchmark run. Encoder buckets 1.8/3.2/5/10 s, all compiled at startup (cached; ready ~12 s after start): 93 ms per command (was 105 ms with 5/10 s), accuracy unchanged. Commands in the corpus: 2.5 s median, 5.4 s max; longer audio is truncated to 10 s. A 20 s bucket needs ~11 GB to compile and gets OOM-killed even at 12 GB.
 
 ## 2. Text-to-speech: Pocket TTS (German)
 
@@ -110,7 +110,7 @@ Notes on the live setup (`pkgs/by-name/pocket-tts-german-wyoming`, `systemd.serv
 
 ## 3. Voice VM sizing
 
-Measured Oct 26 from hub over the network. RAM: 4.5 GB used in total (Parakeet 3.0 GB, Pocket 0.7 GB), no paging at 8 GB; only Parakeet's first start or a model change peaks at ~11 GB. STT needs ~0.2 CPU-s per command (the NPU does the work); TTS is the only real CPU user.
+Measured Oct 26 from hub over the network. RAM: 4.5 GB used in total (Parakeet 3.0 GB, Pocket 0.7 GB), no paging at 8 GB; set to 12 GB for headroom when buckets compile (first start or a model change). STT needs ~0.2 CPU-s per command (the NPU does the work); TTS is the only real CPU user.
 
 | vCPUs | Affinity | STT / command (mean, p95) | TTS first audio (mean, p95) | TTS RTF |
 | --- | --- | --- | --- | --- |
@@ -122,12 +122,34 @@ Proxmox affinity applies to the whole VM, so with E-cores in the set the vCPUs d
 
 ## 4. Wake word: more reliable
 
-Observed: good from close up; from far away bad; from medium distance facing away atrocious. Workaround so far: sensitivity 0.5 and medium noise suppression on the device page. The bundled `hey_jarvis`/`okay_computer` ship with a cutoff of 0.97, which silently drops most slightly unclear attempts.
+Wake word: microWakeWord `okay_nabu` (trained on German among others; `okay_computer` and `hey_jarvis` are English-only). The HA "sensitivity" is the detection threshold itself (model default 0.85; lower = more permissive). Two wake words can be active at once.
 
-- [ ] Measure first, same protocol for every change: missed wakes (20 tries each at 1 m, far, and facing away), false wakes (24 h with TV or radio on).
-- [ ] Wake word models: switch to a "computer" microWakeWord model shipped via `--wake-word-dir` (community: JohnnyPrimus, cutoff 0.66; TaterTotterson, cutoff 0.97); compare with `okay_nabu` (best-trained bundled model, cutoff 0.85). Watch the cutoff.
-- [ ] Audio: compare DSP chip defaults with the old tuning (`dsp-tuning.nix`, apply via `hardware.respeaker-mic-array.tuning`) and LVA's own gain/noise suppression; placement of the array (walls, TV speaker).
-- [ ] Later: a custom wake word trained on recordings from this room.
+**Base test (Oct 26)**, all defaults (threshold 0.85, LVA gain and noise suppression off, chip DSP defaults): 20 attempts per situation, recorded raw on the satellite and scored offline with the same model (reproduces all 91 live detections). Recording, scripts and results: `ww/` in the scratchpad archive.
+
+| Situation | Attempts found | at 0.85 | at 0.70 | at 0.60 | at 0.50 | Median score |
+| --- | --- | --- | --- | --- | --- | --- |
+| quiet, near | 20 | 20 | 20 | 20 | 20 | 0.97 |
+| quiet, far | 20 | 13 | 13 | 16 | 18 | 0.92 |
+| quiet, couch | 23 | 19 | 22 | 22 | 22 | 0.96 |
+| music, near | 20 | 7 | 10 | 11 | 11 | 0.69 |
+| music, far | 9¹ | 4 | 6 | 7 | 8 | 0.81 |
+| music, couch | 22 | 5 | 5 | 8 | 9 | 0.33 |
+| TV, near | 19 | 14 | 17 | 18 | 18 | 0.93 |
+| TV, far | 20 | 15 | 18 | 19 | 19 | 0.91 |
+| TV, couch | 21 | 4 | 7 | 9 | 10 | 0.33 |
+
+¹ The other music/far attempts left no score at all.
+
+- The voice arrives at −24 to −26 dBFS everywhere: the chip's AGC already levels it. LVA's auto gain made things slightly worse, its noise suppression changed nothing (±1 attempt) → both off.
+- Threshold 0.5 rescues far and TV near/far; no peak ≥ 0.5 in 8 min of pauses and conversation. False wakes during TV dialogue can't be told apart in this recording.
+- What remains is masking (music, and TV at the couch), which the threshold can't fix.
+
+Chip DSP (read from the array; firmware defaults otherwise): now `MIN_NN_SR` 0.3 → 0.15 (deeper suppression of non-stationary noise on the ASR output), `HPFONOFF` 1 → 2 (125 Hz high-pass against music bass), `CNIONOFF` 1 → 0 (no comfort noise), in `home-assistant/satellite/default.nix` (`hardware.respeaker-mic-array.tuning`). `GAMMA_NN_SR` is locked at 1.1 in the 1-channel firmware. The old 6-channel tuning (`dsp-tuning.nix`) is discarded.
+
+- [ ] Step 1b (running since Oct 26, 14:35): real-world use with threshold 0.5 and the chip tuning above; count misses and false wakes from LVA's log (`ww/step1b.sh` in the scratchpad archive).
+- [ ] If masking stays bad: re-record music near/couch and TV couch (~10 attempts each) to compare chip variants (e.g. `MIN_NN_SR` 0.1), and try placement (array vs. Sonos, TV, couch).
+- [ ] Optional: "computer" community models (JohnnyPrimus, cutoff 0.66; TaterTotterson, cutoff 0.97) against `okay_nabu` with the same recorded protocol.
+- [ ] Later: a custom wake word trained on recordings from this room (with its TV/music as negatives).
 
 ## Sources
 
