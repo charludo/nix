@@ -13,6 +13,7 @@ in
     ./client.nix
     ./certs.nix
     ./gpu.nix
+    ./npu.nix
     ./unsupervised-updates.nix
   ];
 
@@ -44,6 +45,16 @@ in
       storage = lib.mkOption {
         type = lib.types.str;
         description = "disk size of the VM. For use with proxmox";
+      };
+      affinity = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "0-3";
+        description = ''
+          Host CPUs the VM's vCPUs may run on (Proxmox `affinity`, a cpuset
+          list). Only applied when the image is created; an existing VM needs
+          `qm set <id> --affinity <list>` on the host.
+        '';
       };
     };
 
@@ -136,6 +147,9 @@ in
         ide2 = lib.mkForce "none,media=cdrom";
         kvm = 1;
         onboot = 1;
+      }
+      // lib.optionalAttrs (config.vm.hardware.affinity != null) {
+        inherit (config.vm.hardware) affinity;
       };
       virtualisation.diskSize = "auto";
     };

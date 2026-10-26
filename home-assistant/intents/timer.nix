@@ -30,7 +30,7 @@ in
     TimerStellenMinuten = {
       sentences = [
         "[Stelle|Starte] [einen] Timer (für|auf) {timer_minutes:minutes} Minuten"
-        "{timer_minutes:minutes} Minuten an jetzt"
+        "{timer_minutes:minutes} Minuten ab jetzt"
       ];
       script = {
         action = startTimer "(minutes | int) * 60";
