@@ -24,6 +24,7 @@
     ./sonos.nix
     ./timers.nix
     ./voice.nix
+    ./waste.nix
     ./weather.nix
     ./xiaomi.nix
   ];
