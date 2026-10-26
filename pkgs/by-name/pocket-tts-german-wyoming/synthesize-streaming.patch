@@ -1,0 +1,27 @@
+diff --git a/crates/pocket-tts-wyoming/src/server.rs b/crates/pocket-tts-wyoming/src/server.rs
+index e67984d..6a648b8 100644
+--- a/crates/pocket-tts-wyoming/src/server.rs
++++ b/crates/pocket-tts-wyoming/src/server.rs
+@@ -122,7 +122,7 @@ fn info(shared: &Shared) -> Event {
+     let voices=shared.voices.values().map(|v|json!({"name":v.name,"languages":["de-DE"],"attribution":attribution,"installed":true,"description":v.name,"version":shared.model.revision})).collect::<Vec<_>>();
+     Event::new(
+         "info",
+-        json!({"asr":[],"tts":[{"name":"pocket-tts","attribution":attribution,"installed":ready,"description":"Native Rust Pocket TTS, german, incremental PCM audio","version":env!("CARGO_PKG_VERSION"),"voices":voices,"supports_synthesize_streaming":false}],"wake":[],"handle":[],"intent":[],"mic":[],"snd":[],"ready":ready,"pocket_tts":{"model":shared.model.language,"model_revision":shared.model.revision,"precision":shared.model.precision,"default_voice":shared.settings.voice,"voice_count":shared.voices.len(),"speed":shared.settings.speed,"busy":shared.busy.load(Ordering::Acquire)}}),
++        json!({"asr":[],"tts":[{"name":"pocket-tts","attribution":attribution,"installed":ready,"description":"Native Rust Pocket TTS, german, incremental PCM audio","version":env!("CARGO_PKG_VERSION"),"voices":voices,"supports_synthesize_streaming":true}],"wake":[],"handle":[],"intent":[],"mic":[],"snd":[],"ready":ready,"pocket_tts":{"model":shared.model.language,"model_revision":shared.model.revision,"precision":shared.model.precision,"default_voice":shared.settings.voice,"voice_count":shared.voices.len(),"speed":shared.settings.speed,"busy":shared.busy.load(Ordering::Acquire)}}),
+     )
+ }
+ fn send_error(stream: &mut TcpStream, code: &str, error: impl std::fmt::Display) -> Result<()> {
+@@ -329,6 +329,13 @@ fn connection(mut stream: TcpStream, shared: Arc<Shared>, connection_id: usize)
+                     synthesize(&mut stream, &event.data, &shared)?;
+                 }
+             }
++            // Streaming input: clients (Home Assistant) send synthesize-start,
++            // the text chunks, the full text as a plain synthesize (answered
++            // above, audio streamed as generated), then synthesize-stop.
++            "synthesize-start" | "synthesize-chunk" => {}
++            "synthesize-stop" => {
++                protocol::write_event(&mut stream, &Event::new("synthesize-stopped", json!({})))?
++            }
+             _ => send_error(
+                 &mut stream,
+                 "unsupported-event",

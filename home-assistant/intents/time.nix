@@ -12,6 +12,7 @@
     ZeitDatum = {
       sentences = [
         "(Welches|Was für ein) Datum (haben wir|ist heute)"
+        "Was ist [heute] das Datum"
         "Datum"
       ];
       script.speech.text = ''
@@ -23,6 +24,7 @@
       sentences = [
         "Welcher (Tag|Wochentag) ist heute"
         "Was ist heute für ein (Wochentag|Tag)"
+        "Wochentag"
       ];
       script.speech.text = ''
         Heute ist {{ ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'][now().weekday()] }}.

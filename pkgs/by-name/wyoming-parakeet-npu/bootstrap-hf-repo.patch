@@ -1,0 +1,46 @@
+diff --git a/scripts/bootstrap.py b/scripts/bootstrap.py
+index 2fa3b28..07eabb3 100644
+--- a/scripts/bootstrap.py
++++ b/scripts/bootstrap.py
+@@ -12,7 +12,10 @@ import time
+ from pathlib import Path
+ 
+ 
+-HF_REPO = "istupakov/parakeet-tdt-0.6b-v3-onnx"
++# Any export with the same inputs and outputs works (e.g. Parakeet Ultra);
++# files it lacks (such as the shared mel preprocessor) come from v3.
++FALLBACK_REPO = "istupakov/parakeet-tdt-0.6b-v3-onnx"
++HF_REPO = os.environ.get("HF_REPO", FALLBACK_REPO)
+ 
+ # Files we need locally. Some are pulled by onnx-asr's HF auto-download for the
+ # INT8 pipeline init, but we fetch all of them explicitly so the first run is
+@@ -31,19 +34,23 @@ REQUIRED_FILES = [
+ 
+ def download_if_missing(model_dir: Path) -> None:
+     from huggingface_hub import hf_hub_download
++    from huggingface_hub.errors import EntryNotFoundError
+ 
+     model_dir.mkdir(parents=True, exist_ok=True)
+     for fname in REQUIRED_FILES:
+         target = model_dir / fname
+         if target.exists() and target.stat().st_size > 0:
+             continue
+-        print(f"[bootstrap] Downloading {fname} from {HF_REPO} ...", flush=True)
+         t0 = time.perf_counter()
+-        hf_hub_download(
+-            repo_id=HF_REPO,
+-            filename=fname,
+-            local_dir=str(model_dir),
+-        )
++        for repo in dict.fromkeys([HF_REPO, FALLBACK_REPO]):
++            print(f"[bootstrap] Downloading {fname} from {repo} ...", flush=True)
++            try:
++                hf_hub_download(repo_id=repo, filename=fname, local_dir=str(model_dir))
++                break
++            except EntryNotFoundError:
++                print(f"[bootstrap]   not in {repo}", flush=True)
++        else:
++            raise SystemExit(f"[bootstrap] FATAL: {fname} found in no repo")
+         print(
+             f"[bootstrap]   done in {time.perf_counter()-t0:.1f}s "
+             f"({target.stat().st_size / 1e6:.1f} MB)",

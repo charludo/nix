@@ -35,6 +35,8 @@ in
         "Musik (fortsetzen|weiter)"
         "(Mache|Setze) Musik fort"
         "(Fortsetzen|Weiter abspielen|Weiterspielen|Spiel weiter)"
+        "Wiedergabe (fortsetzen|weiter)"
+        "Setze [die] Wiedergabe fort"
       ];
       script = {
         action = [
