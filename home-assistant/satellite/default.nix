@@ -72,10 +72,20 @@
   # the same treatment:
   #   sudo respeaker-dfu --download \
   #     $(nix build --print-out-paths .#respeaker-dfu)/share/respeaker/1_channel_firmware.bin
-  # The DSP runs on chip defaults; the earlier tuning is in ./dsp-tuning.nix.
   hardware.respeaker-mic-array = {
     enable = true;
     leds = true;
+    # Chip defaults except for these. The base wake word test (Oct 26) failed
+    # mostly where music or TV masked the voice, so: deeper suppression of
+    # non-stationary noise on the ASR output (default floor 0.3; GAMMA_NN_SR
+    # is locked at 1.1 in the 1-channel firmware and ignores writes), a
+    # 125 Hz high-pass instead of 70 Hz against music bass driving the AGC,
+    # and no comfort noise.
+    tuning = {
+      MIN_NN_SR = 0.15;
+      HPFONOFF = 2;
+      CNIONOFF = 0;
+    };
   };
 
   # Wake word, pipeline, sensitivity, finished-speaking detection and the

@@ -42,7 +42,8 @@ in
     # the P-cores. Only applied when the image is created; on the existing VM:
     # `qm set 2402 --cores 4 --affinity 0-3`.
     hardware.affinity = "0-3";
-    hardware.memory = 8192;
+    # 4.5 GB in use; headroom for compiling the encoder buckets at startup.
+    hardware.memory = 12288;
     hardware.storage = "64G";
 
     networking.openPorts.tcp = [
@@ -105,11 +106,14 @@ in
         "de"
         "--device"
         "NPU"
-        # Commands run up to ~11 s; keep padding small.
+        # Commands take 2.5 s (median), 3.4 s (90 %), 5.4 s at most in our 100
+        # test recordings. Audio longer than the largest bucket is truncated,
+        # which only hits TV or stray speech. All buckets compile at startup and
+        # are cached in ov_cache (a 20 s bucket needs ~11 GB of RAM to compile).
         "--encoder-buckets"
-        "5,10"
+        "1.8,3.2,5,10"
         "--encoder-lazy-buckets"
-        "20"
+        ""
       ];
       DynamicUser = true;
       StateDirectory = lib.removePrefix "/var/lib/" stt.dataDir;
