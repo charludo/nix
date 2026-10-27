@@ -66,7 +66,7 @@ in
         { delay.milliseconds = reminderDurationMs; }
       ]
       ++ [
-        (playOnAll "media-source://tts/tts.piper?message={{ ((sender | default('Jemand', true)) ~ ' sagt: ' ~ message) | urlencode }}")
+        (playOnAll "media-source://tts/${config.hass.voice.ttsEntity}?message={{ ((sender | default('Jemand', true)) ~ ' sagt: ' ~ message) | urlencode }}")
         {
           action = "input_text.set_value";
           target.entity_id = "input_text.broadcast_message";

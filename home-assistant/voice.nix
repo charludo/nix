@@ -4,6 +4,7 @@ let
 in
 {
   hass.voice.defaultLanguage = "de";
+  hass.voice.ttsEntity = "tts.pocket_tts";
   hass.voice.extraConfig.de.skip_words = [ ];
   hass.voice.disableBuiltinIntents = [
     "HassGetWeather"

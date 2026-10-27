@@ -146,9 +146,10 @@ Wake word: microWakeWord `okay_nabu` (trained on German among others; `okay_comp
 
 Chip DSP (read from the array; firmware defaults otherwise): now `MIN_NN_SR` 0.3 → 0.15 (deeper suppression of non-stationary noise on the ASR output), `HPFONOFF` 1 → 2 (125 Hz high-pass against music bass), `CNIONOFF` 1 → 0 (no comfort noise), in `home-assistant/satellite/default.nix` (`hardware.respeaker-mic-array.tuning`). `GAMMA_NN_SR` is locked at 1.1 in the 1-channel firmware. The old 6-channel tuning (`dsp-tuning.nix`) is discarded.
 
-- [ ] Step 1b (running since Oct 26, 14:35): real-world use with threshold 0.5 and the chip tuning above; count misses and false wakes from LVA's log (`ww/step1b.sh` in the scratchpad archive).
+- [x] Step 1b (running since Oct 26, 14:35): real-world use with threshold 0.5 and the chip tuning above; count misses and false wakes from LVA's log (`ww/step1b.sh` in the scratchpad archive).
 - [ ] If masking stays bad: re-record music near/couch and TV couch (~10 attempts each) to compare chip variants (e.g. `MIN_NN_SR` 0.1), and try placement (array vs. Sonos, TV, couch).
-- [ ] Optional: "computer" community models (JohnnyPrimus, cutoff 0.66; TaterTotterson, cutoff 0.97) against `okay_nabu` with the same recorded protocol.
+- [ ] Repeat 1b. The satellite now logs every activation by itself (`services.linux-voice-assistant.activationLog`): `/var/lib/lva-activation-log/activations.jsonl` with wake word, transcript, reply, errors and event timings, plus a WAV per activation (4 s before the wake word until idle, audio kept 30 days).
+- [ ] Optional: "computer" community models (JohnnyPrimus, cutoff 0.66; TaterTotterson, cutoff 0.97) against `okay_nabu` with the same recorded protocol. Both are on the satellite as `computer_johnnyprimus` and `computer_tatertotterson` (`pkgs/by-name/computer-wake-words`, via `services.linux-voice-assistant.wakeWordDirs`).
 - [ ] Later: a custom wake word trained on recordings from this room (with its TV/music as negatives).
 
 ## Sources

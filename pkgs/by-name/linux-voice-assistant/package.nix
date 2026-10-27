@@ -37,6 +37,10 @@ python3Packages.buildPythonApplication rec {
     setuptools-scm
   ];
 
+  # Name the wake word in the peripheral API's `wake_word_detected` event;
+  # upstream sends it without data. Used by the activation log.
+  patches = [ ./wake-word-event-data.patch ];
+
   # The version is meant to come from git (setuptools-scm) for the package
   # metadata and from version.txt (written by upstream's Docker build) at
   # runtime; neither exists in a source tarball.

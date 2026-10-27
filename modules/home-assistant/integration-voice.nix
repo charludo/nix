@@ -97,6 +97,12 @@ in
       description = "Fallback language for intents that don't set language";
     };
 
+    ttsEntity = lib.mkOption {
+      type = lib.types.str;
+      example = "tts.pocket_tts";
+      description = "TTS entity used for announcements outside the assist pipeline (timers, broadcasts)";
+    };
+
     extraConfig = lib.mkOption {
       type = lib.types.attrsOf yamlFormat.type;
       default = { };
