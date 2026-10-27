@@ -55,6 +55,7 @@
         mainProgram = "orca-slicer";
       };
     })
+    freecad
 
     ours.nsenter
   ];
