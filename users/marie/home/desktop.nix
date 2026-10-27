@@ -25,4 +25,5 @@
 
   projects = private-settings.just-nix-projects;
   accounts.email.accounts = private-settings.marie.accounts;
+  accounts.calendar.accounts = private-settings.marie.calendars;
 }

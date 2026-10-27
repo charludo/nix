@@ -6,12 +6,13 @@
   ...
 }:
 let
-  inherit (private-settings) domains;
+  inherit (private-settings) domains radicale;
 
   mailAccounts = config.mailserver.accounts;
   htpasswd = pkgs.writeText "radicale.users" (
     lib.concatStrings (
       lib.flip lib.mapAttrsToList mailAccounts (mail: user: mail + ":" + user.hashedPassword + "\n")
+      ++ lib.mapAttrsToList (name: hash: name + ":" + hash + "\n") radicale.extraLogins
     )
   );
 in
@@ -24,6 +25,31 @@ in
       htpasswd_encryption = "bcrypt";
     };
     settings.web.type = "internal";
+    rights = {
+      root = {
+        user = ".+";
+        collection = "";
+        permissions = "R";
+      };
+      principal = {
+        user = ".+";
+        collection = "{user}";
+        permissions = "RW";
+      };
+      calendars = {
+        user = ".+";
+        collection = "{user}/[^/]+";
+        permissions = "rw";
+      };
+    }
+    // lib.mapAttrs' (
+      path: members:
+      lib.nameValuePair "shared ${path}" {
+        user = "^(${lib.concatMapStringsSep "|" lib.escapeRegex members})$";
+        collection = lib.escapeRegex path;
+        permissions = "rw";
+      }
+    ) radicale.shared;
   };
 
   services.nginx = {
