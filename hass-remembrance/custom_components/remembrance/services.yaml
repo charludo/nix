@@ -1,0 +1,131 @@
+# Every service returns {status, items, candidates?, reason?} when asked for a
+# response. status: ok | ambiguous (nothing done, see candidates) | no_match |
+# invalid. Without a response, anything but ok is raised as an error.
+
+.target: &target
+  id:
+    name: ID
+    description: Item ID(s).
+    selector:
+      text:
+        multiple: true
+  entity_id:
+    name: Entity
+    description: The item's entity (a timer's sensor).
+    selector:
+      entity:
+        integration: remembrance
+        multiple: true
+  label:
+    name: Label
+    description: The item's label, matched fuzzily.
+    selector:
+      text:
+  duration:
+    name: Set duration
+    description: The duration a timer was set to ("the 5-minute timer").
+    selector:
+      duration:
+  remaining:
+    name: Time left
+    description: Roughly how much time is left.
+    selector:
+      duration:
+  area:
+    name: Area
+    description: Breaks ties between otherwise equal matches.
+    selector:
+      area:
+  all:
+    name: All
+    description: Every matching item instead of exactly one.
+    default: false
+    selector:
+      boolean:
+
+timer_start:
+  name: Start timer
+  fields:
+    duration:
+      name: Duration
+      required: true
+      selector:
+        duration:
+    label:
+      name: Label
+      selector:
+        text:
+    area:
+      name: Area
+      description: Where it rings.
+      selector:
+        area:
+
+timer_adjust:
+  name: Adjust timer
+  description: Add or remove time, or set the time left. Exactly one timer.
+  fields:
+    <<: *target
+    delta:
+      name: Change
+      description: Seconds to add, negative to remove (or "-00:01:00").
+      example: 60
+      selector:
+        number:
+          min: -86400
+          max: 86400
+          unit_of_measurement: s
+    set_remaining:
+      name: Set time left
+      selector:
+        duration:
+
+timer_pause:
+  name: Pause timer
+  fields: *target
+
+timer_resume:
+  name: Resume timer
+  fields: *target
+
+timer_cancel:
+  name: Cancel timer
+  fields: *target
+
+dismiss:
+  name: Dismiss
+  description: Stop ringing. Without a target, everything ringing (in the area, if given).
+  fields: *target
+
+snooze:
+  name: Snooze
+  description: >-
+    Ring again later. Without a target, what is ringing, else what rang last
+    (in the area, if given).
+  fields:
+    <<: *target
+    delay:
+      name: Delay
+      description: Defaults to the configured snooze delay.
+      selector:
+        duration:
+
+query:
+  name: Query
+  description: List items, soonest first.
+  fields:
+    <<: *target
+    kind:
+      name: Kind
+      selector:
+        select:
+          options:
+            - timer
+    state:
+      name: State
+      selector:
+        select:
+          options:
+            - running
+            - paused
+            - ringing

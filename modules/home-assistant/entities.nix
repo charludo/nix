@@ -61,7 +61,6 @@ in
           sensor = cfg.devices.sensors;
           script = cfg.scripts;
           automation = cfg.automations;
-          timer = cfg.timers;
         }
     ++ [
       {

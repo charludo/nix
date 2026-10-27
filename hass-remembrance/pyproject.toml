@@ -1,0 +1,37 @@
+[project]
+name = "remembrance"
+version = "0.1.0"
+description = "Central timers, reminders and alarms for Home Assistant, by voice and from your calendar."
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+requires-python = ">=3.13"
+authors = [{ name = "Charlotte Hartmann Paludo" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["remembrance"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E402", "F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]

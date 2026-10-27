@@ -15,70 +15,104 @@ HA's built-in voice timers are bound to the satellite that set them, relative on
 ## Decisions
 
 - **Self-made, standalone project `hass-remembrance`:** installable via HACS, configured in HA's UI. Our setup only consumes it. Lives in this repo while we iterate quickly; moves to its own repo next to `hass-closest-intent` once it settles.
+- **Just an engine:** state, scheduling and an API (services, entities, events). How it's used (voice, UI, automations) is up to the caller; no sentences or response texts in the engine. Our voice intents and announcement texts are defined in Nix.
 - **The calendar is the source of truth** for reminders and alarms: Radicale on gsv (`hosts/gsv/services/radicale.nix`). Voice and Thunderbird (or any client) edit the same entries, so no UI of our own for recurring things. Radicale keeps every iCalendar field as written and supports sync tokens.
-- **Categories mark what the integration handles:** `HomeAssistant Reminder`, `HomeAssistant Alarm`, more kinds later. Untagged entries are never touched, so the entries can live in any calendar.
-- **Location is the room:** free text (iCalendar has no select list), fuzzy-matched against the configured room names. Only read on tagged entries; no match or empty means the configured default, plus a warning in HA's log.
+- **Categories mark what the engine handles:** `HomeAssistant Reminder`, `HomeAssistant Alarm`, more kinds later. Untagged entries are never touched, so the entries can live in any calendar.
+- **Location is the room:** free text (iCalendar has no select list), fuzzy-matched against HA's area names. Only read on tagged entries; no match or empty means the configured default, plus a warning in HA's log.
 - **Rings only at the entry's own reminders (`VALARM`):** no automatic ring at the start time. On the dot only if a 0-minute reminder is set. Tagged entries without any reminder stay silent and get a log note.
-- **Runtime state stays in the integration** (announced, snoozed until, acknowledged), keyed by the entry's ID and occurrence. Nothing is written back for it, so no sync conflicts with Thunderbird.
-- **Timers are not calendar entries:** they're too short-lived for a calendar sync. They live only in the integration, central rather than per satellite, with no limit on how many run in parallel.
+- **Disabled alarms are disabled in the calendar too:** event status `CANCELLED` (Thunderbird's Status field), so it's visible and reversible there.
+- **Other runtime state stays in the engine** (rung, snoozed until, dismissed), keyed by the entry's ID and occurrence. Nothing is written back for it, so no sync conflicts with Thunderbird.
+- **Timers are not calendar entries:** they're too short-lived for a calendar sync. They live only in the engine, central rather than per satellite, with no limit on how many run in parallel.
+- **Ringing goes through a script hook:** each ring round calls a configured script with the item's data; the engine decides when, the script how it sounds. A simple built-in fallback (sound plus a generic text on a configured media player) comes with publishing, for setups without a script.
+- **Ambiguous targets do nothing:** the response lists the candidates, so the caller can ask back. Acting on a guess (extending the wrong timer) is worse than asking.
 
-## Concept
+## Engine API
 
-**Sync and ringing**
+**Items:** timers, reminders and alarms, each with an ID, kind, label, area and state (`running`, `paused`, `scheduled`, `ringing`, `snoozed`). Every service can return data (`supports_response`).
 
-- Poll the calendar every minute with a sync token; only changed entries come back.
-- Schedule exact ring times locally from the reminders, including repeat rules and their exceptions.
-- Keep the last synced state in HA's storage, so alarms still ring when Radicale or the internet is down.
-- After a restart, re-schedule. Anything missed while HA was down rings immediately if it's only minutes late, otherwise it's marked missed.
-- The integration's own writes (voice) take effect immediately, without waiting for the next poll.
+**Target** (shared by all services acting on existing items):
 
-**Playback**
+- precise: `id` or `entity_id` (UI buttons);
+- descriptive, any combination: `label` (fuzzy), `duration` (as set: "the 5-minute timer"), `remaining` (approximate), `area` (only breaks ties);
+- everything: `all: true`.
+- Ambiguous: nothing happens, the response contains `candidates`.
 
-- Room from the Location field, mapped to a media player in the config. Generic HA announcement (`play_media` with `announce`), so tts_relay's ducking keeps working here.
-- The kind's sound, then TTS. Alarms optionally with slowly rising volume, repeating until stopped or a time limit runs out.
+| Area | Service | Parameters | Response |
+|---|---|---|---|
+| Timers | `timer_start` | `duration`, `label`?, `area`? | the item |
+| | `timer_adjust` | target, `delta` (+/−) or `set_remaining` (set the time left; `remaining` is a target field) | the item |
+| | `timer_pause` / `timer_resume` | target | the item |
+| | `timer_cancel` | target or `all` | cancelled items |
+| Reminders | `reminder_create` | `summary`, `at` or `in`, `alerts` (offsets, default `[0]`), `area`? | the item (written to the calendar with category, location and reminders) |
+| | `reminder_delete` | target | |
+| Alarms | `alarm_create` | `time`, `days`/repeat rule?, `label`?, `area`? | the item (calendar event) |
+| | `alarm_skip` | target, `date` (default: next occurrence) | the item; an exception date in the calendar ("Wecker morgen aus") |
+| | `alarm_enable` / `alarm_disable` | target | the item; status `CANCELLED` in the calendar while disabled |
+| | `alarm_delete` | target | |
+| Ringing (all kinds) | `dismiss` | target, default: everything ringing (optionally only in `area`) | dismissed items |
+| | `snooze` | target (default: whatever rang last, optionally in `area`), `delay`? (default from config) | the item with its new time |
+| Queries | `query` | `kind`?, `state`?, target fields?, time window `from`/`to`? | items incl. time left, next ring time, next reminder |
 
-**Announcement text**
+**Entities**
 
+- One sensor per running timer, showing when it ends (live countdown in the frontend), all fields as attributes. Created and removed with the timer.
+- A calendar entity with the upcoming tagged entries.
+- One switch per recurring alarm (enabled or not; mirrors the calendar status).
+- Sensors: "next alarm" (timestamp) and "ringing" (on/off, the ringing items as attributes).
+
+**Events:** `remembrance_ringing` (per ring round: item, round number, next reminder of the same occurrence, pending snooze), `remembrance_dismissed`, `remembrance_snoozed`, `remembrance_missed`, `remembrance_changed`.
+
+**Config:** CalDAV connection and calendar, category names, ring script, repeat rhythm and time limit per kind, default snooze delay, default area.
+
+## Engine behaviour
+
+- **Sync:** poll the calendar every minute with a sync token; only changed entries come back. The engine's own writes take effect immediately.
+- **Scheduling:** exact ring times locally, from the reminders including repeat rules and their exceptions.
+- **Offline:** the last synced state is kept in HA's storage, so alarms still ring when Radicale or the internet is down.
+- **Restarts:** re-schedule everything. Missed while HA was down: ring immediately if only minutes late, otherwise `remembrance_missed`.
+- **Ringing:** repeats per the kind's rhythm until dismissed, snoozed or the time limit runs out.
+- **Snooze without a target** means whatever rang last (in the given area, else anywhere). Prepares the later global "noch mal".
+
+## Our setup (Nix)
+
+**Ring script:** speaker per area via tts_relay's routes, the kind's sound, then TTS via `hass.voice.ttsEntity`. Alarms optionally with slowly rising volume. Generic HA announcement (`play_media` with `announce`), so tts_relay's ducking keeps working.
+
+**Announcement texts** (built from the event data):
+
+- Timer: "Der Nudel-Timer ist abgelaufen."
 - Reminder: "Erinnerung: Zahnarzt in 30 Minuten."
-- If another reminder of the same occurrence follows: "Ich erinnere dich 5 Minuten vorher noch mal." If that next one is at the start time: "… zum Beginn noch mal." No addition after the last one.
-- The time is relative to the event's start, as Thunderbird shows it.
-- A pending repeat ("noch mal", below) that comes before the next reminder is announced instead.
+- If another reminder of the same occurrence follows: "Ich erinnere dich 5 Minuten vorher noch mal." If that next one is at the start time: "… zum Beginn noch mal." No addition after the last one. Times relative to the event's start, as Thunderbird shows them.
+- A pending snooze that comes before the next reminder is announced instead.
 
-**Voice**
+**Voice intents** (`hass.voice.intents`, calling the engine's services and building the replies from their responses):
 
 | Kind | Sentences |
 |---|---|
 | Timers | "Nudel-Timer auf 8 Minuten", "Timer auf 5 Minuten", "5-Minuten-Timer um 1 Minute verlängern", "Pausiere den Timer", "Wie lange noch?", "Lösche den Nudel-Timer" |
 | Reminders | "Erinnere mich Samstag um 13 Uhr an …", "… morgen früh an …", "… in 2 Stunden an …", "Was steht heute an?" |
 | Alarms | "Weck mich morgen um 6:30", "Wecker werktags um 7", "Wecker für morgen aus" |
-| Repeat | "Erinnere mich in 10 Minuten noch mal", "später noch mal", "morgen früh noch mal"; for alarms "Schlummern", "noch 5 Minuten" |
+| Ringing | "Stopp", "Erinnere mich in 10 Minuten noch mal", "später noch mal", "morgen früh noch mal"; for alarms "Schlummern", "noch 5 Minuten" |
 
-- **Created by voice:** a calendar entry with the category set and the room it was spoken in as Location. Reminders get a 0-minute reminder automatically. "Wecker für morgen aus" excludes that one occurrence from the repeat.
-- **Which timer is meant:** the label ("Nudel"), the original length ("5-Minuten-Timer"), the closest time left, the room it was started in, or the only one running. Still ambiguous: ask back ("Den 5- oder den 10-Minuten-Timer?"). Needs a test that the satellite keeps the conversation open.
-- **Which reminder "noch mal" means:** the last one that rang in this room within the past few minutes, otherwise the last one anywhere. The repeat is runtime state; the calendar entry stays unchanged. It plays in the room you asked from.
-- **Date and time understanding** ("Samstag um 13 Uhr", "übermorgen Abend", "in 2 Stunden", "am 3. November") in its own module with unit tests. Check existing libraries for German first.
+- The caller's area (`preferred_area_id`) goes into `area`, both for creating and as tie-breaker.
+- Ambiguous: ask back with the candidates ("Den 5- oder den 10-Minuten-Timer?"). Needs a test that the satellite keeps the conversation open.
+- Hyphens and compounds from speech-to-text ("5-Minuten-Timer", "Nudel-Timer") become spaces in closest-intent before matching, so sentences are written with spaces.
+- **Date and time understanding** ("Samstag um 13 Uhr", "übermorgen Abend", "in 2 Stunden", "am 3. November") for `reminder_create`/`alarm_create`: where it lives (Jinja in Nix, or a helper the engine offers as a service) is still open. Check existing libraries for German first.
 
-**HA side**
-
-- Timers: one entity per running timer showing when it ends (live countdown in the frontend), plus services for +1 min, pause and cancel.
-- Reminders and alarms: a calendar entity for display, one on/off switch per recurring alarm.
-- A "Wecker" view in our dashboard (Nix).
-- Services for everything, so automations and other setups can use it.
-- Sentence files for German and English included.
+**Dashboard:** a "Wecker" view with the timer sensors (+1 min, pause, cancel via the services), next alarm, upcoming reminders.
 
 ## Steps
 
-- [ ] Deploy SRV-HOMEASSISTANT: `tts.piper` fix and the tts_relay duck fix.
-- [ ] Set up `hass-remembrance` in this repo (HACS layout, config flow, tests).
-- [ ] Engine: entries, local scheduler, storage, restart recovery, playback per room.
-- [ ] Timers on the engine, by voice and in the UI; replace the three fixed slots.
-- [ ] CalDAV sync (one calendar), categories, Location fuzzy match, reminders from `VALARM`.
-- [ ] Reminders by voice, incl. the date/time module and the "noch mal" repeat.
-- [ ] Announcement text with the next-reminder line.
-- [ ] Alarms: recurring, snooze, rising volume, "Wecker für morgen aus".
+- [x] Deploy SRV-HOMEASSISTANT: `tts.piper` fix and the tts_relay duck fix.
+- [x] Set up `hass-remembrance` in this repo (HACS layout, tests; YAML config first, config flow before publishing).
+- [x] Engine core: items, targets, storage, scheduler, restart recovery, ringing via the script hook, events.
+- [x] Timers: services, sensors; packaged and loaded in our HA.
+- [x] Our side: ring script (`home-assistant/scripts/remembrance-ring.nix`) and timer intents (`intents/timer.nix`, speech macros in `lib.ha.voice.remembranceJinja`); the three fixed slots and their automation are gone, the dashboard banner shows one banner per timer (auto-entities). Not yet tested by voice.
+- [ ] CalDAV sync (one calendar), categories, Location → area, reminders from `VALARM`, calendar entity.
+- [ ] Reminders: `reminder_create`/`delete`, `snooze`, `dismiss`; intents and announcement texts in Nix.
+- [ ] Alarms: create, skip, enable/disable (status `CANCELLED`), switches, "next alarm"; intents in Nix.
 - [ ] Dashboard view.
-- [ ] Switch our setup over, remove `timers.nix` and the old timer automation.
-- [ ] Move `hass-remembrance` to its own repo, publish via HACS.
+- [x] Remove `timers.nix` and the old timer automation.
+- [ ] Config flow and built-in ring fallback; move `hass-remembrance` to its own repo, publish via HACS.
 
 ## Later
 

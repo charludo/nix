@@ -22,7 +22,6 @@
     ./oidc.nix
     ./shopping.nix
     ./sonos.nix
-    ./timers.nix
     ./voice.nix
     ./waste.nix
     ./weather.nix
@@ -93,4 +92,6 @@
     hassTokenPath = config.age.secrets.hass-mass-token.path;
   };
   hass.closestIntent.enable = true;
+  # No ring script yet: timers ring only as `remembrance_ringing` events.
+  hass.remembrance.enable = true;
 }
