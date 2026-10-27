@@ -96,7 +96,14 @@
     audioInputDevice = "ReSpeaker";
     audioOutputDevice = "alsa/plughw:CARD=Dummy";
     wakeModel = "okay_computer";
-    peripheralApi = true; # for the LED ring
+    # Community "computer" models, to compare with okay_nabu (voice ToDo, 4).
+    wakeWordDirs = [ pkgs.ours.computer-wake-words ];
+    peripheralApi = true; # for the LED ring and the activation log
+    # Every activation with its audio, to judge false and missed wakes.
+    activationLog = {
+      enable = true;
+      audioTarget = "alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.mono-fallback";
+    };
   };
 
   # Silent virtual sound card used as LVA's playback sink. Creates ALSA

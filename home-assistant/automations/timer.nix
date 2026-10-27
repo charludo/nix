@@ -51,7 +51,7 @@ in
     ++ [
       {
         action = "tts.speak";
-        target.entity_id = "tts.piper";
+        target.entity_id = config.hass.voice.ttsEntity;
         data = {
           media_player_entity_id = "{{ target }}";
           message = "Der Timer {{ state_attr(trigger.event.data.entity_id, 'friendly_name') }} ist abgelaufen.";

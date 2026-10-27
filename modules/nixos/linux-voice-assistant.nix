@@ -57,6 +57,17 @@ in
       '';
     };
 
+    wakeWordDirs = lib.mkOption {
+      type = lib.types.listOf lib.types.path;
+      default = [ ];
+      example = lib.literalExpression "[ pkgs.ours.computer-wake-words ]";
+      description = ''
+        Extra directories with wake word models (`<id>.tflite` plus its
+        `<id>.json` manifest), offered in Home Assistant next to the built-in
+        ones.
+      '';
+    };
+
     peripheralApi = lib.mkEnableOption ''
       LVA's peripheral WebSocket API on 127.0.0.1:6055, which LED and button
       controllers use to follow and control the assistant
@@ -66,6 +77,27 @@ in
       type = lib.types.listOf lib.types.str;
       default = [ ];
       description = "Extra command line arguments.";
+    };
+
+    activationLog = {
+      enable = lib.mkEnableOption ''
+        a log of every wake word activation in /var/lib/lva-activation-log:
+        one JSON line per activation (wake word, transcript, reply, errors,
+        event timings) plus its audio, from a few seconds before the wake word
+        until the pipeline is idle again. Needs `peripheralApi`
+      '';
+
+      audioTarget = lib.mkOption {
+        type = lib.types.str;
+        example = "alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.mono-fallback";
+        description = "PipeWire node name of the microphone (`pw-cli ls Node`).";
+      };
+
+      retentionDays = lib.mkOption {
+        type = lib.types.ints.positive;
+        default = 30;
+        description = "Days of audio and day folders kept; the JSON log is kept.";
+      };
     };
   };
 
@@ -123,6 +155,11 @@ in
             "--port"
             "6053"
           ]
+          # Appended to LVA's built-in wakewords directory, which stays.
+          ++ lib.concatMap (dir: [
+            "--wake-word-dir"
+            "${dir}"
+          ]) cfg.wakeWordDirs
           ++ lib.optionals (cfg.audioOutputDevice != null) [
             "--audio-output-device"
             cfg.audioOutputDevice
@@ -150,5 +187,40 @@ in
 
     networking.firewall.allowedTCPPorts = [ 6053 ]; # ESPHome API, HA connects in
     networking.firewall.allowedUDPPorts = [ 5353 ]; # mDNS, for HA's auto-discovery
+
+    assertions = [
+      {
+        assertion = cfg.activationLog.enable -> cfg.peripheralApi;
+        message = "services.linux-voice-assistant.activationLog needs peripheralApi.";
+      }
+    ];
+
+    # A second capture client next to LVA; PipeWire shares the microphone.
+    systemd.services.lva-activation-log = lib.mkIf cfg.activationLog.enable {
+      description = "Log and record every Linux-Voice-Assistant activation";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "linux-voice-assistant.service"
+        "wireplumber.service"
+      ];
+      path = [ pkgs.pipewire ]; # pw-record
+      environment.PIPEWIRE_RUNTIME_DIR = "/run/pipewire";
+      serviceConfig = {
+        ExecStart = lib.escapeShellArgs [
+          (lib.getExe pkgs.ours.lva-activation-log)
+          "--target"
+          cfg.activationLog.audioTarget
+          "--dir"
+          "/var/lib/lva-activation-log"
+          "--retention-days"
+          (toString cfg.activationLog.retentionDays)
+        ];
+        User = "lva";
+        Group = "lva";
+        StateDirectory = "lva-activation-log";
+        Restart = "always";
+        RestartSec = 5;
+      };
+    };
   };
 }

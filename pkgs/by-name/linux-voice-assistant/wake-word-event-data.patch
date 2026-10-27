@@ -1,0 +1,27 @@
+diff -ru a/linux_voice_assistant/peripheral_api.py b/linux_voice_assistant/peripheral_api.py
+--- a/linux_voice_assistant/peripheral_api.py	2026-10-27 16:43:45.398813473 +0100
++++ b/linux_voice_assistant/peripheral_api.py	2026-10-27 16:43:45.670770550 +0100
+@@ -9,7 +9,7 @@
+ 
+ Feedback events emitted by LVA
+ -------------------------------
+-  wake_word_detected
++  wake_word_detected  data: {"id": str, "wake_word": str}
+   listening
+   stt_text        data: {"text": str}
+               Emitted when HA returns the recognised speech transcript.
+diff -ru a/linux_voice_assistant/satellite.py b/linux_voice_assistant/satellite.py
+--- a/linux_voice_assistant/satellite.py	2026-10-27 16:43:45.397813457 +0100
++++ b/linux_voice_assistant/satellite.py	2026-10-27 16:43:45.670275594 +0100
+@@ -832,7 +832,10 @@
+         self._timer_ring_start = None
+         _LOGGER.debug("Stopping timer finished sound")
+         self._pipeline_active = True
+-        self._emit(LVAEvent.WAKE_WORD_DETECTED)
++        self._emit(
++            LVAEvent.WAKE_WORD_DETECTED,
++            {"id": getattr(wake_word, "id", None), "wake_word": wake_word_phrase},
++        )
+         self.duck()
+         if self.state.listen_during_wake_sound:
+             _LOGGER.debug("Starting audio streaming immediately (listen_during_wake_sound enabled)")
