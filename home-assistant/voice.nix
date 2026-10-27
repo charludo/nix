@@ -13,6 +13,14 @@ in
     "HassTurnOn"
     "HassTurnOff"
     "HassGetState"
+    "HassStartTimer"
+    "HassCancelTimer"
+    "HassCancelAllTimers"
+    "HassIncreaseTimer"
+    "HassDecreaseTimer"
+    "HassPauseTimer"
+    "HassUnpauseTimer"
+    "HassTimerStatus"
   ];
 
   hass.voice.sounds = {

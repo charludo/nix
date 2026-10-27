@@ -1,0 +1,11 @@
+{
+  "domain": "remembrance",
+  "name": "Remembrance",
+  "codeowners": ["@charludo"],
+  "dependencies": [],
+  "documentation": "https://github.com/charludo/hass-remembrance",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/charludo/hass-remembrance/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
