@@ -26,6 +26,11 @@ let
   };
 in
 {
+  # The nightly unsupervised update (stateless tag) builds this VM from the
+  # repo's default branch, which still has the old voice setup: it reverted
+  # the VM and rebooted it on Oct 26 and 27. Off until this config is merged.
+  system.autoUpgrade.enable = lib.mkForce false;
+
   vm = {
     id = 2402;
     name = "SRV-VOICE";

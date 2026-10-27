@@ -22,7 +22,7 @@ in
     MusikAn = silent (unmute {
       sentences = [
         "(Spiele|Spiel|Starte) [etwas|ein bisschen|irgendwelche|zufällige] Musik"
-        "Musik (an|abspielen|starten)"
+        "Musik [an|abspielen|starten]"
       ];
       script = {
         action = playPlaylist "500 random tracks (from library)";
