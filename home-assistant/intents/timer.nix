@@ -70,7 +70,14 @@ let
   # "<timer> um 1 Minute verlängern" / "verkürzen"; `sign` 1 or -1.
   adjust =
     verb: imperative: participle: extra: sign:
-    mkIntent ([ "<timer> um <aenderung> ${verb}" "${imperative} den <timer> um <aenderung>" ] ++ extra)
+    mkIntent
+      (
+        [
+          "<timer> um <aenderung> ${verb}"
+          "${imperative} den <timer> um <aenderung>"
+        ]
+        ++ extra
+      )
       "timer_adjust"
       (target // { delta = "{{ ${toString sign} * ${secondsOf "delta_"} }}"; })
       "{{ timer_name(t) }} um {{ dauer(${secondsOf "delta_"}) }} ${participle}, noch {{ dauer(t.remaining) }}.";
@@ -86,16 +93,18 @@ let
         ];
         inherit lists;
         script = {
-          action = callService "timer_start" {
-            duration = fixedDurations.${phrase};
-            label = "{{ label | default('') }}";
-            inherit area;
-          };
+          action = start fixedDurations.${phrase};
           speech.text = startSpeech;
         };
       }
     ) (lib.attrNames fixedDurations)
   );
+  start =
+    duration:
+    callService "timer_start" {
+      inherit duration area;
+      label = "{{ label | default('') }}";
+    };
   startSpeech = speak "{{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else '' }} - ab jetzt.";
 in
 {
@@ -111,11 +120,7 @@ in
       ];
       inherit lists;
       script = {
-        action = callService "timer_start" {
-          duration = "{{ ${secondsOf ""} }}";
-          label = "{{ label | default('') }}";
-          inherit area;
-        };
+        action = start "{{ ${secondsOf ""} }}";
         speech.text = startSpeech;
       };
     };

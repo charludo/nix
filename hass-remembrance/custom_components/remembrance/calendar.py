@@ -42,11 +42,12 @@ class RemembranceCalendar(CalendarEntity):
         if manager is None:
             return []
         events = []
-        for entry, occ in manager.occurrences(start, end):
+        for entry, occ_start, occ_end in manager.occurrences(start, end):
             events.append(
                 CalendarEvent(
-                    start=occ,
-                    end=occ + timedelta(minutes=1),
+                    start=occ_start,
+                    # As long as in the calendar; a minute when it has no end.
+                    end=max(occ_end, occ_start + timedelta(minutes=1)),
                     summary=entry.summary,
                     location=entry.location,
                     description=entry.kind,

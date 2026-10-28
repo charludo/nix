@@ -27,7 +27,6 @@ from homeassistant.helpers.typing import ConfigType
 from .const import (
     CONF_ALARM_CATEGORY,
     CONF_CALENDAR,
-    CONF_DEFAULT_AREA,
     CONF_INTERVAL,
     CONF_LIMIT,
     CONF_MISSED_GRACE,
@@ -103,7 +102,6 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_RING, default={}): {vol.In(KINDS): RING_SCHEMA},
                 vol.Optional(CONF_SNOOZE_DELAY): _seconds,
                 vol.Optional(CONF_MISSED_GRACE): _seconds,
-                vol.Optional(CONF_DEFAULT_AREA): cv.string,
                 vol.Optional(CONF_CALENDAR): CALENDAR_SCHEMA,
             }
         )

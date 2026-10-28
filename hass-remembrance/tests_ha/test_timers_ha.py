@@ -82,7 +82,7 @@ async def test_pause_resume_cancel(hass):
 async def test_empty_target_fields_mean_not_given(hass):
     await setup(hass, {})
     t = (await call(hass, "timer_start", duration=60, area=""))["items"][0]
-    assert t["area"] is None
+    assert t["areas"] == []
     done = await call(hass, "timer_pause", label="", duration=0, remaining=0, area="")
     assert done["status"] == "ok"
     assert done["items"][0]["id"] == t["id"]
@@ -199,3 +199,17 @@ async def test_overdue_after_restart(tmp_path):
     assert [e["label"] for e in missed] == [None]
     assert [e["label"] for e in ringing] == ["Alt"]
     await hass.async_stop(force=True)
+
+
+async def test_without_area_rings_everywhere(hass):
+    await setup(hass, FAST_RING)
+    anywhere = (await call(hass, "timer_start", duration=1))["items"][0]
+    kitchen = (await call(hass, "timer_start", duration=1, area="kueche"))["items"][0]
+    await call(hass, "timer_start", duration=1, area="bad")
+    await asyncio.sleep(1.3)
+    await hass.async_block_till_done()
+
+    # "Stopp" in the kitchen: its own, and the one without an area.
+    done = await call(hass, "dismiss", area="kueche")
+    assert {i["id"] for i in done["items"]} == {anywhere["id"], kitchen["id"]}
+    assert anywhere["areas"] == []

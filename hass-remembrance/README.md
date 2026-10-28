@@ -14,8 +14,9 @@ Reminders and alarms live in your calendar; any client (Thunderbird, phone) can 
 - An entry is handled when it carries the category `HomeAssistant Reminder` or `HomeAssistant Alarm` (configurable). Everything else is left alone.
 - It rings at its own reminders (VALARMs) only; on the dot only with a 0-minute reminder. Repeats,
   exceptions and moved occurrences are honoured.
-- The Location field names the room: fuzzily matched against Home Assistant's area names and
-  aliases.
+- Further categories name the rooms it rings in: an area's name, alias or id, ignoring case.
+  Several rooms ring at once; with none, it rings everywhere. Other categories are ignored.
+- The Location field is passed on with the item, like the description.
 - A disabled alarm has the status `CANCELLED` (Thunderbird's Status field).
 - The Description field is passed on with the item, uninterpreted: what it means is up to your
   ring script (e.g. a playlist to wake up to).
@@ -25,7 +26,8 @@ Reminders and alarms live in your calendar; any client (Thunderbird, phone) can 
 
 ```yaml
 remembrance:
-  # Called once per ring round with the item as variables (plus `round`).
+  # Called once per ring round with the item as variables (plus `round`); its
+  # `areas` are where it rings, none: everywhere.
   ring_script: script.remembrance_ring
   ring: # per kind: seconds between rounds, and until it times out (0: one round)
     timer: { interval: 20, limit: 120 }
@@ -33,7 +35,6 @@ remembrance:
     alarm: { interval: 30, limit: 600 }
   snooze_delay: 600 # default for `remembrance.snooze`
   missed_grace: 300 # after a restart: ring late up to this, else `remembrance_missed`
-  default_area: wohnzimmer # for items created without an area
   calendar: # optional; without it only timers
     url: https://dav.example.org/user/calendar/ # the calendar's own URL
     username: user
@@ -50,7 +51,8 @@ count as not given.
 
 Services acting on existing items share the target fields: `id` or `entity_id`, or a description
 in any combination: `label` (fuzzy), `duration` (a timer as set: "the 5-minute timer"),
-`remaining` (roughly), `time` (a reminder's or alarm's time of day), `area` (only breaks ties); or
+`remaining` (roughly), `time` (a reminder's or alarm's time of day), `area` (only breaks ties;
+items without areas are in every area); or
 `all: true`.
 
 | Service                                         | Fields                                                                                         |

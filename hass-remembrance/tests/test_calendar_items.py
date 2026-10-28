@@ -24,7 +24,7 @@ def ics(body: str) -> str:
 
 THUNDERBIRD = ics(
     "BEGIN:VEVENT\r\nUID:dentist\r\nSUMMARY:Zahnarzt\r\nLOCATION:Kueche\r\n"
-    "CATEGORIES:HomeAssistant Reminder\r\n"
+    "CATEGORIES:HomeAssistant Reminder,Küche\r\n"
     "DTSTART;TZID=Europe/Berlin:20261031T130000\r\nDTEND;TZID=Europe/Berlin:20261031T140000\r\n"
     "BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-PT30M\r\nDESCRIPTION:x\r\nEND:VALARM\r\n"
     "BEGIN:VALARM\r\nACTION:DISPLAY\r\nTRIGGER:-PT5M\r\nDESCRIPTION:x\r\nEND:VALARM\r\n"
@@ -44,6 +44,7 @@ def test_parse_only_tagged():
         "Zahnarzt",
         "Kueche",
     )
+    assert entry.categories == ["Küche"]
     assert entry.alerts == [1800, 300]
     assert not entry.recurring and not entry.cancelled
     assert entry.href == "/cal/a.ics"
@@ -51,9 +52,12 @@ def test_parse_only_tagged():
 
 def test_category_among_others_and_case():
     body = THUNDERBIRD.replace(
-        "CATEGORIES:HomeAssistant Reminder", "CATEGORIES:Arbeit,homeassistant reminder"
+        "CATEGORIES:HomeAssistant Reminder,Küche\r\n",
+        "CATEGORIES:Arbeit,homeassistant reminder\r\nCATEGORIES:Bad\r\n",
     )
-    assert [e.kind for e in parse(body, CATS, TZ)] == ["reminder"]
+    [entry] = parse(body, CATS, TZ)
+    assert entry.kind == "reminder"
+    assert entry.categories == ["Arbeit", "Bad"]
 
 
 def test_plan_rings_at_each_reminder_only():
@@ -149,12 +153,13 @@ def test_new_reminder_roundtrip():
         start=start,
         duration=timedelta(minutes=15),
         alerts=[0, 600],
-        location="Wohnzimmer",
+        categories=["Wohnzimmer"],
         description="Musik: Morgenrunde",
         now=NOW,
     )
     [entry] = parse(text, CATS, TZ)
-    assert (entry.uid, entry.summary, entry.location) == (uid, "Blumen gießen", "Wohnzimmer")
+    assert (entry.uid, entry.summary, entry.categories) == (uid, "Blumen gießen", ["Wohnzimmer"])
+    assert entry.location is None
     assert entry.description == "Musik: Morgenrunde"
     assert entry.start == start
     assert entry.alerts == [600, 0]
