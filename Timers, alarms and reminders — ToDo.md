@@ -1,6 +1,6 @@
 # Timers, alarms and reminders — ToDo
 
-Started Oct 27, 2026 · @Charlotte · last update Oct 27, 2026
+Started Oct 27, 2026 · @Charlotte · last update Oct 28, 2026
 
 ## Where things stand
 
@@ -33,7 +33,7 @@ HA's built-in voice timers are bound to the satellite that set them, relative on
 **Target** (shared by all services acting on existing items):
 
 - precise: `id` or `entity_id` (UI buttons);
-- descriptive, any combination: `label` (fuzzy), `duration` (as set: "the 5-minute timer"), `remaining` (approximate), `area` (only breaks ties);
+- descriptive, any combination: `label` (fuzzy), `duration` (as set: "the 5-minute timer"), `remaining` (approximate), `time` (a reminder's or alarm's time of day), `area` (only breaks ties);
 - everything: `all: true`.
 - Ambiguous: nothing happens, the response contains `candidates`.
 
@@ -106,18 +106,31 @@ HA's built-in voice timers are bound to the satellite that set them, relative on
 - [x] Set up `hass-remembrance` in this repo (HACS layout, tests; YAML config first, config flow before publishing).
 - [x] Engine core: items, targets, storage, scheduler, restart recovery, ringing via the script hook, events.
 - [x] Timers: services, sensors; packaged and loaded in our HA.
-- [x] Our side: ring script (`home-assistant/scripts/remembrance-ring.nix`) and timer intents (`intents/timer.nix`, speech macros in `lib.ha.voice.remembranceJinja`); the three fixed slots and their automation are gone, the dashboard banner shows one banner per timer (auto-entities). Not yet tested by voice.
-- [ ] CalDAV sync (one calendar), categories, Location → area, reminders from `VALARM`, calendar entity.
-- [ ] Reminders: `reminder_create`/`delete`, `snooze`, `dismiss`; intents and announcement texts in Nix.
-- [ ] Alarms: create, skip, enable/disable (status `CANCELLED`), switches, "next alarm"; intents in Nix.
-- [ ] Dashboard view.
+- [x] Our side: ring script (`home-assistant/scripts/remembrance-ring.nix`) and timer intents (`intents/timer.nix`); the three fixed slots and their automation are gone, the dashboard banner shows one banner per timer (auto-entities). Live and tested by voice; HA's own timer intents are off (`hass.voice.disableBuiltinIntents`), as they caught what our sentences missed.
+- [x] CalDAV sync (one calendar), categories, Location → area, reminders from `VALARM`, calendar entity (`calendar_items.py` pure, `caldav_source.py`, `calendar_manager.py`; tested against a local Radicale).
+- [x] Reminders: `reminder_create`/`delete`, `snooze`, `dismiss`; intents (`intents/reminders.nix`) and announcement texts (ring script) in Nix.
+- [x] Alarms: create, skip, enable/disable (status `CANCELLED`), switches, "next alarm"; intents (`intents/alarms.nix`), louder every round (ring script).
+- [x] Dashboard view "Wecker" (`dashboards/home/view-wecker.nix`): timer quick start and controls; alarms and upcoming entries once the calendar is on.
 - [x] Remove `timers.nix` and the old timer automation.
+- [ ] **Turn on the calendar:** add `remembrance_caldav_url` (the calendar's own URL), `remembrance_caldav_username` and `remembrance_caldav_password` to `hass-secrets`, set `withCalendar = true` in `home-assistant/remembrance.nix`, deploy.
+- [ ] Try reminders and alarms by voice and on the Sonos (the texts are rendered and the matching simulated, not heard yet); check `parse_sentence` live first.
 - [ ] Config flow and built-in ring fallback; move `hass-remembrance` to its own repo, publish via HACS.
+
+## Notes
+
+- **Sentences and closest_intent:** it expands each pattern into at most 16 variants (`expansion_cap`), so the shapes are generated in Nix, one pattern each (`lib.ha.remembrance`). Two slots side by side don't split; hence one slot for clock times ("13:30" arrives as "13 30", 1440 values) and one for day plus time of day ("morgen früh"). On equal scores the first pattern wins, so longer shapes come first. Number words come from our own list (`timer_zahl`), as HA's lists hold digits only.
+- **Not understood (yet):** "halb sieben" and similar; dates like "am 3. November"; a timer name in the short form ("Nudel Timer auf 8 Minuten") or as one word ("Nudeltimer").
+- **Parse time:** sentences close to a time pattern take ~60–100 ms offline (the clock list in every alarm and reminder pattern); others stay at ~10 ms. The next thing to slim down if it gets noticeable live (e.g. fewer time shapes, or a cheaper clock slot in closest_intent).
+- **Gently or at once:** "Weck mich …" (you're asleep) writes a line `Sanft` into the alarm's description, and the alarm gets louder every round, chime or music alike; "Stelle einen Wecker …" / "Wecker auf …" rings at one volume from the start. In Thunderbird: add or delete the `Sanft` line. The phrasing decides, not the time of day (a nap at 15:00 is still "Weck mich").
+- **Waking up to music:** an alarm whose description has a line `Musik: <playlist>` (just `Musik`: the default, "500 random tracks") plays that playlist on the room's Music Assistant player instead of the chime, quietly and louder every round (ring script). No chime; with `Sanft` the music's own volume goes up every round (10 % to 40 %), otherwise it plays at 30 %. Snoozing pauses it (`remembrance_snooze_music`), the next ring starts it again; "Stopp" ends the alarm (no more ramping, no time limit) and lets the music play on at its volume, confirmed by "Wecker beendet" ducked over it; a second "Stopp" silences it. A music alarm replaces whatever is playing. Normal alarms, timers and reminders never touch the music's volume: their chime is an announcement that ducks it. By voice: "Weck mich (morgen) um 7 mit Musik", "… mit der Playlist <name>", "Weck mich werktags um 6:30 mit Musik", "Stelle einen Wecker auf 15 Uhr mit Musik"; or the line in Thunderbird's Description field. The engine only stores and passes on the description.
+- **One "off" (`Stopp`, `intents/ringing.nix`):** "Stopp", "Ruhe", "Aus", "Wecker aus" and so on dismiss whatever rings and leave the music playing; with nothing ringing they silence the speakers (the former `StilleAlle`). Switching alarms off for good is "Wecker deaktivieren".
+- **closest_intent:** before "und", a singular unit ("eine Minute und 30 Sekunden") against a plural-only pattern shifts its alignment into the number and loses it, hence `Minute[n]` there (only there: each optional doubles the candidates). Long TV sentences can score just over the threshold on short patterns ("Hess" as a device).
 
 ## Later
 
 - Several calendars.
 - Fuzzy-matching details for Location (thresholds, aliases).
+- "halb sieben", "Viertel nach", dates ("am 3. November").
 - Tasks (`VTODO`) with a "done" tick, at least for one-off items; recurring tasks behave inconsistently across clients.
 - **Global "noch mal":** one slot for the last repeatable thing, whether alarm, reminder or what was just said. To prepare for it, every announcement registers itself as repeatable through a small common interface, rather than the reminder code tracking "the last one" itself. The TTS relay can join later.
 - Phone push with "Erledigt" and "Später" buttons.

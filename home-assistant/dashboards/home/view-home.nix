@@ -37,43 +37,7 @@ let
       name = t;
     };
 
-  # One banner per remembrance timer; they come and go, so auto-entities
-  # builds them from the integration's sensors. Tap cancels.
-  timerBanners = {
-    type = "custom:auto-entities";
-    show_empty = false;
-    card = {
-      type = "vertical-stack";
-    };
-    card_param = "cards";
-    sort = {
-      method = "attribute";
-      attribute = "ends_at";
-    };
-    filter.include = [
-      {
-        domain = "sensor";
-        integration = "remembrance";
-        # The banner's look (mkActiveBanner) without its conditional
-        # wrapper, so auto-entities sets the entity on the button itself.
-        options = ha.mkActionCard {
-          entity = "this.entity_id";
-          cardBg = "var(--yellow)";
-          iconColor = "var(--black)";
-          nameColor = "var(--black)";
-          labelColor = "var(--black)";
-          zIndex = 1;
-          extraCardProps."margin-top" = "24px";
-          name = "[[[ return entity.attributes.label ? 'Timer ' + entity.attributes.label : 'Timer'; ]]]";
-          icon = "[[[ return entity.attributes.state === 'paused' ? 'mdi:timer-pause' : 'mdi:timer-sand'; ]]]";
-          label = "[[[ const a = entity.attributes; if (a.state === 'ringing') return 'Abgelaufen'; if (a.state === 'paused') { const r = Math.round(a.remaining); return 'Pausiert, noch ' + Math.floor(r / 60) + ':' + String(r % 60).padStart(2, '0'); } return 'Endet um ' + new Date(a.ends_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); ]]]";
-          service = "remembrance.timer_cancel";
-          serviceData.entity_id = "this.entity_id";
-          confirmation = "Timer wirklich abbrechen?";
-        };
-      }
-    ];
-  };
+  inherit (import ./remembrance-cards.nix { inherit lib; }) timerBanners;
 in
 {
   type = "sections";

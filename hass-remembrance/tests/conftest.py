@@ -1,6 +1,6 @@
 """Import the integration's pure modules without Home Assistant.
 
-`timers` has no HA imports; the package's `__init__` does, so
+`timers` and `calendar_items` have no HA imports; the package's `__init__` does, so
 the modules are loaded as part of a stand-in package instead.
 """
 
@@ -15,7 +15,7 @@ package = types.ModuleType("remembrance")
 package.__path__ = [str(PKG_DIR)]
 sys.modules["remembrance"] = package
 
-for name in ("timers",):
+for name in ("timers", "calendar_items"):
     spec = importlib.util.spec_from_file_location(f"remembrance.{name}", PKG_DIR / f"{name}.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules[f"remembrance.{name}"] = module

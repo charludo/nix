@@ -30,6 +30,10 @@ in
       (import ./view-sonos.nix { inherit lib e; })
       (import ./view-tv.nix { inherit lib e; })
       (import ./view-x1c.nix { inherit lib; })
+      (import ./view-wecker.nix {
+        inherit lib;
+        withCalendar = config.hass.remembrance.settings ? calendar;
+      })
       (import ./view-einkaufsliste.nix {
         inherit lib;
         supermarkets = config.hass.shopping.supermarkets or { };

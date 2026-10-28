@@ -2,6 +2,7 @@
   lib,
   buildHomeAssistantComponent,
   home-assistant,
+  radicale,
   runCommand,
   ruff,
 }:
@@ -14,16 +15,28 @@ let
     );
   };
 
-  # Home Assistant itself as a library, for the tests against a real core.
-  testPython = home-assistant.python3Packages.python.withPackages (ps: [
-    (ps.toPythonModule home-assistant)
-    ps.pytest
-    ps.pytest-asyncio
-  ]);
+  # From Home Assistant's own package set, so they match what it runs with.
+  dependencies = with home-assistant.python3Packages; [
+    caldav
+    icalendar
+    recurring-ical-events
+  ];
+
+  # Home Assistant itself as a library, for the tests against a real core;
+  # Radicale as the CalDAV server they talk to.
+  testPython = home-assistant.python3Packages.python.withPackages (
+    ps:
+    [
+      (ps.toPythonModule home-assistant)
+      ps.pytest
+      ps.pytest-asyncio
+    ]
+    ++ dependencies
+  );
 
   runTests =
     name: command:
-    runCommand "hass-remembrance-${name}" { nativeBuildInputs = [ testPython ]; } ''
+    runCommand "hass-remembrance-${name}" { nativeBuildInputs = [ testPython radicale ]; } ''
       cp -r ${src} work
       chmod -R u+w work
       cd work
@@ -36,7 +49,7 @@ buildHomeAssistantComponent {
   owner = "charludo";
   domain = "remembrance";
   version = "0.1.0";
-  inherit src;
+  inherit src dependencies;
 
   passthru.tests = {
     # The pure core, no Home Assistant.

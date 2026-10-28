@@ -83,45 +83,6 @@ rec {
     {
       inherit satelliteAreaToTarget;
 
-      # Jinja macros for speaking about remembrance items, prepended to a
-      # template that uses them:
-      #   dauer(seconds)  "1 Minute und 30 Sekunden"; whole minutes from 10 min
-      #   timer_name(t)   "Nudel-Timer", "5 Minuten Timer",
-      #                   "Timer über 1 Stunde und 30 Minuten"
-      #                   (no hyphen after a number: Pocket TTS's normaliser
-      #                   doesn't spell out "5-Minuten" and garbles it)
-      #   timer_choices(items)  "Den 5 Minuten Timer oder den Nudel-Timer"
-      # `t` is an item as remembrance's services and events return it.
-      remembranceJinja = ''
-        {%- macro dauer(sec) -%}
-          {%- set t = sec | float(0) | round(0) | int -%}
-          {%- if t >= 600 -%}{%- set t = ((t / 60) | round(0) | int) * 60 -%}{%- endif -%}
-          {%- set h = t // 3600 -%}{%- set m = (t % 3600) // 60 -%}{%- set s = t % 60 -%}
-          {%- set ns = namespace(p=[]) -%}
-          {%- if h -%}{%- set ns.p = ns.p + [h ~ (' Stunde' if h == 1 else ' Stunden')] -%}{%- endif -%}
-          {%- if m -%}{%- set ns.p = ns.p + [m ~ (' Minute' if m == 1 else ' Minuten')] -%}{%- endif -%}
-          {%- if s or not ns.p -%}{%- set ns.p = ns.p + [s ~ (' Sekunde' if s == 1 else ' Sekunden')] -%}{%- endif -%}
-          {{- (ns.p[:-1] | join(', ') ~ ' und ' ~ ns.p[-1]) if ns.p | length > 1 else ns.p[0] -}}
-        {%- endmacro -%}
-        {%- macro timer_name(t) -%}
-          {%- set d = t.duration | float(0) | round(0) | int -%}
-          {%- if t.label -%}{{ t.label }}-Timer
-          {%- elif d == 3600 -%}Ein-Stunden-Timer
-          {%- elif d == 60 -%}Ein-Minuten-Timer
-          {%- elif d % 3600 == 0 -%}{{ d // 3600 }} Stunden Timer
-          {%- elif d < 3600 and d % 60 == 0 -%}{{ d // 60 }} Minuten Timer
-          {%- elif d < 60 -%}{{ d }} Sekunden Timer
-          {%- else -%}Timer über {{ dauer(d) }}
-          {%- endif -%}
-        {%- endmacro -%}
-        {%- macro timer_choices(items) -%}
-          {%- set ns = namespace(n=[]) -%}
-          {%- for t in items -%}{%- set ns.n = ns.n + ['den ' ~ timer_name(t)] -%}{%- endfor -%}
-          {%- set s = (ns.n[:-1] | join(', ') ~ ' oder ' ~ ns.n[-1]) if ns.n | length > 1 else ns.n[0] -%}
-          {{- s[:1] | upper ~ s[1:] -}}
-        {%- endmacro -%}
-      '';
-
       # Voice path: play the "acknowledge" sound on the target Sonos
       # instead of speaking the TTS. Use for intents whose only output
       # is a confirmation ("Licht eingeschaltet", "Pausiert", ...).

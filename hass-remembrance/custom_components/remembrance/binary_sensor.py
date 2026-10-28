@@ -38,8 +38,8 @@ class RingingSensor(BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        return bool(self.engine.book.ringing())
+        return bool(self.engine.ringing())
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        return {"items": [self.engine.item(t) for t in self.engine.book.ringing()]}
+        return {"items": self.engine.ringing_items()}
