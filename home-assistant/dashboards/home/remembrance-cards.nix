@@ -1,7 +1,7 @@
 { lib }:
 # Cards for remembrance's timers, reminders and alarms, shared by the views.
 let
-  ha = lib.ha;
+  inherit (lib) ha;
 
   # The banner's look (mkActiveBanner) without its conditional wrapper, so
   # auto-entities sets the entity on the button itself. Tap cancels.
@@ -72,14 +72,23 @@ in
 
   # Quick start, in the room the dashboard doesn't know: rings where the
   # remembrance default (or the ring script's fallback) says.
-  timerQuickStart = map (minutes:
-    ha.mkButtonBlue {
-      name = "${toString minutes} min";
-      icon = "mdi:timer-plus-outline";
-      service = "remembrance.timer_start";
-      serviceData.duration = minutes * 60;
-    }
-  ) [ 5 10 15 30 ];
+  timerQuickStart =
+    map
+      (
+        minutes:
+        ha.mkButtonBlue {
+          name = "${toString minutes} min";
+          icon = "mdi:timer-plus-outline";
+          service = "remembrance.timer_start";
+          serviceData.duration = minutes * 60;
+        }
+      )
+      [
+        5
+        10
+        15
+        30
+      ];
 
   # Repeating alarms, each a switch (enabled or not).
   alarmSwitches = {
@@ -101,6 +110,6 @@ in
   upcoming = {
     type = "calendar";
     entities = [ "calendar.remembrance" ];
-    initial_view = "listWeek";
+    initial_view = "dayGridDay";
   };
 }

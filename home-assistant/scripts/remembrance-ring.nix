@@ -116,7 +116,11 @@ let
         }
       ];
       "then" = [
-        { delay.milliseconds = lib.ha.soundDurationMs pkgs sound.${kind}; }
+        # Reminders: a breather between the chime and the text.
+        {
+          delay.milliseconds =
+            lib.ha.soundDurationMs pkgs sound.${kind} + (if kind == "reminder" then 1000 else 0);
+        }
         {
           action = "media_player.play_media";
           target.entity_id = "{{ target }}";

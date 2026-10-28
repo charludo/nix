@@ -6,7 +6,8 @@ let
   expand = r.expand {
     "<zeit>" = r.timeShapes;
     "<tag>" = [ "{remembrance_tag:day}" ];
-    "<wiederholung>" = [ "{remembrance_wiederholung:days}" ];
+    # A day or a repeat, in one slot: the value says which.
+    "<wann>" = [ "{remembrance_wecker_tag:day}" ];
   };
 
   lists = {
@@ -16,33 +17,33 @@ let
       remembrance_uhrzeit
       remembrance_tag
       ;
-    # Repeats, as remembrance's `days` takes them.
-    remembrance_wiederholung.values =
-      lib.mapAttrsToList
-        (k: v: {
-          "in" = k;
-          out = v;
-        })
-        {
-          "werktags" = "werktags";
-          "jeden Tag" = "täglich";
-          "täglich" = "täglich";
-          "am Wochenende" = "wochenende";
-          "montags" = "montag";
-          "dienstags" = "dienstag";
-          "mittwochs" = "mittwoch";
-          "donnerstags" = "donnerstag";
-          "freitags" = "freitag";
-          "samstags" = "samstag";
-          "sonntags" = "sonntag";
-        };
+    # Days (as `ziel` takes them) and repeats (as remembrance's `days`
+    # takes them), so "Weck mich morgen …" and "Weck mich werktags …" are
+    # one sentence.
+    remembrance_wecker_tag.values = r.lists.remembrance_tag.values ++ r.valuesOf repeats;
   };
+
+  repeats = {
+    "werktags" = "werktags";
+    "jeden Tag" = "täglich";
+    "täglich" = "täglich";
+    "am Wochenende" = "wochenende";
+    "montags" = "montag";
+    "dienstags" = "dienstag";
+    "mittwochs" = "mittwoch";
+    "donnerstags" = "donnerstag";
+    "freitags" = "freitag";
+    "samstags" = "samstag";
+    "sonntags" = "sonntag";
+  };
+  # Jinja test: was a repeat said (rather than a day)?
+  repeatSaid = "(day is defined and day in ${builtins.toJSON (lib.attrValues repeats)})";
 
   hhmm = "'%02d:%02d' | format(${r.hourOf}, ${r.minuteOf})";
   clock = "{{ ${hhmm} }}";
   # The day a spoken day and time mean (the `ziel` macro rolls over to the
   # next one when it's already past).
-  onDay = "${r.jinja}{{ ziel(day, ${r.hourOf}, ${r.minuteOf})[:10] if day is defined else '' }}";
+  onDay = "${r.jinja}{{ ziel(day, ${r.hourOf}, ${r.minuteOf})[:10] if day is defined and not ${repeatSaid} else '' }}";
   # An alarm's description, as the ring script reads it: a "Sanft" line for
   # gently getting louder (said as "Weck mich …": you're asleep; "Stelle
   # einen Wecker …" rings at full volume), a "Musik: <playlist>" line for
@@ -54,7 +55,7 @@ let
       ++ lib.optional music "Musik{{ ': ' ~ mass_playlist if mass_playlist is defined else \"\" }}"
     );
   musicSaid = "{{ 'mit der Playlist ' ~ mass_playlist if mass_playlist is defined else 'mit Musik' }}";
-  repeatName = "{{ {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende'}.get(days, days) }}";
+  repeatName = "{{ {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende'}.get(day, day) }}";
 
   # Speech for an action on existing alarms: `ok` (Jinja; `i` is the first
   # alarm, `items` all of them) on success, the shared answers otherwise.
@@ -71,45 +72,38 @@ let
     {%- endif -%}
   '';
 
-  # Alarms set by voice, once (on a spoken day, else the next time it comes)
-  # or repeating (`days`), gently ("Weck mich": you're asleep) or not, with
-  # music or not: one intent each.
+  # Alarms set by voice: once (on a spoken day, else the next time it comes)
+  # or repeating, as the day slot says; gently ("Weck mich": you're asleep)
+  # or not, with music or not: one intent each.
   openers = [
     {
       say = "Stelle einen Wecker";
+      at = "(auf|für)";
       gentle = false;
-      once = [
-        "(auf|für) <zeit>"
-        "<tag> um <zeit>"
-      ];
       music = true;
     }
     {
       say = "Wecker";
+      at = "(auf|für)";
       gentle = false;
-      once = [ "(auf|für) <zeit>" ];
       music = false;
     }
     {
       say = "Weck mich";
+      at = "um";
       gentle = true;
-      once = [
-        "um <zeit>"
-        "<tag> um <zeit>"
-      ];
       music = true;
     }
   ];
   sentencesOf =
-    {
-      gentle,
-      music,
-      repeat,
-    }:
+    { gentle, music }:
     lib.concatMap (
       o:
       let
-        plain = map (w: "${o.say} ${w}") (if repeat then [ "<wiederholung> um <zeit>" ] else o.once);
+        plain = [
+          "${o.say} ${o.at} <zeit>"
+          "${o.say} <wann> um <zeit>"
+        ];
       in
       lib.optionals (o.gentle == gentle && (o.music || !music)) (
         if music then
@@ -123,18 +117,9 @@ let
     ) openers;
 
   mkAlarm =
-    {
-      gentle,
-      music,
-      repeat,
-    }@kind:
+    { gentle, music }@kind:
     lib.nameValuePair
-      (
-        "Wecker"
-        + lib.optionalString gentle "Sanft"
-        + lib.optionalString repeat "Wiederholt"
-        + lib.optionalString music "MitMusik"
-      )
+      ("Wecker" + lib.optionalString gentle "Sanft" + lib.optionalString music "MitMusik")
       {
         sentences = expand (sentencesOf kind);
         inherit lists;
@@ -142,18 +127,15 @@ let
           action = callService "alarm_create" (
             {
               time = clock;
+              days = "{{ [day] if ${repeatSaid} else [] }}";
+              date = onDay;
               inherit area;
             }
-            // (if repeat then { days = "{{ days }}"; } else { date = onDay; })
             // lib.optionalAttrs (gentle || music) { description = descriptionOf gentle music; }
           );
           speech.text = speak (
-            (
-              if repeat then
-                "Wecker ${repeatName} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt"
-              else
-                "Wecker {{ zeitpunkt(i.start) }} gestellt"
-            )
+            "{%- if i.recurring -%}Wecker ${repeatName} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt"
+            + "{%- else -%}Wecker {{ zeitpunkt(i.start) }} gestellt{%- endif -%}"
             + lib.optionalString music ", ${musicSaid}"
             + "."
           );
@@ -167,10 +149,6 @@ let
           false
         ];
         music = [
-          true
-          false
-        ];
-        repeat = [
           true
           false
         ];
