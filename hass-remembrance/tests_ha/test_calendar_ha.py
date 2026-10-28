@@ -44,7 +44,7 @@ def ical_time(t: datetime) -> str:
     return t.astimezone(dt_util.UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
-def external_event(uid, summary, start, *, alarms=(), location=None, tagged=True) -> str:
+def external_event(uid, summary, start, *, alarms=(), rooms=(), location=None, tagged=True) -> str:
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -56,7 +56,7 @@ def external_event(uid, summary, start, *, alarms=(), location=None, tagged=True
         f"DTEND:{ical_time(start + timedelta(hours=1))}",
     ]
     if tagged:
-        lines.append("CATEGORIES:HomeAssistant Reminder")
+        lines.append(",".join(["CATEGORIES:HomeAssistant Reminder", *rooms]))
     if location:
         lines.append(f"LOCATION:{location}")
     for trigger in alarms:
@@ -80,15 +80,15 @@ async def test_reminder_create_written_and_rings(hass, radicale):
     made = await call(hass, "reminder_create", summary="Tee", **{"in": 2}, area="kuche")
     assert made["status"] == "ok"
     item = made["items"][0]
-    assert (item["kind"], item["label"], item["area"], item["location"]) == (
+    assert (item["kind"], item["label"], item["areas"], item["location"]) == (
         "reminder",
         "Tee",
-        "kuche",
-        "Küche",
+        ["kuche"],
+        None,
     )
     [stored] = radicale.events()
-    assert "CATEGORIES:HomeAssistant Reminder" in stored
-    assert "LOCATION:Küche" in stored
+    assert "CATEGORIES:HomeAssistant Reminder,Küche" in stored
+    assert "LOCATION" not in stored
     assert "TRIGGER:PT0S" in stored
 
     await asyncio.sleep(2.6)
@@ -105,16 +105,59 @@ async def test_external_event_rings_at_each_reminder(hass, radicale):
     ringing = events(hass, "ringing")
     begins = dt_util.now().replace(microsecond=0) + timedelta(seconds=6)
     radicale.put(
-        external_event("dentist", "Zahnarzt", begins, alarms=["-PT4S", "PT0S"], location="kueche")
+        external_event("dentist", "Zahnarzt", begins, alarms=["-PT4S", "PT0S"], rooms=["kueche"])
     )
     await engine.calendar.async_sync()
 
     [item] = (await call(hass, "query", kind="reminder"))["items"]
-    assert (item["label"], item["area"], item["alerts"]) == ("Zahnarzt", "kuche", [4.0, 0.0])
+    assert (item["label"], item["areas"], item["alerts"]) == ("Zahnarzt", ["kuche"], [4.0, 0.0])
 
     await asyncio.sleep(6.6)
     await hass.async_block_till_done()
     assert [(e["offset"], e["next_offset"]) for e in ringing] == [(4.0, 0.0), (0.0, None)]
+
+
+async def test_rooms_from_categories_ring_each(hass, radicale):
+    from homeassistant.setup import async_setup_component
+
+    areas = ar.async_get(hass)
+    areas.async_create("Küche")
+    areas.async_create("Bad", aliases={"Badezimmer"})
+    assert await async_setup_component(
+        hass,
+        "script",
+        {
+            "script": {
+                "ring": {
+                    "mode": "parallel",
+                    "sequence": [{"event": "rang", "event_data": {"areas": "{{ areas }}"}}],
+                }
+            }
+        },
+    )
+    rang = []
+    hass.bus.async_listen("rang", lambda e: rang.append(e.data["areas"]))
+    engine = await start(hass, radicale, ring_script="script.ring")
+    begins = dt_util.now().replace(microsecond=0) + timedelta(seconds=3)
+    radicale.put(
+        external_event(
+            "dentist",
+            "Zahnarzt",
+            begins,
+            alarms=["PT0S"],
+            # Exact names or aliases only; other categories are left alone.
+            rooms=["küche", "Badezimmer", "Arbeit", "Kueche"],
+            location="Hauptstraße 5",
+        )
+    )
+    await engine.calendar.async_sync()
+    [item] = (await call(hass, "query", kind="reminder"))["items"]
+    assert (item["areas"], item["location"]) == (["kuche", "bad"], "Hauptstraße 5")
+
+    await asyncio.sleep(3.6)
+    await hass.async_block_till_done()
+    # One call per round, with all its rooms.
+    assert rang == [["kuche", "bad"]]
 
 
 async def test_untagged_ignored_tagged_without_reminder_silent(hass, radicale):
@@ -181,6 +224,14 @@ async def test_one_off_alarm_and_query_window(hass, radicale):
     # Skipping a one-off alarm deletes it.
     assert (await call(hass, "alarm_skip"))["status"] == "ok"
     assert radicale.events() == []
+
+
+async def test_query_kind_without_target(hass, radicale):
+    await start(hass, radicale)
+    await call(hass, "alarm_create", time="06:30", days=["daily"])
+    await call(hass, "reminder_create", summary="Tee", **{"in": 3600})
+    assert [i["kind"] for i in (await call(hass, "query", kind="alarm"))["items"]] == ["alarm"]
+    assert len((await call(hass, "query"))["items"]) == 2
 
 
 async def test_ring_alarm_and_snooze(hass, radicale):
@@ -264,7 +315,11 @@ async def test_calendar_entity_lists_tagged_occurrences(hass, radicale):
         blocking=True,
         return_response=True,
     )
-    assert [e["summary"] for e in found["calendar.remembrance"]["events"]] == ["Zahnarzt"]
+    [event] = found["calendar.remembrance"]["events"]
+    assert event["summary"] == "Zahnarzt"
+    # As long as in the calendar (an hour), not a fixed minute.
+    length = datetime.fromisoformat(event["end"]) - datetime.fromisoformat(event["start"])
+    assert length == timedelta(hours=1)
 
 
 async def test_skip_a_day_for_all_alarms(hass, radicale):

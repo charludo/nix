@@ -43,6 +43,9 @@ class Entry:
     uid: str
     kind: str
     summary: str
+    # The other categories (besides the kind's): which name rooms is up to
+    # the caller.
+    categories: list[str]
     location: str | None
     # Free text, uninterpreted: what it means is up to the caller (e.g. a
     # playlist to wake up to).
@@ -113,7 +116,8 @@ def parse(ics: str, categories: dict[str, str], tz: tzinfo, href: str | None = N
     for event in calendar.walk("VEVENT"):
         if "RECURRENCE-ID" in event:
             continue  # overrides belong to their master
-        kind = next((wanted[c.lower()] for c in _categories(event) if c.lower() in wanted), None)
+        cats = _categories(event)
+        kind = next((wanted[c.lower()] for c in cats if c.lower() in wanted), None)
         if kind is None:
             continue
         start, end = _times(event, tz)
@@ -122,6 +126,7 @@ def parse(ics: str, categories: dict[str, str], tz: tzinfo, href: str | None = N
                 uid=str(event.get("UID")),
                 kind=kind,
                 summary=str(event.get("SUMMARY", "")),
+                categories=[c for c in cats if c and c.lower() not in wanted],
                 location=str(event["LOCATION"]) if event.get("LOCATION") else None,
                 description=str(event["DESCRIPTION"]) if event.get("DESCRIPTION") else None,
                 start=start,
@@ -165,32 +170,30 @@ def plan(entry: Entry, start: datetime, end: datetime, tz: tzinfo) -> list[Ring]
     return sorted(rings, key=lambda r: (r.at, r.offset))
 
 
-def occurrences(entry: Entry, start: datetime, end: datetime, tz: tzinfo) -> list[datetime]:
-    """Starts of the entry's occurrences in the window, cancelled ones skipped."""
+def spans(
+    entry: Entry, start: datetime, end: datetime, tz: tzinfo
+) -> list[tuple[datetime, datetime]]:
+    """(start, end) of the entry's occurrences in the window, cancelled ones skipped."""
     if entry.cancelled:
         return []
     query = recurring_ical_events.of(entry.calendar).between(start, end)
     return sorted(
-        _times(o, tz)[0]
+        _times(o, tz)
         for o in query
         if str(o.get("UID")) == entry.uid and str(o.get("STATUS", "")).upper() != "CANCELLED"
     )
+
+
+def occurrences(entry: Entry, start: datetime, end: datetime, tz: tzinfo) -> list[datetime]:
+    """Starts of the entry's occurrences in the window, cancelled ones skipped."""
+    return [s for s, _ in spans(entry, start, end, tz)]
 
 
 def next_occurrence(
     entry: Entry, after: datetime, tz: tzinfo, horizon_days: int = 400
 ) -> datetime | None:
     """Start of the first occurrence at or after `after`, cancelled ones skipped."""
-    if entry.cancelled:
-        return None
-    query = recurring_ical_events.of(entry.calendar).between(
-        after, after + timedelta(days=horizon_days)
-    )
-    starts = sorted(
-        _times(o, tz)[0]
-        for o in query
-        if str(o.get("UID")) == entry.uid and str(o.get("STATUS", "")).upper() != "CANCELLED"
-    )
+    starts = occurrences(entry, after, after + timedelta(days=horizon_days), tz)
     return next((s for s in starts if s >= after), None)
 
 
@@ -219,6 +222,7 @@ def new_event(
     start: datetime,
     duration: timedelta,
     alerts: list[float],
+    categories: list[str] | None = None,
     location: str | None = None,
     description: str | None = None,
     byday: list[str] | None = None,
@@ -226,7 +230,8 @@ def new_event(
 ) -> tuple[str, str]:
     """A new calendar resource with one tagged event: (uid, ics text).
 
-    `alerts` are seconds before the start; `byday` (MO … SU) makes it repeat
+    `alerts` are seconds before the start; `categories` go next to `category`;
+    `byday` (MO … SU) makes it repeat
     weekly on those days (daily when all seven).
     """
     uid = f"{uuid.uuid4()}@remembrance"
@@ -240,7 +245,7 @@ def new_event(
     event.add("SUMMARY", summary)
     event.add("DTSTART", start)
     event.add("DTEND", start + duration)
-    event.add("CATEGORIES", [category])
+    event.add("CATEGORIES", [category, *(categories or [])])
     if location:
         event.add("LOCATION", location)
     if description:

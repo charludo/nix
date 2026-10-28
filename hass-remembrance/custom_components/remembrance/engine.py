@@ -24,7 +24,6 @@ from .caldav_source import SourceError
 from .calendar_manager import CalendarManager, local_datetime
 from .const import (
     CONF_CALENDAR,
-    CONF_DEFAULT_AREA,
     CONF_INTERVAL,
     CONF_LIMIT,
     CONF_MISSED_GRACE,
@@ -59,6 +58,11 @@ _LOGGER = logging.getLogger(__name__)
 
 def _iso(ts: float | None) -> str | None:
     return datetime.fromtimestamp(ts, UTC).isoformat() if ts is not None else None
+
+
+def _in_area(areas: list[str], area: str | None) -> bool:
+    """Whether an item with `areas` rings in `area`; without areas: everywhere."""
+    return bool(area) and (not areas or area in areas)
 
 
 @dataclass
@@ -100,7 +104,7 @@ class Ringing:
 
     kind: str
     id: str
-    area: str | None
+    areas: list[str]
     label: str | None
     # Calendar entries: the ring (occurrence, reminder) that's ringing.
     ring: ci.Ring | None = None
@@ -126,10 +130,6 @@ class Engine:
     @property
     def missed_grace(self) -> float:
         return self.config.get(CONF_MISSED_GRACE, DEFAULT_MISSED_GRACE)
-
-    @property
-    def default_area(self) -> str | None:
-        return self.config.get(CONF_DEFAULT_AREA)
 
     # --- lifecycle -------------------------------------------------------
 
@@ -172,7 +172,7 @@ class Engine:
 
     def timer_start(self, duration: float, label: str | None, area: str | None) -> Result:
         try:
-            timer = self.book.start(duration, self._now(), label=label, area=self._area(area))
+            timer = self.book.start(duration, self._now(), label=label, area=area)
         except TimerError as err:
             return Result(STATUS_INVALID, reason=str(err))
         self._schedule(timer)
@@ -235,7 +235,7 @@ class Engine:
                 summary,
                 start,
                 sorted(set(alerts or [0.0])),
-                self._area(area),
+                area,
                 description=description,
             )
         )
@@ -268,7 +268,7 @@ class Engine:
                 label or "Wecker",
                 start,
                 [0.0],
-                self._area(area),
+                area,
                 byday,
                 description=description,
             )
@@ -367,7 +367,7 @@ class Engine:
         self._stop_ringing(entry.uid)
         calendar = self.calendar
         self._ringing[entry.uid] = Ringing(
-            entry.kind, entry.uid, calendar.area_of(entry), entry.summary, ring
+            entry.kind, entry.uid, calendar.areas_of(entry), entry.summary, ring
         )
         self._start_ringing(
             entry.uid,
@@ -418,7 +418,7 @@ class Engine:
             return Result(STATUS_NO_MATCH, reason="nothing ringing")
         if target.is_empty():
             area = target.selector.area
-            here = [r for r in ringing if area and r.area == area] or ringing
+            here = [r for r in ringing if _in_area(r.areas, area)] or ringing
             return here if all_in_area else here[:1]
         if target.ids:
             chosen = [r for r in ringing if r.id in target.ids]
@@ -468,7 +468,7 @@ class Engine:
                 duration=item["duration"],
                 created=self._now(),
                 label=item["label"],
-                area=item["area"],
+                area=next(iter(item["areas"]), None),
                 extended=item["extended"],
             )
             self.book.timers[timer.id] = timer
@@ -514,13 +514,11 @@ class Engine:
                 e.uid
                 for e in cal.select(target.selector, target.ids, target.all, kind, target.at_time)
             }
-            if target.is_empty():
-                chosen = set(cal.entries)
             if start or end:
                 tz = cal.tz
                 window_start = local_datetime(start, tz) if start else datetime.now(tz)
                 window_end = local_datetime(end, tz) if end else window_start + timedelta(days=1)
-                for entry, occ in cal.occurrences(window_start, window_end, kind):
+                for entry, occ, _end in cal.occurrences(window_start, window_end, kind):
                     if entry.uid in chosen:
                         items.append(cal.item(entry, occurrence=occ))
             else:
@@ -537,7 +535,7 @@ class Engine:
             "id": timer.id,
             "kind": KIND_TIMER,
             "label": timer.label,
-            "area": timer.area,
+            "areas": [timer.area] if timer.area else [],
             "state": str(timer.state),
             "duration": timer.duration,
             "extended": timer.extended,
@@ -554,9 +552,6 @@ class Engine:
 
     def _now(self) -> float:
         return datetime.now(UTC).timestamp()
-
-    def _area(self, area: str | None) -> str | None:
-        return area or self.default_area
 
     def _paused(self) -> list[Timer]:
         return [t for t in self.book.timers.values() if t.state == TimerState.PAUSED]
@@ -614,7 +609,9 @@ class Engine:
 
     def _fire(self, timer: Timer) -> None:
         self.book.ring(timer)
-        self._ringing[timer.id] = Ringing(KIND_TIMER, timer.id, timer.area, timer.label)
+        self._ringing[timer.id] = Ringing(
+            KIND_TIMER, timer.id, [timer.area] if timer.area else [], timer.label
+        )
         self._start_ringing(
             timer.id,
             KIND_TIMER,
@@ -673,7 +670,7 @@ class Engine:
     def _recent_item(self, area: str | None) -> dict | None:
         now = self._now()
         recent = [i for t, i in self._recent if now - t <= RECENT_WINDOW]
-        pick = [i for i in recent if area and i["area"] == area] or recent
+        pick = [i for i in recent if _in_area(i["areas"], area)] or recent
         return pick[-1] if pick else None
 
     def _event(self, event: str, timer: Timer, **extra: Any) -> None:

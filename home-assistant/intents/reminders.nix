@@ -40,12 +40,6 @@ let
       {{ ziel(day | default(""), ${r.hourOf}, ${r.minuteOf}) }}
     {%- endif -%}
   '';
-
-  failed = ''
-    {%- elif res.reason == 'no calendar configured' -%}Erinnerungen sind noch nicht eingerichtet.
-    {%- elif res.reason == 'in the past' -%}Dieser Zeitpunkt ist schon vorbei.
-    {%- elif (res.reason or "").startswith('calendar') -%}Ich komme gerade nicht an den Kalender.
-  '';
 in
 {
   hass.voice.intents = {
@@ -64,7 +58,7 @@ in
           {%- if res.status == 'ok' -%}
             {%- set i = res['items'][0] -%}
             Okay, ich erinnere dich {{ zeitpunkt(i.start) }} an {{ i.label }}.
-          ${failed}
+          ${r.failed "Erinnerungen"}
           {%- else -%}Das hat nicht geklappt.
           {%- endif -%}
         '';
@@ -116,7 +110,7 @@ in
           {%- if res.status == 'ok' -%}Erinnerung an {{ res['items'][0].label }} gelöscht.
           {%- elif res.status == 'ambiguous' -%}Welche meinst du? {{ erinnerung_choices(res.candidates) }}?
           {%- elif res.status == 'no_match' -%}Diese Erinnerung gibt es nicht.
-          ${failed}
+          ${r.failed "Erinnerungen"}
           {%- else -%}Das hat nicht geklappt.
           {%- endif -%}
         '';

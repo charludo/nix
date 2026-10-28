@@ -263,33 +263,29 @@ class CalendarManager:
 
     # --- items -----------------------------------------------------------
 
-    def area_of(self, entry: ci.Entry) -> str | None:
-        """The area the entry's location names (fuzzy), else the default."""
-        if entry.location:
-            wanted = _norm(entry.location)
-            best, score = None, 0.0
-            for area in ar.async_get(self.hass).async_list_areas():
-                for name in [area.id, area.name, *area.aliases]:
-                    s = difflib.SequenceMatcher(None, _norm(name), wanted).ratio()
-                    if s > score:
-                        best, score = area.id, s
-            if best and score >= 0.75:
-                return best
-            _LOGGER.warning("%r: location %r names no area", entry.summary, entry.location)
-        return self.engine.default_area
+    def areas_of(self, entry: ci.Entry) -> list[str]:
+        """The areas the entry's categories name (an area's id, name or alias,
+        ignoring case); other categories are left alone."""
+        names = {
+            _norm(name): area.id
+            for area in ar.async_get(self.hass).async_list_areas()
+            for name in [area.id, area.name, *area.aliases]
+        }
+        found = [names[n] for c in entry.categories if (n := _norm(c)) in names]
+        return list(dict.fromkeys(found))
 
-    def next_ring(self, entry: ci.Entry, after: datetime) -> ci.Ring | None:
-        rings = [
-            r
-            for r in ci.plan(entry, after, after + timedelta(days=60), self.tz)
-            if r.key not in self.rung
-        ]
+    def rings(self, entry: ci.Entry, start: datetime, end: datetime) -> list[ci.Ring]:
+        """The entry's rings still to come in the window, snoozes included."""
+        planned = [r for r in ci.plan(entry, start, end, self.tz) if r.key not in self.rung]
         snoozed = [
             ci.Ring(entry.uid, entry.kind, s.occurrence, s.at, self._snooze_offset(s))
             for s in self.snoozes
-            if s.uid == entry.uid and s.at >= after
+            if s.uid == entry.uid and start <= s.at < end
         ]
-        return min([*rings, *snoozed], key=lambda r: r.at, default=None)
+        return sorted([*planned, *snoozed], key=lambda r: r.at)
+
+    def next_ring(self, entry: ci.Entry, after: datetime) -> ci.Ring | None:
+        return next(iter(self.rings(entry, after, after + timedelta(days=60))), None)
 
     def item(
         self, entry: ci.Entry, ring: ci.Ring | None = None, occurrence: datetime | None = None
@@ -299,33 +295,28 @@ class CalendarManager:
         now = datetime.now(UTC)
         upcoming = self.next_ring(entry, now)
         occ = ring.occurrence if ring else occurrence or ci.next_occurrence(entry, now, self.tz)
-        following = None
-        if ring:
-            later = [
-                r
-                for r in [
-                    *ci.plan(
-                        entry,
-                        ring.at + timedelta(seconds=1),
-                        ring.occurrence + timedelta(days=1),
-                        self.tz,
-                    ),
-                    *(
-                        ci.Ring(entry.uid, entry.kind, s.occurrence, s.at, self._snooze_offset(s))
-                        for s in self.snoozes
-                        if s.uid == entry.uid and s.at > ring.at
-                    ),
-                ]
-                if r.occurrence == ring.occurrence
-            ]
-            following = min(later, key=lambda r: r.at, default=None)
+        # The next ring of the same occurrence (reminders: "I'll remind you again").
+        following = (
+            next(
+                (
+                    r
+                    for r in self.rings(
+                        entry, ring.at + timedelta(seconds=1), ring.occurrence + timedelta(days=1)
+                    )
+                    if r.occurrence == ring.occurrence
+                ),
+                None,
+            )
+            if ring
+            else None
+        )
         item = {
             "id": entry.uid,
             "kind": entry.kind,
             "label": entry.summary,
             "location": entry.location,
             "description": entry.description,
-            "area": self.area_of(entry),
+            "areas": self.areas_of(entry),
             "state": "ringing"
             if self.engine.is_ringing(entry.uid)
             else ("disabled" if entry.cancelled else "scheduled"),
@@ -349,14 +340,14 @@ class CalendarManager:
 
     def occurrences(
         self, start: datetime, end: datetime, kind: str | None = None
-    ) -> list[tuple[ci.Entry, datetime]]:
-        """(entry, occurrence start) for every tagged occurrence in the window."""
-        found: list[tuple[ci.Entry, datetime]] = []
+    ) -> list[tuple[ci.Entry, datetime, datetime]]:
+        """(entry, start, end) for every tagged occurrence in the window."""
+        found: list[tuple[ci.Entry, datetime, datetime]] = []
         for entry in self.entries.values():
             if kind and entry.kind != kind or entry.cancelled:
                 continue
-            for occ in ci.occurrences(entry, start, end, self.tz):
-                found.append((entry, occ))
+            for occ_start, occ_end in ci.spans(entry, start, end, self.tz):
+                found.append((entry, occ_start, occ_end))
         return sorted(found, key=lambda p: p[1])
 
     def select(
@@ -384,7 +375,7 @@ class CalendarManager:
                 return []
             pool = [e for s, e in scored if s >= best - 0.05]
         if len(pool) > 1 and sel.area:
-            same = [e for e in pool if self.area_of(e) == sel.area]
+            same = [e for e in pool if sel.area in self.areas_of(e)]
             if len(same) == 1:
                 return same
         return pool
@@ -413,7 +404,7 @@ class CalendarManager:
             start=start,
             duration=EVENT_LENGTH[kind],
             alerts=alerts,
-            location=self.area_name(area),
+            categories=[name] if (name := self.area_name(area)) else None,
             description=description,
             byday=byday,
             now=datetime.now(UTC),

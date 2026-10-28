@@ -1,6 +1,6 @@
 { lib, config, ... }:
 let
-  ha = lib.ha;
+  inherit (lib) ha;
 
   areasWithClimate = lib.filterAttrs (
     _: a: a.temperatureEntity != null && a.humidityEntity != null

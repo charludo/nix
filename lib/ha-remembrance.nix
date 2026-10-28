@@ -13,6 +13,7 @@ rec {
   #                   "Timer über 1 Stunde und 30 Minuten"
   #                   (no hyphen after a number: Pocket TTS's normaliser
   #                   doesn't spell out "5-Minuten" and garbles it)
+  #   oder(names)     "A, B oder C", capitalised
   #   timer_choices(items)  "Den 5 Minuten Timer oder den Nudel-Timer"
   #   uhrzeit(dt)     "7 Uhr", "13:30 Uhr"
   #   zeitpunkt(iso)  "heute um 13 Uhr", "morgen um 7:30 Uhr",
@@ -52,11 +53,14 @@ rec {
       {%- else -%}Timer über {{ dauer(d) }}
       {%- endif -%}
     {%- endmacro -%}
+    {%- macro oder(names) -%}
+      {%- set s = (names[:-1] | join(', ') ~ ' oder ' ~ names[-1]) if names | length > 1 else names[0] -%}
+      {{- s[:1] | upper ~ s[1:] -}}
+    {%- endmacro -%}
     {%- macro timer_choices(items) -%}
       {%- set ns = namespace(n=[]) -%}
       {%- for t in items -%}{%- set ns.n = ns.n + ['den ' ~ timer_name(t)] -%}{%- endfor -%}
-      {%- set s = (ns.n[:-1] | join(', ') ~ ' oder ' ~ ns.n[-1]) if ns.n | length > 1 else ns.n[0] -%}
-      {{- s[:1] | upper ~ s[1:] -}}
+      {{- oder(ns.n) -}}
     {%- endmacro -%}
     {%- macro uhrzeit(dt) -%}
       {{- dt.hour ~ (' Uhr' if dt.minute == 0 else ':' ~ '%02d' | format(dt.minute) ~ ' Uhr') -}}
@@ -90,14 +94,10 @@ rec {
     {%- macro wecker_choices(items) -%}
       {%- set ns = namespace(n=[]) -%}
       {%- for i in items -%}{%- set ns.n = ns.n + ['den um ' ~ uhrzeit(as_local(as_datetime(i.start)))] -%}{%- endfor -%}
-      {%- set s = (ns.n[:-1] | join(', ') ~ ' oder ' ~ ns.n[-1]) if ns.n | length > 1 else ns.n[0] -%}
-      {{- s[:1] | upper ~ s[1:] -}}
+      {{- oder(ns.n) -}}
     {%- endmacro -%}
     {%- macro erinnerung_choices(items) -%}
-      {%- set ns = namespace(n=[]) -%}
-      {%- for i in items -%}{%- set ns.n = ns.n + ['die an ' ~ i.label] -%}{%- endfor -%}
-      {%- set s = (ns.n[:-1] | join(', ') ~ ' oder ' ~ ns.n[-1]) if ns.n | length > 1 else ns.n[0] -%}
-      {{- s[:1] | upper ~ s[1:] -}}
+      {{- oder(items | map(attribute='label') | map('regex_replace', '^', 'die an ') | list) -}}
     {%- endmacro -%}
     {%- macro wake_playlist(description) -%}
       {%- set m = (description or "") | regex_findall('(?im)^\s*musik\s*:?\s*(.*?)\s*$') -%}
@@ -123,19 +123,67 @@ rec {
   germanNumber =
     n:
     let
-      ones = [ "" "eins" "zwei" "drei" "vier" "fünf" "sechs" "sieben" "acht" "neun" ];
-      teens = [ "zehn" "elf" "zwölf" "dreizehn" "vierzehn" "fünfzehn" "sechzehn" "siebzehn" "achtzehn" "neunzehn" ];
-      tens = [ "" "" "zwanzig" "dreißig" "vierzig" "fünfzig" "sechzig" "siebzig" "achtzig" "neunzig" ];
+      ones = [
+        ""
+        "eins"
+        "zwei"
+        "drei"
+        "vier"
+        "fünf"
+        "sechs"
+        "sieben"
+        "acht"
+        "neun"
+      ];
+      teens = [
+        "zehn"
+        "elf"
+        "zwölf"
+        "dreizehn"
+        "vierzehn"
+        "fünfzehn"
+        "sechzehn"
+        "siebzehn"
+        "achtzehn"
+        "neunzehn"
+      ];
+      tens = [
+        ""
+        ""
+        "zwanzig"
+        "dreißig"
+        "vierzig"
+        "fünfzig"
+        "sechzig"
+        "siebzig"
+        "achtzig"
+        "neunzig"
+      ];
       t = n / 10;
       o = lib.mod n 10;
     in
-    if n == 0 then [ "null" ]
-    else if n == 1 then [ "eins" "ein" "eine" "einer" ]
-    else if n < 10 then [ (builtins.elemAt ones n) ]
-    else if n < 20 then [ (builtins.elemAt teens (n - 10)) ]
-    else if n == 100 then [ "hundert" "einhundert" ]
-    else if o == 0 then [ (builtins.elemAt tens t) ]
-    else [ "${if o == 1 then "ein" else builtins.elemAt ones o}und${builtins.elemAt tens t}" ];
+    if n == 0 then
+      [ "null" ]
+    else if n == 1 then
+      [
+        "eins"
+        "ein"
+        "eine"
+        "einer"
+      ]
+    else if n < 10 then
+      [ (builtins.elemAt ones n) ]
+    else if n < 20 then
+      [ (builtins.elemAt teens (n - 10)) ]
+    else if n == 100 then
+      [
+        "hundert"
+        "einhundert"
+      ]
+    else if o == 0 then
+      [ (builtins.elemAt tens t) ]
+    else
+      [ "${if o == 1 then "ein" else builtins.elemAt ones o}und${builtins.elemAt tens t}" ];
   numberValues =
     from: to:
     lib.concatMap (
@@ -145,6 +193,27 @@ rec {
         out = n;
       }) ([ (toString n) ] ++ germanNumber n)
     ) (lib.range from to);
+
+  # Spoken days, as `ziel`/`zieltag` take them.
+  days = {
+    "heute" = "0";
+    "morgen" = "1";
+    "übermorgen" = "2";
+    "Montag" = "MO";
+    "Dienstag" = "TU";
+    "Mittwoch" = "WE";
+    "Donnerstag" = "TH";
+    "Freitag" = "FR";
+    "Samstag" = "SA";
+    "Sonntag" = "SU";
+  };
+  # A slot list from { spoken = value; }.
+  valuesOf = lib.mapAttrsToList (
+    k: v: {
+      "in" = k;
+      out = v;
+    }
+  );
 
   # Slot lists shared by the intents (lists are global per language, hence
   # the prefixes).
@@ -165,48 +234,21 @@ rec {
         }
       ) (lib.range 0 59)
     ) (lib.range 0 23);
-    # Days, as `ziel`/`zieltag` take them.
-    remembrance_tag.values =
-      lib.mapAttrsToList
-        (k: v: {
-          "in" = k;
-          out = v;
-        })
-        {
-          "heute" = "0";
-          "morgen" = "1";
-          "übermorgen" = "2";
-          "am Montag" = "MO";
-          "am Dienstag" = "TU";
-          "am Mittwoch" = "WE";
-          "am Donnerstag" = "TH";
-          "am Freitag" = "FR";
-          "am Samstag" = "SA";
-          "am Sonntag" = "SU";
-          "Montag" = "MO";
-          "Dienstag" = "TU";
-          "Mittwoch" = "WE";
-          "Donnerstag" = "TH";
-          "Freitag" = "FR";
-          "Samstag" = "SA";
-          "Sonntag" = "SU";
-        };
+    # Days, as `ziel`/`zieltag` take them; weekdays also with "am".
+    remembrance_tag.values = valuesOf (
+      days
+      // lib.mapAttrs' (d: lib.nameValuePair "am ${d}") (
+        removeAttrs days [
+          "heute"
+          "morgen"
+          "übermorgen"
+        ]
+      )
+    );
     # A day with a time of day ("morgen früh", "Samstag Abend") as one
     # slot: two slots side by side don't split. Out: "<day> <hour>".
     remembrance_tag_tageszeit.values =
       let
-        days = {
-          "heute" = "0";
-          "morgen" = "1";
-          "übermorgen" = "2";
-          "Montag" = "MO";
-          "Dienstag" = "TU";
-          "Mittwoch" = "WE";
-          "Donnerstag" = "TH";
-          "Freitag" = "FR";
-          "Samstag" = "SA";
-          "Sonntag" = "SU";
-        };
         times = {
           "früh" = 8;
           "Vormittag" = 10;
@@ -281,11 +323,23 @@ rec {
     lib.foldlAttrs (
       acc: placeholder: shapes:
       lib.concatMap (
-        s: if lib.hasInfix placeholder s then map (x: lib.replaceStrings [ placeholder ] [ x ] s) shapes else [ s ]
+        s:
+        if lib.hasInfix placeholder s then
+          map (x: lib.replaceStrings [ placeholder ] [ x ] s) shapes
+        else
+          [ s ]
       ) acc
     ) sentences placeholders;
 
   area = "{{ preferred_area_id | default('') }}";
+
+  # Answers to a failed calendar write, as Jinja `elif` branches on `res`;
+  # `what` names the items ("Erinnerungen", "Wecker").
+  failed = what: ''
+    {%- elif res.reason == 'no calendar configured' -%}${what} sind noch nicht eingerichtet.
+    {%- elif res.reason == 'in the past' -%}Dieser Zeitpunkt ist schon vorbei.
+    {%- elif (res.reason or "").startswith('calendar') -%}Ich komme gerade nicht an den Kalender.
+  '';
 
   # Call `remembrance.<service>` and stop with its response, which the
   # speech reads as `action_response`.

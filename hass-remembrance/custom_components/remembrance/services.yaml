@@ -62,7 +62,7 @@ timer_start:
         text:
     area:
       name: Area
-      description: Where it rings.
+      description: Where it rings (none: everywhere).
       selector:
         area:
 
@@ -124,7 +124,7 @@ reminder_create:
         object:
     area:
       name: Area
-      description: Where it rings (stored as the entry's location).
+      description: Where it rings (stored as a category named after the area; none: everywhere).
       selector:
         area:
     description:
@@ -164,7 +164,7 @@ alarm_create:
         text:
     area:
       name: Area
-      description: Where it rings (stored as the entry's location).
+      description: Where it rings (stored as a category named after the area; none: everywhere).
       selector:
         area:
     description:

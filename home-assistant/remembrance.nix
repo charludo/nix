@@ -5,7 +5,7 @@ let
   #   remembrance_caldav_url  the calendar's own URL
   #   remembrance_caldav_username, remembrance_caldav_password
   # Without it, the reminder and alarm intents answer that they aren't set up.
-  withCalendar = false;
+  withCalendar = true;
 in
 {
   hass.remembrance = {
@@ -18,10 +18,11 @@ in
           interval = 20;
           limit = 120;
         };
-        # Said once; "noch mal" for more.
+        # One round, said twice by the ring script; "stopp" within the
+        # 30 s skips the repeat, "noch mal" afterwards rings it again.
         reminder = {
           interval = 60;
-          limit = 0;
+          limit = 30;
         };
         # Louder every round (see the ring script), for up to ten minutes.
         alarm = {
