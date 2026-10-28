@@ -343,3 +343,13 @@ async def test_skip_a_day_for_all_alarms(hass, radicale):
 
     nothing = await call(hass, "alarm_skip", all=True, date=tomorrow.isoformat())
     assert nothing["status"] == "no_match"
+
+
+async def test_alarm_create_empty_days_is_one_off(hass, radicale):
+    # As the voice intents call it: empty `days` and `date` mean "not given".
+    await start(hass, radicale)
+    made = await call(hass, "alarm_create", time="06:30", days=[], date="")
+    assert made["status"] == "ok"
+    assert not made["items"][0]["recurring"]
+    repeating = await call(hass, "alarm_create", time="07:00", days=["werktags"], date="")
+    assert repeating["items"][0]["recurring"]

@@ -119,15 +119,13 @@ class NextAlarmSensor(SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         @callback
-        def update(_changed_id: str | None = None) -> None:
+        def update(_changed: str | datetime | None = None) -> None:
             self._refresh()
             self.async_write_ha_state()
 
         self.async_on_remove(async_dispatcher_connect(self.hass, SIGNAL_UPDATED, update))
         # Rings move past without any change: refresh once a minute.
-        self.async_on_remove(
-            async_track_time_interval(self.hass, lambda _now: update(), timedelta(minutes=1))
-        )
+        self.async_on_remove(async_track_time_interval(self.hass, update, timedelta(minutes=1)))
         self._refresh()
 
     def _refresh(self) -> None:
