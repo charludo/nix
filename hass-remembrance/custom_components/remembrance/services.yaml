@@ -31,6 +31,11 @@
     description: Roughly how much time is left.
     selector:
       duration:
+  time:
+    name: Time of day
+    description: A reminder's or alarm's time of day.
+    selector:
+      time:
   area:
     name: Area
     description: Breaks ties between otherwise equal matches.
@@ -92,6 +97,107 @@ timer_cancel:
   name: Cancel timer
   fields: *target
 
+reminder_create:
+  name: Create reminder
+  description: Writes a tagged entry to the calendar; it rings at its reminders.
+  fields:
+    summary:
+      name: Summary
+      required: true
+      selector:
+        text:
+    at:
+      name: At
+      description: When it starts (or `in`).
+      selector:
+        datetime:
+    in:
+      name: In
+      description: How long from now it starts (or `at`).
+      selector:
+        duration:
+    alerts:
+      name: Reminders
+      description: Seconds before the start to ring at; default [0], on the dot.
+      example: "[0, 600]"
+      selector:
+        object:
+    area:
+      name: Area
+      description: Where it rings (stored as the entry's location).
+      selector:
+        area:
+    description:
+      name: Description
+      description: Free text, stored in the entry and passed on with the item.
+      selector:
+        text:
+          multiline: true
+
+reminder_delete:
+  name: Delete reminder
+  fields: *target
+
+alarm_create:
+  name: Create alarm
+  description: Writes a tagged entry to the calendar, repeating on `days` or once.
+  fields:
+    time:
+      name: Time
+      required: true
+      selector:
+        time:
+    days:
+      name: Days
+      description: e.g. werktags, wochenende, daily, montags, or a list of days.
+      selector:
+        text:
+          multiple: true
+    date:
+      name: Date
+      description: For a one-off alarm; default the next time `time` comes.
+      selector:
+        date:
+    label:
+      name: Label
+      selector:
+        text:
+    area:
+      name: Area
+      description: Where it rings (stored as the entry's location).
+      selector:
+        area:
+    description:
+      name: Description
+      description: Free text, stored in the entry and passed on with the item.
+      selector:
+        text:
+          multiline: true
+
+alarm_skip:
+  name: Skip alarm
+  description: Leaves out one occurrence of a repeating alarm; a one-off alarm is deleted.
+  fields:
+    <<: *target
+    date:
+      name: Date
+      description: Default the next occurrence.
+      selector:
+        date:
+
+alarm_enable:
+  name: Enable alarm
+  fields: *target
+
+alarm_disable:
+  name: Disable alarm
+  description: Sets the entry's status to CANCELLED.
+  fields: *target
+
+alarm_delete:
+  name: Delete alarm
+  fields: *target
+
 dismiss:
   name: Dismiss
   description: Stop ringing. Without a target, everything ringing (in the area, if given).
@@ -121,6 +227,8 @@ query:
         select:
           options:
             - timer
+            - reminder
+            - alarm
     state:
       name: State
       selector:
@@ -129,3 +237,14 @@ query:
             - running
             - paused
             - ringing
+            - scheduled
+            - disabled
+    from:
+      name: From
+      description: With `to`, one item per occurrence in the window.
+      selector:
+        datetime:
+    to:
+      name: To
+      selector:
+        datetime:

@@ -98,23 +98,5 @@ in
         ];
         script.action = setVolume (relativeVolume "[0.0, cur - 0.05] | max");
       });
-
-      StilleAlle = silent {
-        sentences = [
-          "[Halt die ](Klappe|Fresse)[ halten]"
-          "Sei (still|ruhig)[ jetzt]"
-          "Ruhe"
-          "Aus"
-        ];
-        script.action = [
-          {
-            action = "tts_relay.silence";
-            data.entity_id = [
-              e.media_player.living_room
-              e.media_player.office
-            ];
-          }
-        ];
-      };
     };
 }

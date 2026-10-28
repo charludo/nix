@@ -9,6 +9,9 @@ in
       living_room.area = a.wohnzimmer;
       office.area = a.buro;
       lg_c4.area = a.wohnzimmer;
+      # The same Sonos as Music Assistant players (music_assistant.play_media).
+      living_room_2.area = a.wohnzimmer;
+      office_2.area = a.buro;
     };
 
     vacuums.botty.area = a.wohnzimmer;

@@ -1,11 +1,21 @@
 {
   "domain": "remembrance",
   "name": "Remembrance",
-  "codeowners": ["@charludo"],
+  "codeowners": [
+    "@charludo"
+  ],
   "dependencies": [],
   "documentation": "https://github.com/charludo/hass-remembrance",
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/charludo/hass-remembrance/issues",
-  "requirements": [],
-  "version": "0.1.0"
+  "requirements": [
+    "caldav>=2.1",
+    "icalendar>=6.1",
+    "recurring-ical-events>=3.3"
+  ],
+  "version": "0.1.0",
+  "after_dependencies": [
+    "script",
+    "calendar"
+  ]
 }

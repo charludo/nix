@@ -1,41 +1,10 @@
 { lib, ... }:
 let
-  inherit (lib.ha.voice) remembranceJinja silentAction;
+  r = lib.ha.remembrance;
+  inherit (r) area callService secondsOf;
 
-  # Spoken durations, one sentence per shape: closest_intent expands each
-  # pattern into at most 16 variants (`expansion_cap`), so alternations and
-  # optionals inside one pattern get cut off. Fuzzy matching covers
-  # "Minute"/"Minuten" and articles anyway. Each use fills its own slots:
-  # a timer's new duration (no prefix), a change to it (`delta_`), or the
-  # duration naming a timer (`set_`, see `timerShapes`).
-  durationShapes = p: [
-    "{timer_zahl:${p}minutes} Minuten"
-    "{timer_zahl:${p}hours} Stunden"
-    "{timer_zahl:${p}seconds} Sekunden"
-    "{timer_zahl:${p}hours} Stunden und {timer_zahl:${p}minutes} Minuten"
-    "{timer_zahl:${p}minutes} Minuten und {timer_zahl:${p}seconds} Sekunden"
-  ];
-
-  # 1 to 100 as digits and German words. HA's own number lists hold digits
-  # only: closest_intent scores a spoken "eine" or "zwanzig" against those
-  # and drops the sentence.
-  germanNumber =
-    n:
-    let
-      ones = [ "" "eins" "zwei" "drei" "vier" "fünf" "sechs" "sieben" "acht" "neun" ];
-      teens = [ "zehn" "elf" "zwölf" "dreizehn" "vierzehn" "fünfzehn" "sechzehn" "siebzehn" "achtzehn" "neunzehn" ];
-      tens = [ "" "" "zwanzig" "dreißig" "vierzig" "fünfzig" "sechzig" "siebzig" "achtzig" "neunzig" ];
-      t = n / 10;
-      o = lib.mod n 10;
-    in
-    if n == 1 then [ "eins" "ein" "eine" "einer" ]
-    else if n < 10 then [ (builtins.elemAt ones n) ]
-    else if n < 20 then [ (builtins.elemAt teens (n - 10)) ]
-    else if n == 100 then [ "hundert" "einhundert" ]
-    else if o == 0 then [ (builtins.elemAt tens t) ]
-    else [ "${if o == 1 then "ein" else builtins.elemAt ones o}und${builtins.elemAt tens t}" ];
   # Durations without a number, as literal sentences that start a timer.
-  # Against the number patterns above they only win when said as is (an
+  # Against the number patterns they only win when said as is (an
   # exact sentence scores 100); otherwise "eine halbe Stunde" would become
   # "eine Stunde".
   fixedDurations = {
@@ -45,20 +14,6 @@ let
     "anderthalb Stunden" = 5400;
     "eine halbe Minute" = 30;
   };
-
-  numberValues = lib.concatMap (
-    n:
-    map (w: {
-      "in" = w;
-      out = n;
-    }) ([ (toString n) ] ++ germanNumber n)
-  ) (lib.range 1 100);
-
-  # Jinja expression: the seconds a duration's slots add up to.
-  secondsOf =
-    p:
-    "((${p}hours | default(0) | int) * 3600 + (${p}minutes | default(0) | int) * 60"
-    + " + (${p}seconds | default(0) | int))";
 
   # "den Timer", "den 5-Minuten-Timer" (speech-to-text hyphens arrive as
   # spaces in closest_intent), "den Nudel-Timer". The label is its own
@@ -70,29 +25,17 @@ let
     "{timer_label:label} Timer"
   ];
 
-  # Every sentence once per shape of each placeholder it contains.
-  placeholders = {
-    "<dauer>" = durationShapes "";
+  expand = r.expand {
+    "<dauer>" = r.durationShapes "";
     # Changes in one unit only: "um eine Minute", "um 30 Sekunden".
-    "<aenderung>" = lib.take 3 (durationShapes "delta_");
+    "<aenderung>" = lib.take 3 (r.durationShapes "delta_");
     "<timer>" = timerShapes;
   };
-  expand =
-    sentences:
-    lib.foldlAttrs (
-      acc: placeholder: shapes:
-      lib.concatMap (
-        s: if lib.hasInfix placeholder s then map (x: lib.replaceStrings [ placeholder ] [ x ] s) shapes else [ s ]
-      ) acc
-    ) sentences placeholders;
 
-  # Lists are global per language, hence the prefixes.
   lists = {
+    inherit (r.lists) timer_zahl;
     timer_label.wildcard = true;
-    timer_zahl.values = numberValues;
   };
-
-  area = "{{ preferred_area_id | default('') }}";
 
   # What was said about the timer, and where (only breaks ties). Unsaid
   # fields render empty or 0, which remembrance treats as not given.
@@ -102,24 +45,10 @@ let
     inherit area;
   };
 
-  # Call `service` and stop with its response, which the speech reads as
-  # `action_response`.
-  callService = service: data: [
-    {
-      action = "remembrance.${service}";
-      inherit data;
-      response_variable = "r";
-    }
-    {
-      stop = "";
-      response_variable = "r";
-    }
-  ];
-
   # Speech for a timer action: `ok` (Jinja; `t` is the timer) on success,
   # the shared answers otherwise.
   speak = ok: ''
-    ${remembranceJinja}
+    ${r.jinja}
     {%- set r = action_response -%}
     {%- set t = r['items'][0] if r['items'] else none -%}
     {%- if r.status == 'ok' -%}${ok}
@@ -170,14 +99,6 @@ let
   startSpeech = speak "{{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else '' }} - ab jetzt.";
 in
 {
-  hass.remembrance.settings = {
-    ring_script = "script.remembrance_ring";
-    ring.timer = {
-      interval = 20;
-      limit = 120;
-    };
-  };
-
   hass.voice.intents = fixedStartIntents // {
     TimerStellen = {
       sentences = expand [
@@ -258,49 +179,13 @@ in
           inherit (target) label duration;
         };
         speech.text = ''
-          ${remembranceJinja}
+          ${r.jinja}
           {%- set items = action_response['items'] | rejectattr('state', 'eq', 'ringing') | list -%}
           {%- if not items -%}Es läuft kein Timer.
           {%- else -%}
             {%- for t in items -%}
               {{ timer_name(t) }}: {{ 'pausiert, ' if t.state == 'paused' else "" }}noch {{ dauer(t.remaining) }}.{{ ' ' if not loop.last }}
             {%- endfor -%}
-          {%- endif -%}
-        '';
-      };
-    };
-
-    # Anything ringing (timers now, reminders and alarms later). Silent:
-    # the ringing stopping is the answer.
-    Stopp = silentAction {
-      sentences = [
-        "Stopp"
-        "Stop"
-        "Ist gut"
-        "(Timer|Wecker) aus"
-      ];
-      script.action = callService "dismiss" { inherit area; };
-    };
-
-    # Ring again: what is ringing, else what rang last. No duration: the
-    # configured snooze delay.
-    NochMal = {
-      sentences = expand [
-        "In <dauer> noch mal"
-        "Erinnere mich in <dauer> noch mal"
-        "Schlummern"
-      ];
-      inherit lists;
-      script = {
-        action = callService "snooze" {
-          delay = "{{ ${secondsOf ""} }}";
-          inherit area;
-        };
-        speech.text = ''
-          ${remembranceJinja}
-          {%- set r = action_response -%}
-          {%- if r.status == 'ok' -%}Okay, in {{ dauer(r['items'][0].remaining) }} noch mal.
-          {%- else -%}Gerade gab es nichts, was ich wiederholen könnte.
           {%- endif -%}
         '';
       };
