@@ -31,6 +31,8 @@ CONF_PASSWORD = "password"
 CONF_POLL_INTERVAL = "poll_interval"
 CONF_REMINDER_CATEGORY = "reminder_category"
 CONF_ALARM_CATEGORY = "alarm_category"
+# Duckling's HTTP server, for the services that take a sentence.
+CONF_DUCKLING_URL = "duckling_url"
 
 # Ring rhythm per kind: seconds between rounds, and until it times out.
 DEFAULT_RING = {

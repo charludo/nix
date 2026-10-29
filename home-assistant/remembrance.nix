@@ -10,6 +10,8 @@ in
 {
   hass.remembrance = {
     enable = true;
+    # Reads times and durations in sentences (`create_from_text`).
+    duckling.enable = true;
     settings = {
       ring_script = "script.remembrance_ring";
       # Seconds between rounds, and until it gives up.

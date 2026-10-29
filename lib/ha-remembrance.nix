@@ -18,12 +18,8 @@ rec {
   #   uhrzeit(dt)     "7 Uhr", "13:30 Uhr"
   #   zeitpunkt(iso)  "heute um 13 Uhr", "morgen um 7:30 Uhr",
   #                   "am Samstag um 9 Uhr", "am 3.11. um 9 Uhr"
-  #   ziel(day, hour, minute)  ISO time for a spoken day ("0" today, "1"
-  #                   tomorrow, …, "MO" … "SU", or "" when none was said)
-  #                   and time. No day: a time already past means tomorrow;
-  #                   a weekday that is today and already past means next
-  #                   week; "heute" stays today (and may be past)
-  #   zieltag(day)    the date (ISO) a spoken day means, never in the past
+  #   zieltag(day)    the date (ISO) a spoken day ("0" today, "1" tomorrow,
+  #                   …, "MO" … "SU") means, never in the past
   #   tag_name(day)   "heute", "morgen", "am Samstag"
   #   wecker_choices(items)      "Den um 7 Uhr oder den um 8:30 Uhr"
   #   erinnerung_choices(items)  "Die an Zahnarzt oder die an Blumen gießen"
@@ -106,15 +102,6 @@ rec {
     {%- macro wake_gentle(description) -%}
       {{- "1" if (description or "") | regex_search('(?im)^\s*sanft\s*$') else "" -}}
     {%- endmacro -%}
-    {%- macro ziel(day, hour, minute) -%}
-      {%- set n = now() -%}
-      {%- set base = as_local(as_datetime(zieltag(day or '0') ~ 'T00:00:00')) -%}
-      {%- set at = base.replace(hour=hour | int(9), minute=minute | int(0)) -%}
-      {%- if at <= n and day in ["", 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] -%}
-        {%- set at = at + timedelta(days=1 if day == "" else 7) -%}
-      {%- endif -%}
-      {{- at.isoformat() -}}
-    {%- endmacro -%}
   '';
 
   # 0 to 100 as digits and German words. HA's own number lists hold digits
@@ -194,7 +181,7 @@ rec {
       }) ([ (toString n) ] ++ germanNumber n)
     ) (lib.range from to);
 
-  # Spoken days, as `ziel`/`zieltag` take them.
+  # Spoken days, as `zieltag` takes them.
   days = {
     "heute" = "0";
     "morgen" = "1";
@@ -234,7 +221,7 @@ rec {
         }
       ) (lib.range 0 59)
     ) (lib.range 0 23);
-    # Days, as `ziel`/`zieltag` take them; weekdays also with "am".
+    # Days, as `zieltag` takes them; weekdays also with "am".
     remembrance_tag.values = valuesOf (
       days
       // lib.mapAttrs' (d: lib.nameValuePair "am ${d}") (
@@ -245,34 +232,6 @@ rec {
         ]
       )
     );
-    # A day with a time of day ("morgen früh", "Samstag Abend") as one
-    # slot: two slots side by side don't split. Out: "<day> <hour>".
-    remembrance_tag_tageszeit.values =
-      let
-        times = {
-          "früh" = 8;
-          "Vormittag" = 10;
-          "Mittag" = 12;
-          "Nachmittag" = 15;
-          "Abend" = 19;
-          "Nacht" = 22;
-        };
-      in
-      lib.concatLists (
-        lib.mapAttrsToList (
-          d: dv:
-          lib.mapAttrsToList (t: tv: {
-            "in" = "${d} ${t}";
-            out = "${dv} ${toString tv}";
-          }) times
-        ) days
-      )
-      ++ [
-        {
-          "in" = "heute Morgen";
-          out = "0 8";
-        }
-      ];
   };
 
   # Spoken durations, one sentence per shape: closest_intent expands each
@@ -340,6 +299,56 @@ rec {
     {%- elif res.reason == 'in the past' -%}Dieser Zeitpunkt ist schon vorbei.
     {%- elif (res.reason or "").startswith('calendar') -%}Ich komme gerade nicht an den Kalender.
   '';
+
+  # Answers to a sentence `create_from_text` didn't understand, as Jinja
+  # `elif` branches on `res` (more per kind: `no duration`, `no summary`).
+  notUnderstood = ''
+    {%- elif res.reason == 'vague time' -%}Bitte sag mir eine genaue Uhrzeit.
+    {%- elif res.reason == 'no time' -%}Ich habe keine Uhrzeit verstanden.
+    {%- elif (res.reason or "").startswith('duckling') or res.reason == 'no duckling configured' -%}Ich kann gerade keine Zeitangaben lesen.
+  '';
+
+  # Intents that hand the whole sentence to remembrance's `create_from_text`
+  # (its parser reads times, repeats, labels): one per pattern, as `name`,
+  # `name2`, …, since the script puts the sentence back together from its
+  # pattern ("Weck mich {remembrance_text:text}" -> "Weck mich {{ text }}").
+  # Patterns are literal apart from their slots; `{remembrance_text:…}` is a
+  # wildcard, other lists come with `lists`.
+  fromText =
+    {
+      name,
+      kind,
+      sentences,
+      speech,
+      lists ? { },
+    }:
+    let
+      # "{list:slot}" or "{slot}" -> "{{ slot }}"
+      sentenceOf =
+        pattern:
+        lib.concatMapStrings (part: if builtins.isList part then "{{ ${lib.last part} }}" else part) (
+          builtins.split "\\{(([a-z_]+):)?([a-z_]+)}" pattern
+        );
+    in
+    lib.listToAttrs (
+      lib.imap1 (
+        i: pattern:
+        lib.nameValuePair (name + lib.optionalString (i > 1) (toString i)) {
+          sentences = [ pattern ];
+          lists = {
+            remembrance_text.wildcard = true;
+          }
+          // lists;
+          script = {
+            action = callService "create_from_text" {
+              inherit kind area;
+              text = sentenceOf pattern;
+            };
+            speech.text = speech;
+          };
+        }
+      ) sentences
+    );
 
   # Call `remembrance.<service>` and stop with its response, which the
   # speech reads as `action_response`.

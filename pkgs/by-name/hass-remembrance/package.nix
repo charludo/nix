@@ -2,6 +2,7 @@
   lib,
   buildHomeAssistantComponent,
   home-assistant,
+  duckling,
   radicale,
   runCommand,
   ruff,
@@ -23,7 +24,7 @@ let
   ];
 
   # Home Assistant itself as a library, for the tests against a real core;
-  # Radicale as the CalDAV server they talk to.
+  # Radicale as the CalDAV server they talk to, Duckling to read sentences.
   testPython = home-assistant.python3Packages.python.withPackages (
     ps:
     [
@@ -36,14 +37,22 @@ let
 
   runTests =
     name: command:
-    runCommand "hass-remembrance-${name}" { nativeBuildInputs = [ testPython radicale ]; } ''
-      cp -r ${src} work
-      chmod -R u+w work
-      cd work
-      export HOME=$TMPDIR
-      ${command}
-      touch $out
-    '';
+    runCommand "hass-remembrance-${name}"
+      {
+        nativeBuildInputs = [
+          testPython
+          radicale
+          duckling
+        ];
+      }
+      ''
+        cp -r ${src} work
+        chmod -R u+w work
+        cd work
+        export HOME=$TMPDIR
+        ${command}
+        touch $out
+      '';
 in
 buildHomeAssistantComponent {
   owner = "charludo";

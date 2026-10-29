@@ -27,6 +27,7 @@ from homeassistant.helpers.typing import ConfigType
 from .const import (
     CONF_ALARM_CATEGORY,
     CONF_CALENDAR,
+    CONF_DUCKLING_URL,
     CONF_INTERVAL,
     CONF_LIMIT,
     CONF_MISSED_GRACE,
@@ -46,6 +47,7 @@ from .const import (
     STATUS_OK,
 )
 from .engine import Engine, Result, Target
+from .parsers import Parsed
 from .timers import Selector
 
 
@@ -103,6 +105,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_SNOOZE_DELAY): _seconds,
                 vol.Optional(CONF_MISSED_GRACE): _seconds,
                 vol.Optional(CONF_CALENDAR): CALENDAR_SCHEMA,
+                vol.Optional(CONF_DUCKLING_URL): cv.url,
             }
         )
     },
@@ -169,6 +172,23 @@ SERVICES: dict[str, vol.Schema] = {
     "alarm_delete": vol.Schema(TARGET_FIELDS),
     "dismiss": vol.Schema(TARGET_FIELDS),
     "snooze": vol.Schema({**TARGET_FIELDS, vol.Optional("delay"): _blank_or(_seconds)}),
+    # A sentence, whole ("Weck mich werktags um halb sieben"), in `language`
+    # (default: Home Assistant's).
+    "parse": vol.Schema(
+        {
+            vol.Required("text"): cv.string,
+            vol.Optional("kind"): _blank_or(vol.In(KINDS)),
+            vol.Optional("language"): _blank_or(cv.string),
+        }
+    ),
+    "create_from_text": vol.Schema(
+        {
+            vol.Required("text"): cv.string,
+            vol.Optional("kind"): _blank_or(vol.In(KINDS)),
+            vol.Optional("language"): _blank_or(cv.string),
+            vol.Optional("area"): _blank_or(cv.string),
+        }
+    ),
     "query": vol.Schema(
         {
             **TARGET_FIELDS,
@@ -274,6 +294,21 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 result = engine.dismiss(target_of(call))
             case "snooze":
                 result = engine.snooze(target_of(call), d.get("delay"))
+            case "parse":
+                parsed = await engine.parse(d["text"], d.get("kind"), d.get("language"))
+                result = (
+                    Result(
+                        STATUS_INVALID if parsed.reason else STATUS_OK,
+                        reason=parsed.reason,
+                        parsed=parsed.as_dict(),
+                    )
+                    if isinstance(parsed, Parsed)
+                    else parsed
+                )
+            case "create_from_text":
+                result = engine.create_from_text(
+                    d["text"], d.get("kind"), d.get("language"), d.get("area")
+                )
             case "query":
                 result = engine.query(
                     target_of(call), d.get("kind"), d.get("state"), d.get("from"), d.get("to")

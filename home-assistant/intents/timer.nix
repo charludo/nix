@@ -3,18 +3,6 @@ let
   r = lib.ha.remembrance;
   inherit (r) area callService secondsOf;
 
-  # Durations without a number, as literal sentences that start a timer.
-  # Against the number patterns they only win when said as is (an
-  # exact sentence scores 100); otherwise "eine halbe Stunde" would become
-  # "eine Stunde".
-  fixedDurations = {
-    "eine halbe Stunde" = 1800;
-    "eine Viertelstunde" = 900;
-    "eine Dreiviertelstunde" = 2700;
-    "anderthalb Stunden" = 5400;
-    "eine halbe Minute" = 30;
-  };
-
   # "den Timer", "den 5-Minuten-Timer" (speech-to-text hyphens arrive as
   # spaces in closest_intent), "den Nudel-Timer". The label is its own
   # sentence, so the wildcard doesn't compete with a duration in one pattern.
@@ -26,7 +14,6 @@ let
   ];
 
   expand = r.expand {
-    "<dauer>" = r.durationShapes "";
     # Changes in one unit only: "um eine Minute", "um 30 Sekunden".
     "<aenderung>" = lib.take 3 (r.durationShapes "delta_");
     "<timer>" = timerShapes;
@@ -82,49 +69,36 @@ let
       (target // { delta = "{{ ${toString sign} * ${secondsOf "delta_"} }}"; })
       "{{ timer_name(t) }} um {{ dauer(${secondsOf "delta_"}) }} ${participle}, noch {{ dauer(t.remaining) }}.";
 
-  fixedStartIntents = lib.listToAttrs (
-    lib.imap1 (
-      i: phrase:
-      lib.nameValuePair "TimerStellenFest${toString i}" {
-        sentences = [
-          "Timer auf ${phrase}"
-          "Stelle einen Timer auf ${phrase}"
-          "Stelle einen {timer_label:label} Timer auf ${phrase}"
-        ];
-        inherit lists;
-        script = {
-          action = start fixedDurations.${phrase};
-          speech.text = startSpeech;
-        };
-      }
-    ) (lib.attrNames fixedDurations)
-  );
-  start =
-    duration:
-    callService "timer_start" {
-      inherit duration area;
-      label = "{{ label | default('') }}";
-    };
-  startSpeech = speak "{{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else '' }} - ab jetzt.";
+  # Started from the sentence as said: remembrance reads the duration
+  # ("anderthalb Stunden", "3,5 Minuten") and the label ("Nudeltimer",
+  # "Nudel Timer", "Timer für die Nudeln").
+  startIntents = r.fromText {
+    name = "TimerStellen";
+    kind = "timer";
+    sentences = [
+      "Stelle einen {remembrance_text:text}"
+      "Starte einen {remembrance_text:text}"
+      "Timer {remembrance_text:text}"
+      # closest_intent drops what comes before a pattern: "Nudel Timer auf …"
+      # needs its own.
+      "{remembrance_text:label} Timer auf {remembrance_text:text}"
+      "{remembrance_text:text} ab jetzt"
+    ];
+    speech = ''
+      ${r.jinja}
+      {%- set res = action_response -%}
+      {%- set t = res['items'][0] if res['items'] else none -%}
+      {%- if res.status == 'ok' -%}
+        {{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else "" }} - ab jetzt.
+      {%- elif res.reason == 'no duration' -%}Ich habe nicht verstanden, wie lange der Timer laufen soll.
+      ${r.notUnderstood}
+      {%- else -%}Das hat nicht geklappt.
+      {%- endif -%}
+    '';
+  };
 in
 {
-  hass.voice.intents = fixedStartIntents // {
-    TimerStellen = {
-      sentences = expand [
-        "Stelle einen Timer auf <dauer>"
-        "Stelle einen {timer_label:label} Timer auf <dauer>"
-        # A name only in this form: in the short form ("Nudel Timer auf …")
-        # the unnamed pattern ties and wins.
-        "Timer auf <dauer>"
-        "<dauer> ab jetzt"
-      ];
-      inherit lists;
-      script = {
-        action = start "{{ ${secondsOf ""} }}";
-        speech.text = startSpeech;
-      };
-    };
-
+  hass.voice.intents = startIntents // {
     TimerVerlaengern = adjust "verlängern" "Verlängere" "verlängert" [
       "<aenderung> (hinzufügen|dazu|drauf)"
       "Füge <aenderung> hinzu"

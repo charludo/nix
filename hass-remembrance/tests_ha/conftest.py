@@ -3,17 +3,20 @@ component, and a real Radicale as CalDAV server. Needs Home Assistant,
 caldav and radicale installed (see the repo's test env)."""
 
 import os
+import shutil
 import socket
 import subprocess
 import time
 from pathlib import Path
 
+import aiohttp
 import pytest
 from homeassistant import loader
 from homeassistant.auth import auth_manager_from_config
 from homeassistant.bootstrap import async_load_base_functionality
 from homeassistant.config_entries import ConfigEntries
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import aiohttp_client
 from homeassistant.setup import async_setup_component
 
 PKG_DIR = Path(__file__).resolve().parent.parent / "custom_components" / "remembrance"
@@ -107,5 +110,51 @@ class Radicale:
 @pytest.fixture
 def radicale(tmp_path):
     server = Radicale(tmp_path / "dav")
+    yield server
+    server.stop()
+
+
+class Duckling:
+    """A Duckling server on a free port (`duckling-example-exe` from PATH)."""
+
+    def __init__(self, root: Path) -> None:
+        root.mkdir(parents=True, exist_ok=True)
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            port = sock.getsockname()[1]
+        self.process = subprocess.Popen(
+            ["duckling-example-exe", "--address", "127.0.0.1", "--port", str(port)]
+            + ["--no-access-log", "--no-error-log"],
+            cwd=root,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.url = f"http://127.0.0.1:{port}"
+        for _ in range(200):
+            assert self.process.poll() is None, "duckling exited"
+            try:
+                with socket.create_connection(("127.0.0.1", port), timeout=0.1):
+                    break
+            except OSError:
+                time.sleep(0.05)
+
+    def stop(self) -> None:
+        self.process.terminate()
+        self.process.wait()
+
+
+class _PlainResolver(aiohttp.ThreadedResolver):
+    """Home Assistant's resolver also asks mDNS, which build sandboxes lack."""
+
+    async def real_close(self) -> None:
+        await self.close()
+
+
+@pytest.fixture
+def duckling(tmp_path, monkeypatch):
+    if not shutil.which("duckling-example-exe"):
+        pytest.skip("no duckling-example-exe")
+    monkeypatch.setattr(aiohttp_client, "_async_make_resolver", lambda hass: _PlainResolver())
+    server = Duckling(tmp_path / "duckling")
     yield server
     server.stop()

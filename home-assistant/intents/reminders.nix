@@ -1,70 +1,40 @@
 { lib, ... }:
 let
   r = lib.ha.remembrance;
-  inherit (r) area callService secondsOf;
+  inherit (r) area callService;
 
-  # When, as spoken. The slots decide the service's fields: `in` for a
-  # duration, `at` (via the `ziel` macro) for a day and/or time.
   expand = r.expand {
-    "<wann>" =
-      map (d: "in ${d}") (r.durationShapes "")
-      ++ map (t: "um ${t}") r.timeShapes
-      ++ map (t: "{remembrance_tag:day} um ${t}") r.timeShapes
-      ++ [
-        "{remembrance_tag_tageszeit:daytime}"
-        "{remembrance_tag:day}"
-      ];
     "<tag>" = [ "{remembrance_tag:day}" ];
   };
 
   lists = {
-    inherit (r.lists)
-      timer_zahl
-      remembrance_stunde
-      remembrance_minute
-      remembrance_uhrzeit
-      remembrance_tag
-      remembrance_tag_tageszeit
-      ;
+    inherit (r.lists) remembrance_tag;
     erinnerung_text.wildcard = true;
   };
 
-  # A day without a time means 9 o'clock, a time without a day the next
-  # time it comes.
-  at = ''
-    ${r.jinja}
-    {%- if daytime is defined -%}
-      {%- set dt = daytime.split(' ') -%}
-      {{ ziel(dt[0], dt[1], 0) }}
-    {%- elif day is defined or ${r.timeSaid} -%}
-      {{ ziel(day | default(""), ${r.hourOf}, ${r.minuteOf}) }}
-    {%- endif -%}
-  '';
+  # Set from the sentence as said: remembrance reads when ("in 10 Minuten",
+  # "morgen um 7 Uhr 15", "am Samstag": at 9) and what about (after "an" or
+  # "dass", wherever the time is).
+  createIntents = r.fromText {
+    name = "ErinnerungStellen";
+    kind = "reminder";
+    sentences = [ "Erinnere mich {remembrance_text:text}" ];
+    speech = ''
+      ${r.jinja}
+      {%- set res = action_response -%}
+      {%- if res.status == 'ok' -%}
+        {%- set i = res['items'][0] -%}
+        Okay, Erinnerung {{ zeitpunkt(i.start) }}: {{ i.label }}.
+      {%- elif res.reason == 'no summary' -%}Ich habe nicht verstanden, woran ich dich erinnern soll.
+      ${r.notUnderstood}
+      ${r.failed "Erinnerungen"}
+      {%- else -%}Das hat nicht geklappt.
+      {%- endif -%}
+    '';
+  };
 in
 {
-  hass.voice.intents = {
-    ErinnerungStellen = {
-      sentences = expand [ "Erinnere mich <wann> an {erinnerung_text:text}" ];
-      inherit lists;
-      script = {
-        action = callService "reminder_create" {
-          summary = "{{ text }}";
-          inherit at area;
-          "in" = "{{ ${secondsOf ""} }}";
-        };
-        speech.text = ''
-          ${r.jinja}
-          {%- set res = action_response -%}
-          {%- if res.status == 'ok' -%}
-            {%- set i = res['items'][0] -%}
-            Okay, ich erinnere dich {{ zeitpunkt(i.start) }} an {{ i.label }}.
-          ${r.failed "Erinnerungen"}
-          {%- else -%}Das hat nicht geklappt.
-          {%- endif -%}
-        '';
-      };
-    };
-
+  hass.voice.intents = createIntents // {
     ErinnerungenHeute = {
       sentences = expand [
         "Was steht <tag> an"

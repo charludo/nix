@@ -16,6 +16,10 @@ basePackages
     inherit (inputs) nixvim;
   };
 
+  hass-remembrance = callPackage ./by-name/hass-remembrance/package.nix {
+    inherit (basePackages) duckling;
+  };
+
   home-assistant =
     basePackages.home-assistant
     // inputs.hass-custom-integrations.packages.${pkgs.stdenv.hostPlatform.system};
