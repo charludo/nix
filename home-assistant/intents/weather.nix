@@ -94,7 +94,7 @@ in
     WetterWoche = {
       sentences = [
         "Wie wird das Wetter (diese Woche|in den nächsten Tagen|die nächste Woche)"
-        "Wettervorhersage [für die nächsten Tage]"
+        "Wettervorhersage [für die nächsten [7] Tage]"
       ];
       script.speech.text = ''
         {% for d in state_attr('${daily}', 'forecast')[1:8] -%}

@@ -15,15 +15,19 @@ from typing import Any
 
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
 
 from . import calendar_items as ci
+from . import duckling
 from .caldav_source import SourceError
 from .calendar_manager import CalendarManager, local_datetime
 from .const import (
     CONF_CALENDAR,
+    CONF_DUCKLING_URL,
     CONF_INTERVAL,
     CONF_LIMIT,
     CONF_MISSED_GRACE,
@@ -51,6 +55,7 @@ from .const import (
     STORAGE_KEY,
     STORAGE_VERSION,
 )
+from .parsers import Parsed, parser_for
 from .timers import Selector, Timer, TimerBook, TimerError, TimerState, resolve
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,6 +93,8 @@ class Result:
     items: list[dict] = field(default_factory=list)
     candidates: list[dict] = field(default_factory=list)
     reason: str | None = None
+    # From a sentence: what it was understood to say.
+    parsed: dict[str, Any] | None = None
 
     def as_response(self) -> dict[str, Any]:
         response: dict[str, Any] = {"status": self.status, "items": self.items}
@@ -95,6 +102,8 @@ class Result:
             response["candidates"] = self.candidates
         if self.reason:
             response["reason"] = self.reason
+        if self.parsed is not None:
+            response["parsed"] = self.parsed
         return response
 
 
@@ -273,6 +282,49 @@ class Engine:
                 description=description,
             )
         )
+
+    # --- from sentences ---------------------------------------------------
+
+    async def parse(self, text: str, kind: str | None, language: str | None) -> Parsed | Result:
+        """What a sentence says, by the parser for its language (default:
+        Home Assistant's); a Result when it can't be parsed at all."""
+        language = language or self.hass.config.language
+        parser = parser_for(language)
+        if parser is None:
+            return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        url = self.config.get(CONF_DUCKLING_URL)
+        if not url:
+            return Result(STATUS_INVALID, reason="no duckling configured")
+        ask = duckling.client(
+            async_get_clientsession(self.hass), url, self.hass.config.time_zone, dt_util.now()
+        )
+        try:
+            return await parser(text, kind, ask)
+        except duckling.DucklingError as err:
+            return Result(STATUS_INVALID, reason=f"duckling: {err}")
+
+    async def create_from_text(
+        self, text: str, kind: str | None, language: str | None, area: str | None
+    ) -> Result:
+        """A timer, reminder or alarm as a sentence says it; the response
+        also says what was understood (`parsed`)."""
+        parsed = await self.parse(text, kind, language)
+        if isinstance(parsed, Result):
+            return parsed
+        if parsed.reason:
+            result = Result(STATUS_INVALID, reason=parsed.reason)
+        elif parsed.kind == KIND_TIMER:
+            result = self.timer_start(parsed.duration or 0, parsed.label, area)
+        elif parsed.kind == KIND_REMINDER:
+            assert parsed.summary and parsed.at
+            result = await self.reminder_create(parsed.summary, parsed.at, None, None, area)
+        else:
+            assert parsed.time
+            result = await self.alarm_create(
+                parsed.time, parsed.days, parsed.date, parsed.label, area, parsed.description
+            )
+        result.parsed = parsed.as_dict()
+        return result
 
     async def alarm_skip(self, target: Target, on: date | None) -> Result:
         """Leave out one occurrence (default: the next) of a repeating alarm;

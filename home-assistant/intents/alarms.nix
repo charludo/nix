@@ -6,8 +6,6 @@ let
   expand = r.expand {
     "<zeit>" = r.timeShapes;
     "<tag>" = [ "{remembrance_tag:day}" ];
-    # A day or a repeat, in one slot: the value says which.
-    "<wann>" = [ "{remembrance_wecker_tag:day}" ];
   };
 
   lists = {
@@ -17,45 +15,9 @@ let
       remembrance_uhrzeit
       remembrance_tag
       ;
-    # Days (as `ziel` takes them) and repeats (as remembrance's `days`
-    # takes them), so "Weck mich morgen …" and "Weck mich werktags …" are
-    # one sentence.
-    remembrance_wecker_tag.values = r.lists.remembrance_tag.values ++ r.valuesOf repeats;
   };
-
-  repeats = {
-    "werktags" = "werktags";
-    "jeden Tag" = "täglich";
-    "täglich" = "täglich";
-    "am Wochenende" = "wochenende";
-    "montags" = "montag";
-    "dienstags" = "dienstag";
-    "mittwochs" = "mittwoch";
-    "donnerstags" = "donnerstag";
-    "freitags" = "freitag";
-    "samstags" = "samstag";
-    "sonntags" = "sonntag";
-  };
-  # Jinja test: was a repeat said (rather than a day)?
-  repeatSaid = "(day is defined and day in ${builtins.toJSON (lib.attrValues repeats)})";
 
   hhmm = "'%02d:%02d' | format(${r.hourOf}, ${r.minuteOf})";
-  clock = "{{ ${hhmm} }}";
-  # The day a spoken day and time mean (the `ziel` macro rolls over to the
-  # next one when it's already past).
-  onDay = "${r.jinja}{{ ziel(day, ${r.hourOf}, ${r.minuteOf})[:10] if day is defined and not ${repeatSaid} else '' }}";
-  # An alarm's description, as the ring script reads it: a "Sanft" line for
-  # gently getting louder (said as "Weck mich …": you're asleep; "Stelle
-  # einen Wecker …" rings at full volume), a "Musik: <playlist>" line for
-  # waking up to music ("Musik" alone: the default playlist).
-  descriptionOf =
-    gentle: music:
-    lib.concatStringsSep "\n" (
-      lib.optional gentle "Sanft"
-      ++ lib.optional music "Musik{{ ': ' ~ mass_playlist if mass_playlist is defined else \"\" }}"
-    );
-  musicSaid = "{{ 'mit der Playlist ' ~ mass_playlist if mass_playlist is defined else 'mit Musik' }}";
-  repeatName = "{{ {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende'}.get(day, day) }}";
 
   # Speech for an action on existing alarms: `ok` (Jinja; `i` is the first
   # alarm, `items` all of them) on success, the shared answers otherwise.
@@ -72,89 +34,42 @@ let
     {%- endif -%}
   '';
 
-  # Alarms set by voice: once (on a spoken day, else the next time it comes)
-  # or repeating, as the day slot says; gently ("Weck mich": you're asleep)
-  # or not, with music or not: one intent each.
-  openers = [
-    {
-      say = "Stelle einen Wecker";
-      at = "(auf|für)";
-      gentle = false;
-      music = true;
-    }
-    {
-      say = "Wecker";
-      at = "(auf|für)";
-      gentle = false;
-      music = false;
-    }
-    {
-      say = "Weck mich";
-      at = "um";
-      gentle = true;
-      music = true;
-    }
-  ];
-  sentencesOf =
-    { gentle, music }:
-    lib.concatMap (
-      o:
-      let
-        plain = [
-          "${o.say} ${o.at} <zeit>"
-          "${o.say} <wann> um <zeit>"
-        ];
-      in
-      lib.optionals (o.gentle == gentle && (o.music || !music)) (
-        if music then
-          lib.concatMap (s: [
-            "${s} mit Musik"
-            "${s} mit der Playlist {mass_playlist}"
-          ]) plain
-        else
-          plain
-      )
-    ) openers;
-
-  mkAlarm =
-    { gentle, music }@kind:
-    lib.nameValuePair
-      ("Wecker" + lib.optionalString gentle "Sanft" + lib.optionalString music "MitMusik")
-      {
-        sentences = expand (sentencesOf kind);
-        inherit lists;
-        script = {
-          action = callService "alarm_create" (
-            {
-              time = clock;
-              days = "{{ [day] if ${repeatSaid} else [] }}";
-              date = onDay;
-              inherit area;
-            }
-            // lib.optionalAttrs (gentle || music) { description = descriptionOf gentle music; }
-          );
-          speech.text = speak (
-            "{%- if i.recurring -%}Wecker ${repeatName} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt"
-            + "{%- else -%}Wecker {{ zeitpunkt(i.start) }} gestellt{%- endif -%}"
-            + lib.optionalString music ", ${musicSaid}"
-            + "."
-          );
-        };
-      };
-  alarmIntents = lib.listToAttrs (
-    map mkAlarm (
-      lib.cartesianProduct {
-        gentle = [
-          true
-          false
-        ];
-        music = [
-          true
-          false
-        ];
-      }
-    )
-  );
+  # Set from the sentence as said: remembrance reads the time ("um halb
+  # sieben", "6 Uhr morgens"), a day or repeats ("werktags", "montags und
+  # mittwochs"), "sanft" and the music ("mit Musik", "mit der Playlist …").
+  # "Weck mich …" rings gently (you're asleep), "Stelle einen Wecker …" at
+  # full volume. A playlist named on its own comes from Music Assistant's
+  # list (`mass_playlist`), so a misheard name still finds it.
+  setIntents = r.fromText {
+    name = "WeckerStellen";
+    kind = "alarm";
+    sentences = [
+      "Stelle einen Wecker {remembrance_text:text}"
+      "Stelle einen Wecker {remembrance_text:text} mit der Playlist {mass_playlist}"
+      "Wecker {remembrance_text:text}"
+      "Weck mich {remembrance_text:text}"
+      "Weck mich {remembrance_text:text} mit der Playlist {mass_playlist}"
+    ];
+    speech = ''
+      ${r.jinja}
+      {%- set res = action_response -%}
+      {%- if res.status == 'ok' -%}
+        {%- set i = res['items'][0] -%}
+        {%- set p = res.parsed -%}
+        {%- if p.days -%}
+          {%- set names = {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende', 'werktags': 'werktags'} -%}
+          {%- set ns = namespace(n=[]) -%}
+          {%- for d in p.days -%}{%- set ns.n = ns.n + [names.get(d, d ~ 's')] -%}{%- endfor -%}
+          Wecker {{ ns.n | join(' und ') }} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt
+        {%- else -%}Wecker {{ zeitpunkt(i.start) }} gestellt
+        {%- endif -%}
+        {{- (', mit der Playlist ' ~ p.playlist if p.playlist else ', mit Musik') if p.playlist is defined else "" -}}.
+      ${r.notUnderstood}
+      ${r.failed "Wecker"}
+      {%- else -%}Das hat nicht geklappt.
+      {%- endif -%}
+    '';
+  };
 
   # The alarm a sentence names by its time ("den Wecker um 7 Uhr"), if any.
   target = {
@@ -163,7 +78,7 @@ let
   };
 in
 {
-  hass.voice.intents = alarmIntents // {
+  hass.voice.intents = setIntents // {
     # One day off, for every alarm that rings that day.
     WeckerAuslassen = {
       sentences = expand [

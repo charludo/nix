@@ -1,0 +1,119 @@
+--- a/Duckling/Duration/DE/Rules.hs
++++ b/Duckling/Duration/DE/Rules.hs
+@@ -136,6 +136,44 @@
+       _ -> Nothing
+   }
+ 
++-- "anderthalb Stunden", "zweieinhalb Minuten"
++ruleFusedAndAHalf :: Rule
++ruleFusedAndAHalf = Rule
++  { name = "<integer>einhalb <unit-of-duration>"
++  , pattern =
++    [ regex "anderthalb|(ein|zwei|drei|vier|f(?:ü|ue)nf|sechs|sieben|acht|neun|zehn|elf|zw(?:ö|oe)lf)einhalb"
++    , dimension TimeGrain
++    ]
++  , prod = \case
++      (Token RegexMatch (GroupMatch (n:_)):Token TimeGrain grain:_) -> do
++        -- "anderthalb" leaves the group empty
++        v <- if Text.null n then Just 1 else lookup (Text.toLower n) fused
++        Token Duration <$> nPlusOneHalf grain v
++      _ -> Nothing
++  }
++  where
++  fused :: [(Text.Text, Int)]
++  fused =
++    [ ("ein", 1), ("zwei", 2), ("drei", 3), ("vier", 4), ("fünf", 5)
++    , ("fuenf", 5), ("sechs", 6), ("sieben", 7), ("acht", 8), ("neun", 9)
++    , ("zehn", 10), ("elf", 11), ("zwölf", 12), ("zwoelf", 12)
++    ]
++
++-- "zwei Stunden und eine halbe"
++ruleAndAHalfAfter :: Rule
++ruleAndAHalfAfter = Rule
++  { name = "<integer> <unit-of-duration> and a half"
++  , pattern =
++    [ Predicate isNatural
++    , dimension TimeGrain
++    , regex "und (eine )?halbe?"
++    ]
++  , prod = \case
++      (Token Numeral NumeralData{TNumeral.value = v}:Token TimeGrain grain:_) ->
++        Token Duration <$> nPlusOneHalf grain (floor v)
++      _ -> Nothing
++  }
++
+ ruleArticle :: Rule
+ ruleArticle = Rule
+   { name = "a <unit-of-duration>"
+@@ -239,6 +277,8 @@
+   , ruleFortnight
+   , ruleAndHalfHour
+   , ruleAndHalfMinute
++  , ruleFusedAndAHalf
++  , ruleAndAHalfAfter
+   , ruleArticle
+   , ruleHalfTimeGrain
+   , ruleCompositeDurationCommasAnd
+--- a/Duckling/Duration/DE/Corpus.hs
++++ b/Duckling/Duration/DE/Corpus.hs
+@@ -73,6 +73,24 @@
+              , "90 min"
+              , "90min"
+              ]
++  , examples (DurationData 90 Minute)
++             [ "anderthalb Stunden"
++             , "eineinhalb Stunden"
++             , "eine Stunde und eine halbe"
++             ]
++  , examples (DurationData 150 Minute)
++             [ "zweieinhalb Stunden"
++             , "zwei Stunden und eine halbe"
++             ]
++  , examples (DurationData 90 Second)
++             [ "anderthalb Minuten"
++             ]
++  , examples (DurationData 210 Second)
++             [ "dreieinhalb Minuten"
++             ]
++  , examples (DurationData 36 Hour)
++             [ "anderthalb Tage"
++             ]
+   , examples (DurationData 75 Minute)
+              [ "1,25 stunden"
+              ]
+--- a/duckling.cabal
++++ b/duckling.cabal
+@@ -350,6 +350,7 @@
+                      , Duckling.Duration.CA.Corpus
+                      , Duckling.Duration.CA.Rules
+                      , Duckling.Duration.DA.Rules
++                     , Duckling.Duration.DE.Corpus
+                      , Duckling.Duration.DE.Rules
+                      , Duckling.Duration.EL.Corpus
+                      , Duckling.Duration.EL.Rules
+@@ -976,6 +977,7 @@
+                      , Duckling.Duration.AR.Tests
+                      , Duckling.Duration.BG.Tests
+                      , Duckling.Duration.CA.Tests
++                     , Duckling.Duration.DE.Tests
+                      , Duckling.Duration.EL.Tests
+                      , Duckling.Duration.EN.Tests
+                      , Duckling.Duration.ES.Tests
+--- a/tests/Duckling/Duration/Tests.hs
++++ b/tests/Duckling/Duration/Tests.hs
+@@ -16,6 +16,7 @@
+ import qualified Duckling.Duration.AR.Tests as AR
+ import qualified Duckling.Duration.BG.Tests as BG
+ import qualified Duckling.Duration.CA.Tests as CA
++import qualified Duckling.Duration.DE.Tests as DE
+ import qualified Duckling.Duration.EL.Tests as EL
+ import qualified Duckling.Duration.EN.Tests as EN
+ import qualified Duckling.Duration.ES.Tests as ES
+@@ -43,6 +44,7 @@
+   [ AR.tests
+   , BG.tests
+   , CA.tests
++  , DE.tests
+   , EL.tests
+   , EN.tests
+   , ES.tests

@@ -40,6 +40,8 @@ remembrance:
     username: user
     password: !secret caldav_password
     poll_interval: 60
+  # optional; Duckling's HTTP server, for the services that take a sentence
+  duckling_url: http://127.0.0.1:8000
 ```
 
 ## Services
@@ -68,6 +70,25 @@ items without areas are in every area); or
 | `dismiss`                                       | target; none: everything ringing (in `area`)                                                   |
 | `snooze`                                        | target, `delay`; none: what is ringing, else what rang last (in `area`)                        |
 | `query`                                         | target, `kind`, `state`, `from`/`to` (one item per occurrence in that window)                  |
+| `create_from_text`                              | `text`, `kind`, `language`, `area` (see below)                                                 |
+| `parse`                                         | `text`, `kind`, `language`: only what it would create                                          |
+
+### From sentences
+
+`create_from_text` takes a whole sentence ("Weck mich werktags um halb sieben mit Musik", "5
+Minuten Timer ab jetzt") and creates what it says through `timer_start`, `reminder_create` or
+`alarm_create`; its response also has `parsed`, what was understood. `kind` is optional: without
+it, the sentence says. `parse` returns only `parsed`. A sentence that doesn't say enough is
+`invalid` with a `reason`: `unknown kind`, `no duration`, `no time`, `vague time` ("morgen
+früh"), `no summary`.
+
+[Duckling](https://github.com/facebook/duckling) reads the times and durations; a parser per
+language (`parsers/`; so far `de`, default Home Assistant's language) adds the rest: which kind,
+repeats ("werktags", "montags", "jeden Tag"), a timer's label ("Nudeltimer"), a reminder's text,
+and for alarms the description lines `Sanft` (gently: "sanft", "Weck mich") and `Musik` /
+`Musik: <playlist>` ("mit Musik", "mit der Playlist …"). Alarms take a clock time as said ("um
+7": 7:00), reminders the next time it comes (at 14:00, "um 7" is 19:00); a reminder on a day
+without a time starts at 9.
 
 ## Entities and events
 

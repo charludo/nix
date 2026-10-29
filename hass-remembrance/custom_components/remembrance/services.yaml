@@ -216,6 +216,49 @@ snooze:
       selector:
         duration:
 
+parse:
+  name: Parse sentence
+  description: >-
+    What a sentence about a timer, reminder or alarm says, without doing
+    anything (in `parsed`). Needs `duckling_url`.
+  fields:
+    text: &text
+      name: Sentence
+      description: The whole sentence, e.g. "Weck mich werktags um halb sieben mit Musik".
+      required: true
+      selector:
+        text:
+    kind: &kind
+      name: Kind
+      description: What it is about; default from the sentence.
+      selector:
+        select:
+          options:
+            - timer
+            - reminder
+            - alarm
+    language: &language
+      name: Language
+      description: Default Home Assistant's. Parsers so far - de.
+      selector:
+        language:
+
+create_from_text:
+  name: Create from sentence
+  description: >-
+    A timer, reminder or alarm as a sentence says it, through timer_start,
+    reminder_create or alarm_create; the response also says what was
+    understood (`parsed`). Needs `duckling_url`.
+  fields:
+    text: *text
+    kind: *kind
+    language: *language
+    area:
+      name: Area
+      description: Where it rings (none: everywhere).
+      selector:
+        area:
+
 query:
   name: Query
   description: List items, soonest first.

@@ -10,7 +10,10 @@ everywhere (currently: the living-room Sonos).
 - [ ] "Timer auf 1 Stunde und 15 Minuten"
 - [ ] "Timer auf eine halbe Stunde" / "eine Viertelstunde" / "anderthalb Stunden"
 - [ ] "Stelle einen Nudel Timer auf 8 Minuten" → *Nudel-Timer auf 8 Minuten – ab jetzt.*
-- [ ] "15 Minuten ab jetzt"
+- [ ] "Stelle einen Nudeltimer auf 8 Minuten" / "Nudel Timer auf 8 Minuten" → named too
+- [ ] "Timer auf 3,5 Minuten" → 3:30; "Timer auf zweieinhalb Minuten"
+- [ ] "15 Minuten ab jetzt" / "5 Minuten Timer ab jetzt"
+- [ ] "Stelle einen Timer" → *Ich habe nicht verstanden, wie lange der Timer laufen soll.*
 - [ ] "Wie lange noch" → all timers with their remaining time
 - [ ] "Wie lange läuft der Nudel Timer noch"
 - [ ] "Verlängere den Timer um 2 Minuten" (with two timers running → *Welchen meinst du? …*)
@@ -34,7 +37,9 @@ everywhere (currently: the living-room Sonos).
 - [ ] Same, but "Stopp" after the first text → no second pass
 - [ ] "Erinnere mich um 13:30 Uhr an den Zahnarzt" → 13:30, not 10 Uhr
 - [ ] "Erinnere mich morgen um 7 Uhr 15 an die Tabletten" → 7:15, not 7:00
-- [ ] "Erinnere mich morgen früh an den Müll" → tomorrow 8:00
+- [ ] "Erinnere mich an die Blumen am Samstag um 10" → time after the text works too
+- [ ] "Erinnere mich daran, dass ich den Müll rausbringe, morgen um 7" → *… : ich den Müll rausbringe.*
+- [ ] "Erinnere mich morgen früh an den Müll" → *Bitte sag mir eine genaue Uhrzeit.*
 - [ ] "Erinnere mich heute um 9 Uhr an X" (after 9) → *Dieser Zeitpunkt ist schon vorbei.*
 - [ ] "Erinnere mich am Samstag an die Blumen" → Saturday 9:00
 - [ ] "Was steht heute an" / "Was steht morgen an"
@@ -51,6 +56,11 @@ everywhere (currently: the living-room Sonos).
 - [ ] "Stelle einen Wecker werktags um 7 Uhr mit Musik" → repeating, music (new)
 - [ ] "Stelle einen Wecker für 7 Uhr mit der Playlist <name>" (new)
 - [ ] "Wecker werktags um 6:45" / "Weck mich jeden Tag um 7 Uhr"
+- [ ] "Weck mich werktags um halb sieben" / "Stelle einen Wecker auf Viertel vor sieben"
+- [ ] "Weck mich montags und mittwochs um 7" → *Wecker montags und mittwochs um 7 Uhr gestellt.*
+- [ ] "Stelle einen Wecker am Wochenende um 9" → Saturday and Sunday, not Friday evening
+- [ ] "Stelle einen Wecker am 3. November um 7"
+- [ ] "Weck mich morgen früh" → *Bitte sag mir eine genaue Uhrzeit.*
 - [ ] "Wann klingelt der Wecker" → the next alarm, never a reminder
 - [ ] "Kein Wecker morgen" / "Weck mich am Samstag nicht"
 - [ ] "Deaktiviere den Wecker um 7 Uhr" → "Aktiviere den Wecker um 7 Uhr"
@@ -70,6 +80,6 @@ everywhere (currently: the living-room Sonos).
 
 ## Known gaps (shouldn't work yet)
 
-- "halb sieben", "Viertel nach sieben"
-- Dates ("am 3. November")
-- Short-form names ("Nudel Timer auf 8 Minuten" names nothing; use "Stelle einen Nudel Timer …")
+- Kind in the middle of the sentence ("6 Uhr morgens Wecker wochentags"): remembrance reads it,
+  but no intent passes it on yet
+- Answering a question back ("Welchen meinst du?")
