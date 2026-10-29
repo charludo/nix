@@ -21,36 +21,45 @@ let
     };
 in
 {
+  # Re-doing the setup after a re-map (all values are in vacuum map space, mm):
+  # - rooms: Developer Tools -> States -> image.botty_live_map, attribute
+  #   `rooms`. Keys are the segment IDs for `rooms` below; x0/y0/x1/y1 are the
+  #   room's bounding box and can be used as a whole-room zone. Names are not
+  #   given, so identify a room by running app_segment_clean with that ID.
+  # - zones: draw the rectangle in the map card/app and start the clean, with
+  #   Developer Tools -> Events listening to `call_service`. The event's
+  #   service_data.params is [[x1, y1, x2, y2, repeats]]. (Raw packet alternative:
+  #   logger.set_level {miio: debug} and look for "app_zoned_clean" in the log.)
   hass.botty = {
     zones = {
       sofa = {
-        x1 = 23500;
-        y1 = 25150;
-        x2 = 26300;
-        y2 = 29250;
+        x1 = 24601;
+        y1 = 23474;
+        x2 = 27927;
+        y2 = 26098;
       };
       kueche = {
-        x1 = 19510;
-        y1 = 25150;
-        x2 = 23500;
-        y2 = 27700;
+        x1 = 29859;
+        y1 = 21837;
+        x2 = 31409;
+        y2 = 25715;
       };
       wohnzimmer = {
-        x1 = 19510;
-        y1 = 25150;
-        x2 = 26300;
-        y2 = 31250;
+        x1 = 24800;
+        y1 = 18350;
+        x2 = 32950;
+        y2 = 26000;
       };
       buro = {
-        x1 = 20250;
-        y1 = 31300;
-        x2 = 26250;
-        y2 = 35100;
+        x1 = 24750;
+        y1 = 16100;
+        x2 = 28050;
+        y2 = 19950;
       };
     };
     rooms = [
-      18 # Wohnzimmer
-      17 # Büro
+      2 # Wohnzimmer
+      1 # Büro
     ];
   };
 
