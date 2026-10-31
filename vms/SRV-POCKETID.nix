@@ -33,7 +33,7 @@
       SESSION_DURATION = "10800"; # one week
       HOME_PAGE_URL = "settings/apps";
       ALLOW_USER_SIGNUPS = "withToken";
-      SIGNUP_DEFAULT_USER_GROUP_IDS = "af6fa27e-153f-44b2-a7d6-847a60855b2c";
+      SIGNUP_DEFAULT_USER_GROUP_IDS = builtins.toJSON [ "af6fa27e-153f-44b2-a7d6-847a60855b2c" ];
       ACCENT_COLOR = "default";
     };
   };

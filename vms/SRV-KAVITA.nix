@@ -21,7 +21,7 @@
 
   services.kavita = {
     enable = true;
-    tokenKeyFile = config.age.secrets.kavita-token.path;
+    credentials.token_key = config.age.secrets.kavita-token.path;
     settings.IpAddresses = "0.0.0.0";
   };
 

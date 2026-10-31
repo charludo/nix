@@ -9,7 +9,8 @@ let
     };
   };
   lgtv =
-    pkgs.writers.writePython3Bin "lgtv" { libraries = [ python3.pkgs.flask ]; } # python
+    pkgs.writers.makePythonWriter python3 python3.pkgs python3.pkgs "/bin/lgtv"
+      { libraries = [ python3.pkgs.flask ]; } # python
       ''
         # flake8: noqa
         from flask import Flask

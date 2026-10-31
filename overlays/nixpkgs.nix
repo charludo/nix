@@ -29,4 +29,12 @@ _: prev: {
     '';
     doInstallCheck = false;
   });
+
+  pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+    (_: pyprev: {
+      spacy = pyprev.spacy.overridePythonAttrs (old: {
+        disabledTests = (old.disabledTests or [ ]) ++ [ "test_entity_ruler_multiprocessing" ];
+      });
+    })
+  ];
 }
