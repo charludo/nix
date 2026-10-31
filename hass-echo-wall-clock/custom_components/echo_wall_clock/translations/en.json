@@ -1,0 +1,170 @@
+{
+  "config": {
+    "step": {
+      "adapter": {
+        "title": "Bluetooth adapter",
+        "description": "Which Bluetooth adapter should talk to the clock? It needs Classic Bluetooth and to be within range of the clock.",
+        "data": { "adapter": "Adapter" }
+      },
+      "known": {
+        "title": "Choose a clock",
+        "description": "These clocks are already paired with this adapter.",
+        "data": { "address": "Clock" }
+      },
+      "prepare": {
+        "title": "Put the clock into pairing mode",
+        "description": "Remove the clock from the Alexa app (or switch off its Echo), then put it into pairing mode (see its manual). Keep it close to the Bluetooth adapter and continue: Home Assistant looks for it for 20 seconds."
+      },
+      "pick": {
+        "title": "Choose a clock",
+        "data": { "address": "Clock" }
+      }
+    },
+    "progress": {
+      "scan": "Looking for clocks in pairing mode…",
+      "pair": "Pairing…"
+    },
+    "error": {
+      "none_found": "No clock in pairing mode was found. Check that it's in pairing mode and close by, then try again.",
+      "scan_failed": "Looking for clocks failed. Is the Bluetooth adapter working?",
+      "pair_failed": "Pairing failed. Put the clock into pairing mode again and retry."
+    },
+    "abort": {
+      "already_configured": "This clock is already set up.",
+      "no_bluetooth_sockets": "This Python can't open Bluetooth sockets (built without Bluetooth support).",
+      "no_bluez": "BlueZ isn't reachable over the system D-Bus.",
+      "no_adapter": "No powered Bluetooth adapter found."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Echo Wall Clock",
+        "data": { "ring_for": "Ring for" },
+        "data_description": {
+          "ring_for": "How long a due alert keeps ringing on the clock before it's cancelled."
+        }
+      }
+    }
+  },
+  "selector": {
+    "known": {
+      "options": { "scan": "Look for a new clock" }
+    },
+    "kind": {
+      "options": { "timer": "Timer", "alarm": "Alarm", "reminder": "Reminder" }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "connected": { "name": "Connected" }
+    },
+    "button": {
+      "sync_time": { "name": "Sync time" }
+    },
+    "sensor": {
+      "next_timer": { "name": "Next timer" },
+      "next_alarm": { "name": "Next alarm" },
+      "next_reminder": { "name": "Next reminder" }
+    },
+    "switch": {
+      "indicator": { "name": "Notification indicator" }
+    }
+  },
+  "exceptions": {
+    "no_bluetooth_sockets": { "message": "This Python can't open Bluetooth sockets." },
+    "no_bluez": { "message": "BlueZ isn't reachable: {error}" },
+    "no_clock": { "message": "No Echo Wall Clock is set up." },
+    "which_clock": { "message": "There's more than one clock; choose one." },
+    "unknown_clock": { "message": "{device_id} isn't an Echo Wall Clock." },
+    "unknown_alert": { "message": "There's no alert {alert_id}." },
+    "in_the_past": { "message": "That time has already passed." },
+    "no_change": { "message": "Give a new time, a duration or how much to extend by." }
+  },
+  "services": {
+    "set_timer": {
+      "name": "Set timer",
+      "description": "Starts a timer on the clock's LED ring.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "duration": { "name": "Duration", "description": "How long the timer runs." },
+        "alert_id": {
+          "name": "Alert ID",
+          "description": "Your own ID for it (one is made up otherwise). An existing ID is replaced."
+        },
+        "label": { "name": "Label", "description": "A name for it, kept in Home Assistant only." }
+      }
+    },
+    "set_alarm": {
+      "name": "Set alarm",
+      "description": "Sets an alarm on the clock.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "at": { "name": "At", "description": "A date and time, or a time of day (the next one)." },
+        "alert_id": {
+          "name": "Alert ID",
+          "description": "Your own ID for it (one is made up otherwise). An existing ID is replaced."
+        },
+        "label": { "name": "Label", "description": "A name for it, kept in Home Assistant only." }
+      }
+    },
+    "set_reminder": {
+      "name": "Set reminder",
+      "description": "Sets a reminder on the clock.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "at": { "name": "At", "description": "A date and time, or a time of day (the next one)." },
+        "alert_id": {
+          "name": "Alert ID",
+          "description": "Your own ID for it (one is made up otherwise). An existing ID is replaced."
+        },
+        "label": { "name": "Label", "description": "A name for it, kept in Home Assistant only." }
+      }
+    },
+    "update_alert": {
+      "name": "Change alert",
+      "description": "Moves a timer, alarm or reminder. Moving it into the past cancels it.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "alert_id": { "name": "Alert ID", "description": "Which alert." },
+        "at": { "name": "At", "description": "The new time." },
+        "duration": { "name": "Duration", "description": "Due this long from now." },
+        "extend": {
+          "name": "Extend by",
+          "description": "Later by this much (earlier if negative)."
+        }
+      }
+    },
+    "cancel_alert": {
+      "name": "Cancel alert",
+      "description": "Cancels a timer, alarm or reminder; a ringing one stops.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "alert_id": { "name": "Alert ID", "description": "Which alert." }
+      }
+    },
+    "cancel_all": {
+      "name": "Cancel all",
+      "description": "Cancels every alert, or every one of a kind.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "kind": { "name": "Kind", "description": "Only this kind." }
+      }
+    },
+    "list_alerts": {
+      "name": "List alerts",
+      "description": "The clock's alerts, soonest first.",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." },
+        "kind": { "name": "Kind", "description": "Only this kind." }
+      }
+    },
+    "sync_time": {
+      "name": "Sync time",
+      "description": "Sends the time now (it's also sent on every connect and every half hour).",
+      "fields": {
+        "device_id": { "name": "Clock", "description": "Only needed with more than one clock." }
+      }
+    }
+  }
+}
