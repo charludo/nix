@@ -2,7 +2,7 @@
   lib,
   buildNpmPackage,
   fetchFromGitHub,
-  nodejs_22,
+  nodejs_24,
   python3,
   pkg-config,
   autoPatchelfHook,
@@ -11,20 +11,20 @@
 }:
 
 let
-  nodejs = nodejs_22;
+  nodejs = nodejs_24;
 in
 buildNpmPackage (finalAttrs: {
   pname = "trek";
-  version = "4.2.1";
+  version = "5.1.0";
 
   src = fetchFromGitHub {
     owner = "liketrek";
     repo = "TREK";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-qIuJOAzqYNIH9JdKe/YkInh+qQjOJigcZQD4/6r66AM=";
+    hash = "sha256-0utjffcaO/RzIwRMGci0LByCUzrW7w4b39cMJzlKGqo=";
   };
 
-  npmDepsHash = "sha256-2iTyYCgOycMoBkUs0PwBNihscvF9EjNvVF3uwtWSqME=";
+  npmDepsHash = "sha256-WpC66jz7xjSXLI3cQKh7RGIEpR/+rWUsOWzG4nqDrqw=";
 
   inherit nodejs;
 
