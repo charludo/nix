@@ -13,6 +13,7 @@
     ./fail2ban.nix
     ./filebrowser.nix
     ./jitsi.nix
+    ./livekit.nix
     ./mailserver.nix
     ./minecraft.nix
     ./monit.nix
