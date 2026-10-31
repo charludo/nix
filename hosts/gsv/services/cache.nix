@@ -8,10 +8,11 @@
 {
   gitea-runners = {
     enable = true;
-    defaultTokenFile.secret = secrets.gitea-actions-registration-token;
     runners = {
       ci-buildbot = {
+        tokenFile.secret = secrets.gitea-runner-token-ci-buildbot;
         makeNixRunner = true;
+        uuid = "06dbe2a8-5564-4bae-9ae9-a90eecf5b3f9";
         labels = [ "buildbot:docker://gitea-runner-nix" ];
         settings = {
           container.cpus = "6";
