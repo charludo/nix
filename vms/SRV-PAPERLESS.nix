@@ -43,10 +43,7 @@ in
     openMPThreadingWorkaround = true;
     settings = {
       PAPERLESS_URL = private-settings.domains.paperless;
-      PAPERLESS_CONSUMER_IGNORE_PATTERN = [
-        ".DS_STORE/*"
-        "desktop.ini"
-      ];
+      PAPERLESS_DBENGINE = "postgresql";
       PAPERLESS_DBHOST = "/run/postgresql";
       PAPERLESS_OCR_LANGUAGE = "deu+eng";
       PAPERLESS_OCR_USER_ARGS = {
