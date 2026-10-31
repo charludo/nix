@@ -73,6 +73,7 @@ in
 
   services.pinchflat = {
     enable = true;
+    package = pkgs.pinchflat-ngx;
     selfhosted = true;
     mediaDir = config.nas.location;
   };
