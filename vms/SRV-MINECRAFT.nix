@@ -9,6 +9,7 @@
   vm = {
     id = 2211;
     name = "SRV-MINECRAFT";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 8192;

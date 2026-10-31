@@ -57,6 +57,7 @@ in
   vm = {
     id = 2216;
     name = "SRV-PINCHFLAT";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 8192;

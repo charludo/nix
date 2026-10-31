@@ -3,6 +3,7 @@
   vm = {
     id = 2102;
     name = "SRV-SUWAYOMI";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 8192;

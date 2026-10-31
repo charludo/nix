@@ -8,6 +8,7 @@
   vm = {
     id = 2223;
     name = "SRV-SEERR";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 4096;

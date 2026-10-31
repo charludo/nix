@@ -9,6 +9,7 @@
   vm = {
     id = 2215;
     name = "SRV-FFSYNC";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 2048;

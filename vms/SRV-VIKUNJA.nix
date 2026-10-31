@@ -6,6 +6,7 @@ in
   vm = {
     id = 2209;
     name = "SRV-VIKUNJA";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 4096;

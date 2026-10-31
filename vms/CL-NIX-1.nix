@@ -4,6 +4,7 @@
   vm = {
     id = 3020;
     name = "CL-NIX-1";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 4096;
