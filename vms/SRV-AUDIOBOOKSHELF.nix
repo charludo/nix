@@ -3,6 +3,7 @@
   vm = {
     id = 2207;
     name = "SRV-AUDIOBOOKSHELF";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 16384;

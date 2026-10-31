@@ -8,6 +8,7 @@
   vm = {
     id = 3012;
     name = "SRV-CLOUDSYNC";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 2048;

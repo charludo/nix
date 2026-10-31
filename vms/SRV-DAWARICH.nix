@@ -9,6 +9,7 @@
   vm = {
     id = 2225;
     name = "SRV-DAWARICH";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 4096;

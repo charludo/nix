@@ -3,6 +3,7 @@
   vm = {
     id = 2226;
     name = "SRV-NAVIDROME";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 4096;

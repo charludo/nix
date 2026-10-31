@@ -9,6 +9,7 @@
   vm = {
     id = 2220;
     name = "SRV-WANDERER";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 8192;

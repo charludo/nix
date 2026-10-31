@@ -8,6 +8,7 @@
   vm = {
     id = 2208;
     name = "SRV-KAVITA";
+    unsupervisedUpdates = true;
 
     hardware.cores = 4;
     hardware.memory = 8192;
