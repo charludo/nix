@@ -93,4 +93,6 @@
     hassTokenPath = config.age.secrets.hass-mass-token.path;
   };
   hass.closestIntent.enable = true;
+  # Over the Bluetooth dongle passed through to the VM; the clock is added in the UI.
+  hass.echoWallClock.enable = true;
 }

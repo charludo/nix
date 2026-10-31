@@ -1,0 +1,170 @@
+{
+  "config": {
+    "step": {
+      "adapter": {
+        "title": "Bluetooth-Adapter",
+        "description": "Welcher Bluetooth-Adapter soll mit der Uhr sprechen? Er braucht klassisches Bluetooth und muss in Reichweite der Uhr sein.",
+        "data": { "adapter": "Adapter" }
+      },
+      "known": {
+        "title": "Uhr auswählen",
+        "description": "Diese Uhren sind mit dem Adapter schon gekoppelt.",
+        "data": { "address": "Uhr" }
+      },
+      "prepare": {
+        "title": "Uhr in den Kopplungsmodus versetzen",
+        "description": "Entferne die Uhr aus der Alexa-App (oder schalte ihren Echo aus) und versetze sie in den Kopplungsmodus (siehe Anleitung). Halte sie nah am Bluetooth-Adapter und mach weiter: Home Assistant sucht 20 Sekunden lang."
+      },
+      "pick": {
+        "title": "Uhr auswählen",
+        "data": { "address": "Uhr" }
+      }
+    },
+    "progress": {
+      "scan": "Suche nach Uhren im Kopplungsmodus …",
+      "pair": "Kopple …"
+    },
+    "error": {
+      "none_found": "Keine Uhr im Kopplungsmodus gefunden. Ist sie im Kopplungsmodus und in der Nähe? Dann noch einmal versuchen.",
+      "scan_failed": "Die Suche ist fehlgeschlagen. Funktioniert der Bluetooth-Adapter?",
+      "pair_failed": "Das Koppeln ist fehlgeschlagen. Uhr noch einmal in den Kopplungsmodus versetzen und erneut versuchen."
+    },
+    "abort": {
+      "already_configured": "Diese Uhr ist schon eingerichtet.",
+      "no_bluetooth_sockets": "Dieses Python kann keine Bluetooth-Sockets öffnen (ohne Bluetooth-Unterstützung gebaut).",
+      "no_bluez": "BlueZ ist über den System-D-Bus nicht erreichbar.",
+      "no_adapter": "Kein eingeschalteter Bluetooth-Adapter gefunden."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Echo Wall Clock",
+        "data": { "ring_for": "Klingeln für" },
+        "data_description": {
+          "ring_for": "Wie lange ein fälliger Alarm auf der Uhr klingelt, bevor er abgebrochen wird."
+        }
+      }
+    }
+  },
+  "selector": {
+    "known": {
+      "options": { "scan": "Nach einer neuen Uhr suchen" }
+    },
+    "kind": {
+      "options": { "timer": "Timer", "alarm": "Wecker", "reminder": "Erinnerung" }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "connected": { "name": "Verbunden" }
+    },
+    "button": {
+      "sync_time": { "name": "Uhrzeit senden" }
+    },
+    "sensor": {
+      "next_timer": { "name": "Nächster Timer" },
+      "next_alarm": { "name": "Nächster Wecker" },
+      "next_reminder": { "name": "Nächste Erinnerung" }
+    },
+    "switch": {
+      "indicator": { "name": "Benachrichtigungsanzeige" }
+    }
+  },
+  "exceptions": {
+    "no_bluetooth_sockets": { "message": "Dieses Python kann keine Bluetooth-Sockets öffnen." },
+    "no_bluez": { "message": "BlueZ ist nicht erreichbar: {error}" },
+    "no_clock": { "message": "Es ist keine Echo Wall Clock eingerichtet." },
+    "which_clock": { "message": "Es gibt mehr als eine Uhr; bitte eine auswählen." },
+    "unknown_clock": { "message": "{device_id} ist keine Echo Wall Clock." },
+    "unknown_alert": { "message": "Es gibt keinen Alarm {alert_id}." },
+    "in_the_past": { "message": "Dieser Zeitpunkt ist schon vorbei." },
+    "no_change": { "message": "Gib eine neue Zeit, eine Dauer oder eine Verlängerung an." }
+  },
+  "services": {
+    "set_timer": {
+      "name": "Timer stellen",
+      "description": "Startet einen Timer auf dem LED-Ring der Uhr.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "duration": { "name": "Dauer", "description": "Wie lange der Timer läuft." },
+        "alert_id": {
+          "name": "Alarm-ID",
+          "description": "Eigene ID (sonst wird eine erzeugt). Eine bestehende ID wird ersetzt."
+        },
+        "label": { "name": "Name", "description": "Ein Name dafür, nur in Home Assistant." }
+      }
+    },
+    "set_alarm": {
+      "name": "Wecker stellen",
+      "description": "Stellt einen Wecker auf der Uhr.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "at": { "name": "Um", "description": "Datum und Uhrzeit, oder eine Uhrzeit (die nächste)." },
+        "alert_id": {
+          "name": "Alarm-ID",
+          "description": "Eigene ID (sonst wird eine erzeugt). Eine bestehende ID wird ersetzt."
+        },
+        "label": { "name": "Name", "description": "Ein Name dafür, nur in Home Assistant." }
+      }
+    },
+    "set_reminder": {
+      "name": "Erinnerung stellen",
+      "description": "Stellt eine Erinnerung auf der Uhr.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "at": { "name": "Um", "description": "Datum und Uhrzeit, oder eine Uhrzeit (die nächste)." },
+        "alert_id": {
+          "name": "Alarm-ID",
+          "description": "Eigene ID (sonst wird eine erzeugt). Eine bestehende ID wird ersetzt."
+        },
+        "label": { "name": "Name", "description": "Ein Name dafür, nur in Home Assistant." }
+      }
+    },
+    "update_alert": {
+      "name": "Alarm ändern",
+      "description": "Verschiebt einen Timer, Wecker oder eine Erinnerung. In die Vergangenheit verschoben heißt abgebrochen.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "alert_id": { "name": "Alarm-ID", "description": "Welcher Alarm." },
+        "at": { "name": "Um", "description": "Die neue Zeit." },
+        "duration": { "name": "Dauer", "description": "Fällig in so langer Zeit ab jetzt." },
+        "extend": {
+          "name": "Verlängern um",
+          "description": "So viel später (früher, wenn negativ)."
+        }
+      }
+    },
+    "cancel_alert": {
+      "name": "Alarm abbrechen",
+      "description": "Bricht einen Timer, Wecker oder eine Erinnerung ab; ein klingelnder hört auf.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "alert_id": { "name": "Alarm-ID", "description": "Welcher Alarm." }
+      }
+    },
+    "cancel_all": {
+      "name": "Alle abbrechen",
+      "description": "Bricht alle Alarme ab, oder alle einer Art.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "kind": { "name": "Art", "description": "Nur diese Art." }
+      }
+    },
+    "list_alerts": {
+      "name": "Alarme auflisten",
+      "description": "Die Alarme der Uhr, nächster zuerst.",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." },
+        "kind": { "name": "Art", "description": "Nur diese Art." }
+      }
+    },
+    "sync_time": {
+      "name": "Uhrzeit senden",
+      "description": "Sendet jetzt die Uhrzeit (das passiert auch bei jeder Verbindung und jede halbe Stunde).",
+      "fields": {
+        "device_id": { "name": "Uhr", "description": "Nur bei mehr als einer Uhr nötig." }
+      }
+    }
+  }
+}

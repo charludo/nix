@@ -1,0 +1,39 @@
+[project]
+name = "echo_wall_clock"
+version = "0.1.0"
+description = "Echo Wall Clock timers, alarms and reminders in Home Assistant, without an Echo."
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+requires-python = ">=3.13"
+authors = [{ name = "Charlotte Hartmann Paludo" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "SIM", # flake8-simplify
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["echo_wall_clock"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E402", "F401"]
+# dbus-fast reads D-Bus signatures from string annotations ("o", "a{sv}", …).
+"custom_components/echo_wall_clock/bluez.py" = ["UP037", "F821", "F722"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]

@@ -1,0 +1,85 @@
+set_timer:
+  fields:
+    device_id: &device
+      selector:
+        device:
+          integration: echo_wall_clock
+    duration:
+      required: true
+      example: "00:05:00"
+      selector:
+        duration:
+    alert_id: &alert_id
+      example: "pasta"
+      selector:
+        text:
+    label: &label
+      example: "Pasta"
+      selector:
+        text:
+
+set_alarm:
+  fields:
+    device_id: *device
+    at: &at
+      required: true
+      example: "07:00"
+      selector:
+        datetime:
+    alert_id: *alert_id
+    label: *label
+
+set_reminder:
+  fields:
+    device_id: *device
+    at: *at
+    alert_id: *alert_id
+    label: *label
+
+update_alert:
+  fields:
+    device_id: *device
+    alert_id:
+      required: true
+      selector:
+        text:
+    at:
+      selector:
+        datetime:
+    duration:
+      selector:
+        duration:
+    extend:
+      example: "00:05:00"
+      selector:
+        duration:
+          enable_negative: true
+
+cancel_alert:
+  fields:
+    device_id: *device
+    alert_id:
+      required: true
+      selector:
+        text:
+
+cancel_all:
+  fields:
+    device_id: *device
+    kind: &kind
+      selector:
+        select:
+          translation_key: kind
+          options:
+            - timer
+            - alarm
+            - reminder
+
+list_alerts:
+  fields:
+    device_id: *device
+    kind: *kind
+
+sync_time:
+  fields:
+    device_id: *device
