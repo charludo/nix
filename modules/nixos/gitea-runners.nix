@@ -5,6 +5,7 @@
   config,
   lib,
   pkgs,
+  utils,
   private-settings,
   ...
 }:
@@ -47,19 +48,23 @@ in
               description = "The token file used to register at the Gitea/Forgejo instance";
               default = null;
             };
+            uuid = lib.mkOption {
+              type = str;
+              description = "UUID of the registered runner";
+            };
             labels = lib.mkOption {
               type = listOf str;
               description = "Labels used to map jobs to runners";
             };
             settings = lib.mkOption {
               type = anything;
-              description = "Configuration for `act_runner daemon`";
+              description = "Configuration for `forgejo-runner daemon`";
               default = { };
             };
           };
         });
       default = { };
-      description = "an arbitrary number of gitea-actions-runner instances";
+      description = "an arbitrary number of forgejo-runner instances";
     };
   };
 
@@ -76,7 +81,7 @@ in
       podman.enable = true;
       containers = {
         containersConf.settings.containers.dns_servers = config.networking.nameservers;
-        storage.settings = {
+        storage.rootful.settings = {
           storage.graphroot = "/var/lib/containers/storage";
           storage.runroot = "/run/containers/storage";
         };
@@ -139,7 +144,7 @@ in
       };
     }
     // lib.mapAttrs' (name: _: {
-      name = "gitea-runner-${builtins.replaceStrings [ "-" ] [ "\\x2d" ] name}";
+      name = "forgejo-runner-${utils.escapeSystemdPath name}";
       value = {
         after = [ "gitea-runner-nix-image.service" ];
         requires = [ "gitea-runner-nix-image.service" ];
@@ -197,14 +202,15 @@ in
       };
     }) cfg.runners;
 
-    age.secrets = {
-      "gitea-runner-token-default".rekeyFile = cfg.defaultTokenFile.secret;
-    }
-    // (lib.concatMapAttrs (name: runner: {
-      "gitea-runner-token-${name}".rekeyFile = runner.tokenFile.secret;
-    }) (lib.filterAttrs (_: r: r.tokenFile.secret != null) cfg.runners));
+    age.secrets =
+      lib.optionalAttrs (cfg.defaultTokenFile.secret != null) {
+        "gitea-runner-token-default".rekeyFile = cfg.defaultTokenFile.secret;
+      }
+      // (lib.concatMapAttrs (name: runner: {
+        "gitea-runner-token-${name}".rekeyFile = runner.tokenFile.secret;
+      }) (lib.filterAttrs (_: r: r.tokenFile.secret != null) cfg.runners));
 
-    services.gitea-actions-runner =
+    services.forgejo-runner =
       let
         storeDeps = pkgs.runCommand "store-deps" { } ''
           mkdir -p $out/bin
@@ -243,17 +249,20 @@ in
       {
         package = pkgs.forgejo-runner;
         instances = builtins.mapAttrs (name: runner: {
-          inherit name;
-          inherit (runner) labels;
-
           enable = true;
 
-          url = if (runner.url != null) then runner.url else cfg.defaultUrl;
-          tokenFile =
+          secrets.server.connections.default.token_url =
             config.age.secrets."gitea-runner-token-${name}".path
               or config.age.secrets.gitea-runner-token-default.path;
           settings = lib.mkMerge [
             runner.settings
+            {
+              runner.labels = runner.labels;
+              server.connections.default = {
+                inherit (runner) uuid;
+                url = if (runner.url != null) then runner.url else cfg.defaultUrl;
+              };
+            }
             (lib.mkIf runner.makeNixRunner {
               container.options = "-e NIX_BUILD_SHELL=/bin/bash -e NIX_PATH=nixpkgs=${inputs.nixpkgs.outPath} -e PAGER=cat -e PATH=/bin -e SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt -v /nix:/nix -v ${storeDeps}/bin:/bin -v ${storeDeps}/etc/ssl:/etc/ssl --user nixuser";
               container.network = "host";
