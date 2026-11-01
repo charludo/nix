@@ -1,0 +1,169 @@
+diff -ruN a/linux_voice_assistant/__main__.py b/linux_voice_assistant/__main__.py
+--- a/linux_voice_assistant/__main__.py	2026-11-01 15:54:56.999086673 +0100
++++ b/linux_voice_assistant/__main__.py	2026-11-01 15:55:39.805511932 +0100
+@@ -29,6 +29,7 @@
+     get_version,
+ )
+ from .wake_word import find_available_wake_words, load_stop_model, load_wake_models
++from .wake_word_scores import WakeWordScores
+ from .webrtc import WebRTCProcessor
+ from .zeroconf import HomeAssistantZeroconf
+ 
+@@ -113,6 +114,11 @@
+         help="Seconds before wake word can be activated again",
+     )
+     parser.add_argument(
++        "--wake-word-score-floor",
++        type=float,
++        help="Report every wake word score peak at or above this to peripheral clients (wake_word_score event)",
++    )
++    parser.add_argument(
+         "--continue-conversation-delay",
+         type=float,
+         default=0.5,
+@@ -437,6 +443,7 @@
+         preferences=preferences,
+         preferences_path=preferences_path,
+         refractory_seconds=args.refractory_seconds,
++        wake_word_score_floor=args.wake_word_score_floor,
+         continue_conversation_delay=args.continue_conversation_delay,
+         output_only=args.output_only,
+         download_dir=args.download_dir,
+@@ -640,6 +647,15 @@
+     last_active: Optional[float] = None
+     webrtc: Optional[WebRTCProcessor] = None
+ 
++    scores: Optional[WakeWordScores] = None
++    if state.wake_word_score_floor is not None:
++
++        def report_score(data):
++            if state.peripheral_api is not None:
++                state.peripheral_api.emit_event_sync(LVAEvent.WAKE_WORD_SCORE, data)
++
++        scores = WakeWordScores(state.wake_word_score_floor, report_score)
++
+     try:
+         _LOGGER.debug("Opening audio input device: %s", mic.name)
+         with mic.recorder(samplerate=16000, channels=n_channels, blocksize=block_size) as mic_in:
+@@ -793,12 +809,23 @@
+                             wake_word.probability_cutoff = threshold
+ 
+                             for micro_input in micro_inputs:
+-                                if wake_word.process_streaming(micro_input):
++                                # process_streaming() without throwing the score away
++                                prob = wake_word.process_streaming_prob(micro_input)
++                                if prob is None:
++                                    continue
++                                # Between strides it returns a filler 0.0; only a
++                                # fresh inference empties the feature buffer.
++                                if scores is not None and not wake_word._features:
++                                    scores.update(wake_word, prob, threshold)
++                                if prob > threshold:
++                                    _LOGGER.debug("Wake word '%s' activated (probability %.3f exceeded threshold %.3f)", wake_word.wake_word, prob, threshold)
+                                     wake_word.debug_probabilities = True
+                                     activated = True
+                         elif isinstance(wake_word, OpenWakeWord):
+                             for oww_input in oww_inputs:
+                                 for prob in wake_word.process_streaming(oww_input):
++                                    if scores is not None:
++                                        scores.update(wake_word, prob, threshold)
+                                     if prob > threshold:
+                                         _LOGGER.debug("Wake word '%s' activated (probability %.3f exceeded threshold %.3f)", wake_word.wake_word, prob, threshold)  # type: ignore[attr-defined]
+                                         activated = True
+diff -ruN a/linux_voice_assistant/models.py b/linux_voice_assistant/models.py
+--- a/linux_voice_assistant/models.py	2026-11-01 15:54:56.999086673 +0100
++++ b/linux_voice_assistant/models.py	2026-11-01 15:55:19.680910658 +0100
+@@ -158,6 +158,7 @@
+     mic_volume_entity: "Optional[MicSettingEntity]" = None
+     wake_words_changed: bool = False
+     refractory_seconds: float = 2.0
++    wake_word_score_floor: Optional[float] = None
+     thinking_sound_enabled: bool = False
+     output_only: bool = False
+     muted: bool = False
+diff -ruN a/linux_voice_assistant/peripheral_api.py b/linux_voice_assistant/peripheral_api.py
+--- a/linux_voice_assistant/peripheral_api.py	2026-11-01 15:54:57.003886672 +0100
++++ b/linux_voice_assistant/peripheral_api.py	2026-11-01 15:55:44.986664960 +0100
+@@ -46,6 +46,12 @@
+   volume_changed        data: {"volume": 0.0–1.0}
+   volume_muted          data: {"muted": true/false}
+   zeroconf              data: {"status": "getting_started" | "connected"}
++  wake_word_score       data: {"id": str, "wake_word": str, "score": float,
++                              "threshold": float, "duration_s": float, "ago_s": float}
++              Only with --wake-word-score-floor. One per peak of a wake
++              word's score at or above the floor, once the peak is over,
++              whether or not it crossed the threshold. ``ago_s``: how long
++              before the event the highest score was.
+   light_command         data: {"object_id": str, "state": bool, "brightness": float,
+                               "red": float, "green": float, "blue": float, "effect": str}
+               Fires when HA changes a Light entity that a peripheral
+@@ -139,6 +145,7 @@
+     VOLUME_MUTED = "volume_muted"
+     ZEROCONF = "zeroconf"
+     LIGHT_COMMAND = "light_command"
++    WAKE_WORD_SCORE = "wake_word_score"
+ 
+ 
+ class LVACommand(str, Enum):
+diff -ruN a/linux_voice_assistant/wake_word_scores.py b/linux_voice_assistant/wake_word_scores.py
+--- a/linux_voice_assistant/wake_word_scores.py	1970-01-01 01:00:00.000000000 +0100
++++ b/linux_voice_assistant/wake_word_scores.py	2026-11-01 15:55:17.743852195 +0100
+@@ -0,0 +1,58 @@
++"""Peaks of the wake word scores, for collecting near misses.
++
++A peak starts when a wake word's score rises to the floor and ends when it
++falls below again (or after ``MAX_PEAK_SECONDS``). Each peak is reported once,
++when it is over, with its highest score - whether or not that crossed the
++detection threshold.
++"""
++
++import time
++from typing import Any, Callable, Dict, Optional
++
++MAX_PEAK_SECONDS = 3.0
++
++
++class _Peak:
++    def __init__(self, now: float, score: float, threshold: float) -> None:
++        self.start = now
++        self.at = now
++        self.score = score
++        self.threshold = threshold
++
++
++class WakeWordScores:
++    def __init__(self, floor: float, report: Callable[[Dict[str, Any]], None]) -> None:
++        self.floor = floor
++        self.report = report
++        self._peaks: Dict[str, _Peak] = {}
++
++    def update(self, wake_word: Any, score: float, threshold: float, now: Optional[float] = None) -> None:
++        """Feed one fresh score (not a filler between strides)."""
++        now = time.monotonic() if now is None else now
++        key = getattr(wake_word, "id", None) or wake_word.wake_word
++        peak = self._peaks.get(key)
++
++        if peak is not None and (score < self.floor or now - peak.start > MAX_PEAK_SECONDS):
++            del self._peaks[key]
++            self._report(wake_word, key, peak, now)
++            peak = None
++
++        if score < self.floor:
++            return
++        if peak is None:
++            self._peaks[key] = _Peak(now, score, threshold)
++        elif score > peak.score:
++            peak.score, peak.at, peak.threshold = score, now, threshold
++
++    def _report(self, wake_word: Any, key: str, peak: _Peak, now: float) -> None:
++        self.report(
++            {
++                "id": key,
++                "wake_word": wake_word.wake_word,
++                "score": round(peak.score, 3),
++                "threshold": round(peak.threshold, 3),
++                "duration_s": round(now - peak.start, 2),
++                # The peak's highest score was this long before the report.
++                "ago_s": round(now - peak.at, 2),
++            }
++        )

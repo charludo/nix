@@ -96,7 +96,23 @@ in
       retentionDays = lib.mkOption {
         type = lib.types.ints.positive;
         default = 30;
-        description = "Days of audio and day folders kept; the JSON log is kept.";
+        description = "Days of audio and day folders kept; the JSON logs are kept.";
+      };
+
+      scoreFloor = lib.mkOption {
+        type = lib.types.nullOr lib.types.float;
+        default = 0.05;
+        description = ''
+          Log every peak of a wake word's score at or above this to
+          scores.jsonl, whether LVA woke up or not, to find near misses.
+          `null` turns score logging off.
+        '';
+      };
+
+      recordAbove = lib.mkOption {
+        type = lib.types.float;
+        default = 0.2;
+        description = "Score peaks at or above this also get an audio clip.";
       };
     };
   };
@@ -173,6 +189,10 @@ in
             else
               [ "--disable-peripheral-api" ]
           )
+          ++ lib.optionals (cfg.activationLog.enable && cfg.activationLog.scoreFloor != null) [
+            "--wake-word-score-floor"
+            (toString cfg.activationLog.scoreFloor)
+          ]
           ++ cfg.extraArgs
         );
         User = "lva";
@@ -214,6 +234,8 @@ in
           "/var/lib/lva-activation-log"
           "--retention-days"
           (toString cfg.activationLog.retentionDays)
+          "--record-above"
+          (toString cfg.activationLog.recordAbove)
         ];
         User = "lva";
         Group = "lva";
