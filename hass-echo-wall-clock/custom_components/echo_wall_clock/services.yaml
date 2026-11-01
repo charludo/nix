@@ -53,7 +53,7 @@ update_alert:
       example: "00:05:00"
       selector:
         duration:
-          enable_negative: true
+          allow_negative: true
 
 cancel_alert:
   fields:

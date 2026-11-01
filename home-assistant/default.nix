@@ -24,6 +24,7 @@
     ./shopping.nix
     ./sonos.nix
     ./voice.nix
+    ./wall-clock.nix
     ./waste.nix
     ./weather.nix
     ./xiaomi.nix

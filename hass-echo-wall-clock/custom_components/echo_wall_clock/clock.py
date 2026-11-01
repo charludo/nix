@@ -33,6 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 
 TIME_SYNC_EVERY = timedelta(minutes=30)
 DISCOVER_TIMEOUT = 5.0
+TOKEN_DIGITS = 10
 # A gap after Discover before the rest, as an Echo leaves one.
 SETTLE = 0.2
 
@@ -54,6 +55,12 @@ Opener = Callable[[], Awaitable[Link]]
 
 @dataclass
 class Alert:
+    """`key` is the caller's name for it (`alert_id` outside); `token` is the
+    clock's, always generated here: the clock reads tokens as numbers, so any
+    other token collides with every other one (each new alert replaces the
+    last, deleting one deletes "it")."""
+
+    key: str
     token: str
     kind: str
     at: datetime
@@ -61,7 +68,8 @@ class Alert:
 
     def as_dict(self) -> dict:
         return {
-            "alert_id": self.token,
+            "alert_id": self.key,
+            "token": self.token,
             "kind": self.kind.lower(),
             "at": self.at.isoformat(),
             "label": self.label,
@@ -69,8 +77,12 @@ class Alert:
 
     @classmethod
     def from_dict(cls, data: dict) -> Alert:
+        key = data["alert_id"]
         return cls(
-            token=data["alert_id"],
+            key=key,
+            # Stored before tokens and keys were separate: a numeric id was
+            # the clock's token; anything else gets one.
+            token=data.get("token") or (key if is_token(key) else new_token()),
             kind=data["kind"].upper(),
             at=datetime.fromisoformat(data["at"]),
             label=data.get("label"),
@@ -99,19 +111,30 @@ class ClockState:
     def from_dict(cls, data: dict | None) -> ClockState:
         if not data:
             return cls()
-        alerts = [Alert.from_dict(a) for a in data.get("alerts", [])]
+        raw = data.get("alerts", [])
+        alerts = [Alert.from_dict(a) for a in raw]
+        # Stored before keys and tokens were separate, with a caller's id as
+        # the clock's token: the clock may still hold that one (under whatever
+        # number it read), so it's deleted by that id once.
+        stale = {a["alert_id"] for a in raw if "token" not in a and not is_token(a["alert_id"])}
         info = data.get("info")
         return cls(
-            alerts={a.token: a for a in alerts},
-            pending_deletes=set(data.get("pending_deletes", [])),
+            alerts={a.key: a for a in alerts},
+            pending_deletes=set(data.get("pending_deletes", [])) | stale,
             indicator=bool(data.get("indicator", False)),
             info=GadgetInfo.from_dict(info) if info else None,
         )
 
 
-def new_token() -> str:
-    # Short and numeric, like the Echo's; the clock keeps at most 63 chars.
-    return str(secrets.randbelow(10**10)).zfill(10)
+def is_token(value: str) -> bool:
+    return value.isdigit() and len(value) == TOKEN_DIGITS
+
+
+def new_token(taken: set[str] = frozenset()) -> str:
+    """Numeric, like the Echo's (10 digits), and not already in use."""
+    while (token := str(secrets.randbelow(10**TOKEN_DIGITS)).zfill(TOKEN_DIGITS)) in taken:
+        pass
+    return token
 
 
 class WallClock:
@@ -137,20 +160,24 @@ class WallClock:
     # --- what callers do ---------------------------------------------------
 
     async def set_alert(
-        self, kind: str, at: datetime, token: str | None = None, label: str | None = None
+        self, kind: str, at: datetime, key: str | None = None, label: str | None = None
     ) -> Alert:
-        """Add an alert, or move/replace the one with this token."""
+        """Add an alert, or move/replace the one with this key."""
         kind = kind.upper()
         if kind not in ALERT_TYPES:
             raise ValueError(f"alert type {kind!r}")
         if at.tzinfo is None:
             raise ValueError("naive datetime")
-        token = token or new_token()
-        previous = self.state.alerts.get(token)
+        previous = self.state.alerts.get(key) if key else None
+        token = previous.token if previous else new_token(self._tokens())
         alert = Alert(
-            token, kind, at, label if label is not None else (previous and previous.label)
+            key or token,
+            token,
+            kind,
+            at,
+            label if label is not None else (previous and previous.label),
         )
-        self.state.alerts[token] = alert
+        self.state.alerts[alert.key] = alert
         self.state.pending_deletes.discard(token)
         if previous and previous.kind != kind:
             await self._send(protocol.delete_alert(token))
@@ -158,26 +185,30 @@ class WallClock:
         self._changed()
         return alert
 
-    async def move_alert(self, token: str, at: datetime) -> Alert:
-        alert = self.state.alerts.get(token)
+    async def move_alert(self, key: str, at: datetime) -> Alert:
+        alert = self.state.alerts.get(key)
         if alert is None:
-            raise KeyError(token)
-        return await self.set_alert(alert.kind, at, token)
+            raise KeyError(key)
+        return await self.set_alert(alert.kind, at, key)
 
-    async def cancel_alert(self, token: str) -> bool:
+    async def cancel_alert(self, key: str) -> bool:
         """Remove an alert; a ringing one stops ringing. False if unknown."""
-        if self.state.alerts.pop(token, None) is None:
+        alert = self.state.alerts.pop(key, None)
+        if alert is None:
             return False
-        if not await self._send(protocol.delete_alert(token)):
-            self.state.pending_deletes.add(token)
+        if not await self._send(protocol.delete_alert(alert.token)):
+            self.state.pending_deletes.add(alert.token)
         self._changed()
         return True
 
+    def _tokens(self) -> set[str]:
+        return {a.token for a in self.state.alerts.values()} | self.state.pending_deletes
+
     async def cancel_all(self, kind: str | None = None) -> list[str]:
-        tokens = [t for t, a in self.state.alerts.items() if kind is None or a.kind == kind.upper()]
-        for token in tokens:
-            await self.cancel_alert(token)
-        return tokens
+        keys = [k for k, a in self.state.alerts.items() if kind is None or a.kind == kind.upper()]
+        for key in keys:
+            await self.cancel_alert(key)
+        return keys
 
     async def set_indicator(self, on: bool) -> None:
         self.state.indicator = on
@@ -193,7 +224,7 @@ class WallClock:
         cutoff = self._now() - older_than
         gone = [a for a in self.state.alerts.values() if a.at < cutoff]
         for alert in gone:
-            del self.state.alerts[alert.token]
+            del self.state.alerts[alert.key]
         if gone:
             self._changed()
         return gone

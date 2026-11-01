@@ -30,7 +30,11 @@ in
       divider = true;
     }
     { item = "Music Assistant"; }
-    { item = "Map"; }
+    {
+      item = "Map";
+      divider = true;
+    }
+    { item = "Calendar"; }
     { item = "To-do lists"; }
     {
       item = "Logbook";
