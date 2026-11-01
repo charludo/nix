@@ -16,6 +16,7 @@ in
     ./gpu.nix
     ./npu.nix
     ./unsupervised-updates.nix
+    ./usb.nix
   ];
 
   options.vm = {

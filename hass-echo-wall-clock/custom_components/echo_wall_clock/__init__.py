@@ -128,7 +128,7 @@ POSITIVE_PERIOD = vol.All(cv.time_period, cv.positive_timedelta)
 BASE = {vol.Optional(ATTR_DEVICE_ID): cv.string}
 ALERT = {
     **BASE,
-    vol.Optional(ATTR_ALERT_ID): vol.All(cv.string, vol.Length(min=1, max=63)),
+    vol.Optional(ATTR_ALERT_ID): vol.All(cv.string, vol.Length(min=1, max=255)),
     vol.Optional(ATTR_LABEL): cv.string,
 }
 
@@ -200,13 +200,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def update_alert(call: ServiceCall) -> ServiceResponse:
         runtime = _runtime(hass, call)
-        token = call.data[ATTR_ALERT_ID]
-        alert = runtime.clock.state.alerts.get(token)
+        key = call.data[ATTR_ALERT_ID]
+        alert = runtime.clock.state.alerts.get(key)
         if alert is None:
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="unknown_alert",
-                translation_placeholders={"alert_id": token},
+                translation_placeholders={"alert_id": key},
             )
         if ATTR_AT in call.data:
             at = call.data[ATTR_AT]
@@ -218,33 +218,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_change")
         if at <= dt_util.now():
             # Moved into the past: that's the end of it.
-            await runtime.async_cancel(token)
+            await runtime.async_cancel(key)
             return {**alert.as_dict(), "cancelled": True}
-        return _response(runtime, await runtime.clock.move_alert(token, at))
+        return _response(runtime, await runtime.clock.move_alert(key, at))
 
     async def cancel_alert(call: ServiceCall) -> ServiceResponse:
         runtime = _runtime(hass, call)
-        token = call.data[ATTR_ALERT_ID]
-        alert = runtime.clock.state.alerts.get(token)
-        if not await runtime.async_cancel(token):
+        key = call.data[ATTR_ALERT_ID]
+        alert = runtime.clock.state.alerts.get(key)
+        if not await runtime.async_cancel(key):
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
                 translation_key="unknown_alert",
-                translation_placeholders={"alert_id": token},
+                translation_placeholders={"alert_id": key},
             )
         return {**alert.as_dict(), "cancelled": True}
 
     async def cancel_all(call: ServiceCall) -> ServiceResponse:
         runtime = _runtime(hass, call)
         kind = call.data.get(ATTR_KIND)
-        tokens = [
+        keys = [
             t
             for t, a in runtime.clock.state.alerts.items()
             if kind is None or a.kind == kind.upper()
         ]
-        for token in tokens:
-            await runtime.async_cancel(token)
-        return {"cancelled": tokens}
+        for key in keys:
+            await runtime.async_cancel(key)
+        return {"cancelled": keys}
 
     async def list_alerts(call: ServiceCall) -> ServiceResponse:
         runtime = _runtime(hass, call)

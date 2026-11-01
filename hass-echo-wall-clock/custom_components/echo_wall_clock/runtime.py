@@ -207,30 +207,28 @@ class ClockRuntime:
     def _schedule(self) -> None:
         """One timer per alert: when it's due, then when it should stop ringing."""
         alerts = self.clock.state.alerts
-        for token in list(self._due):
-            if token not in alerts:
-                self._due.pop(token)()
-        for token in list(self._announced):
-            if token not in alerts or alerts[token].at != self._announced[token]:
-                self._announced.pop(token)
-        for token, alert in alerts.items():
-            if token in self._due:
-                self._due.pop(token)()
-            if token in self._announced:
+        for key in list(self._due):
+            if key not in alerts:
+                self._due.pop(key)()
+        for key in list(self._announced):
+            if key not in alerts or alerts[key].at != self._announced[key]:
+                self._announced.pop(key)
+        for key, alert in alerts.items():
+            if key in self._due:
+                self._due.pop(key)()
+            if key in self._announced:
                 when = alert.at + self.ring_for
                 action = self._ring_over
             else:
                 when = alert.at
                 action = self._now_due
-            self._due[token] = async_track_point_in_time(
-                self.hass, self._make_job(token, action), when
-            )
+            self._due[key] = async_track_point_in_time(self.hass, self._make_job(key, action), when)
 
-    def _make_job(self, token: str, action):
+    def _make_job(self, key: str, action):
         @callback
         def job(_now: datetime) -> None:
-            self._due.pop(token, None)
-            alert = self.clock.state.alerts.get(token)
+            self._due.pop(key, None)
+            alert = self.clock.state.alerts.get(key)
             if alert is not None:
                 action(alert)
 
@@ -238,7 +236,7 @@ class ClockRuntime:
 
     @callback
     def _now_due(self, alert: Alert) -> None:
-        self._announced[alert.token] = alert.at
+        self._announced[alert.key] = alert.at
         self._fire(EVENT_ALERT_DUE, alert)
         self._schedule()
         for listener in list(self._listeners):
@@ -246,7 +244,7 @@ class ClockRuntime:
 
     @callback
     def _ring_over(self, alert: Alert) -> None:
-        self.hass.async_create_task(self.async_cancel(alert.token, "timeout"), eager_start=True)
+        self.hass.async_create_task(self.async_cancel(alert.key, "timeout"), eager_start=True)
 
     def _fire(self, event: str, alert: Alert, reason: str | None = None) -> None:
         data = {**alert.as_dict(), "address": self.address}
@@ -256,12 +254,12 @@ class ClockRuntime:
             data["reason"] = reason
         self.hass.bus.async_fire(event, data)
 
-    async def async_cancel(self, token: str, reason: str = "cancelled") -> bool:
-        alert = self.clock.state.alerts.get(token)
+    async def async_cancel(self, key: str, reason: str = "cancelled") -> bool:
+        alert = self.clock.state.alerts.get(key)
         if alert is None:
             return False
-        was_due = token in self._announced
-        await self.clock.cancel_alert(token)
+        was_due = key in self._announced
+        await self.clock.cancel_alert(key)
         if was_due:
             self._fire(EVENT_ALERT_ENDED, alert, reason)
         return True

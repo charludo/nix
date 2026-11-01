@@ -78,6 +78,26 @@ everywhere (currently: the living-room Sonos).
 - [ ] Alarm with description `Sanft` / `Musik: <playlist>`
 - [ ] Entry length in HA's calendar view matches Thunderbird
 
+## On the wall clock
+
+Mirrored by `script.wall_clock_mirror` (`home-assistant/wall-clock.nix`) within about a second;
+only what rings in the clock's room (its device's area, Wohnzimmer) or everywhere.
+
+- [ ] Living room: "Stelle einen Timer auf 5 Minuten" → the LED ring shows 5 minutes
+- [ ] Kitchen: "Stelle einen Timer auf 5 Minuten" → not on the clock
+- [ ] Calendar entry with categories `Küche` + `Wohnzimmer`, or with no room → on the clock;
+      with only `Küche` → not
+- [ ] "Verlängere den Timer um 2 Minuten" → the ring moves on
+- [ ] "Pausiere den Timer" → gone from the clock; "Setze den Timer fort" → back with the time left
+- [ ] "Lösche den Timer" → gone from the clock
+- [ ] Timer runs out → the clock rings with the speakers; "Stopp" → the clock stops too
+- [ ] Timer not stopped → the clock stops when remembrance gives up (2 minutes)
+- [ ] "Weck mich morgen um 7" / "Erinnere mich in 10 Minuten an …" → on the clock
+- [ ] Repeating alarm rings and is dismissed → the clock shows the next one
+- [ ] Reminder entry from Thunderbird → on the clock at its reminder time, not at the start
+- [ ] HA restarted while a timer runs → still on the clock afterwards
+- [ ] An alert set on the clock directly (not via remembrance) stays
+
 ## Known gaps (shouldn't work yet)
 
 - Kind in the middle of the sentence ("6 Uhr morgens Wecker wochentags"): remembrance reads it,

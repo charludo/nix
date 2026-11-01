@@ -184,8 +184,15 @@ async def test_alarm_at_a_time_of_day_and_cancel_all(hass, world):
     await call(hass, "set_reminder", at=(dt_util.now() + dt_util.dt.timedelta(hours=2)).isoformat())
     assert {a[1] for a in clock.alerts_sent()} == {"ALARM", "REMINDER"}
 
+    # A caller's id never reaches the clock: it gets a numeric token.
+    assert alarm["alert_id"] == "wake"
+    assert alarm["token"].isdigit() and len(alarm["token"]) == 10
+    assert all(a[0].isdigit() for a in clock.alerts_sent())
+    assert ("wake",) not in [(a[0],) for a in clock.alerts_sent()]
+
     done = await call(hass, "cancel_all", kind="alarm")
     assert done["cancelled"] == ["wake"]
+    assert clock.deletes_sent() == [alarm["token"]]
     assert len((await call(hass, "list_alerts"))["alerts"]) == 1
 
     with pytest.raises(ServiceValidationError):

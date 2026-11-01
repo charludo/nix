@@ -39,7 +39,7 @@ async def start(wall: WallClock, fake: FakeClock):
 
 async def test_session_brings_the_clock_up_to_date():
     wall = WallClock(ClockState(), lambda: NOW)
-    await wall.set_alert("timer", NOW + timedelta(minutes=5), token="t1")
+    alert = await wall.set_alert("timer", NOW + timedelta(minutes=5), key="t1")
     fake = FakeClock()
     link, task = await start(wall, fake)
 
@@ -51,7 +51,7 @@ async def test_session_brings_the_clock_up_to_date():
         "Notifications/ClearIndicator",
     ]
     assert fake.time_infos() == ["2026-10-31T16:00:00+01:00"]
-    assert fake.alerts_sent() == [("t1", "TIMER", "2026-10-31T16:05:00+01:00")]
+    assert fake.alerts_sent() == [(alert.token, "TIMER", "2026-10-31T16:05:00+01:00")]
     assert wall.state.info.firmware == "102"
 
     link.drop()
@@ -68,14 +68,16 @@ async def test_changes_while_connected_go_out_at_once():
     assert fake.alerts_sent()[-1] == (alert.token, "ALARM", "2026-11-01T00:00:00+01:00")
     assert alert.token.isdigit() and len(alert.token) == 10
 
-    await wall.move_alert(alert.token, NOW + timedelta(hours=9))
+    # Without a key of its own, the key is the token.
+    assert alert.key == alert.token
+    await wall.move_alert(alert.key, NOW + timedelta(hours=9))
     assert fake.alerts_sent()[-1][2] == "2026-11-01T01:00:00+01:00"
 
-    # Same token, other kind: the old one is deleted first.
-    await wall.set_alert("reminder", NOW + timedelta(hours=9), token=alert.token)
+    # Same key, other kind: the old one is deleted first.
+    await wall.set_alert("reminder", NOW + timedelta(hours=9), key=alert.key)
     assert fake.deletes_sent() == [alert.token]
 
-    assert await wall.cancel_alert(alert.token)
+    assert await wall.cancel_alert(alert.key)
     assert fake.deletes_sent() == [alert.token, alert.token]
     assert not await wall.cancel_alert("nope")
 
@@ -86,17 +88,60 @@ async def test_changes_while_connected_go_out_at_once():
     await task
 
 
+async def test_the_clock_only_gets_numeric_tokens_of_its_own():
+    """The clock reads tokens as numbers: callers' keys (like "r-cb4b19b2fb54")
+    would all collide. Each alert gets its own 10-digit token instead."""
+    wall = WallClock(ClockState(), lambda: NOW)
+    fake = FakeClock()
+    link, task = await start(wall, fake)
+    long = await wall.set_alert("timer", NOW + timedelta(minutes=40), key="r-cb4b19b2fb54")
+    short = await wall.set_alert("timer", NOW + timedelta(minutes=1), key="r-d20168f8b633")
+    await wall.set_alert("reminder", NOW + timedelta(hours=1), key="r-ffbbf89f-ed7f@remembrance")
+    assert long.token != short.token
+    tokens = [a[0] for a in fake.alerts_sent()]
+    assert len(set(tokens)) == 3
+    assert all(t.isdigit() and len(t) == 10 for t in tokens)
+
+    # Moving and cancelling by key reach the same token.
+    fake.received.clear()
+    await wall.move_alert("r-cb4b19b2fb54", NOW + timedelta(minutes=45))
+    await wall.cancel_alert("r-d20168f8b633")
+    assert fake.alerts_sent() == [(long.token, "TIMER", "2026-10-31T16:45:00+01:00")]
+    assert fake.deletes_sent() == [short.token]
+    assert list(wall.state.alerts) == ["r-cb4b19b2fb54", "r-ffbbf89f-ed7f@remembrance"]
+    link.drop()
+    await task
+
+
+async def test_state_from_before_tokens_were_separate():
+    """Stored alerts with a caller's id as token get a numeric one; the old id
+    is deleted once on the clock, which may still hold it."""
+    state = ClockState.from_dict(
+        {
+            "alerts": [
+                {"alert_id": "r-cb4b19b2fb54", "kind": "timer", "at": "2026-10-31T16:40:00+01:00"},
+                {"alert_id": "0123456789", "kind": "alarm", "at": "2026-11-01T07:00:00+01:00"},
+            ]
+        }
+    )
+    old, numeric = state.alerts["r-cb4b19b2fb54"], state.alerts["0123456789"]
+    assert old.token.isdigit() and len(old.token) == 10
+    assert numeric.token == "0123456789"
+    assert state.pending_deletes == {"r-cb4b19b2fb54"}
+    assert ClockState.from_dict(state.as_dict()).alerts == state.alerts
+
+
 async def test_cancelled_while_away_is_deleted_next_time():
     wall = WallClock(ClockState(), lambda: NOW)
-    await wall.set_alert("timer", NOW + timedelta(minutes=5), token="gone")
-    await wall.set_alert("timer", NOW + timedelta(minutes=9), token="kept")
+    gone = await wall.set_alert("timer", NOW + timedelta(minutes=5), key="gone")
+    kept = await wall.set_alert("timer", NOW + timedelta(minutes=9), key="kept")
     assert await wall.cancel_alert("gone")
-    assert wall.state.pending_deletes == {"gone"}
+    assert wall.state.pending_deletes == {gone.token}
 
     fake = FakeClock()
     link, task = await start(wall, fake)
-    assert fake.deletes_sent() == ["gone"]
-    assert [a[0] for a in fake.alerts_sent()] == ["kept"]
+    assert fake.deletes_sent() == [gone.token]
+    assert [a[0] for a in fake.alerts_sent()] == [kept.token]
     assert wall.state.pending_deletes == set()
     link.drop()
     await task
@@ -125,14 +170,14 @@ async def test_nothing_is_sent_while_away():
     wall = WallClock(ClockState(), lambda: NOW)
     assert not await wall.sync_time()
     alert = await wall.set_alert("timer", NOW + timedelta(minutes=1))
-    assert alert.token in wall.state.alerts
+    assert alert.key in wall.state.alerts
 
 
 async def test_state_round_trips_and_expires():
     changes = []
     wall = WallClock(ClockState(), lambda: NOW, on_change=lambda: changes.append(1))
-    await wall.set_alert("timer", NOW - timedelta(minutes=30), token="old", label="Pasta")
-    await wall.set_alert("alarm", NOW + timedelta(hours=1), token="new")
+    await wall.set_alert("timer", NOW - timedelta(minutes=30), key="old", label="Pasta")
+    await wall.set_alert("alarm", NOW + timedelta(hours=1), key="new")
     await wall.cancel_alert("ghost")  # unknown: no change
     await wall.set_indicator(True)
 
@@ -141,7 +186,7 @@ async def test_state_round_trips_and_expires():
     assert copy.indicator
 
     gone = wall.expire(timedelta(minutes=10))
-    assert [a.token for a in gone] == ["old"]
+    assert [a.key for a in gone] == ["old"]
     assert list(wall.state.alerts) == ["new"]
     assert changes
 

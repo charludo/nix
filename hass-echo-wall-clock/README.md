@@ -37,7 +37,9 @@ show, and stays connected, sending the time again every half hour. If the clock 
 batteries, out of range), it's brought up to date when it's back; alerts cancelled meanwhile are
 deleted then. Alerts are stored, so a Home Assistant restart loses nothing.
 
-The messages are the Alexa Gadgets Toolkit's, byte for byte what an Echo sends.
+The messages are the Alexa Gadgets Toolkit's, byte for byte what an Echo sends. The clock reads
+alert IDs as numbers, so it only ever gets 10-digit ones made up here; any other ID would collide
+with every other alert (each new one replacing the last).
 
 ## Actions
 
@@ -55,9 +57,10 @@ return it (`alert_id`, `kind`, `at`, `label`, `ringing`).
 | `list_alerts` | `kind`? | Returns `connected` and the alerts, soonest first. |
 | `sync_time` | | |
 
-`alert_id` is yours to choose (up to 63 characters), so a caller can use its own IDs; setting an
-existing one replaces it. Without one, a numeric ID is made up. `label` stays in Home Assistant:
-the clock has no display for it.
+`alert_id` is yours to choose (any text), so a caller can use its own IDs; setting an existing
+one replaces it. Without one, the alert's ID is made up for you and returned. Either way the clock
+never sees it: it gets a numeric ID of its own, which the response also shows as `token`. `label`
+stays in Home Assistant: the clock has no display for it.
 
 ## Entities and events
 

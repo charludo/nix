@@ -13,10 +13,16 @@
   vm = {
     id = 2403;
     name = "SRV-HOMEASSISTANT";
+    runOnGPUHost = true;
 
     hardware.cores = 4;
     hardware.memory = 16384;
     hardware.storage = "8G";
+
+    hardware.usb = [
+      { id = "1a86:55d4"; } # Sonoff Zigbee 3.0 USB Dongle Plus V2
+      { id = "8087:0037"; } # Onboard Intel Bluetooth
+    ];
 
     networking.openPorts.tcp = [
       8123
@@ -32,6 +38,8 @@
     ];
   };
   snow.tags = lib.mkForce [ "vm" ];
+
+  hardware.enableRedistributableFirmware = true;
 
   nas.backup.enable = true;
 
@@ -66,5 +74,4 @@
   };
 
   environment.systemPackages = [ pkgs.usbutils ];
-  # proxmox.qemuExtraConf.usb0 = "host=10c4:ea60,usb3=1";
 }
