@@ -19,6 +19,9 @@ in
 # server (`duckling-example-exe`). The Hackage release (2020) in nixpkgs is
 # broken; master builds with its version bounds relaxed and two patches.
 lib.pipe haskellPackages.duckling [
+  # nixpkgs dropped pcre (v1), which regex-pcre links against; take the
+  # variant with the C library bundled, as duckling does on Windows.
+  (drv: drv.override { regex-pcre = haskellPackages.regex-pcre-builtin; })
   (overrideSrc {
     version = "0.2.0.1-unstable-2026-03-15";
     src = fetchFromGitHub {
@@ -41,6 +44,11 @@ lib.pipe haskellPackages.duckling [
   # Just the server: the library would pull in GHC.
   justStaticExecutables
   (overrideCabal (drv: {
+    # Before jailbreak-cabal drops the version bounds this matches on.
+    prePatch = (drv.prePatch or "") + ''
+      substituteInPlace duckling.cabal \
+        --replace-fail 'regex-pcre              >=' 'regex-pcre-builtin      >='
+    '';
     # The server reads time zones from /usr/share/zoneinfo, which NixOS
     # (and the build sandbox) doesn't have.
     postPatch = (drv.postPatch or "") + ''
