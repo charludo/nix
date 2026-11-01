@@ -4,18 +4,21 @@
   fetchgit,
 }:
 
-# esqueleto's test suite pulls in mysql-simple -> pcre-light, which needs the removed pcre library
 (haskellPackages.extend (
   _: prev: {
+    # test suite pulls in mysql-simple -> pcre-light, which needs the removed pcre library
     esqueleto = haskell.lib.dontCheck prev.esqueleto;
+
+    # continuwuity omits "timeline" in /sync for rooms without timeline updates
+    matrix-client = haskell.lib.appendPatch prev.matrix-client ./matrix-client-optional-timeline.patch;
   }
 )).callCabal2nix
   "nixpkgs-bot"
   (
     fetchgit {
       url = "https://code.maralorn.de/maralorn/config.git";
-      rev = "0b57faa34d2f31e5bd7091780192c8d855b1b349";
-      sha256 = "sha256-YmS328MZ9mK2hErMnsc2LnWwrfV1sp9nirLJDB/AA2U=";
+      rev = "13f6652b1a822969293c56309043f8f19f7f4a04";
+      sha256 = "sha256-COBLxUMSbBW39d8N4v1OlKOyz15Lo1VCZJ1bPrfL3+M=";
     }
     + "/packages/nixpkgs-bot"
   )

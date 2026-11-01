@@ -1,0 +1,15 @@
+--- a/src/Network/Matrix/Client.hs
++++ b/src/Network/Matrix/Client.hs
+@@ -1307,7 +1307,11 @@
+     toJSON = genericToJSON aesonOptions
+ 
+ instance FromJSON JoinedRoomSync where
+-    parseJSON = genericParseJSON aesonOptions
++    -- servers like continuwuity omit "timeline" for rooms without timeline updates
++    parseJSON = withObject "JoinedRoomSync" $ \o ->
++        JoinedRoomSync
++            <$> o .:? "summary"
++            <*> (fromMaybe (TimelineSync Nothing Nothing Nothing) <$> o .:? "timeline")
+ 
+ instance ToJSON InvitedRoomSync where
+     toJSON _ = object []

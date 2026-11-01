@@ -15,10 +15,7 @@ in
 
     releases = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
-        "24.11"
-        "25.05"
-      ];
+      default = [ ];
       description = ''
         A list of NixOS release versions for which additional branch
         mappings should be generated.
