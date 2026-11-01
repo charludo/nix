@@ -34,6 +34,16 @@
 
     settings = {
       server = "https://matrix.${private-settings.domains.home}";
+
+      # only track master, nixos-unstable and the latest two releases (plus their channels)
+      branches = {
+        master = [ "nixos-unstable" ];
+        nixos-unstable = [ ];
+        "release-25.11" = [ "nixos-25.11" ];
+        "nixos-25.11" = [ ];
+        "release-26.05" = [ "nixos-26.05" ];
+        "nixos-26.05" = [ ];
+      };
     };
   };
 
