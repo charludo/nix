@@ -30,6 +30,29 @@ _: prev: {
     doInstallCheck = false;
   });
 
+  # The mobile app needs the "-app" builds of backend and web. Upstream publishes no git tags for them, only the feature/app branch.
+  wanderer = prev.wanderer.overrideAttrs (old: {
+    version = "0.21.2-app-unstable-2026-10-30";
+    src = prev.fetchFromGitHub {
+      owner = "open-wanderer";
+      repo = "wanderer";
+      rev = "f07d0f01616c3c444ea4b19a237a3c7499a918e8";
+      hash = "sha256-jQoKaIZcXvnSCFxiAzY43CRks84ZJtVZWZyfvhoMjUI=";
+    };
+    doCheck = false; # very expensive tests, idc
+    passthru = old.passthru // {
+      web = old.passthru.web.overrideAttrs (webOld: {
+        # npmDepsHash is a builder argument, so only replacing npmDeps itself changes the fetched dependencies
+        npmDeps = prev.fetchNpmDeps {
+          inherit (webOld) src sourceRoot postPatch;
+          name = "${webOld.pname}-${webOld.version}-npm-deps";
+          hash = "sha256-4fbtL6OPpcjnBNU4vkCaoA9SJiKVfM6LSsK60V17Me4=";
+          fetcherVersion = 2;
+        };
+      });
+    };
+  });
+
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (_: pyprev: {
       spacy = pyprev.spacy.overridePythonAttrs (old: {
