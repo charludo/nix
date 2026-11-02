@@ -9,7 +9,7 @@ let
 in
 {
   services.roundcube = {
-    enable = false;
+    enable = true;
     hostName = "mail.${domains.personal}";
     configureNginx = true;
     package = pkgs.roundcube.withPlugins (p: [
@@ -32,10 +32,4 @@ in
       $config['smtp_pass'] = "%p";
     '';
   };
-
-  # Mitigation for the 2026-10 PHP RCE that works against the default config.
-  # TODO: remove once php84 in nixpkgs is patched.
-  # services.phpfpm.pools.roundcube.phpOptions = ''
-  # session.upload_progress.enabled = Off
-  # '';
 }
