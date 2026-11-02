@@ -2,6 +2,8 @@
   config,
   lib,
   private-settings,
+  secrets,
+  outputs,
   ...
 }:
 let
@@ -24,6 +26,12 @@ in
     ++ config.services.matrix-continuwuity.settings.global.port;
   };
 
+  age.secrets.turn = {
+    rekeyFile = secrets.gsv-turn;
+    owner = config.services.matrix-continuwuity.user;
+    inherit (config.services.matrix-continuwuity) group;
+  };
+
   services.matrix-continuwuity = {
     enable = true;
     settings.global = rec {
@@ -37,6 +45,16 @@ in
       server_name = "matrix.${domains.home}";
       address = [ "0.0.0.0" ];
       port = [ 6167 ];
+
+      turn_uris =
+        let
+          inherit (outputs.nixosConfigurations.gsv.config.services) coturn;
+        in
+        [
+          "turns:turn.${domains.blog}:${toString coturn.tls-listening-port}"
+          "turn:turn.${domains.blog}:${toString coturn.listening-port}"
+        ];
+      turn_secret_file = config.age.secrets.turn.path;
 
       new_user_displayname_suffix = "";
       max_request_size = 1000000000; # 1GB
