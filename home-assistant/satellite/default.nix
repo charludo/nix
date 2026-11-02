@@ -79,11 +79,12 @@
     # mostly where music or TV masked the voice, so: deeper suppression of
     # non-stationary noise on the ASR output (default floor 0.3; GAMMA_NN_SR
     # is locked at 1.1 in the 1-channel firmware and ignores writes), a
-    # 125 Hz high-pass instead of 70 Hz against music bass driving the AGC,
+    # 180 Hz high-pass instead of 70 Hz against music bass and male news
+    # voices driving the AGC (wake word models listen at ~300-3000 Hz),
     # and no comfort noise.
     tuning = {
       MIN_NN_SR = 0.15;
-      HPFONOFF = 2;
+      HPFONOFF = 3;
       CNIONOFF = 0;
     };
   };

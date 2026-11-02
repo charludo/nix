@@ -256,6 +256,39 @@ in
       };
     });
 
+    # Music Assistant only exposes title/artist/album on the player (no
+    # composer or year), so what's said depends on the kind of media: a
+    # podcast is named by its show, a track by artist and album. The album
+    # artist is added only when it differs, which is what carries the
+    # orchestra/ensemble on classical and compilation releases.
+    MusikWasIstDas = {
+      sentences = [
+        "Was ist das"
+        "Was (läuft|spielt) [da|hier|gerade|jetzt]"
+        "Was [für ein|ein] (Lied|Song|Titel|Stück) (ist das|läuft [da|hier|gerade|jetzt])"
+        "Welche[s|r|n] (Lied|Song|Titel|Stück|Album) ist das"
+      ];
+      script.speech.text = ''
+        {%- set p = '${player}' -%}
+        {%- set t = state_attr(p, 'media_title') -%}
+        {%- if is_state(p, ['off', 'idle', 'standby', 'unavailable', 'unknown']) or not t -%}
+          Es läuft gerade nichts.
+        {%- else -%}
+          {%- set artist = state_attr(p, 'media_artist') -%}
+          {%- set album = state_attr(p, 'media_album_name') -%}
+          {%- set album_artist = state_attr(p, 'media_album_artist') -%}
+          {%- set kind = state_attr(p, 'media_content_type') | default("", true) | string -%}
+          {%- if 'podcast' in kind -%}
+            {{ t }}{{ (', aus dem Podcast ' ~ album) if album else "" }}.
+          {%- elif 'audiobook' in kind -%}
+            {{ ('Das Hörbuch ' ~ album ~ ', ') if album and album != t else "" }}{{ t }}{{ (' von ' ~ artist) if artist else "" }}.
+          {%- else -%}
+            {{ t }}{{ (' von ' ~ artist) if artist else "" }}{{ (', vom Album ' ~ album) if album and album != t else "" }}{{ (' von ' ~ album_artist) if album_artist and album_artist != artist else "" }}.
+          {%- endif -%}
+        {%- endif -%}
+      '';
+    };
+
     MusikSongVonKuenstler = silent (unmute {
       sentences = [
         "(Spiele|Spiel|Starte) [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
