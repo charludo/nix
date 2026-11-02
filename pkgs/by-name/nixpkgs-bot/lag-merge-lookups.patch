@@ -1,0 +1,40 @@
+diff --git a/exe/Main.hs b/exe/Main.hs
+index 87dff9ae..2cad0687 100644
+--- a/exe/Main.hs
++++ b/exe/Main.hs
+@@ -192,6 +192,7 @@ data Environment = MkEnvironment
+   , githubToken ∷ Text
+   , lastWatch ∷ IORef Clock.TimeSpec
+   , lastMaintenance ∷ IORef Clock.TimeSpec
++  , fetchedHeads ∷ IORef (Map Text Commit)
+   }
+
+ type App = ReaderT Persist.Sqlite.SqlBackend (MonadLogger.NoLoggingT (ResourceT.ResourceT (ReaderT Environment IO)))
+@@ -392,7 +393,14 @@ watchRepo = do
+   messages ←
+     catMaybes <$> do
+       forM (Map.toList $ branches conf) \(branch, next) → do
+-        [new_commit] ← gitShow [originBranch branch]
++        [fetched_commit] ← gitShow [originBranch branch]
++        -- GitHub only associates a merge-queue commit with its pull request a few seconds after it lands on the branch.
++        -- So we only advance to the head fetched during the previous watch, giving GitHub at least one watch interval to catch up.
++        -- Right after startup there is no previous head and we advance to the fetched one.
++        fetched_heads ← getEnv fetchedHeads
++        new_commit ←
++          fromMaybe fetched_commit
++            <$> atomicModifyIORef' fetched_heads \heads → (Map.insert branch fetched_commit heads, Map.lookup branch heads)
+         let key = BranchKey branch
+         old_branch_state ∷ Maybe Branch ← Persist.get key
+         Persist.repsert key $ Branch branch (commitId new_commit)
+@@ -788,9 +796,10 @@ main = do
+   now ← liftIO $ Clock.getTime Clock.Monotonic
+   last_watch ← newIORef now
+   last_maintenance ← newIORef minBound
++  fetched_heads ← newIORef mempty
+   let runApp ∷ App a → IO a
+       runApp =
+-        flip runReaderT (MkEnvironment config matrix_session github_token last_watch last_maintenance)
++        flip runReaderT (MkEnvironment config matrix_session github_token last_watch last_maintenance fetched_heads)
+           . Persist.Sqlite.runSqlite (database config)
+           . Persist.Sqlite.retryOnBusy
+   first_next_batch ← runApp do
