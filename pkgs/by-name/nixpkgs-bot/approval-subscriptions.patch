@@ -1,0 +1,373 @@
+diff --git a/exe/Main.hs b/exe/Main.hs
+index 2cad0687..b7eabd43 100644
+--- a/exe/Main.hs
++++ b/exe/Main.hs
+@@ -101,6 +101,11 @@ Persist.share
+     githubLogin Text
+     deriving Eq Show
+     Primary user githubLogin
++  ApprovalSubscription
++    user Text
++    approver Text
++    author Text Maybe
++    deriving Eq Show
+   |]
+ 
+ data Commit = Commit
+@@ -246,7 +251,13 @@ type PRSchema = [GraphQL.unwrap| (GraphQL.API.PullRequestSchema).repository!.pul
+ 
+ type RateLimitSchema = [GraphQL.unwrap| (GraphQL.API.PullRequestSchema).rateLimit! |]
+ 
+-extractPR ∷ PRSchema → App (PullRequest, Maybe Merge, Text)
++-- | The github logins of a pull request‘s author and of everyone who approved it.
++data PRPeople = PRPeople
++  { prAuthor ∷ Text
++  , prApprovers ∷ [Text]
++  }
++
++extractPR ∷ PRSchema → App (PullRequest, Maybe Merge, PRPeople)
+ extractPR pr = do
+   when (isNothing [get|pr.mergeCommit|] && [get|pr.merged|]) $
+     MonadCatch.throwM ("PR is merged but has no merge commit:" <> show pr ∷ Text)
+@@ -261,15 +272,50 @@ extractPR pr = do
+           { mergeNumber = PullRequestKey [get|pr.number|]
+           , mergeCommit = [get|commit.oid|]
+           }
+-    , [get|pr.author!.login|]
++    , PRPeople
++        { prAuthor = [get|pr.author!.login|]
++        , prApprovers = do
++            review ← maybe [] catMaybes $ join [get|pr.reviews?.nodes|]
++            maybeToList [get|review.author?.login|]
++        }
+     )
+ 
++approvalsDescription ∷ Text → Maybe Text → Text
++approvalsDescription approver pr_author = "pull requests approved by " <> approver <> maybe "" (" and authored by " <>) pr_author
++
++-- | All users following the author or approvers of this pull request, who are not subscribed to it yet, with the reason.
++getMissingSubscriptions ∷ Persist.Key PullRequest → PRPeople → App [(Text, Text)]
++getMissingSubscriptions pr_key PRPeople{prAuthor, prApprovers} = do
++  author_subs ← getMissingAuthorSubscriptions pr_key prAuthor
++  approval_subs ← SQL.select $ do
++    approval_sub ← SQL.from $ SQL.table @ApprovalSubscription
++    SQL.where_
++      ( (approval_sub ^. ApprovalSubscriptionApprover `SQL.in_` SQL.valList prApprovers)
++          &&. ( SQL.isNothing_ (approval_sub ^. ApprovalSubscriptionAuthor)
++                  SQL.||. (approval_sub ^. ApprovalSubscriptionAuthor ==. SQL.just (SQL.val prAuthor))
++              )
++          &&. (approval_sub ^. ApprovalSubscriptionUser `notIn` SQL.subSelectList (usersSubscribedTo pr_key))
++      )
++    pure approval_sub
++  pure
++    . fmap head
++    . NonEmpty.groupAllWith fst
++    $ fmap (,"you are following user " <> prAuthor) author_subs
++      <> fmap
++        ( \sub →
++            let ApprovalSubscription{approvalSubscriptionUser, approvalSubscriptionApprover, approvalSubscriptionAuthor} = Persist.entityVal sub
++             in (approvalSubscriptionUser, "you are following " <> approvalsDescription approvalSubscriptionApprover approvalSubscriptionAuthor)
++        )
++        approval_subs
++
++usersSubscribedTo ∷ Persist.Key PullRequest → SQL.SqlQuery (SQL.SqlExpr (SQL.Value Text))
++usersSubscribedTo pr_key = do
++  sub ← SQL.from $ SQL.table @Subscription
++  SQL.where_ (sub ^. SubscriptionPullRequest ==. SQL.val pr_key)
++  pure (sub ^. SubscriptionUser)
++
+ getMissingAuthorSubscriptions ∷ Persist.Key PullRequest → Text → App [Text]
+ getMissingAuthorSubscriptions pr_key author = do
+-  let users_subscribed_to_this_pr = do
+-        sub ← SQL.from $ SQL.table @Subscription
+-        SQL.where_ (sub ^. SubscriptionPullRequest ==. SQL.val pr_key)
+-        pure (sub ^. SubscriptionUser)
+   author_subs ← SQL.select $ do
+     author_sub ← SQL.from $ SQL.table @AuthorSubscription
+     SQL.where_
+@@ -278,7 +324,7 @@ getMissingAuthorSubscriptions pr_key author = do
+           ==. SQL.val author
+           SQL.&&. author_sub
+             ^. AuthorSubscriptionUser
+-            `notIn` SQL.subSelectList users_subscribed_to_this_pr
++            `notIn` SQL.subSelectList (usersSubscribedTo pr_key)
+       )
+     pure author_sub
+   pure $ fmap (authorSubscriptionUser . Persist.entityVal) author_subs
+@@ -290,7 +336,7 @@ checkRateLimit rateLimit = when ([get|rateLimit.remaining|] < warn_threshold) $
+   -- The threshold should probably be lower, but for debugging purposes, I currently want to see everytime a graphql Query happens.
+   warn_threshold = 5000
+ 
+-queryPR ∷ Persist.Key PullRequest → App (PullRequest, Maybe Merge, Text)
++queryPR ∷ Persist.Key PullRequest → App (PullRequest, Maybe Merge, PRPeople)
+ queryPR (PullRequestKey number) = do
+   owner ← getEnv (owner . repo . config)
+   name ← getEnv (name . repo . config)
+@@ -308,9 +354,9 @@ getPRInfo pr_key = do
+       pure $ Just (savedPRInfo, branches)
+     Nothing → do
+       prInfo ← catchAll $ queryPR pr_key
+-      forM prInfo \(pull_request, pull_request_merge, author) → do
++      forM prInfo \(pull_request, pull_request_merge, people) → do
+         Persist.insert_ pull_request
+-        ensureSubscriptions pr_key author =<< getMissingAuthorSubscriptions pr_key author
++        ensureSubscriptions pr_key =<< getMissingSubscriptions pr_key people
+         case pull_request_merge of
+           Just merge_info → do
+             Persist.insert_ merge_info
+@@ -322,13 +368,13 @@ getPRInfo pr_key = do
+           , branches
+           )
+ 
+-ensureSubscriptions ∷ Persist.Key PullRequest → Text → [Text] → App ()
+-ensureSubscriptions pr_key author missing_subscriptions = do
+-  forM_ missing_subscriptions \user → void $ Persist.insertUnique_ (Subscription user pr_key)
++ensureSubscriptions ∷ Persist.Key PullRequest → [(Text, Text)] → App ()
++ensureSubscriptions pr_key missing_subscriptions = do
++  forM_ missing_subscriptions \(user, _) → void $ Persist.insertUnique_ (Subscription user pr_key)
+   pr_msg ← mapM prHTML =<< getPRInfo pr_key
+-  forM_ pr_msg \msg → forM_ missing_subscriptions \user →
++  forM_ pr_msg \msg → forM_ missing_subscriptions \(user, reason) →
+     sendMessageToUser user $
+-      m ("Because you are following user " <> author <> " I subscribed you to the pull request ")
++      m ("Because " <> reason <> " I subscribed you to the pull request ")
+         <> msg
+ 
+ -- | This function
+@@ -360,17 +406,17 @@ findSubscribedPRsInCommitList branch possible_new_merge_commits =
+         putText $ "MergingQuery: " <> show change <> " "
+         checkRateLimit [get|result.rateLimit!|]
+         prs ← mapM extractPR $ catMaybes [get|result.repository!.object!.__fragment!.associatedPullRequests!.nodes!|]
+-        flip mapMaybeM prs \(pr, merge, author) →
++        flip mapMaybeM prs \(pr, merge, people) →
+           case merge of
+             Just mergeProof | mergeCommit mergeProof == commitId change → do
+               let pr_key = mergeNumber mergeProof
+-              missing_subs ← getMissingAuthorSubscriptions pr_key author
++              missing_subs ← getMissingSubscriptions pr_key people
+               pr_is_watched ← isJust <$> Persist.get (mergeNumber mergeProof)
+               if pr_is_watched || not (null missing_subs)
+                 then do
+                   Persist.repsert pr_key pr
+                   Persist.repsert (MergeKey pr_key) mergeProof
+-                  ensureSubscriptions pr_key author missing_subs
++                  ensureSubscriptions pr_key missing_subs
+                   pure $ Just pr_key
+                 else pure Nothing
+             _ → pure Nothing
+@@ -498,6 +544,10 @@ deleteUnusedQueries = SQL.delete do
+         `notIn` SQL.subList_select do
+           sub ← SQL.from $ SQL.table @AuthorSubscription
+           pure (sub ^. AuthorSubscriptionUser)
++      &&. (query ^. QueryUser)
++        `notIn` SQL.subList_select do
++          sub ← SQL.from $ SQL.table @ApprovalSubscription
++          pure (sub ^. ApprovalSubscriptionUser)
+ 
+ leaveEmptyRooms ∷ App ()
+ leaveEmptyRooms = do
+@@ -633,8 +683,57 @@ resultHandler syncResult@Matrix.SyncResult{Matrix.srNextBatch, Matrix.srRooms} =
+           sub ← SQL.from $ SQL.table @AuthorSubscription
+           SQL.where_ (sub ^. AuthorSubscriptionUser ==. SQL.val user &&. sub ^. AuthorSubscriptionGithubLogin ==. SQL.val author)
+           pure sub
++      isApprovalSub user approver pr_author sub =
++        (sub ^. ApprovalSubscriptionUser ==. SQL.val user)
++          &&. (sub ^. ApprovalSubscriptionApprover ==. SQL.val approver)
++          &&. maybe
++            (SQL.isNothing_ (sub ^. ApprovalSubscriptionAuthor))
++            (\a → sub ^. ApprovalSubscriptionAuthor ==. SQL.just (SQL.val a))
++            pr_author
++      hasApprovalSub user approver pr_author =
++        null <$> SQL.select do
++          sub ← SQL.from $ SQL.table @ApprovalSubscription
++          SQL.where_ (isApprovalSub user approver pr_author sub)
++          pure sub
++      isApprovalsCommand = fromMaybe False . viaNonEmpty (flip Text.isPrefixOf "approvals" . head) . Text.words
++      parseApprovalsArgs args = case Text.words args of
++        [_, approver] → Just (approver, Nothing)
++        [_, approver, by, pr_author] | Text.isPrefixOf by "by" → Just (approver, Just pr_author)
++        _ → Nothing
++      approvalsUsage =
++        m "Please tell me whose approvals to follow, e.g. "
++          <> codeHTML "subscribe approvals [github-login-name]"
++          <> m " or "
++          <> codeHTML "subscribe approvals [github-login-name] by [github-login-name]"
++          <> m "."
+   responses ← forM (filter isQuery commands) \cmd →
+     (cmd,) <$> catchAll case cmd of
++      MkCommand{command, author, args}
++        | Text.isPrefixOf command "subscribe"
++        , isApprovalsCommand args →
++            case parseApprovalsArgs args of
++              Nothing → pure approvalsUsage
++              Just (approver, pr_author) → do
++                notSubbed ← hasApprovalSub author approver pr_author
++                if notSubbed
++                  then do
++                    Persist.insert_ $ ApprovalSubscription author approver pr_author
++                    pure $ m $ "I will now track for you all " <> approvalsDescription approver pr_author
++                  else pure $ m $ "Okay, but you were already subscribed to " <> approvalsDescription approver pr_author
++      MkCommand{command, author, args}
++        | Text.isPrefixOf command "unsubscribe"
++        , isApprovalsCommand args →
++            case parseApprovalsArgs args of
++              Nothing → pure approvalsUsage
++              Just (approver, pr_author) → do
++                notSubbed ← hasApprovalSub author approver pr_author
++                if notSubbed
++                  then pure $ m $ "I haven‘t been tracking " <> approvalsDescription approver pr_author <> " for you."
++                  else do
++                    SQL.delete do
++                      sub ← SQL.from $ SQL.table @ApprovalSubscription
++                      SQL.where_ (isApprovalSub author approver pr_author sub)
++                    pure $ m $ "I will not subscribe you automatically to " <> approvalsDescription approver pr_author <> " anymore."
+       MkCommand{command, author, args}
+         | Text.isPrefixOf command "subscribe"
+         , split_args ← Text.words args
+@@ -701,7 +800,11 @@ resultHandler syncResult@Matrix.SyncResult{Matrix.srNextBatch, Matrix.srRooms} =
+           sub ← SQL.from $ SQL.table @AuthorSubscription
+           SQL.where_ (sub ^. AuthorSubscriptionUser ==. SQL.val author)
+           pure sub
+-        if null existingSubscriptions && null existingAuthorSubscriptions
++        existingApprovalSubscriptions ← SQL.select $ do
++          sub ← SQL.from $ SQL.table @ApprovalSubscription
++          SQL.where_ (sub ^. ApprovalSubscriptionUser ==. SQL.val author)
++          pure sub
++        if null existingSubscriptions && null existingAuthorSubscriptions && null existingApprovalSubscriptions
+           then do
+             pure $
+               m "I am currently not tracking any pull requests or users for you. Use "
+@@ -716,9 +819,21 @@ resultHandler syncResult@Matrix.SyncResult{Matrix.srNextBatch, Matrix.srRooms} =
+                 ( m ("I am currently watching the following " <> show (length existingSubscriptions) <> " pull requests for you:")
+                     : prMsgs
+                       <> [ m
+-                             ( "Also I am subscribing you to new pull requests by the users: "
+-                                 <> Text.intercalate ", " (fmap (authorSubscriptionGithubLogin . Persist.entityVal) existingAuthorSubscriptions)
+-                             )
++                           ( "Also I am subscribing you to new pull requests by the users: "
++                               <> Text.intercalate ", " (fmap (authorSubscriptionGithubLogin . Persist.entityVal) existingAuthorSubscriptions)
++                           )
++                         | not (null existingAuthorSubscriptions)
++                         ]
++                      <> [ m
++                           ( "Also I am subscribing you to new "
++                               <> Text.intercalate
++                                 ", "
++                                 ( existingApprovalSubscriptions <&> \sub →
++                                     let ApprovalSubscription{approvalSubscriptionApprover, approvalSubscriptionAuthor} = Persist.entityVal sub
++                                      in approvalsDescription approvalSubscriptionApprover approvalSubscriptionAuthor
++                                 )
++                           )
++                         | not (null existingApprovalSubscriptions)
+                          ]
+                 )
+       MkCommand{command} | Text.isPrefixOf command "help" → helpMessage
+@@ -752,6 +867,12 @@ helpMessage = do
+           <> m ": I will subscribe you to all newly merged pull requests created by the given github handle."
+       , codeHTML "unsubscribe user [github-login-name]"
+           <> m ": I will not subscribe you to newly merged pull requests from the given user anymore."
++      , codeHTML "subscribe approvals [github-login-name]"
++          <> m ": I will subscribe you to all newly merged pull requests approved by the given github handle."
++      , codeHTML "subscribe approvals [github-login-name] by [github-login-name]"
++          <> m ": Like above, but only for pull requests created by the second github handle."
++      , codeHTML "unsubscribe approvals [github-login-name] (by [github-login-name])"
++          <> m ": I will not subscribe you to newly merged pull requests approved by the given user anymore."
+       , codeHTML "list" <> m ": I will show you all the pull requests, I am watching for you."
+       , codeHTML "help" <> m ": So I can tell you all of this again."
+       , mempty
+diff --git a/graphql/merge_pr_info.graphql b/graphql/merge_pr_info.graphql
+index c1aea54d..2704cd35 100644
+--- a/graphql/merge_pr_info.graphql
++++ b/graphql/merge_pr_info.graphql
+@@ -14,6 +14,13 @@ query MergingPullRequest($commit: GitObjectID!, $m_owner: String!, $m_name: Stri
+             }
+             merged
+             baseRefName
++            reviews(states: APPROVED, first: 100) {
++              nodes {
++                author {
++                  login
++                }
++              }
++            }
+           }
+         }
+       }
+diff --git a/graphql/pr_info.graphql b/graphql/pr_info.graphql
+index 630b76fa..51f4fc77 100644
+--- a/graphql/pr_info.graphql
++++ b/graphql/pr_info.graphql
+@@ -11,6 +11,13 @@ query PullRequest($number: Int!, $owner: String!, $name: String!) {
+       }
+       merged
+       baseRefName
++      reviews(states: APPROVED, first: 100) {
++        nodes {
++          author {
++            login
++          }
++        }
++      }
+     }
+   }
+   rateLimit {
+diff --git a/lib/NixpkgsBot/GraphQL/API.hs b/lib/NixpkgsBot/GraphQL/API.hs
+index 2d685aa4..648c8683 100644
+--- a/lib/NixpkgsBot/GraphQL/API.hs
++++ b/lib/NixpkgsBot/GraphQL/API.hs
+@@ -56,6 +56,13 @@ type MergingPullRequestSchema =
+                 },
+                 merged: Bool,
+                 baseRefName: Text,
++                reviews: Maybe {
++                  nodes: Maybe List Maybe {
++                    author: Maybe {
++                      login: Text,
++                    },
++                  },
++                },
+               },
+             },
+           }
+@@ -92,6 +99,13 @@ instance GraphQLQuery MergingPullRequestQuery where
+                 }
+                 merged
+                 baseRefName
++                reviews(states: APPROVED, first: 100) {
++                  nodes {
++                    author {
++                      login
++                    }
++                  }
++                }
+               }
+             }
+           }
+@@ -151,6 +165,13 @@ type PullRequestSchema =
+         },
+         merged: Bool,
+         baseRefName: Text,
++        reviews: Maybe {
++          nodes: Maybe List Maybe {
++            author: Maybe {
++              login: Text,
++            },
++          },
++        },
+       },
+     },
+     rateLimit: Maybe {
+@@ -180,6 +201,13 @@ instance GraphQLQuery PullRequestQuery where
+           }
+           merged
+           baseRefName
++          reviews(states: APPROVED, first: 100) {
++            nodes {
++              author {
++                login
++              }
++            }
++          }
+         }
+       }
+       rateLimit {
