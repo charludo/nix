@@ -42,7 +42,7 @@ in
         description = "amount of memory the VM will have. For use with proxmox";
       };
       storage = lib.mkOption {
-        type = lib.types.str;
+        type = lib.types.strMatching "[0-9]+G";
         description = "disk size of the VM. For use with proxmox";
       };
     };
@@ -112,6 +112,28 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions =
+      let
+        minCores = 2;
+        minMemory = 4096;
+        minStorage = 16;
+        storageGiB = lib.toInt (lib.removeSuffix "G" cfg.hardware.storage);
+      in
+      [
+        {
+          assertion = cfg.hardware.cores >= minCores;
+          message = "vm.hardware.cores of ${cfg.name} must be at least ${toString minCores}";
+        }
+        {
+          assertion = cfg.hardware.memory >= minMemory;
+          message = "vm.hardware.memory of ${cfg.name} must be at least ${toString minMemory}";
+        }
+        {
+          assertion = storageGiB >= minStorage;
+          message = "vm.hardware.storage of ${cfg.name} must be at least ${toString minStorage}G";
+        }
+      ];
+
     image.modules.proxmox = {
       proxmox.qemuConf = {
         scsihw = lib.mkDefault "virtio-scsi-single";
@@ -185,7 +207,7 @@ in
     };
 
     boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
+    boot.loader.efi.canTouchEfiVariables = false;
 
     nixpkgs.hostPlatform = "x86_64-linux";
     services.qemuGuest.enable = true;
@@ -215,9 +237,11 @@ in
     boot.kernel.sysctl."vm.swappiness" = 0;
     boot.extraModulePackages = [ ];
 
+    boot.growPartition = true;
     fileSystems."/" = lib.mkForce {
       device = "/dev/disk/by-uuid/f222513b-ded1-49fa-b591-20ce86a2fe7f";
       fsType = "ext4";
+      autoResize = true;
     };
     fileSystems."/boot" = lib.mkForce {
       device = "/dev/disk/by-uuid/12CE-A600";
