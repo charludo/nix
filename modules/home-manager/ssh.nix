@@ -10,15 +10,15 @@ in
       enable = true;
       enableDefaultConfig = false;
       settings = {
-        proxmox-gpu = {
+        px-gpu = {
           HostName = "192.168.30.14";
           User = "root";
         };
-        proxmox = {
+        px-1 = {
           HostName = "192.168.30.15";
           User = "root";
         };
-        proxmox2 = {
+        px-2 = {
           HostName = "192.168.30.16";
           User = "root";
         };
