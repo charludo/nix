@@ -17,5 +17,5 @@ jobs:
           submodules: true
           token: ${{ secrets.PAT }}
           persist-credentials: false
-      - name: Build all flake outputs
-        run: nix build .?submodules=1#ci-builds
+      - name: Build and publish all flake outputs
+        run: nix build --no-link .?submodules=1#ci-builds --profile /nix/var/nix/profiles/ci/ci-builds

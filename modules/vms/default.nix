@@ -215,6 +215,11 @@ in
     # Overwriting parts of hosts/common (imported in mkConfig)
     programs.ssh.knownHosts = lib.mkForce { };
 
+    # Hosts get the token by default to be able to build from the repo, but VMs never build themselves.
+    age.secrets.git-credentials.enable = false;
+    age.secrets.git-credentials.rekeyFile = lib.mkForce null;
+    programs.git.config.credential = lib.mkForce { };
+
     security.pki.certificateFiles = [ private-settings.caIssuing1.root ];
 
     nix.gc = {

@@ -45,6 +45,8 @@
     extra-trusted-public-keys = lib.mkForce [ ];
   };
 
+  systemd.tmpfiles.rules = [ "d /nix/var/nix/profiles/ci 0755 nixuser nixuser -" ];
+
   networking.firewall.allowedTCPPorts = [
     443
     80
@@ -63,6 +65,15 @@
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection $connection_upgrade;
+          auth_basic "Nix cache";
+          auth_basic_user_file ${config.age.secrets.nix-cache-htpasswd.path};
+        '';
+      };
+      locations."= /ci-builds.json" = {
+        alias = "/nix/var/nix/profiles/ci/ci-builds";
+        extraConfig = ''
+          default_type application/json;
+          add_header Cache-Control no-cache;
           auth_basic "Nix cache";
           auth_basic_user_file ${config.age.secrets.nix-cache-htpasswd.path};
         '';
