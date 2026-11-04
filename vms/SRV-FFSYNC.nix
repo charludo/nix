@@ -12,7 +12,7 @@
     unsupervisedUpdates = true;
 
     hardware.cores = 2;
-    hardware.memory = 2048;
+    hardware.memory = 4096;
     hardware.storage = "16G";
 
     networking.openPorts.tcp = [ config.services.firefox-syncserver.settings.port ];

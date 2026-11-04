@@ -13,8 +13,8 @@
     name = "SRV-MATRIX-BOTS";
 
     hardware.cores = 2;
-    hardware.memory = 2048;
-    hardware.storage = "16G";
+    hardware.memory = 4096;
+    hardware.storage = "32G";
   };
 
   imports = [ inputs.nix-update-notifier.nixosModules.default ];

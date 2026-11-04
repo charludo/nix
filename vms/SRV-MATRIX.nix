@@ -14,9 +14,9 @@ in
     id = 2206;
     name = "SRV-MATRIX";
 
-    hardware.cores = 4;
+    hardware.cores = 2;
     hardware.memory = 8192;
-    hardware.storage = "64G";
+    hardware.storage = "132G";
 
     networking.nameservers = [ "192.168.30.13" ];
     networking.openPorts.tcp = [

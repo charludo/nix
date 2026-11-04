@@ -9,8 +9,8 @@
     id = 2201;
     name = "SRV-JELLYFIN";
 
-    hardware.cores = 4;
-    hardware.memory = 32768;
+    hardware.cores = 6;
+    hardware.memory = 24576;
     hardware.storage = "128G";
     hardware.gpu.enable = true;
 

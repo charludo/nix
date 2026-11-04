@@ -3,9 +3,9 @@
     id = 3002;
     name = "SRV-BLOCKY";
 
-    hardware.cores = 1;
-    hardware.memory = 1024;
-    hardware.storage = "8G";
+    hardware.cores = 2;
+    hardware.memory = 4096;
+    hardware.storage = "16G";
 
     networking.address = "192.168.30.13";
     networking.gateway = "192.168.30.1";

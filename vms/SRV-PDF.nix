@@ -4,8 +4,8 @@
     name = "SRV-PDF";
 
     hardware.cores = 2;
-    hardware.memory = 1024;
-    hardware.storage = "8G";
+    hardware.memory = 4096;
+    hardware.storage = "16G";
 
     networking.openPorts.tcp = [ 3000 ];
   };

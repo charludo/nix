@@ -11,7 +11,7 @@
 
     hardware.cores = 2;
     hardware.memory = 4096;
-    hardware.storage = "8G";
+    hardware.storage = "16G";
 
     networking.openPorts.tcp = [ 1411 ];
   };

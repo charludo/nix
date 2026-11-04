@@ -8,7 +8,7 @@
 
     hardware.cores = 4;
     hardware.memory = 4096;
-    hardware.storage = "8G";
+    hardware.storage = "16G";
 
     networking = {
       address = "192.168.130.99";

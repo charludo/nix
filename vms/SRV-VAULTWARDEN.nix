@@ -14,7 +14,7 @@ in
 
     hardware.cores = 2;
     hardware.memory = 4096;
-    hardware.storage = "16G";
+    hardware.storage = "24G";
 
     networking.openPorts.tcp = [ config.services.vaultwarden.config.ROCKET_PORT ];
   };

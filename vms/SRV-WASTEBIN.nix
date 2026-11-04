@@ -9,8 +9,8 @@
     id = 2204;
     name = "SRV-WASTEBIN";
 
-    hardware.cores = 1;
-    hardware.memory = 1024;
+    hardware.cores = 2;
+    hardware.memory = 4096;
     hardware.storage = "16G";
 
     networking.openPorts.tcp = [ 8080 ];

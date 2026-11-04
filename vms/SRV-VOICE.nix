@@ -9,9 +9,9 @@ in
     name = "SRV-VOICE";
     runOnGPUHost = true;
 
-    hardware.cores = 6;
-    hardware.memory = 32768;
-    hardware.storage = "32G";
+    hardware.cores = 4;
+    hardware.memory = 12288;
+    hardware.storage = "64G";
 
     networking.openPorts.tcp = [
       (toPort wyoming.openwakeword.uri)

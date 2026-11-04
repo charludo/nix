@@ -10,8 +10,8 @@
     id = 3033;
     name = "CA-ISSUING-1";
 
-    hardware.cores = 1;
-    hardware.memory = 1024;
+    hardware.cores = 2;
+    hardware.memory = 4096;
     hardware.storage = "16G";
 
     networking.address = "192.168.30.33";

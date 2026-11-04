@@ -12,7 +12,7 @@
 
     hardware.cores = 4;
     hardware.memory = 16384;
-    hardware.storage = "32G";
+    hardware.storage = "48G";
   };
 
   users.users."${config.services.immich.user}" = {

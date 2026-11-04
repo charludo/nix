@@ -11,7 +11,7 @@
     runOnGPUHost = true;
 
     hardware.cores = 4;
-    hardware.memory = 24576;
+    hardware.memory = 12288;
     hardware.storage = "256G";
 
     certsFor = [

@@ -6,7 +6,7 @@
 
     hardware.cores = 4;
     hardware.memory = 16384;
-    hardware.storage = "16G";
+    hardware.storage = "32G";
   };
 
   gitea-runners = {

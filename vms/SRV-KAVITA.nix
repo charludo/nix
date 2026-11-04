@@ -12,7 +12,7 @@
 
     hardware.cores = 4;
     hardware.memory = 8192;
-    hardware.storage = "16G";
+    hardware.storage = "24G";
 
     networking.nameservers = private-settings.upstreamDNS.ips;
     networking.openPorts.tcp = [ config.services.kavita.settings.Port ];

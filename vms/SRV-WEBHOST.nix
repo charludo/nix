@@ -5,8 +5,8 @@
     name = "SRV-WEBHOST";
 
     hardware.cores = 2;
-    hardware.memory = 2048;
-    hardware.storage = "16G";
+    hardware.memory = 4096;
+    hardware.storage = "32G";
 
     networking.openPorts.tcp = [ 80 ];
   };
