@@ -73,6 +73,7 @@ in
       };
       environment = {
         BORG_RSH = "ssh -p ${toString borg.port} -i ${config.age.secrets."borg-ssh-key-${name}".path}";
+        BORG_HOST_ID = "${config.networking.hostName}@borg";
       };
       compression = "auto,lzma";
       doInit = false; # instead, provide script below
@@ -87,6 +88,7 @@ in
             export BORG_PASSCOMMAND="${config.services.borgbackup.jobs."${name}".encryption.passCommand}"
             export BORG_REPO="${config.services.borgbackup.jobs."${name}".repo}"
             export BORG_RSH="${config.services.borgbackup.jobs."${name}".environment.BORG_RSH}"
+            export BORG_HOST_ID="${config.services.borgbackup.jobs."${name}".environment.BORG_HOST_ID}"
           '';
         in
         [
