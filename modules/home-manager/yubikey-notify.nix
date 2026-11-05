@@ -25,8 +25,8 @@ in
 
     extraArgs = mkOption {
       type = types.listOf types.str;
-      default = [ "--libnotify" ];
-      defaultText = literalExpression ''[ "--libnotify" ]'';
+      default = [ "--notify" ];
+      defaultText = literalExpression ''[ "--notify" ]'';
       description = ''
         Extra arguments to pass to the tool. The arguments are not escaped.
       '';
@@ -47,7 +47,7 @@ in
 
     systemd.user.services.yubikey-notify = {
       Unit = {
-        Descriptin = "Detects and notifies when Yubikey is waiting for touch";
+        Description = "Detects and notifies when Yubikey is waiting for touch";
         Requires = optionals cfg.socket.enable [ "yubikey-touch-detector.socket" ];
       };
       Service = {
