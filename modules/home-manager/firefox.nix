@@ -260,6 +260,7 @@ in
           "browser.newtabpage.activity-stream.improvesearch.topSiteSearchShortcuts.havePinned" = false;
           "browser.newtabpage.activity-stream.feeds.topsites" = false;
           "browser.newtabpage.enabled" = false;
+          "browser.nova.enabled" = false;
           "browser.policies.runOncePerModification.removeSearchEngines" = [ ];
           "browser.policies.runOncePerModification.setDefaultSearchEngine" = "Kagi";
           "browser.search.separatePrivateDefault" = false;
