@@ -7,6 +7,8 @@
     hardware.cores = 4;
     hardware.memory = 16384;
     hardware.storage = "32G";
+
+    ha.affinity.negative = [ "px-gpu" ];
   };
 
   gitea-runners = {

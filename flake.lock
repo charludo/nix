@@ -1537,11 +1537,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1780984618,
-        "narHash": "sha256-ZnHmu2QJAyL3KoRcJGoQJoQs4Bc6idZPBU/382W7evo=",
+        "lastModified": 1793976939,
+        "narHash": "sha256-In23cSkdWYuheRNWeUUYvXYKX8iKSXz4RHdkBKQYWtk=",
         "owner": "charludo",
         "repo": "snow",
-        "rev": "f4982f7120580dc937cc0dfadaf34018431fd8d5",
+        "rev": "feb96e4d142754fbbb73baa6634d1cd9d10bdc66",
         "type": "github"
       },
       "original": {

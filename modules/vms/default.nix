@@ -109,6 +109,50 @@ in
         };
       };
     };
+
+    ha.affinity =
+      let
+        node = lib.types.enum [
+          "px-1"
+          "px-2"
+          "px-gpu"
+        ];
+      in
+      {
+        positive = lib.mkOption {
+          type = lib.types.nullOr (lib.types.nonEmptyListOf node);
+          default =
+            if cfg.ha.affinity.negative != null then
+              null
+            else if
+              builtins.elem (builtins.substring 0 2 (toString config.vm.id)) [
+                "20"
+                "30"
+              ]
+            then
+              [
+                "px-1"
+                "px-2"
+              ]
+            else
+              [
+                "px-2"
+                "px-1"
+              ];
+          defaultText = lib.literalExpression ''if vm.ha.affinity.negative != null then null else if vm.id starts with "20" or "30" then [ "px-1" "px-2" ] else [ "px-2" "px-1" ]'';
+          example = [
+            "px-2"
+            "px-1"
+          ];
+          description = "Proxmox nodes the VM may run on, in order of preference.";
+        };
+        negative = lib.mkOption {
+          type = lib.types.nullOr (lib.types.nonEmptyListOf node);
+          default = null;
+          example = [ "px-gpu" ];
+          description = "Proxmox nodes the VM must not run on.";
+        };
+      };
   };
 
   config = lib.mkIf cfg.enable {
@@ -131,6 +175,10 @@ in
         {
           assertion = storageGiB >= minStorage;
           message = "vm.hardware.storage of ${cfg.name} must be at least ${toString minStorage}G";
+        }
+        {
+          assertion = cfg.ha.affinity.positive == null || cfg.ha.affinity.negative == null;
+          message = "vm.ha.affinity of ${cfg.name}: only one of `positive` and `negative` can be set";
         }
       ];
 
@@ -157,7 +205,6 @@ in
         cpu = "host";
         ide2 = lib.mkForce "none,media=cdrom";
         kvm = 1;
-        onboot = 1;
       };
       virtualisation.diskSize = "auto";
     };
@@ -178,9 +225,11 @@ in
       vm = {
         inherit (cfg) id;
         ip = cfg.networking.address;
-        proxmoxHost = lib.mkDefault "proxmox";
+        proxmoxHost =
+          if cfg.ha.affinity.positive == null then "px-1" else lib.head cfg.ha.affinity.positive;
         proxmoxImageStore = lib.mkDefault "${config.nas.backup.location}/proxmox_images/template/iso";
         resizeDiskTo = cfg.hardware.storage;
+        ha.affinity = cfg.ha.affinity;
       };
     };
 

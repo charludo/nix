@@ -18,6 +18,11 @@ in
     hardware.memory = 4096;
     hardware.storage = "64G";
 
+    ha.affinity.positive = [
+      "px-1"
+      "px-2"
+    ];
+
     networking.nameservers = [ "1.1.1.1" ];
     networking.openPorts.tcp = [
       # Client connections

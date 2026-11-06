@@ -27,7 +27,7 @@ in
       boot.kernelModules = lib.mkForce [ "kvm-intel" ];
 
       vm.networking.interface = "enp6s18";
-      snow.vm.proxmoxHost = "proxmox-gpu";
+      vm.ha.affinity.positive = [ "px-gpu" ];
     })
 
     (lib.mkIf cfg.hardware.gpu.enable {
