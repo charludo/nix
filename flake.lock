@@ -918,6 +918,19 @@
         "type": "github"
       }
     },
+    "haos-labelprinter": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793969246,
+        "narHash": "sha256-M/bKTVvtzD0mFxcmldjyR6vWOtEBgXz90MeodpbMYns=",
+        "path": "/home/charlotte/Projekte/haos-labelprinter",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/charlotte/Projekte/haos-labelprinter",
+        "type": "path"
+      }
+    },
     "hass-custom-integrations": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -1549,6 +1562,7 @@
         "dwd-proxy": "dwd-proxy",
         "eso-reshade": "eso-reshade",
         "firefox-addons": "firefox-addons",
+        "haos-labelprinter": "haos-labelprinter",
         "hass-custom-integrations": "hass-custom-integrations",
         "home-manager": "home-manager",
         "idagio": "idagio",

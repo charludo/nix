@@ -22,5 +22,12 @@ basePackages
 
   home-assistant =
     basePackages.home-assistant
+    // {
+      custom-components = basePackages.home-assistant.custom-components // {
+        brother_ptouch = callPackage ./by-name/home-assistant/custom-components/brother-ptouch.nix {
+          src = inputs.haos-labelprinter;
+        };
+      };
+    }
     // inputs.hass-custom-integrations.packages.${pkgs.stdenv.hostPlatform.system};
 }

@@ -51,6 +51,9 @@
 
     hass-custom-integrations.url = "path:/home/charlotte/Projekte/hass-custom-integrations";
     hass-custom-integrations.inputs.nixpkgs.follows = "nixpkgs";
+    # Fork with PT-P300BT support, until it is upstream.
+    haos-labelprinter.url = "path:/home/charlotte/Projekte/haos-labelprinter";
+    haos-labelprinter.flake = false;
     dwd-proxy.url = "path:./dwd-proxy";
     dwd-proxy.inputs.nixpkgs.follows = "nixpkgs";
   };

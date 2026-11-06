@@ -36,6 +36,7 @@ in
     }
     { item = "Calendar"; }
     { item = "To-do lists"; }
+    { item = "Labels"; }
     {
       item = "Logbook";
       hide = true;
