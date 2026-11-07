@@ -8,6 +8,15 @@
 let
   private-settings = import ../private-settings/settings.nix { inherit lib; };
   secrets = import ../private-settings/secrets.nix { inherit lib; };
+  specialArgs = {
+    inherit
+      inputs
+      outputs
+      lib
+      private-settings
+      secrets
+      ;
+  };
 in
 rec {
   homeModulesForOsConfig = [
@@ -52,15 +61,7 @@ rec {
       ++ [ ../hosts/${hostname} ]
       ++ lib.optionals enableHomeManager homeModulesForOsConfig
       ++ extraModules;
-      specialArgs = {
-        inherit
-          inputs
-          outputs
-          lib
-          private-settings
-          secrets
-          ;
-      };
+      inherit specialArgs;
     };
   };
 
@@ -88,18 +89,25 @@ rec {
             ../users/paki/user.nix
           ]
           ++ (builtins.attrValues outputs.nixosModules);
-          specialArgs = {
-            inherit
-              inputs
-              outputs
-              lib
-              private-settings
-              secrets
-              ;
-          };
+          inherit specialArgs;
         };
       }) (lib.helpers.allVMNames vmPath)
     );
+
+  vmSpecs = lib.genAttrs (lib.helpers.allVMNames ../vms) (
+    name:
+    (lib.evalModules {
+      modules = [
+        ../modules/vms
+        ../vms/${name}.nix
+        {
+          _module.check = false;
+          _module.args = { inherit pkgs; };
+        }
+      ];
+      inherit specialArgs;
+    }).config.vm
+  );
 
   home = username: hostname: extraModules: {
     name = "${username}@${hostname}";
@@ -115,15 +123,7 @@ rec {
       ++ [ ../users/${username}/home/${hostname}.nix ]
       ++ extraModules;
       inherit pkgs;
-      extraSpecialArgs = {
-        inherit
-          inputs
-          outputs
-          lib
-          private-settings
-          secrets
-          ;
-      };
+      extraSpecialArgs = specialArgs;
     };
   };
 }

@@ -1,4 +1,4 @@
-{ lib, outputs, ... }:
+{ lib, ... }:
 rec {
   mkImports = dir: lib.filesystem.listFilesRecursive dir;
   mkImportsNoDefault = dir: lib.filter (f: baseNameOf f != "default.nix") (mkImports dir);
@@ -12,21 +12,10 @@ rec {
       }) attrs
     );
   allVMSSHConfigs = toLowercaseKeys (
-    lib.filterAttrs (_: v: v.HostName != null) (
-      builtins.mapAttrs (name: _: {
-        HostName =
-          if lib.pathExists ../vms/keys/ssh_host_${name}_ed25519_key.pub then
-            let
-              inherit (outputs.nixosConfigurations.${name}.config.networking) interfaces;
-              iface = lib.findFirst (i: interfaces ? ${i}) null [
-                "ens18"
-                "enp6s18"
-              ];
-            in
-            if iface != null then (builtins.head interfaces.${iface}.ipv4.addresses).address else null
-          else
-            null;
-      }) outputs.nixosConfigurations
+    builtins.mapAttrs (_: vm: { HostName = vm.networking.address; }) (
+      lib.filterAttrs (
+        name: _: lib.pathExists ../vms/keys/ssh_host_${name}_ed25519_key.pub
+      ) lib.mkConfigs.vmSpecs
     )
   );
 

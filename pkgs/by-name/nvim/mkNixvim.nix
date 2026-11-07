@@ -27,6 +27,7 @@ let
 in
 nixvim.legacyPackages.x86_64-linux.makeNixvim {
   imports = [ ../../../modules/nixvim ];
+  enableMan = false;
   colors = colorsNoPound;
   palette = lib.colors.extendPalette colorsNoPound;
   inherit languages;

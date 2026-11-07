@@ -2,7 +2,6 @@
   config,
   lib,
   private-settings,
-  outputs,
   ...
 }:
 
@@ -88,13 +87,13 @@ in
         customDNS.mapping = lib.mkIf cfg.addEntriesForVMs (
           builtins.listToAttrs (
             lib.lists.flatten (
-              map (
-                vm:
+              lib.mapAttrsToList (
+                _: vm:
                 map (entry: {
                   name = "${entry.name}.${private-settings.domains.ad}";
-                  value = outputs.nixosConfigurations.${vm}.config.vm.networking.address;
-                }) outputs.nixosConfigurations.${vm}.config.vm.certsFor
-              ) (lib.helpers.allVMNames ../../vms)
+                  value = vm.networking.address;
+                }) vm.certsFor
+              ) lib.mkConfigs.vmSpecs
             )
           )
         );
