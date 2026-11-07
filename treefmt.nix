@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   projectRootFile = "flake.nix";
 
@@ -24,5 +25,12 @@
     ];
   };
 
-  settings.formatter.zizmor.options = [ "--offline" ];
+  settings.formatter.zizmor.options = [
+    "--offline"
+    "--config"
+    "${(pkgs.formats.yaml { }).generate "zizmor.yml" {
+      # Forgejo does not understand, and warns on the usage of `permissions:`.
+      rules.excessive-permissions.disable = true;
+    }}"
+  ];
 }
