@@ -15,12 +15,11 @@ let
   };
 in
 {
-  options.vm.unsupervisedUpdates = lib.mkEnableOption "unsupervised nightly updates of the VM" // {
-    default = builtins.elem "stateless" config.snow.tags;
-    defaultText = lib.literalExpression ''builtins.elem "stateless" config.snow.tags'';
-  };
+  options.vm.unsupervisedUpdates = lib.mkEnableOption "unsupervised nightly updates of the VM";
 
   config = lib.mkIf cfg.unsupervisedUpdates {
+    snow.tags = [ "unsupervised-updates" ];
+
     systemd.services.unsupervised-updates = {
       description = "Switch to the system CI built for this VM";
       restartIfChanged = false;

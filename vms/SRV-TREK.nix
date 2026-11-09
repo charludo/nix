@@ -9,6 +9,7 @@
   vm = {
     id = 2224;
     name = "SRV-TREK";
+    unsupervisedUpdates = true;
 
     hardware.cores = 2;
     hardware.memory = 4096;

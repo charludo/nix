@@ -11,6 +11,8 @@
     ../../users/charlotte/user.nix
   ];
 
+  snow.parallel = 6;
+
   age.enable = true;
   # androidUtils.enable = true;
   # ausweisapp.enable = true;

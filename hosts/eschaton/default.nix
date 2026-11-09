@@ -76,6 +76,7 @@
     useSubstitutes = true;
     buildHost = "gsv";
     targetHost = "eschaton";
+    parallel = 4;
   };
 
   hardware.graphics = {

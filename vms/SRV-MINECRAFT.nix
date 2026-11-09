@@ -15,7 +15,10 @@
     hardware.memory = 8192;
     hardware.storage = "64G";
   };
-  snow.tags = lib.mkForce [ "vm" ];
+  snow.tags = lib.mkForce [
+    "vm"
+    "unsupervised-updates"
+  ];
 
   services.minecraft-server = {
     enable = true;

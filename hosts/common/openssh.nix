@@ -3,6 +3,7 @@
   pkgs,
   lib,
   config,
+  private-settings,
   ...
 }:
 let
@@ -34,6 +35,16 @@ in
         extraHostNames = lib.optional (name == hostName) "localhost";
       }) hosts
     );
+
+    # Lets the nix daemon use gsv as remote builder
+    extraConfig = lib.mkIf (hostName != "gsv") ''
+      Match originalhost gsv localuser root
+        HostName ${private-settings.gsv.ip}
+        Port ${toString private-settings.gsv.port}
+        User ${private-settings.gsv.user}
+        HostKeyAlias gsv
+        IdentityFile /etc/ssh/ssh_host_ed25519_key
+    '';
   };
 
   security.pam = {

@@ -7,6 +7,7 @@
 }:
 let
   cfg = config.vm;
+  stateless = !config.nas.backup.enable;
 in
 {
   imports = [
@@ -211,12 +212,14 @@ in
 
     nvim.enable = true;
 
+    vm.unsupervisedUpdates = lib.mkDefault stateless;
+
     snow = {
       enable = true;
       tags = [
         "vm"
       ]
-      ++ (lib.optionals (!config.nas.backup.enable) [ "stateless" ])
+      ++ (lib.optionals stateless [ "stateless" ])
       ++ (lib.optionals (builtins.substring 0 2 config.networking.hostName == "CL") [ "client-vm" ]);
       useRemoteSudo = lib.mkDefault true;
       askSudoPassword = lib.mkDefault false;

@@ -1,5 +1,7 @@
 {
+  config,
   lib,
+  outputs,
   pkgs,
   private-settings,
   ...
@@ -13,6 +15,19 @@ let
     ../../users/charlotte/keys/diziet_ssh.pub
     ../../users/charlotte/keys/ssh.pub
   ];
+
+  hostKey = host: ../${host}/ssh_host_ed25519_key.pub;
+  builderKeys =
+    map
+      (
+        host:
+        ''command="${lib.getExe' config.nix.package "nix-daemon"} --stdio",restrict ${builtins.readFile (hostKey host)}''
+      )
+      (
+        builtins.filter (host: host != hostName && builtins.pathExists (hostKey host)) (
+          builtins.attrNames outputs.nixosConfigurations
+        )
+      );
 in
 {
   imports = [
@@ -26,13 +41,19 @@ in
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
 
   # Make sure we can get on the system via ssh
-  users.users."${gsv.user}".openssh.authorizedKeys.keys = publicKeys;
+  users.users."${gsv.user}".openssh.authorizedKeys.keys = publicKeys ++ builderKeys;
   services.openssh.ports = [ gsv.port ];
 
   snow = {
     targetHost = "root@${gsv.ip}";
     useSubstitutes = true;
     buildMeOn = "gsv";
+    cache = null;
+    parallel = 4;
+    builder = {
+      maxJobs = 4;
+      supportedFeatures = lib.unique config.nix.settings.system-features;
+    };
   };
 
   # Networking config

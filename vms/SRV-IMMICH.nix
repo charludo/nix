@@ -9,6 +9,7 @@
   vm = {
     id = 2205;
     name = "SRV-IMMICH";
+    unsupervisedUpdates = false;
 
     hardware.cores = 4;
     hardware.memory = 16384;
