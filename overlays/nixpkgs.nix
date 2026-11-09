@@ -81,16 +81,6 @@ _: prev: {
     };
   });
 
-  # nixpkgs dropped the gtk2 GUI, which also drops calfjackhost
-  calf = prev.calf.overrideAttrs (old: {
-    cmakeFlags = old.cmakeFlags ++ [ (prev.lib.cmakeBool "WANT_GUI" true) ];
-    buildInputs = old.buildInputs ++ [
-      prev.cairo
-      prev.glib
-      prev.gtk2
-    ];
-  });
-
   # Can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/585183
   lrcget = prev.lrcget.overrideAttrs (old: {
     buildInputs = old.buildInputs ++ [ prev.sqlite ];

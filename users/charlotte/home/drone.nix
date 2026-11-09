@@ -9,7 +9,6 @@
   agenix-rekey.pubkey = ../keys/perostek_age.pub;
 
   desktop = {
-    daw.enable = true;
     musescore.enable = true;
     pdfpc.enable = true;
   };
