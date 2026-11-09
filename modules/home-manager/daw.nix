@@ -12,27 +12,41 @@ in
 
   config =
     let
+      # Run JACK clients against PipeWire's libjack
+      withPwJack =
+        pkg: bins:
+        pkgs.symlinkJoin {
+          name = "${pkg.name}-pw-jack";
+          paths = [ pkg ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = lib.concatMapStrings (bin: ''
+            rm "$out/bin/${bin}"
+            makeWrapper ${lib.getExe' pkgs.pipewire.jack "pw-jack"} "$out/bin/${bin}" \
+              --add-flags ${lib.getExe' pkg bin}
+          '') bins;
+        };
+      ardour = withPwJack pkgs.ardour [ "ardour9" ];
+      calf = withPwJack pkgs.calf [ "calfjackhost" ];
+
       cellolesson = pkgs.writeShellApplication {
         name = "cellolesson";
         runtimeInputs = [
           pkgs.qpwgraph
-          pkgs.calf
+          calf
         ];
         text = ''
-          ${lib.getExe' pkgs.calf "calfjackhost"} --load "${config.home.homeDirectory}/.config/calf/cellolesson.xml" &
+          ${lib.getExe' calf "calfjackhost"} --load "${config.home.homeDirectory}/.config/calf/cellolesson.xml" &
           ${lib.getExe pkgs.qpwgraph} -a "${config.home.homeDirectory}/.config/qpwgraph/cellolesson.qpwgraph"
         '';
       };
     in
     lib.mkIf cfg.enable {
-      home.packages =
-        with pkgs;
-        [
-          ardour
-          qpwgraph
-          calf
-        ]
-        ++ [ cellolesson ];
+      home.packages = [
+        ardour
+        pkgs.qpwgraph
+        calf
+        cellolesson
+      ];
 
       xdg.desktopEntries."cellolesson" = {
         name = "Cello Lesson";

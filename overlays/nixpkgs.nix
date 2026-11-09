@@ -53,6 +53,58 @@ _: prev: {
     };
   });
 
+  # cargoSetupHook forces system aws-lc, can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/584921
+  zizmor = prev.zizmor.overrideAttrs (old: {
+    buildInputs = old.buildInputs ++ [ prev.aws-lc ];
+    nativeBuildInputs = old.nativeBuildInputs ++ [ prev.pkg-config ];
+  });
+  lk-jwt-service = prev.lk-jwt-service.overrideAttrs (old: {
+    buildInputs = (old.buildInputs or [ ]) ++ [ prev.aws-lc ];
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.pkg-config ];
+  });
+
+  # Can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/584713
+  anki = prev.anki.overrideAttrs (old: {
+    nativeBuildInputs = old.nativeBuildInputs ++ [ prev.pkg-config ];
+    buildInputs = old.buildInputs ++ [
+      prev.sqlite
+      prev.zstd
+    ];
+    env = old.env // {
+      UV_FIND_LINKS = prev.symlinkJoin {
+        name = "uv-wheels";
+        paths = [
+          old.env.UV_FIND_LINKS
+          prev.python3.pkgs.tomlkit.dist
+        ];
+      };
+    };
+  });
+
+  # nixpkgs dropped the gtk2 GUI, which also drops calfjackhost
+  calf = prev.calf.overrideAttrs (old: {
+    cmakeFlags = old.cmakeFlags ++ [ (prev.lib.cmakeBool "WANT_GUI" true) ];
+    buildInputs = old.buildInputs ++ [
+      prev.cairo
+      prev.glib
+      prev.gtk2
+    ];
+  });
+
+  # Can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/585183
+  lrcget = prev.lrcget.overrideAttrs (old: {
+    buildInputs = old.buildInputs ++ [ prev.sqlite ];
+  });
+
+  # cargoSetupHook forces system zstd and aws-lc, which need pkg-config. No upstream fix yet.
+  protonup-rs = prev.protonup-rs.overrideAttrs (old: {
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.pkg-config ];
+    buildInputs = (old.buildInputs or [ ]) ++ [
+      prev.zstd
+      prev.aws-lc
+    ];
+  });
+
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (_: pyprev: {
       spacy = pyprev.spacy.overridePythonAttrs (old: {

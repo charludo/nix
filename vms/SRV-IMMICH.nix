@@ -33,6 +33,8 @@
 
     # https://github.com/immich-app/immich/discussions/4758#discussioncomment-7441670
     environment.UV_USE_IO_URING = "0";
+
+    machine-learning.environment.MACHINE_LEARNING_MODEL_REVISION = "v2";
   };
 
   age.secrets.nas.rekeyFile = secrets.nas;
