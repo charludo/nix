@@ -195,6 +195,22 @@
           }
         ];
 
+        device = [
+          {
+            # Wacom Intuos Pen & Touch M (CTH-680)
+            name = "wacom-intuos-pt-m-pen";
+            output = "current";
+            active_area_size = [
+              216
+              121.5
+            ];
+            active_area_position = [
+              0
+              6.75
+            ];
+          }
+        ];
+
         gesture = [
           {
             fingers = 3;

@@ -32,6 +32,7 @@
   suspend.enable = true;
   suspend.gigabyteFix = true;
   tailscale.enable = true;
+  wacom.enable = true;
   wifi.enable = true;
   programs.dconf.enable = true;
 

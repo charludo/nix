@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   config,
   private-settings,
@@ -124,6 +125,18 @@
     }
   ];
   defaultWallpaper = ./backgrounds/river.png;
+
+  # convert wacom pad F13 (XF86Tools) to FreeCAD "fit all"
+  wayland.windowManager.hyprland.settings.bind = [
+    {
+      _args = [
+        "XF86Tools"
+        (lib.generators.mkLuaInline "hl.dsp.exec_cmd(${
+          lib.generators.toLua { } "${lib.getExe pkgs.wtype} v f"
+        })")
+      ];
+    }
+  ];
 
   programs.waybar.settings = {
     top = {
