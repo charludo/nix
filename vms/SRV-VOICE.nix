@@ -21,19 +21,18 @@ let
   tts = {
     port = 10200;
     voice = "eve"; # fallback for requests without a voice
-    speed = "1.15"; # 0.8–1.2, time-stretched after synthesis; 1.0 bypasses it
+    speed = "1.1"; # 0.8–1.2, time-stretched after synthesis; 1.0 bypasses it
     dataDir = "/var/lib/pocket-tts";
   };
 in
 {
-  # The nightly unsupervised update (stateless tag) builds this VM from the
-  # repo's default branch, which still has the old voice setup: it reverted
-  # the VM and rebooted it on Oct 26 and 27. Off until this config is merged.
-  system.autoUpgrade.enable = lib.mkForce false;
-
   vm = {
     id = 2402;
     name = "SRV-VOICE";
+    # The nightly unsupervised update switches to the system CI built from the
+    # repo's default branch, which still has the old voice setup: it reverted
+    # the VM and rebooted it on Oct 26 and 27. Off until this config is merged.
+    unsupervisedUpdates = false;
     runOnGPUHost = true;
     # Intel NPU passed through for speech-to-text (see modules/vms/npu.nix).
     hardware.npu.enable = true;

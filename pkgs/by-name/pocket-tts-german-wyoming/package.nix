@@ -19,7 +19,13 @@ rustPlatform.buildRustPackage rec {
   # Accept Wyoming streaming input (synthesize-start/-chunk/-stop) and
   # advertise it: Home Assistant only streams the audio of servers that do,
   # and otherwise waits for the whole reply. Audio was already streamed.
-  patches = [ ./synthesize-streaming.patch ];
+  patches = [
+    ./synthesize-streaming.patch
+    # POCKET_TTS_TEMPERATURE and POCKET_TTS_LSD_DECODE_STEPS: upstream
+    # hard-codes the sampling temperature (0.3) and the flow decode steps (1).
+    # Unset, nothing changes.
+    ./sampling-settings.patch
+  ];
 
   # Upstream builds for Gracemont (.cargo/config.toml, target-cpu=gracemont);
   # the Core Ultra 5 225H in SRV-VOICE has all of its instructions.

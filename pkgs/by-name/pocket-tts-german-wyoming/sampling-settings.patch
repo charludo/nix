@@ -1,0 +1,34 @@
+diff -ruN a/crates/pocket-tts-runtime/src/config.rs b/crates/pocket-tts-runtime/src/config.rs
+--- a/crates/pocket-tts-runtime/src/config.rs	2026-11-11 13:21:34.781664493 +0100
++++ b/crates/pocket-tts-runtime/src/config.rs	2026-11-11 13:21:34.813004110 +0100
+@@ -201,7 +201,11 @@
+                 inner_dim: Some(m.inner_dim),
+                 outer_dim: Some(m.outer_dim),
+             },
+-            lsd_decode_steps: 1,
++            // Flow decode steps per frame; POCKET_TTS_LSD_DECODE_STEPS overrides.
++            lsd_decode_steps: std::env::var("POCKET_TTS_LSD_DECODE_STEPS")
++                .ok()
++                .and_then(|v| v.parse().ok())
++                .unwrap_or(1),
+             eos_threshold: -4.0,
+             model_id: None,
+             audio_prompt_min_duration: 0.0,
+diff -ruN a/crates/pocket-tts-runtime/src/engine.rs b/crates/pocket-tts-runtime/src/engine.rs
+--- a/crates/pocket-tts-runtime/src/engine.rs	2026-11-11 13:21:34.781664493 +0100
++++ b/crates/pocket-tts-runtime/src/engine.rs	2026-11-11 13:21:34.812707007 +0100
+@@ -131,7 +131,13 @@
+             seconds: 0.0,
+             max_abs_f32: 0.0,
+         };
+-        let mut rng = NormalRng::new(0.3, seed)?;
++        // Sampling temperature of the flow head's noise; low values smooth
++        // away fine (high-frequency) detail. POCKET_TTS_TEMPERATURE overrides.
++        let temperature = std::env::var("POCKET_TTS_TEMPERATURE")
++            .ok()
++            .and_then(|v| v.parse::<f32>().ok())
++            .unwrap_or(0.3);
++        let mut rng = NormalRng::new(temperature, seed)?;
+         for (segment, chunk) in parts.iter().enumerate() {
+             ensure!(
+                 !cancel.load(Ordering::Acquire) && !stop.load(Ordering::Acquire),
