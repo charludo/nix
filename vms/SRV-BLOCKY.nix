@@ -1,3 +1,10 @@
+{ config, private-settings, ... }:
+let
+  dohName = "dns";
+  dohHost = "${dohName}.${private-settings.domains.ad}";
+  dohPort = 4000;
+  acmeDir = config.security.acme.certs.${dohHost}.directory;
+in
 {
   vm = {
     id = 3002;
@@ -14,14 +21,34 @@
 
     networking.openPorts.tcp = [
       53
-      443
       853
     ];
     networking.openPorts.udp = [
       53
-      443
       853
     ];
+
+    # DNS-over-HTTPS: nginx terminates TLS, blocky answers /dns-query on plain HTTP
+    certsFor = [
+      {
+        name = dohName;
+        port = dohPort;
+      }
+    ];
+  };
+
+  # don't expose blocky's control API (e.g. disabling blocking) through the DoH vhost
+  services.nginx.virtualHosts.${dohHost}.locations."/api/".return = "403";
+
+  # DNS-over-TLS: blocky terminates TLS itself, reusing the ACME cert
+  security.acme.certs.${dohHost}.reloadServices = [ "blocky.service" ];
+  systemd.services.blocky.serviceConfig.LoadCredential = [
+    "cert.pem:${acmeDir}/fullchain.pem"
+    "key.pem:${acmeDir}/key.pem"
+  ];
+  systemd.services.blocky = {
+    wants = [ "acme-finished-${dohHost}.target" ];
+    after = [ "acme-finished-${dohHost}.target" ];
   };
 
   blocky.enable = true;
@@ -30,7 +57,9 @@
     settings = {
       ports.dns = 53;
       ports.tls = 853;
-      ports.https = 443;
+      ports.http = "127.0.0.1:${toString dohPort}";
+      certFile = "/run/credentials/blocky.service/cert.pem";
+      keyFile = "/run/credentials/blocky.service/key.pem";
       caching = {
         minTime = "5m";
         maxTime = "30m";
