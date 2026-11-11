@@ -119,6 +119,11 @@ in
         "1.8,3.2,5,10"
         "--encoder-lazy-buckets"
         ""
+        # Decide the end of speech here instead of waiting for HA's VAD
+        # (Silero + Smart Turn; HA's stays as the fallback). Defaults as
+        # benchmarked ("End of speech — plan.md"): Silero 0.5, ask Smart Turn
+        # after 64 ms of silence, finished above 0.7, end anyway after 0.6 s.
+        "--endpointing"
       ];
       DynamicUser = true;
       StateDirectory = lib.removePrefix "/var/lib/" stt.dataDir;

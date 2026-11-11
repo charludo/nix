@@ -1,9 +1,18 @@
 {
   lib,
   fetchFromGitHub,
+  fetchurl,
   addDriverRunpath,
   python3Packages,
 }:
+let
+  # Pipecat's end-of-turn model (BSD-2-Clause), for `--endpointing`.
+  smartTurnModel = fetchurl {
+    name = "smart-turn-v3.2-cpu.onnx";
+    url = "https://huggingface.co/pipecat-ai/smart-turn-v3/resolve/f766f81d3cfdf7737ac64aad813d91bbfd56bf93/smart-turn-v3.2-cpu.onnx";
+    hash = "sha256-K7AmMWsUpmBIanWxczzT+6uML9AxTcmve+SfjMqWfk8=";
+  };
+in
 python3Packages.buildPythonApplication {
   pname = "wyoming-parakeet-npu";
   version = "0.1.0-unstable-2026-05-25";
@@ -18,7 +27,21 @@ python3Packages.buildPythonApplication {
 
   # Model repo selectable via HF_REPO (e.g. Parakeet Ultra), with v3 as the
   # fallback for files an export lacks.
-  patches = [ ./bootstrap-hf-repo.patch ];
+  patches = [
+    ./bootstrap-hf-repo.patch
+    # `--endpointing`: decide the end of speech here (Silero VAD, then Smart
+    # Turn after a short silence) and send the transcript before the client
+    # stops the audio. Home Assistant takes it and stops streaming, so the
+    # faster of its own VAD and this one wins. Benchmarked on 157 recorded
+    # commands: 0.38 s instead of 0.78 s from the last word (median), see
+    # "End of speech — plan.md".
+    ./endpointing.patch
+  ];
+
+  postPatch = ''
+    substituteInPlace src/wyoming_parakeet_npu/__main__.py \
+      --replace-fail '@smartTurnModel@' '${smartTurnModel}'
+  '';
 
   build-system = with python3Packages; [
     setuptools
@@ -31,6 +54,7 @@ python3Packages.buildPythonApplication {
     onnx-asr
     onnxruntime
     openvino
+    pysilero-vad
     soundfile
     wyoming
   ];
@@ -75,6 +99,7 @@ python3Packages.buildPythonApplication {
 
   pythonImportsCheck = [
     "wyoming_parakeet_npu"
+    "wyoming_parakeet_npu.endpointing"
     "openvino"
     "onnx_asr"
   ];

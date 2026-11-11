@@ -72,7 +72,7 @@ in
         plotly-chart-card
         simple-swipe-card
         lg-webos-remote-control
-        my-slider-v2
+        my-cards # bundles my-slider-v2
         xiaomi-vacuum-map-card
         layout-card
         windrose-card
@@ -82,7 +82,7 @@ in
 
     # Successor of card-mod; serves its own frontend script and reads the
     # existing `card_mod:` / `card-mod-*` keys.
-    customComponents = [ pkgs.ours.home-assistant.custom-components.uix ];
+    customComponents = [ pkgs.home-assistant-custom-components.uix ];
 
     config.frontend = {
       themes = "!include_dir_merge_named ${themesDir}";

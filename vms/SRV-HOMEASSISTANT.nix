@@ -17,7 +17,7 @@
 
     hardware.cores = 4;
     hardware.memory = 16384;
-    hardware.storage = "8G";
+    hardware.storage = "16G";
 
     hardware.usb = [
       { id = "1a86:55d4"; } # Sonoff Zigbee 3.0 USB Dongle Plus V2

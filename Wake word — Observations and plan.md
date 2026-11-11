@@ -157,10 +157,38 @@ Training material:
   - So the frontend's noise estimate adapts to your own voice for a few seconds and then subtracts it. This matches the "wait 5 s" experience.
   - Workaround: say the word once, and pause about 3 s before retrying.
   - A custom model trained with tries in quick succession, or a frontend with a faster noise estimate (would need retraining), could fix it properly.
+- **Workarounds, simulated offline** (Alexa, threshold 0.8; "tries" = 37 clips with the word said at least twice; "near misses" = 250 score clips 0.2–0.8 without the word in the transcript):
+  - **Second chance** (threshold 0.5 for 6 s after a peak of 0.3–0.8): 1 try earlier, so useless. The tries that confuse the frontend mostly score below 0.3, so there's no near miss to react to.
+  - **Fresh detector after a near miss:** 3/37 earlier. Same reason.
+  - **Rolling fresh detectors** (a new frontend and model every 1 s, each counting from 1 s to 3 s after its start, i.e. 2–3 extra instances running at once):
+
+    | Threshold of the extra detectors | Tries detected (now 25/37) | Near misses triggering (now 6/250) |
+    |---|---|---|
+    | 0.8 | 35 | 32 |
+    | 0.9 | 32 | 11 |
+    | 0.95 | 31 | 8 |
+    | 0.97 | 30 | 7 |
+
+  - 0.95 looks like the sweet spot. The near-miss set is pre-selected, so before building it, check the false wakes per hour on the room recording.
 - **Gain:** the chip's AGC runs up to 31.6× (AGCMAXGAIN, ~30 dB) toward −46 dBFS. In a quiet room it sits at 16–27×.
   - Turning clips down by 6/12/18 dB offline barely changes the scores (Computer no-speech 34/33/32/25 of 40; Alexa real 30/29/28/25), because the frontend normalises the level.
   - The listening files sounded "dialled to 11" partly because each snippet was peak-normalised for listening.
 - **Double knock:** the most common Computer no-speech trigger. Two sharp transients resemble "Com-pu-ter's" plosives. The source is unknown, and it also happens at night.
+
+## End-of-speech lag (Nov 11)
+
+- **Who decides:** HA, in `assist_pipeline`. `pymicro_vad` gives a speech probability per 10 ms. With "aggressive", HA needs 0.25 s below 0.5, and the command must be at least 1 s.
+- **Replay:** HA's segmenter, re-run offline on 157 recorded commands, lands within a median of 0.14 s of the real `stt_text` event.
+- **Ground truth:** the earliest cut of the audio at which parakeet still returns the full transcript (binary search).
+- **Lag from your last word:** 0.9 s median (p90 1.3 s) until the text reaches HA. Of that, 0.78 s (p90 1.13 s) is the end-of-speech detection.
+- **Cause:** `pymicro_vad` keeps reporting speech after you stop. Its probability first drops to 0.5 or below a median of 0.55 s after the last word; it averages 0.78 in the first 200 ms after, and 0.60 at 400–600 ms.
+  - A stricter cutoff (0.5 → 0.8) or a shorter silence (0.1 s) only saves 0.1–0.2 s.
+  - Less gain (−6/−12 dB) changes nothing.
+- **Silero VAD** (pysilero-vad 3.4, 0.2 ms per 32 ms chunk):
+  - its probability falls a median of 0.22 s after the last word;
+  - with 0.3 s silence and threshold 0.35, the lag is 0.50 s median (p90 0.79 s); with 0.4 s silence, 0.61 s (p90 0.91 s).
+  - Cut check against the full transcript: 9 more of 157 transcripts change than with `pymicro_vad`. A few are real clipped endings ("Strahler aus" → "strahlungs", "Wetter" → "vetchar", a mid-sentence pause); the rest is STT noise or TV.
+- **Possible way:** LVA runs Silero on the streamed audio and sends `VoiceAssistantAudio(end=True)`. HA's esphome satellite treats that as a stop (not an abort) and runs STT right away, and HA's own VAD stays as the fallback.
 
 ## Plan
 

@@ -34,7 +34,7 @@ let
     __intentionallyOverridingVersion = true;
     version = old.version + lib.optionalString redirected "-${endpointSuffix}";
 
-    # Appended rather than replaced: the overlay already rewrites the HACS asset
+    # Appended rather than replaced: nixpkgs already rewrites the HACS asset
     # paths, and that fix is independent of which endpoint is in use.
     postPatch =
       (old.postPatch or "")

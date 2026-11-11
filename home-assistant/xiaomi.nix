@@ -5,25 +5,20 @@
   ];
 
   services.home-assistant.extraPackages =
-    python3Packages:
-    let
-      p = pkgs.ours.home-assistant.custom-components.mkVacuumParsers python3Packages;
-    in
-    with python3Packages;
-    [
+    python3Packages: with python3Packages; [
       python-miio
       vacuum-map-parser-base
       vacuum-map-parser-roborock
-      p.vacuum-map-parser-dreame
-      p.vacuum-map-parser-ijai
-      p.vacuum-map-parser-roidmi
-      p.vacuum-map-parser-viomi
-      p.vacuum-map-parser-xiaomi
+      vacuum-map-parser-dreame
+      vacuum-map-parser-ijai
+      vacuum-map-parser-roidmi
+      vacuum-map-parser-viomi
+      vacuum-map-parser-xiaomi
     ];
 
-  services.home-assistant.customComponents = with pkgs.ours.home-assistant.custom-components; [
-    xiaomi_cloud_map_extractor
-    xiaomi_miio_fan
+  services.home-assistant.customComponents = [
+    pkgs.ours.home-assistant.custom-components.xiaomi_cloud_map_extractor
+    pkgs.home-assistant-custom-components.xiaomi_miio_fan
   ];
 
   services.home-assistant.config = {
