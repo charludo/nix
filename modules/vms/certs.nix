@@ -60,21 +60,15 @@ in
       server = lib.mkDefault "https://${builtins.head private-settings.caIssuing1.dnsNames}/acme/acme/directory";
       reloadServices = [ "nginx.service" ];
     };
-    systemd.services =
-      builtins.listToAttrs (
-        map (entry: {
-          name = "acme-${entry.name}.${private-settings.domains.ad}";
-          value = {
-            after = [ "ddclient.service" ];
-            requires = [ "ddclient.service" ];
-          };
-        }) cfg.certsFor
-      )
-      // {
-        ddclient.path = [ pkgs.dig ];
-        ddclient.serviceConfig.User = "ddclient";
-        ddclient.serviceConfig.Group = "ddclient";
-      };
+    systemd.services = builtins.listToAttrs (
+      map (entry: {
+        name = "acme-${entry.name}.${private-settings.domains.ad}";
+        value = {
+          after = [ "ddclient.service" ];
+          requires = [ "ddclient.service" ];
+        };
+      }) cfg.certsFor
+    );
 
     services.nginx = {
       enable = true;
@@ -140,20 +134,10 @@ in
       }";
       usev6 = "no";
       domains = map (entry: "${entry.name}.${private-settings.domains.ad}") cfg.certsFor;
-      username = "${lib.getExe' pkgs.dig "nsupdate"}";
       passwordFile = config.age.secrets.dns-update-pw.path;
       server = private-settings.ad.dnsServer;
       zone = private-settings.domains.ad;
-      # Has to be used until https://github.com/NixOS/nixpkgs/pull/468051 is merged
-      # configFile = "/var/lib/ddclient/changed-conf.conf";
     };
-    age.secrets.dns-update-pw = {
-      rekeyFile = secrets.dns-update-pw;
-      owner = "ddclient";
-      group = "ddclient";
-    };
-    users.users.ddclient.group = "ddclient";
-    users.users.ddclient.isNormalUser = true;
-    users.groups.ddclient = { };
+    age.secrets.dns-update-pw.rekeyFile = secrets.dns-update-pw;
   };
 }
