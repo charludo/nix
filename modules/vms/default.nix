@@ -183,6 +183,7 @@ in
         }
       ];
 
+    services.ccc-ticket-snipe.enable = true;
     image.modules.proxmox = {
       proxmox.qemuConf = {
         scsihw = lib.mkDefault "virtio-scsi-single";

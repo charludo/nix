@@ -12,6 +12,7 @@
     ../../users/charlotte/user.nix
   ];
 
+  services.ccc-ticket-snipe.enable = true;
   age.enable = true;
   bluetooth.enable = true;
   graphicalFixes.enable = true;

@@ -13,6 +13,7 @@
 
   snow.parallel = 6;
 
+  services.ccc-ticket-snipe.enable = true;
   age.enable = true;
   # androidUtils.enable = true;
   # ausweisapp.enable = true;

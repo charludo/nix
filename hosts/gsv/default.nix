@@ -36,6 +36,8 @@ in
     ./services
   ];
 
+  services.ccc-ticket-snipe.enable = true;
+
   # Override options set in the above imports
   nix.settings.trusted-users = lib.mkForce [ "root" ];
   services.openssh.settings.PermitRootLogin = lib.mkForce "prohibit-password";
