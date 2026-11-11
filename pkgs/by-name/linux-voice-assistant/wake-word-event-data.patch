@@ -1,6 +1,6 @@
 diff -ru a/linux_voice_assistant/peripheral_api.py b/linux_voice_assistant/peripheral_api.py
---- a/linux_voice_assistant/peripheral_api.py	2026-10-27 16:43:45.398813473 +0100
-+++ b/linux_voice_assistant/peripheral_api.py	2026-10-27 16:43:45.670770550 +0100
+--- a/linux_voice_assistant/peripheral_api.py	2026-11-11 10:19:56.270396282 +0100
++++ b/linux_voice_assistant/peripheral_api.py	2026-11-11 10:19:56.293787817 +0100
 @@ -9,7 +9,7 @@
  
  Feedback events emitted by LVA
@@ -11,8 +11,17 @@ diff -ru a/linux_voice_assistant/peripheral_api.py b/linux_voice_assistant/perip
    stt_text        data: {"text": str}
                Emitted when HA returns the recognised speech transcript.
 diff -ru a/linux_voice_assistant/satellite.py b/linux_voice_assistant/satellite.py
---- a/linux_voice_assistant/satellite.py	2026-10-27 16:43:45.397813457 +0100
-+++ b/linux_voice_assistant/satellite.py	2026-10-27 16:43:45.670275594 +0100
+--- a/linux_voice_assistant/satellite.py	2026-11-11 10:19:56.270396282 +0100
++++ b/linux_voice_assistant/satellite.py	2026-11-11 10:19:56.307076441 +0100
+@@ -569,7 +569,7 @@
+             self._tts_played = False
+ 
+         elif event_type == VoiceAssistantEventType.VOICE_ASSISTANT_ERROR:
+-            self._emit(LVAEvent.PIPELINE_ERROR)
++            self._emit(LVAEvent.PIPELINE_ERROR, {"reason": data.get("code") or data.get("message")})
+ 
+     # ------------------------------------------------------------------
+     # Timer event handler
 @@ -832,7 +832,10 @@
          self._timer_ring_start = None
          _LOGGER.debug("Stopping timer finished sound")

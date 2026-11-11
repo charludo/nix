@@ -113,6 +113,55 @@ Next:
   - activations in `activations.jsonl` now carry their `score`.
 - **Settings:** `services.linux-voice-assistant.activationLog.scoreFloor = 0.05` and `recordAbove = 0.2` (the module's defaults).
 
+## Evaluation, Nov 1 – 11
+
+Data: 1223 activations since Oct 27, 7282 score peaks since Nov 1, 3679 clips (~900 MB). The trigger moment (1.5–4.8 s into each clip) was transcribed with parakeet on SRV-VOICE. Media context comes from HA history (`media_player.living_room`, `media_player.lg_c4`), which only goes back to Nov 1.
+
+Activations per day, by threshold period ("ok" means HA did something sensible with the command):
+
+| Period | Computer ok | Computer false | Alexa ok | Alexa false |
+|---|---|---|---|---|
+| Nov 1–7, C 0.8 / A 0.5 | 3.8 | 31.3 | 12.1 | 21.6 |
+| Nov 7–10, C 0.9 / A 0.6 | 0.9 | 15.8 | 11.1 | 23.1 |
+| Nov 10–11, C 0.8 / A 0.8 | 1.8 | 30.1 | 15.9 | 8.8 |
+
+- **The spike of the last days is Computer**, back at 0.8 since Nov 10. It produces ~30 false wakes a day and is barely used anymore (you switched to Alexa).
+- **Two kinds of false wakes:**
+  - **TV speech** (mostly English, LG C4 on): the transcript is random speech, and HA answers "nicht verstanden".
+  - **No speech at all** (Computer 150, Alexa 101): the transcript is empty, and the pipeline runs into the STT timeout after 15 s. These happen all day and night, in a quiet room (median 53 dB vs 63–66 dB for real wakes), and are bass-heavy (0–300 Hz +25 dB over 1–3 kHz).
+- **The high-pass doesn't help.** Offline, 125 Hz, 180 Hz and 180 Hz 4th-order high-passes leave the no-speech triggers unchanged (Computer 140 → 140 of 150 above 0.8). The model reacts to the sound itself, not the bass. `HPFONOFF` 3 is harmless, but it isn't the fix.
+- **Threshold sweep (offline, best of 3 alignments):**
+  - Computer can't be separated: at 0.99 it still has 36/150 no-speech and 13/54 TV triggers, and already loses 6/31 real ones.
+  - Alexa at 0.9: 75/98 real, 15/101 no-speech, 13/54 TV. At 0.95: 57/98, 6/101, 10/54.
+  - Caveat: real attempts that never fired aren't in these numbers.
+- **Activation log:** `pipeline_error` was always logged with `error: null`. LVA emits the event without the reason its docs promise. This is fixed in `wake-word-event-data.patch` (not deployed).
+
+Training material:
+- **Real utterances** (transcript contains the word, deduplicated across activation and score clips):
+  - Alexa 244, spread evenly over the 15 days. Only 33 of them are near misses (score clips without activation).
+  - Computer 189, mostly Oct 27 – Nov 1.
+  - Many clips hold the word several times ("Alexa, Alexa").
+- **Hard negatives:** ~600 false-wake clips (TV, no-speech), plus all score clips with no wake word in the transcript.
+- **Enough for:** a real-voice test set, and real positives and room negatives mixed into a microWakeWord training run on generated (Piper) samples. **Not enough for:** training on real recordings alone.
+- **Missing:**
+  - attempts that never reached 0.2 (no clip at all);
+  - continuous room audio to measure false wakes per hour of TV and music, the number that matters for a new model.
+
+### Repeated tries, gain, knocks (Nov 11)
+
+- **Repeated tries score lower because of the microWakeWord frontend, not LVA.** LVA's 2 s refractory only applies after an actual wake.
+  - The test: 97 peaks from clips with the word said several times, re-scored with a fresh frontend and model started 1.8 s before each peak.
+  - The result: +0.13 on average, and 28/92 tries gain more than 0.2 (e.g. 0.43 → 1.0, 0.39 → 0.96).
+  - Resetting only the model changes nothing (+0.00). Started 3 s before the peak, the gain shrinks (+0.06).
+  - Control: single tries gain nothing from a fresh start (+0.02, 1/40).
+  - So the frontend's noise estimate adapts to your own voice for a few seconds and then subtracts it. This matches the "wait 5 s" experience.
+  - Workaround: say the word once, and pause about 3 s before retrying.
+  - A custom model trained with tries in quick succession, or a frontend with a faster noise estimate (would need retraining), could fix it properly.
+- **Gain:** the chip's AGC runs up to 31.6× (AGCMAXGAIN, ~30 dB) toward −46 dBFS. In a quiet room it sits at 16–27×.
+  - Turning clips down by 6/12/18 dB offline barely changes the scores (Computer no-speech 34/33/32/25 of 40; Alexa real 30/29/28/25), because the frontend normalises the level.
+  - The listening files sounded "dialled to 11" partly because each snippet was peak-normalised for listening.
+- **Double knock:** the most common Computer no-speech trigger. Two sharp transients resemble "Com-pu-ter's" plosives. The source is unknown, and it also happens at night.
+
 ## Plan
 
 1. **After 1–2 days:** count peaks in `scores.jsonl` below and above 0.2, per word and time of day. Adjust `recordAbove` (and possibly `scoreFloor`) to what's worth keeping.

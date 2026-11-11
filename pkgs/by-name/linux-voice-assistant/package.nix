@@ -38,8 +38,9 @@ python3Packages.buildPythonApplication rec {
   ];
 
   patches = [
-    # Name the wake word in the peripheral API's `wake_word_detected` event;
-    # upstream sends it without data. Used by the activation log.
+    # Name the wake word in the peripheral API's `wake_word_detected` event
+    # and the reason in `pipeline_error`, as its docs promise; upstream sends
+    # both without data. Used by the activation log.
     ./wake-word-event-data.patch
     # `--wake-word-score-floor`: report every peak of a wake word's score
     # (`wake_word_score` event), detected or not. Used by the activation log
