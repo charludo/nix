@@ -23,6 +23,7 @@
     ZeitWochentag = {
       sentences = [
         "Welcher (Tag|Wochentag) ist heute"
+        "Welchen (Tag|Wochentag) haben wir"
         "Was ist heute für ein (Wochentag|Tag)"
         "Wochentag"
       ];
