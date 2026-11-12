@@ -98,12 +98,52 @@
     audioOutputDevice = "alsa/plughw:CARD=Dummy";
     wakeModel = "okay_computer";
     # Community "computer" models, to compare with okay_nabu (voice ToDo, 4).
-    wakeWordDirs = [ pkgs.ours.computer-wake-words ];
+    # Own models trained on this room (Nov 12), to replace the stock ones.
+    wakeWordDirs = [
+      pkgs.ours.computer-wake-words
+      pkgs.ours.wohnzimmer-wake-words
+    ];
     peripheralApi = true; # for the LED ring and the activation log
     # Every activation with its audio, to judge false and missed wakes.
     activationLog = {
       enable = true;
       audioTarget = "alsa_input.usb-SEEED_ReSpeaker_4_Mic_Array__UAC1.0_-00.mono-fallback";
+    };
+  };
+
+  # Continuous living room recording (10-minute FLAC files) as training and
+  # test material for our own wake word models. Started on Nov 11 as a
+  # transient 48 h unit of the same name; this takes over from it (the
+  # conflict stops it, a second's gap) and runs until it's removed again
+  # or the SD card runs low: ~1.2 GB a day, stops with under 2 GB free.
+  # Move the files to hub now and then, then delete them here.
+  systemd.services.room-recording-nix = {
+    description = "Living room recording for wake word training";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "pipewire.service" ];
+    conflicts = [ "room-recording.service" ];
+    path = [
+      config.services.pipewire.package
+      pkgs.coreutils
+    ];
+    environment.PIPEWIRE_RUNTIME_DIR = "/run/pipewire";
+    script = ''
+      while true; do
+        if [ "$(df --output=avail -B1M /var/lib/room-recording | tail -1)" -lt 2048 ]; then
+          echo "under 2 GB free, stopping"; exit 0
+        fi
+        f=/var/lib/room-recording/$(date +%Y-%m-%dT%H%M%S.%3N%z).flac
+        timeout -s TERM 600 pw-record --target ${config.services.linux-voice-assistant.activationLog.audioTarget} \
+          --rate 16000 --channels 1 --format s16 "$f" || [ $? -eq 124 ] || exit 1
+      done
+    '';
+    serviceConfig = {
+      User = "lva";
+      Group = "lva";
+      StateDirectory = "room-recording";
+      StateDirectoryMode = "0750";
+      Restart = "on-failure";
+      RestartSec = "5s";
     };
   };
 

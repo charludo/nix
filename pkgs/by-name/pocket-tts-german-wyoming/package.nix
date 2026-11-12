@@ -21,10 +21,15 @@ rustPlatform.buildRustPackage rec {
   # and otherwise waits for the whole reply. Audio was already streamed.
   patches = [
     ./synthesize-streaming.patch
-    # POCKET_TTS_TEMPERATURE and POCKET_TTS_LSD_DECODE_STEPS: upstream
-    # hard-codes the sampling temperature (0.3) and the flow decode steps (1).
-    # Unset, nothing changes.
+    # POCKET_TTS_TEMPERATURE, POCKET_TTS_LSD_DECODE_STEPS and POCKET_TTS_SEED:
+    # upstream hard-codes the sampling temperature (0.3), the flow decode
+    # steps (1) and the seed (42; "random" varies it per request, for wake
+    # word training clips). Unset, nothing changes.
     ./sampling-settings.patch
+    # POCKET_TTS_TREBLE_DB and POCKET_TTS_TREBLE_HZ: a high-shelf boost with a
+    # soft limiter after synthesis, for voices that sound muffled. Unset (0 dB),
+    # nothing changes.
+    ./treble-boost.patch
   ];
 
   # Upstream builds for Gracemont (.cargo/config.toml, target-cpu=gracemont);

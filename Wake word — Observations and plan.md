@@ -175,6 +175,34 @@ Training material:
   - The listening files sounded "dialled to 11" partly because each snippet was peak-normalised for listening.
 - **Double knock:** the most common Computer no-speech trigger. Two sharp transients resemble "Com-pu-ter's" plosives. The source is unknown, and it also happens at night.
 
+## Room recording (Nov 11 10:50 – Nov 12 07:00, first 20 h)
+
+- **Method:** both models re-run over the whole recording, as on the satellite (one frontend per 10-minute file); Silero speech segments (4201, 5.0 h of speech); each transcribed by parakeet on SRV-VOICE. The ground truth is the transcript: a wake word "tried" when it opens the segment (40 Computer, 14 Alexa), "said" anywhere (TV included). Live threshold 0.8 until Nov 11 22:20, then 0.97 for both.
+- **Replay accuracy:** at 0.97, 45 of 46 replay wakes are also in the activation log. Some live wakes aren't reproduced (the frontend's state differs at file starts).
+- **Satellite activations in that time:** 88 (67 Computer, 21 Alexa). Only 28 Computer and 8 Alexa with the word said nearby; 39 and 13 likely false: evening TV (English, Italian, Ukrainian), and many with no speech at all (knocks).
+- **Caught tries and false wakes per hour:**
+
+  | Variant | Computer tries caught (of 40) | Computer false/h | Alexa tries caught (of 14) | Alexa false/h |
+  |---|---|---|---|---|
+  | threshold 0.8 | 22 | 2.1 | 8 | 0.9 |
+  | 0.9 | 21 | 1.8 | 4 | 0.5 |
+  | 0.95 | 19 | 1.7 | 1 | 0.25 |
+  | 0.97 (live since Nov 11 22:20) | 18 | 1.4 | 1 | 0.05 |
+  | rolling fresh detectors, 0.97 | 30 | 3.7 | 2 | 0.2 |
+  | rolling, 0.95 | 30 | 5.1 | 5 | 0.5 |
+  | 0.97 + fresh detector for 8 s after a near miss (≥ 0.3) | 19 | 1.4 | 2 | 0.05 |
+
+- **Conclusions:**
+  - Both stock models catch about half of the tries at best. Alexa at 0.97 is practically off (1 of 14).
+  - The rolling detectors do fix most retries (Computer 18 → 30 of 40), but more than double the false wakes. The near-miss gate keeps the false wakes but loses the gain: failed retries score below 0.3, there's no near miss to react to. Not worth building.
+  - The real fix is a model trained on this room and these voices (plan step 5).
+- **Training material** (scratchpad `room/train/`):
+  - `positive/computer` (44), `positive/alexa` (16): 2.5 s clips of the tries; 5 recovered from false-wake candidates by a second transcription, 1 by listening (her "Alexa" at 20:33:15).
+  - `hard_negative/` (219, all checked by listening): 3 s clips around false wakes (replay > 0.8, base or rolling), no wake word in their own transcript; 43 without any speech.
+  - `negative_spans.json`: 20 h minus ±3 s around every wake word said, as background and for the false-wakes-per-hour check.
+  - To review by ear: `review_positive.wav` / `review_hard_negative.wav` with the clip order in the matching `.tsv`.
+- **Rerun with the full 48 h:** copy the new files to `room/rec/`, then `score.py`, `segment.py` (at most 3 in parallel), `stt.py`, `analyze.py`, `match.py`, `extract.py`.
+
 ## End-of-speech lag (Nov 11)
 
 - **Who decides:** HA, in `assist_pipeline`. `pymicro_vad` gives a speech probability per 10 ms. With "aggressive", HA needs 0.25 s below 0.5, and the command must be at least 1 s.
@@ -203,4 +231,4 @@ Training material:
    - **Undetected misses:** a "missed it" button in HA that saves the last ~10 s from a rolling buffer, for attempts that never reach the floor.
    - **Room background:** optional random short snippets of living-room audio as negatives. Privacy decision first.
    - **Recording session:** a planned session per voice and position, with TV and music on (reuse the Oct 26 protocol).
-5. **Custom wake word:** train a microWakeWord model on generated samples plus these recordings. Use the false wakes as hard negatives, and consider a smaller stride. Compare it with the current models on the recorded protocol.
+5. **Custom wake word** (detailed in "Wake word — Training plan.md"): train a microWakeWord model on generated samples plus these recordings. Use the false wakes as hard negatives, and consider a smaller stride. Compare it with the current models on the recorded protocol.

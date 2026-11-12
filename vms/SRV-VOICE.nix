@@ -22,6 +22,12 @@ let
     port = 10200;
     voice = "eve"; # fallback for requests without a voice
     speed = "1.1"; # 0.8–1.2, time-stretched after synthesis; 1.0 bypasses it
+    # All voices sound a bit muffled; +6 dB above 3 kHz ("shelf6") was the
+    # clearest without changing the voice. Applies to every voice; 0 bypasses.
+    treble = {
+      db = "6";
+      hz = "3000";
+    };
     dataDir = "/var/lib/pocket-tts";
   };
 in
@@ -65,6 +71,8 @@ in
       POCKET_TTS_LANGUAGE = "german";
       POCKET_TTS_VOICE = tts.voice;
       POCKET_TTS_SPEED = tts.speed;
+      POCKET_TTS_TREBLE_DB = tts.treble.db;
+      POCKET_TTS_TREBLE_HZ = tts.treble.hz;
       POCKET_TTS_THREADS = "4"; # upstream maximum
       # Upstream's default int8 weights suit the N100; on this CPU full
       # precision is far faster (first audio 0.12 s instead of 0.79 s).

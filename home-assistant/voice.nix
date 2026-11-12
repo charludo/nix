@@ -36,7 +36,7 @@ in
     {
       satellite = "satellite-wohnzimmer";
       target = e.media_player.living_room;
-      volume = 0.30;
+      volume = 0.35;
     }
   ];
 }

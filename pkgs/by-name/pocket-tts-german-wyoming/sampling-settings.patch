@@ -16,8 +16,8 @@ diff -ruN a/crates/pocket-tts-runtime/src/config.rs b/crates/pocket-tts-runtime/
              audio_prompt_min_duration: 0.0,
 diff -ruN a/crates/pocket-tts-runtime/src/engine.rs b/crates/pocket-tts-runtime/src/engine.rs
 --- a/crates/pocket-tts-runtime/src/engine.rs	2026-11-11 13:21:34.781664493 +0100
-+++ b/crates/pocket-tts-runtime/src/engine.rs	2026-11-11 13:21:34.812707007 +0100
-@@ -131,7 +131,13 @@
++++ b/crates/pocket-tts-runtime/src/engine.rs	2026-11-12 09:01:45.388865028 +0100
+@@ -131,7 +131,23 @@
              seconds: 0.0,
              max_abs_f32: 0.0,
          };
@@ -28,6 +28,16 @@ diff -ruN a/crates/pocket-tts-runtime/src/engine.rs b/crates/pocket-tts-runtime/
 +            .ok()
 +            .and_then(|v| v.parse::<f32>().ok())
 +            .unwrap_or(0.3);
++        // POCKET_TTS_SEED: a number, or "random" for a new seed per request
++        // (e.g. for varied training clips); unset keeps the caller's seed.
++        let seed = match std::env::var("POCKET_TTS_SEED").as_deref() {
++            Ok("random") => std::time::SystemTime::now()
++                .duration_since(std::time::UNIX_EPOCH)
++                .map(|d| d.as_nanos() as u64)
++                .unwrap_or(seed),
++            Ok(v) => v.parse().unwrap_or(seed),
++            Err(_) => seed,
++        };
 +        let mut rng = NormalRng::new(temperature, seed)?;
          for (segment, chunk) in parts.iter().enumerate() {
              ensure!(
