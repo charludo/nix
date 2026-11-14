@@ -128,9 +128,30 @@ in
         ""
         # Decide the end of speech here instead of waiting for HA's VAD
         # (Silero + Smart Turn; HA's stays as the fallback). Defaults as
-        # benchmarked ("End of speech — plan.md"): Silero 0.5, ask Smart Turn
-        # after 64 ms of silence, finished above 0.7, end anyway after 0.6 s.
+        # benchmarked ("End of speech — plan.md"): Silero 0.5, finished above
+        # 0.7, end anyway after 0.6 s.
         "--endpointing"
+        # Ask Smart Turn after 0.1 s of silence (default 64 ms) and transcribe
+        # the cut with 0.3 s of silence appended: together they stop clipped
+        # last words ("stumm" -> "sturm"). Replay of 414 real commands
+        # (Nov 14): 77 -> 65 wrong intent/slots out of 386; the 60 ms of extra
+        # waiting is offset by the faster Smart Turn and parallel STT.
+        "--turn-ask-after"
+        "0.1"
+        "--pad-end"
+        "0.3"
+        # Start transcribing after 64 ms of silence instead of when Smart Turn
+        # is asked: the transcript is ready by the verdict (cut -> transcript
+        # 124 -> 56 ms median on the NPU), but it misses the end of the audio
+        # up to the cut, which clips some last words ("Strahler an." ->
+        # "Strahler.", "Büro stumm" -> "Büro Sturm"; about 1 in 150 commands).
+        # TODO: RECOMMENDED: drop this (no early start); trial of option "cG".
+        "--speculate-after"
+        "0.064"
+        # TODO: RECOMMENDED: drop this (default 4 threads); 3 made no
+        # measurable difference (±3 ms). Trial of option "cG".
+        "--turn-threads"
+        "3"
       ];
       DynamicUser = true;
       StateDirectory = lib.removePrefix "/var/lib/" stt.dataDir;

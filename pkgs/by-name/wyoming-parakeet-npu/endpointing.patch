@@ -1,7 +1,87 @@
-diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/endpointing.py
---- a/src/wyoming_parakeet_npu/endpointing.py	1970-01-01 01:00:00.000000000 +0100
-+++ b/src/wyoming_parakeet_npu/endpointing.py	2026-11-11 12:35:05.442057108 +0100
-@@ -0,0 +1,162 @@
+diff --git a/src/wyoming_parakeet_npu/__main__.py b/src/wyoming_parakeet_npu/__main__.py
+index 66e515a..d874ff1 100644
+--- a/src/wyoming_parakeet_npu/__main__.py
++++ b/src/wyoming_parakeet_npu/__main__.py
+@@ -25,6 +25,7 @@ from wyoming.info import AsrModel, AsrProgram, Attribution, Info
+ from wyoming.server import AsyncServer
+ 
+ from . import __version__
++from .endpointing import EndpointingConfig, SmartTurn
+ from .handler import ParakeetEventHandler
+ from .shims import OpenVinoDecoderShim, OpenVinoEncoderShim
+ 
+@@ -103,6 +104,36 @@ async def main() -> None:
+         choices=["CPU", "GPU", "NPU"],
+         help="OpenVINO device for both encoder and decoder (default: NPU)",
+     )
++    parser.add_argument(
++        "--endpointing",
++        action="store_true",
++        default=os.environ.get("ENDPOINTING", "") not in ("", "0", "false"),
++        help="Decide the end of speech here (Silero VAD + Smart Turn) and answer "
++        "before the client stops the audio",
++    )
++    parser.add_argument(
++        "--smart-turn-model",
++        default=os.environ.get("SMART_TURN_MODEL", "@smartTurnModel@"),
++        help="Smart Turn v3 ONNX model",
++    )
++    parser.add_argument("--vad-threshold", type=float, default=0.5,
++                        help="Silero speech probability above which audio counts as speech (default: 0.5)")
++    parser.add_argument("--turn-ask-after", type=float, default=0.064,
++                        help="Seconds of silence before asking Smart Turn (default: 0.064)")
++    parser.add_argument("--turn-threshold", type=float, default=0.7,
++                        help="Smart Turn probability above which the turn has ended (default: 0.7)")
++    parser.add_argument("--end-after-silence", type=float, default=0.6,
++                        help="Seconds of silence after which the turn ends regardless (default: 0.6)")
++    parser.add_argument("--min-command", type=float, default=1.0,
++                        help="Never end a command before this many seconds (default: 1.0)")
++    parser.add_argument("--pad-end", type=float, default=0.0,
++                        help="Seconds of silence appended to the audio before transcribing "
++                        "a command whose end was found here (default: 0)")
++    parser.add_argument("--speculate-after", type=float, default=None,
++                        help="Seconds of silence after which to start transcribing (default: "
++                        "when Smart Turn is asked)")
++    parser.add_argument("--turn-threads", type=int, default=4,
++                        help="CPU threads for Smart Turn (default: 4)")
+     parser.add_argument("--debug", action="store_true",
+                         help="Enable DEBUG-level logging")
+     parser.add_argument("--version", action="version", version=__version__)
+@@ -169,6 +200,20 @@ async def main() -> None:
+         cache_dir=cache_dir,
+     )
+ 
++    endpointing = None
++    if args.endpointing:
++        endpointing = EndpointingConfig(
++            smart_turn=SmartTurn(args.smart_turn_model, threads=args.turn_threads),
++            speech_threshold=args.vad_threshold,
++            ask_after_silence=args.turn_ask_after,
++            turn_threshold=args.turn_threshold,
++            end_after_silence=args.end_after_silence,
++            min_command_seconds=args.min_command,
++            pad_end=args.pad_end,
++            speculate_after_silence=args.speculate_after,
++        )
++        _LOGGER.info("Endpointing: %s", endpointing)
++
+     # 3. Run the wyoming server.
+     server = AsyncServer.from_uri(args.uri)
+     model_lock = asyncio.Lock()
+@@ -177,6 +222,7 @@ async def main() -> None:
+     await server.run(partial(
+         ParakeetEventHandler, info, model, model_lock,
+         default_language=args.language,
++        endpointing=endpointing,
+     ))
+ 
+ 
+diff --git a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/endpointing.py
+new file mode 100644
+index 0000000..ab80384
+--- /dev/null
++++ b/src/wyoming_parakeet_npu/endpointing.py
+@@ -0,0 +1,190 @@
 +"""End-of-speech detection on the incoming audio, ahead of the client.
 +
 +Home Assistant streams audio to the STT server while it waits for its own VAD
@@ -21,7 +101,7 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +import asyncio
 +import logging
 +from dataclasses import dataclass, field
-+from typing import Optional
++from typing import Callable, Optional
 +
 +import numpy as np
 +import onnxruntime
@@ -68,11 +148,13 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +    N_FFT = 400
 +    HOP = 160
 +
-+    def __init__(self, model_path: str) -> None:
++    def __init__(self, model_path: str, threads: int = 4) -> None:
++        # One call per pause, nothing else on the CPU meanwhile (STT runs on
++        # the NPU): 4 threads take 26 ms per call on SRV-VOICE, 1 takes 82 ms.
 +        opts = onnxruntime.SessionOptions()
 +        opts.execution_mode = onnxruntime.ExecutionMode.ORT_SEQUENTIAL
 +        opts.inter_op_num_threads = 1
-+        opts.intra_op_num_threads = 1
++        opts.intra_op_num_threads = threads
 +        opts.graph_optimization_level = onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
 +        self._session = onnxruntime.InferenceSession(
 +            model_path, sess_options=opts, providers=["CPUExecutionProvider"]
@@ -83,7 +165,8 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +
 +    def features(self, pcm16: bytes) -> np.ndarray:
 +        """Whisper log-mel features of the last 8 s, as WhisperFeatureExtractor
-+        (chunk_length=8, do_normalize=True) computes them."""
++        (chunk_length=8, do_normalize=True) computes them. float64: in float32
++        the score moves by up to 0.48 at some cuts (2 of 300 verdicts flip)."""
 +        n = self.SECONDS * RATE
 +        audio = np.frombuffer(pcm16, dtype=np.int16).astype(np.float64) / 32768.0
 +        audio = audio[-n:]
@@ -112,6 +195,11 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +    ask_after_silence: float = 0.064  # ask Smart Turn after this much silence
 +    turn_threshold: float = 0.7  # Smart Turn: finished above this
 +    end_after_silence: float = 0.6  # end regardless after this much silence
++    pad_end: float = 0.0  # silence appended before transcribing a cut here
++    # Start transcribing after this much silence (None: when Smart Turn is
++    # asked). Earlier means the transcript is ready by the verdict, but it
++    # covers the audio only up to that point.
++    speculate_after_silence: Optional[float] = None
 +
 +
 +@dataclass
@@ -129,6 +217,20 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +    seconds: float = 0.0
 +    reason: Optional[str] = None
 +    turn_probabilities: list = field(default_factory=list)
++    # Called once per pause with the audio so far (at speculate_after_silence,
++    # or right before Smart Turn is asked), so the caller can transcribe it
++    # meanwhile (the NPU is idle while Smart Turn runs on the CPU). If the
++    # turn ends in that pause, that audio is the command: `speculated` is its
++    # length in bytes (None once speech resumes).
++    on_speculate: Optional[Callable[[bytes], None]] = None
++    speculated: Optional[int] = None
++
++    def _speculate(self) -> bytes:
++        audio = bytes(self.audio)
++        if self.on_speculate and self.speculated is None:
++            self.speculated = len(audio)
++            self.on_speculate(audio)
++        return audio
 +
 +    async def feed(self, chunk: bytes) -> bool:
 +        """Add audio; True once the speaker is done."""
@@ -149,13 +251,19 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +            if p > cfg.speech_threshold:
 +                self._silence = 0.0
 +                self._asked = False
++                self.speculated = None
 +                continue
 +            self._silence += _SILERO_SECONDS
 +            if self.seconds < cfg.min_command_seconds:
 +                continue
++            spec = cfg.speculate_after_silence
++            if spec is not None and self._silence >= spec:
++                self._speculate()
 +            if self._silence >= cfg.ask_after_silence and not self._asked:
 +                self._asked = True
-+                prob = await asyncio.to_thread(cfg.smart_turn, bytes(self.audio))
++                # Smart Turn judges the audio up to now either way.
++                audio = self._speculate()
++                prob = await asyncio.to_thread(cfg.smart_turn, audio)
 +                self.turn_probabilities.append(round(prob, 3))
 +                if prob > cfg.turn_threshold:
 +                    self.reason = "turn"
@@ -164,9 +272,10 @@ diff -ruN a/src/wyoming_parakeet_npu/endpointing.py b/src/wyoming_parakeet_npu/e
 +                self.reason = "silence"
 +                return True
 +        return False
-diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handler.py
---- a/src/wyoming_parakeet_npu/handler.py	2026-11-11 12:33:18.083747941 +0100
-+++ b/src/wyoming_parakeet_npu/handler.py	2026-11-11 13:00:58.794262285 +0100
+diff --git a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handler.py
+index d2d928f..4875023 100644
+--- a/src/wyoming_parakeet_npu/handler.py
++++ b/src/wyoming_parakeet_npu/handler.py
 @@ -2,6 +2,8 @@
  
  Adapted with thanks from https://github.com/tboby/wyoming-onnx-asr (MIT).
@@ -176,7 +285,7 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
  """
  import asyncio
  import logging
-@@ -14,11 +16,13 @@
+@@ -14,11 +16,13 @@ import numpy as np
  import soundfile as sf
  from onnx_asr.adapters import AsrAdapter
  from wyoming.asr import Transcribe, Transcript
@@ -191,7 +300,7 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
  _LOGGER = logging.getLogger(__name__)
  
  
-@@ -32,6 +36,7 @@
+@@ -32,6 +36,7 @@ class ParakeetEventHandler(AsyncEventHandler):
          model_lock: asyncio.Lock,
          *args,
          default_language: str = "en",
@@ -199,13 +308,16 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
          **kwargs,
      ) -> None:
          super().__init__(*args, **kwargs)
-@@ -44,8 +49,30 @@
+@@ -44,8 +49,34 @@ class ParakeetEventHandler(AsyncEventHandler):
          self._wav_dir = tempfile.TemporaryDirectory()
          self._wav_path = os.path.join(self._wav_dir.name, "speech.wav")
          self._wav_file: Optional[wave.Wave_write] = None
 +        self._endpointing = endpointing
 +        self._endpointer: Optional[Endpointer] = None
 +        self._answered = False
++        # (length of the audio, task transcribing it) started at the last
++        # Smart Turn question; see _speculate.
++        self._speculation: Optional[tuple[int, asyncio.Task]] = None
  
      async def handle_event(self, event: Event) -> bool:
 +        if self._answered:
@@ -220,17 +332,18 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
 +            # The endpointer expects 16 kHz 16-bit mono, which is what Home
 +            # Assistant sends; anything else just waits for AudioStop.
 +            self._endpointer = (
-+                Endpointer(self._endpointing)
++                Endpointer(self._endpointing, on_speculate=self._speculate)
 +                if self._endpointing
 +                and (start.rate, start.width, start.channels) == (16000, 2, 1)
 +                else None
 +            )
++            self._speculation = None
 +            return True
 +
          if AudioChunk.is_type(event.type):
              chunk = AudioChunk.from_event(event)
  
-@@ -56,37 +83,30 @@
+@@ -56,37 +87,30 @@ class ParakeetEventHandler(AsyncEventHandler):
                  self._wav_file.setnchannels(chunk.channels)
  
              self._wav_file.writeframes(chunk.audio)
@@ -243,7 +356,7 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
 +                    "End of speech after %.2f s (%s, smart turn %s)",
 +                    ep.seconds, ep.reason, ep.turn_probabilities,
 +                )
-+                await self._transcribe()
++                await self._transcribe_endpointed(ep)
 +                self._answered = True
 +                return True
              return True
@@ -289,14 +402,65 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
  
          if Transcribe.is_type(event.type):
              self.request_language = Transcribe.from_event(event).language
-@@ -97,3 +117,36 @@
+@@ -97,3 +121,78 @@ class ParakeetEventHandler(AsyncEventHandler):
              return True
  
          return True
 +
++    async def _recognize(self, waveform: np.ndarray, sample_rate: int) -> str:
++        """Run the model in a worker thread, so the event loop (and Smart Turn)
++        keeps going meanwhile. One recognition at a time."""
++        lang = self.request_language or self.default_language
++        async with self.model_lock:
++            return await asyncio.to_thread(
++                self.model.recognize, waveform, language=lang, sample_rate=sample_rate
++            )
++
++    def _endpointed_waveform(self, pcm16: bytes) -> np.ndarray:
++        """16 kHz mono PCM as the model's float input, plus the configured
++        silence: a cut right after the last word otherwise ends the encoder's
++        input abruptly, which can garble the final sound."""
++        waveform = np.frombuffer(pcm16, dtype=np.int16).astype(np.float32) / 32768.0
++        pad = int(self._endpointing.pad_end * 16000) if self._endpointing else 0
++        return np.pad(waveform, (0, pad)) if pad else waveform
++
++    def _speculate(self, pcm16: bytes) -> None:
++        """A pause began: transcribe the audio so far meanwhile.
++        If the turn ends in this pause, the transcript is ready (or nearly) when the
++        verdict comes; otherwise it's dropped."""
++        task = asyncio.create_task(
++            self._recognize(self._endpointed_waveform(pcm16), 16000)
++        )
++        task.add_done_callback(lambda t: t.cancelled() or t.exception())
++        self._speculation = (len(pcm16), task)
++
++    async def _answer(self, text: str) -> None:
++        _LOGGER.info("%s: %s", self.request_language or self.default_language, text)
++        await self.write_event(Transcript(text=text).event())
++        self.request_language = None
++
++    async def _transcribe_endpointed(self, ep: Endpointer) -> None:
++        """Answer with the audio up to the end of speech found here."""
++        self._endpointer = None
++        if self._wav_file is not None:
++            self._wav_file.close()
++            self._wav_file = None
++        spec, self._speculation = self._speculation, None
++        try:
++            if ep.reason == "turn" and spec and spec[0] == ep.speculated:
++                text = await spec[1]
++            else:
++                text = await self._recognize(self._endpointed_waveform(bytes(ep.audio)), 16000)
++        except Exception as e:
++            _LOGGER.error("Recognition failed: %s", e)
++            await self.write_event(Transcript(text=f"ERROR: {e}").event())
++            return
++        await self._answer(text)
++
 +    async def _transcribe(self) -> bool:
 +        """Transcribe the audio received so far, answer, and end the request."""
 +        self._endpointer = None
++        self._speculation = None
 +        if self._wav_file is None:
 +            await self.write_event(Transcript(text="").event())
 +            return False
@@ -307,94 +471,13 @@ diff -ruN a/src/wyoming_parakeet_npu/handler.py b/src/wyoming_parakeet_npu/handl
 +        if len(waveform.shape) > 1:
 +            waveform = np.mean(waveform, axis=1)
 +
-+        lang = self.request_language or self.default_language
-+        _LOGGER.info("Language requested: %s", lang)
++        _LOGGER.info("Language requested: %s", self.request_language or self.default_language)
++        try:
++            text = await self._recognize(waveform, sample_rate)
++        except Exception as e:
++            _LOGGER.error("Recognition failed: %s", e)
++            await self.write_event(Transcript(text=f"ERROR: {e}").event())
++            return False
 +
-+        async with self.model_lock:
-+            try:
-+                text = self.model.recognize(
-+                    waveform, language=lang, sample_rate=sample_rate
-+                )
-+            except Exception as e:
-+                _LOGGER.error("Recognition failed: %s", e)
-+                await self.write_event(
-+                    Transcript(text=f"ERROR: {e}").event()
-+                )
-+                return False
-+
-+        _LOGGER.info("%s: %s", lang, text)
-+        await self.write_event(Transcript(text=text).event())
-+        self.request_language = None
++        await self._answer(text)
 +        return False
-diff -ruN a/src/wyoming_parakeet_npu/__main__.py b/src/wyoming_parakeet_npu/__main__.py
---- a/src/wyoming_parakeet_npu/__main__.py	2026-11-11 12:33:18.083747941 +0100
-+++ b/src/wyoming_parakeet_npu/__main__.py	2026-11-11 12:35:05.437239284 +0100
-@@ -25,6 +25,7 @@
- from wyoming.server import AsyncServer
- 
- from . import __version__
-+from .endpointing import EndpointingConfig, SmartTurn
- from .handler import ParakeetEventHandler
- from .shims import OpenVinoDecoderShim, OpenVinoEncoderShim
- 
-@@ -103,6 +104,28 @@
-         choices=["CPU", "GPU", "NPU"],
-         help="OpenVINO device for both encoder and decoder (default: NPU)",
-     )
-+    parser.add_argument(
-+        "--endpointing",
-+        action="store_true",
-+        default=os.environ.get("ENDPOINTING", "") not in ("", "0", "false"),
-+        help="Decide the end of speech here (Silero VAD + Smart Turn) and answer "
-+        "before the client stops the audio",
-+    )
-+    parser.add_argument(
-+        "--smart-turn-model",
-+        default=os.environ.get("SMART_TURN_MODEL", "@smartTurnModel@"),
-+        help="Smart Turn v3 ONNX model",
-+    )
-+    parser.add_argument("--vad-threshold", type=float, default=0.5,
-+                        help="Silero speech probability above which audio counts as speech (default: 0.5)")
-+    parser.add_argument("--turn-ask-after", type=float, default=0.064,
-+                        help="Seconds of silence before asking Smart Turn (default: 0.064)")
-+    parser.add_argument("--turn-threshold", type=float, default=0.7,
-+                        help="Smart Turn probability above which the turn has ended (default: 0.7)")
-+    parser.add_argument("--end-after-silence", type=float, default=0.6,
-+                        help="Seconds of silence after which the turn ends regardless (default: 0.6)")
-+    parser.add_argument("--min-command", type=float, default=1.0,
-+                        help="Never end a command before this many seconds (default: 1.0)")
-     parser.add_argument("--debug", action="store_true",
-                         help="Enable DEBUG-level logging")
-     parser.add_argument("--version", action="version", version=__version__)
-@@ -169,6 +192,18 @@
-         cache_dir=cache_dir,
-     )
- 
-+    endpointing = None
-+    if args.endpointing:
-+        endpointing = EndpointingConfig(
-+            smart_turn=SmartTurn(args.smart_turn_model),
-+            speech_threshold=args.vad_threshold,
-+            ask_after_silence=args.turn_ask_after,
-+            turn_threshold=args.turn_threshold,
-+            end_after_silence=args.end_after_silence,
-+            min_command_seconds=args.min_command,
-+        )
-+        _LOGGER.info("Endpointing: %s", endpointing)
-+
-     # 3. Run the wyoming server.
-     server = AsyncServer.from_uri(args.uri)
-     model_lock = asyncio.Lock()
-@@ -177,6 +212,7 @@
-     await server.run(partial(
-         ParakeetEventHandler, info, model, model_lock,
-         default_language=args.language,
-+        endpointing=endpointing,
-     ))
- 
- 
-Binary files a/src/wyoming_parakeet_npu/__pycache__/endpointing.cpython-314.pyc and b/src/wyoming_parakeet_npu/__pycache__/endpointing.cpython-314.pyc differ
-Binary files a/src/wyoming_parakeet_npu/__pycache__/handler.cpython-314.pyc and b/src/wyoming_parakeet_npu/__pycache__/handler.cpython-314.pyc differ
-Binary files a/src/wyoming_parakeet_npu/__pycache__/__init__.cpython-314.pyc and b/src/wyoming_parakeet_npu/__pycache__/__init__.cpython-314.pyc differ
-Binary files a/src/wyoming_parakeet_npu/__pycache__/__main__.cpython-314.pyc and b/src/wyoming_parakeet_npu/__pycache__/__main__.cpython-314.pyc differ
-Binary files a/src/wyoming_parakeet_npu/__pycache__/shims.cpython-314.pyc and b/src/wyoming_parakeet_npu/__pycache__/shims.cpython-314.pyc differ

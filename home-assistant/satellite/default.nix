@@ -110,6 +110,13 @@
       pkgs.ours.wohnzimmer-wake-words
     ];
     peripheralApi = true; # for the LED ring and the activation log
+    # Send audio in 32 ms chunks (default 64 ms): SRV-VOICE's end-of-speech
+    # detection sees the pause sooner. Replay of 414 real commands (Nov 14):
+    # 20 ms less waiting (median), same errors.
+    extraArgs = [
+      "--audio-input-block-size"
+      "512"
+    ];
     # Every activation with its audio, to judge false and missed wakes.
     activationLog = {
       enable = true;
