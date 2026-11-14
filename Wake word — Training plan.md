@@ -79,6 +79,36 @@ Own microWakeWord models for **Computer** and **Alexa**, trained on this room an
   | Alexa new | 0.95 | 13/14 | 0.30 |
 
   A try counts as caught when the score crosses the threshold during it (quick repeats 2–3 s apart fall into the 5 s refractory of the first detection but were heard). Day 1 has no Computer tries from Marie, so her rate is unmeasured.
+- **Deployed** Nov 12 14:47 as `pkgs/by-name/wohnzimmer-wake-words` ("Computer (Wohnzimmer)", "Alexa (Wohnzimmer)"); thresholds 0.97 / 0.95, set in HA (the sensitivity belongs to the wake word slot; the manifest's `probability_cutoff` is only the fallback). Room recording continues as `room-recording-nix` in the satellite config (stops itself under 2 GB free).
+- **First live window** (14:47–17:13, every moment labelled on a second page, scratchpad `label2/`):
+
+  | Speaker | Word | Woke | Missed |
+  |---|---|---|---|
+  | Charlotte | Computer | 9 | 1 (quiet, 0.38) |
+  | Charlotte | Alexa | 4 | 0 |
+  | Marie | Alexa | 5 | 5 (0.0–0.4; once 0.94, then woke on the retry) |
+  | misfire | Computer 3, Alexa 11 | 0 | – |
+
+  - Misfires are mostly coughing, scoring 0.38–0.90: below the thresholds, so none woke. Don't lower the thresholds; use them as hard negatives in the next run.
+  - Marie's misses are as loud as her hits and transcribe clearly as "Alexa"; the same phrase seconds apart scores 0.01 once and 1.0 the next time. Neither stride phase nor the preceding audio (Sonos reply) explains them: scored in isolation, they stay low.
+  - **Likely cause: no pause after the word.** Charlotte says "Alexa; …" / "Computer? …"; Marie runs straight on ("AlexaStrahler an") and won't change that. Every training positive has a pause after the word (synthetic clips end at the word or at a sentence pause; real tries were cut at the word end). Cut after the word with room noise appended, two of her four clear misses score high (0.06 → 0.87, 0.75 → 0.99); the other two follow straight on a Sonos reply and couldn't be isolated cleanly. Likely, not proven.
+  - **Sliding window size doesn't help** (`room/score_raw.py` keeps the raw outputs, `room/window.py` compares N = 1–5 on both days): Marie 5/10 at every N, even N = 1; smaller N only adds false wakes. Her raw outputs never get high, so the model seems to fire a moment after the word, once the quiet it always heard in training follows. Window stays at 5.
+- **Next run, for Marie:**
+  - Real tries cut 0.15–0.3 s after the word end instead of at it, so the start of the command is in the clip. Her run-on tries are the examples that matter.
+  - Pocket TTS "Alexa mach das Licht an" (and Computer) without punctuation, cut shortly after the word; the cut point from the transcriber's word timings (still to check that parakeet gives them).
+  - Charlotte's paused tries stay in. Post-deploy misfires (coughs) in as hard negatives.
+- **Loud tries do worse** (Charlotte noticed quieter tries work better). New model's score vs. the try's level (loudest 0.5 s), day 1 plus the labelled post-deploy tries: below −30 dBFS 27/27 caught; −30…−20 about 9/10; −20…−15 6/7; above −15 dBFS 3/5 (two of them clipping). Cause, from the training setup (microWakeWord augmentation as wakesmith runs it): every clip gets a random gain of **−45…0 dB, never louder**, so the training speech is mostly far quieter than live speech. Sources before the gain: Piper median −18 dBFS, Pocket −30…−34, real tries −23…−25; after it the median is around −40 (Piper) to −56 (Pocket), and only ~7 % of Piper examples (~0 % of Pocket) are louder than −20 dBFS. Live tries are mostly −35…−15.
+  - Also from the same code: each clip is placed **0.2 s before the end** of the training window (jitter 0.195–0.205 s), filled with background noise only. So the model learns to fire ~0.2 s after the word, after a stretch without speech: the mechanism behind Marie's run-on misses.
+  - **The array's AGC adds to it.** XVF-3000 AGC on with chip defaults (our tuning doesn't touch it), read from the chip Nov 12 18:30: `AGCONOFF 1`, `AGCMAXGAIN 31.6` (+30 dB), `AGCGAIN 12.2` (+22 dB at that moment), `AGCDESIREDLEVEL 0.005`, `AGCTIME 0.98` s. In a quiet room it turns itself up, and a loud "Alexa" at the start of a sentence arrives before it can turn down (~1 s): the loudest tries clip (18:14:41, −14.5 dBFS, full scale, score 0.22; two of the five loudest on day 1).
+    - Options, to compare in one experiment (values written to the chip directly, forgotten on replug; scores by loudness and false wakes per evening, as in the analysis above):
+      1. **Lower ceiling:** AGC stays on, `AGCMAXGAIN` 4–6 (+12–15 dB instead of +30). Keeps some levelling for distant speech; a quiet room can no longer pump the gain up so far that a loud onset clips.
+      2. **Off, fixed gain:** `AGCONOFF = 0`, `AGCGAIN` around 4 (+12 dB): a loud try would land around −24 dBFS instead of clipping, a quiet one around −48. Most predictable: level in = level out, which is what the training's gain augmentation assumes, and the model's own frontend (PCAN) already normalises level.
+      3. Not worth trying: a faster `AGCTIME` (minimum 0.1 s). The word itself lasts ~0.5 s, so a fast AGC would pump during it and distort its envelope instead of preventing the clipping.
+    - **Not now:** it changes the audio of the recording that's collecting material for the retrain. Run it together with the retrain and with **HPFONOFF 2 → 3** (see below): either change both first and record with the new settings, or retrain on the current settings and change them afterwards (the gain augmentation below should make the model less level-dependent either way).
+  - Next run: bring all positive sources to one speech level first (Pocket sits 15 dB below Piper), then a gain range that matches live levels (about −50…−12 dBFS, some clipping via the existing TanhDistortion). Needs a small change to wakesmith's augmentation settings (`mww.py`, `_AUG`), as they aren't project options.
+  - First collect more of Marie's tries from the running recording; label in batches (label2 page). Hold some of hers out, so her rate is measurable.
+
+- **High-pass filter is at 125 Hz, not 180 Hz.** The chip reads `HPFONOFF 2`, the config says 3: the tuning service was a plain oneshot, run only when the array appears on USB (last boot Nov 10, when the config still said 2), so the change to 3 never reached the chip. Everything recorded since Nov 10, all training material from the room and the post-deploy data, is at HPF 2. Fixed in `modules/nixos/respeaker-mic-array.nix` (Nov 12, not deployed): the service now stays active while the array is plugged in (bound to its device), so a deploy that changes the parameters reapplies them. After the first deploy with this change it still needs one reboot or replug before the device unit exists. The config is set back to `HPFONOFF = 2` (comment in `home-assistant/satellite/default.nix`), so a reboot doesn't change the recording conditions; switch to 3 together with the AGC experiment above.
 
 ## Time
 

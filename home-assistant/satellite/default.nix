@@ -82,9 +82,15 @@
     # 180 Hz high-pass instead of 70 Hz against music bass and male news
     # voices driving the AGC (wake word models listen at ~300-3000 Hz),
     # and no comfort noise.
+    #
+    # HPFONOFF: 3 (180 Hz) was the plan, but until Nov 12 the tuning service
+    # only ran on boot/replug, so the chip has been on 2 (125 Hz) since Nov 10
+    # and all recordings for the wake word retrain are at 2. Stays at 2 until
+    # that retrain; then 3, together with the AGC experiment (see "Wake word —
+    # Training plan.md").
     tuning = {
       MIN_NN_SR = 0.15;
-      HPFONOFF = 3;
+      HPFONOFF = 2;
       CNIONOFF = 0;
     };
   };

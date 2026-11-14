@@ -60,7 +60,7 @@ in
       SUBSYSTEM=="usb", ATTR{idVendor}=="2886", ATTR{idProduct}=="0018", MODE="0660", GROUP="respeaker"
     ''
     + lib.optionalString (cfg.tuning != { }) ''
-      ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2886", ATTR{idProduct}=="0018", TAG+="systemd", ENV{SYSTEMD_WANTS}+="respeaker-tuning.service"
+      ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="2886", ATTR{idProduct}=="0018", TAG+="systemd", ENV{SYSTEMD_ALIAS}+="/sys/subsystem/usb/respeaker", ENV{SYSTEMD_WANTS}+="respeaker-tuning.service"
     '';
 
     systemd.services.respeaker-leds = lib.mkIf cfg.leds {
@@ -81,8 +81,16 @@ in
 
     systemd.services.respeaker-tuning = lib.mkIf (cfg.tuning != { }) {
       description = "Apply ReSpeaker XMOS DSP tuning parameters";
+      # Stays active while the array is plugged in, so a deploy that changes
+      # the parameters restarts it and they reach the chip right away (a plain
+      # oneshot was inactive after boot, and changed values only arrived with
+      # the next replug or reboot). Unplugging stops it, and the udev rule
+      # starts it again on the next plug-in.
+      bindsTo = [ "sys-subsystem-usb-respeaker.device" ];
+      after = [ "sys-subsystem-usb-respeaker.device" ];
       serviceConfig = {
         Type = "oneshot";
+        RemainAfterExit = true;
         ExecStart = "${lib.getExe' cfg.package "respeaker-tuning-apply"} ${pkgs.writeText "respeaker-tuning.json" (builtins.toJSON cfg.tuning)}";
         DynamicUser = true;
         SupplementaryGroups = [ "respeaker" ];
