@@ -97,9 +97,9 @@ def test_resolve_by_set_duration(book):
 def test_resolve_by_duration_after_extension(book):
     five, _, _ = three(book)
     book.extend(five, MIN, now=0)
-    # Still "the 5-minute timer", and also "the 6-minute timer".
+    # Still "the 5-minute timer", and only that: the name doesn't change.
     assert resolve(book.active(), Selector(duration=5 * MIN), now=0) == [five]
-    assert resolve(book.active(), Selector(duration=6 * MIN), now=0) == [five]
+    assert resolve(book.active(), Selector(duration=6 * MIN), now=0) == []
 
 
 def test_resolve_by_label_fuzzy(book):

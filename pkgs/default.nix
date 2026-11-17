@@ -27,6 +27,10 @@ basePackages
         brother_ptouch = callPackage ./by-name/home-assistant/custom-components/brother-ptouch.nix {
           src = inputs.haos-labelprinter;
         };
+        # nixpkgs' package, built from the local checkout.
+        closest_intent = pkgs.home-assistant-custom-components.closest_intent.overrideAttrs {
+          src = inputs.hass-closest-intent;
+        };
       };
     }
     // inputs.hass-custom-integrations.packages.${pkgs.stdenv.hostPlatform.system};

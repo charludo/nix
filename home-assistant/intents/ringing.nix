@@ -2,28 +2,40 @@
 let
   e = config.hass.entities;
   r = lib.ha.remembrance;
-  inherit (r) area callService secondsOf;
+  inherit (r) area callService;
 
-  # Jinja: did `Stopp` just end an alarm that wakes up to music?
-  musicDismissed = ''
-    ${r.jinja}
-    {%- set res = action_response -%}
-    {%- set ns = namespace(music=false) -%}
-    {%- if res.status == 'ok' -%}
-      {%- for i in res['items'] if i.kind == 'alarm' and wake_playlist(i.description) -%}
-        {%- set ns.music = true -%}
-      {%- endfor -%}
-    {%- endif -%}
-    {%- set music = ns.music -%}
-  '';
+  # Snooze what rings (or rang) of `kind`; `verb`: "Okay, ich <verb> dich …",
+  # `none`: the answer when nothing of that kind rang.
+  snooze = kind: verb: none: sentences: {
+    inherit sentences;
+    lists.remembrance_text.wildcard = true;
+    script = {
+      action = callService "snooze" {
+        inherit kind area;
+        delay_text = "{{ text }}";
+      };
+      speech.text = ''
+        ${r.jinja}
+        {%- set res = action_response -%}
+        {%- if res.status == 'ok' -%}
+          {%- set delay = res.parsed.delay | float(0) -%}
+          Okay, ich ${verb} dich {{ 'in ' ~ dauer(delay) if delay < 3600 else zeitpunkt(res.parsed.at) }} noch mal.
+        {%- elif res.reason == 'in the past' -%}Dieser Zeitpunkt ist schon vorbei.
+        {%- elif res.status == 'no_match' -%}${none}
+        ${r.notUnderstood}
+        {%- else -%}Das hat nicht geklappt.
+        {%- endif -%}
+      '';
+    };
+  };
 in
 {
   hass.voice.intents = {
-    # The one "off": whatever rings (timer, reminder, alarm) is dismissed and
-    # the music plays on; with nothing ringing, the speakers go quiet
-    # (playback and any announcement). Silent (the quiet is the answer),
-    # except for a music wake-up: the playlist keeps playing, so "Wecker
-    # beendet" (ducked over it) says the alarm itself is over.
+    # The one "off", for everything at once: whatever rings (timer,
+    # reminder, alarm) is dismissed, a ring round already playing is cut off
+    # (else its chime and text play to the end, a few seconds after the
+    # "Aus"), playback stops (music, wake-up music too, news), and the
+    # speakers go quiet (announcements, TTS). Silent: the quiet is the answer.
     Stopp = {
       sentences = [
         "Stopp"
@@ -43,65 +55,50 @@ in
             response_variable = "res";
           }
           {
-            "if" = [
-              {
-                condition = "template";
-                value_template = "{{ res.status != 'ok' }}";
-              }
+            action = "script.turn_off";
+            target.entity_id = [
+              "script.remembrance_ring"
+              "script.remembrance_ring_speaker"
             ];
-            "then" = [
-              {
-                action = "tts_relay.silence";
-                data.entity_id = [
-                  e.media_player.living_room
-                  e.media_player.office
-                ];
-              }
+          }
+          # Playback itself: Music Assistant's players (music, wake-up
+          # music), which a stop on the Sonos alone may only pause. News
+          # plays on the Sonos, which the silence below stops.
+          {
+            action = "media_player.media_stop";
+            target.entity_id = [
+              e.media_player.living_room_2
+              e.media_player.office_2
             ];
+            continue_on_error = true;
           }
           {
-            stop = "";
-            response_variable = "res";
+            action = "tts_relay.silence";
+            data.entity_id = [
+              e.media_player.living_room
+              e.media_player.office
+            ];
           }
         ];
-        # tts_relay's voice effect, decided per call: "silent" drops the
-        # reply, an empty one lets it play.
+        # tts_relay's voice effect: "silent" drops the reply.
         card = {
           type = "voice_effect";
-          title = "${musicDismissed}{{ '' if music else 'silent' }}";
+          title = "silent";
           content = "";
         };
-        speech.text = "${musicDismissed}{{ 'Wecker beendet.' if music else '' }}";
+        speech.text = "";
       };
     };
 
-    # Ring again: what is ringing, else what rang last. No duration: the
-    # configured snooze delay.
-    NochMal = {
-      sentences = r.expand { "<dauer>" = r.durationShapes ""; } [
-        "In <dauer> noch mal"
-        "Erinnere mich in <dauer> noch mal"
-        "Noch <dauer>"
-        "Schlummern"
-        "Später noch mal"
-      ];
-      lists = { inherit (r.lists) timer_zahl; };
-      script = {
-        action = callService "snooze" {
-          delay = "{{ ${secondsOf ""} }}";
-          inherit area;
-        };
-        speech.text = ''
-          ${r.jinja}
-          {%- set res = action_response -%}
-          {%- if res.status == 'ok' -%}
-            {%- set i = res['items'][0] -%}
-            {%- set secs = i.remaining if i.kind == 'timer' else as_timestamp(i.next_ring) - as_timestamp(now()) -%}
-            Okay, in {{ dauer(secs) }} noch mal.
-          {%- else -%}Gerade gab es nichts, was ich wiederholen könnte.
-          {%- endif -%}
-        '';
-      };
-    };
+    # Ring again, by kind (timers don't snooze): what is ringing, else what
+    # rang last. When as said, read with Duckling ("10 Minuten", "in 10
+    # Minuten", "morgen um 17 Uhr"); the answer says when it rings again.
+    WeckerSchlummern = snooze "alarm" "wecke" "Gerade hat kein Wecker geklingelt." [
+      "[noch] {remembrance_text:text} schlummern"
+      "Weck mich in {remembrance_text:text} noch mal"
+    ];
+    ErinnerungNochMal = snooze "reminder" "erinnere" "Gerade gab es keine Erinnerung." [
+      "Erinnere mich {remembrance_text:text} noch mal"
+    ];
   };
 }

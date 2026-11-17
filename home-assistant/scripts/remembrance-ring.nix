@@ -27,8 +27,11 @@ let
     map (r: lib.nameValuePair r.target r.volume) (lib.filter (r: r.volume != null) config.hass.ttsRelay)
   );
   announceVolume = "{{ ((${builtins.toJSON announceVolumes}.get(target) or 0.3) * 100) | round | int }}";
-  musicVolume = "{{ ([0.10 + 0.03 * ((round | int(1)) - 1), 0.40] | min) if gentle else 0.30 }}";
-  chimeVolume = "{{ ([15 + 5 * (round | int(1)), 50] | min) if gentle else 40 }}";
+  # "Sanft": louder with time (seconds since the first round), whatever the
+  # rounds' rhythm: chime +5 and music +0.03 every 10 s.
+  elapsed = "((round | int(1)) - 1) * ${toString config.hass.remembrance.settings.ring.alarm.interval}";
+  musicVolume = "{{ ([0.10 + 0.003 * ${elapsed}, 0.40] | min) if gentle else 0.30 }}";
+  chimeVolume = "{{ ([20 + 0.5 * ${elapsed}, 50] | min) | round | int if gentle else 40 }}";
   musicRound = [
     {
       "if" = [
@@ -71,25 +74,27 @@ let
     alarm = sounds.alarmclock;
   };
 
-  # What the first round says, from the item remembrance passes. Reminders:
-  # how long until it starts, and when the next reminder of the same
-  # occurrence comes (`next_offset`, seconds before the start).
+  # What a reminder says (twice), from the item remembrance passes: what
+  # about, how long until it starts, where. Rendered for every kind, but
+  # only reminders have `offset` (an undefined one aborts the script).
   text = ''
     ${lib.ha.remembrance.jinja}
-    {%- if kind == 'timer' -%}
-      Der {{ timer_name({'label': label | default(none), 'duration': duration | default(0)}) }} ist abgelaufen.
-    {%- elif kind == 'reminder' -%}
-      {%- set o = offset | float(0) -%}
-      Erinnerung: {{ label }}{{ ' in ' ~ dauer(o) if o >= 60 else "" }}.
+    {%- if kind == 'reminder' -%}
+      {%- set o = offset | default(0) | float(0) -%}
+      Hier ist deine Erinnerung: {{ label }}{{ ' in ' ~ dauer(o) if o >= 60 else "" }}.
       {%- if location %} Ort: {{ location }}.{% endif -%}
-      {%- if next_offset is not none -%}
-        {%- set n = next_offset | float(0) -%}
-        {%- if n >= 60 %} Ich erinnere dich {{ dauer(n) }} vorher noch mal.
-        {%- elif n > -60 %} Ich erinnere dich zum Beginn noch mal.
-        {%- endif -%}
+    {%- endif -%}
+  '';
+  # After the second time: when the next reminder of the same occurrence
+  # comes (`next_offset`: seconds before the start; this one rang `offset`
+  # before it), if any.
+  again = ''
+    ${lib.ha.remembrance.jinja}
+    {%- if kind == 'reminder' and next_offset is defined and next_offset is not none and next_offset != "" -%}
+      {%- set wait = offset | default(0) | float(0) - next_offset | float(0) -%}
+      {%- if wait > 0 -%}
+        Ich erinnere dich {{ 'in ' ~ dauer(wait) if wait < 3600 else zeitpunkt((now() + timedelta(seconds=wait)).isoformat()) }} erneut.
       {%- endif -%}
-    {%- else -%}
-      Guten Morgen, es ist {{ now().strftime('%-H:%M') }}.{{ ' ' ~ label ~ '.' if label and label != 'Wecker' else "" }}
     {%- endif -%}
   '';
 
@@ -104,67 +109,53 @@ let
     // lib.optionalAttrs (extra != { }) { inherit extra; };
   };
 
-  # The sound, then (first round only) the text after it has played, both
-  # with `extra` (the volume).
-  ringKind = kind: extra: [
-    (playSound kind extra)
-    {
-      "if" = [
-        {
-          condition = "template";
-          value_template = "{{ round | int(1) == 1 }}";
-        }
-      ];
-      "then" = [
-        # Reminders: a breather between the chime and the text.
-        {
-          delay.milliseconds =
-            lib.ha.soundDurationMs pkgs sound.${kind} + (if kind == "reminder" then 1000 else 0);
-        }
-        {
-          action = "media_player.play_media";
-          target.entity_id = "{{ target }}";
-          data = {
-            announce = true;
-            media_content_id = "media-source://tts/${ttsEntity}?message={{ text | urlencode }}";
-            media_content_type = "music";
+  # Reminders: chime, the text; 5 s after the text has been said
+  # (estimated: Pocket TTS says ~18 characters a second) the same again,
+  # then when it comes next. Stops early if dismissed in between.
+  reminderTwice =
+    let
+      volume.volume = announceVolume;
+    in
+    [
+      {
+        repeat.count = 2;
+        repeat.sequence = [
+          (playSound "reminder" volume)
+          # A breather between the chime and the text.
+          { delay.milliseconds = lib.ha.soundDurationMs pkgs sound.reminder + 1000; }
+          {
+            action = "media_player.play_media";
+            target.entity_id = "{{ target }}";
+            data = {
+              announce = true;
+              media_content_id = "media-source://tts/${ttsEntity}?message={{ (text ~ (' ' ~ again if repeat.last and again else '')) | urlencode }}";
+              media_content_type = "music";
+              extra = volume;
+            };
           }
-          // lib.optionalAttrs (extra != { }) { inherit extra; };
-        }
-      ];
-    }
-  ];
-
-  # Reminders: chime and text, 5 s after the text has been said (estimated:
-  # Pocket TTS says ~18 characters a second) the same again, unless it was
-  # dismissed in between.
-  reminderTwice = [
-    {
-      repeat.count = 2;
-      repeat.sequence = ringKind "reminder" { volume = announceVolume; } ++ [
-        {
-          "if" = [
-            {
-              condition = "template";
-              value_template = "{{ repeat.first }}";
-            }
-          ];
-          "then" = [
-            { delay.seconds = "{{ (1.5 + (text | length) / 18 + 5) | round(1) }}"; }
-            {
-              "if" = [
-                {
-                  condition = "template";
-                  value_template = "{{ id not in state_attr('binary_sensor.remembrance_ringing', 'items') | default([], true) | map(attribute='id') | list }}";
-                }
-              ];
-              "then" = [ { stop = "dismissed"; } ];
-            }
-          ];
-        }
-      ];
-    }
-  ];
+          {
+            "if" = [
+              {
+                condition = "template";
+                value_template = "{{ repeat.first }}";
+              }
+            ];
+            "then" = [
+              { delay.seconds = "{{ (1.5 + (text | length) / 18 + 5) | round(1) }}"; }
+              {
+                "if" = [
+                  {
+                    condition = "template";
+                    value_template = "{{ id not in state_attr('binary_sensor.remembrance_ringing', 'items') | default([], true) | map(attribute='id') | list }}";
+                  }
+                ];
+                "then" = [ { stop = "dismissed"; } ];
+              }
+            ];
+          }
+        ];
+      }
+    ];
 
   # The speakers of the given areas; none given, or none of them has a
   # speaker: all speakers.
@@ -180,7 +171,8 @@ in
 {
   # Called by remembrance once per ring round, with the item's fields as
   # variables plus `round` (from 1). Rings on the Sonos of each of its
-  # `areas` at once (none: everywhere); the first round also says what rang.
+  # `areas` at once (none: everywhere). Timers and alarms only ring (the
+  # chime, or an alarm's music), every round; reminders also say what rang.
   hass.scripts.remembrance_ring = {
     alias = "Remembrance ring";
     icon = "mdi:bell-ring";
@@ -203,7 +195,7 @@ in
       {
         variables = {
           speakers = speakersOf "(areas if areas is sequence and areas is not string else [])";
-          inherit text;
+          inherit text again;
           playlist = playlistOf;
           gentle = gentleOf;
         };
@@ -220,6 +212,7 @@ in
               kind = "{{ kind }}";
               round = "{{ round | int(1) }}";
               text = "{{ text }}";
+              again = "{{ again }}";
               playlist = "{{ playlist }}";
               gentle = "{{ gentle }}";
             };
@@ -265,7 +258,7 @@ in
                     sequence = musicRound;
                   }
                 ];
-                default = ringKind "alarm" { volume = chimeVolume; };
+                default = [ (playSound "alarm" { volume = chimeVolume; }) ];
               }
             ];
           }
@@ -279,7 +272,7 @@ in
             sequence = reminderTwice;
           }
         ];
-        default = ringKind "timer" { volume = announceVolume; };
+        default = [ (playSound "timer" { volume = announceVolume; }) ];
       }
     ];
   };

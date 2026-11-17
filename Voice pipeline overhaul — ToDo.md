@@ -70,6 +70,13 @@ Not possible / dropped: Qwen3-ASR on the NPU (GenAI hands the NPU dynamic shapes
 
 Deployed: transcripts identical to the benchmark run. Encoder buckets 1.8/3.2/5/10 s, all compiled at startup (cached; ready ~12 s after start): 93 ms per command (was 105 ms with 5/10 s), accuracy unchanged. Commands in the corpus: 2.5 s median, 5.4 s max; longer audio is truncated to 10 s. A 20 s bucket needs ~11 GB to compile and gets OOM-killed even at 12 GB.
 
+- [ ] Idea, parked (Nov 15; not noticed in practice): **send the wake word to the STT too.** LVA starts streaming only after the wake chime (+0.12 s; `--listen-during-wake-sound` is off), and the model fires 0.1 s before to 0.2 s after the word ends. Run-on speech ("ComputerStrahler an") loses its first syllables, and short commands lose the German context ("Uhrzeit" → "What's that?").
+  - Replay of the 120 commands since Nov 12, same audio from 1 s before the detection, leading wake word stripped: 37 change intent, about 16 better and 6 worse ("Komm da." → "Strahler an.", "Nicht an." (switched the plant light on) → "Licht an.", three failed "Strahler an" at Nov 15 00:41 all right).
+  - A canned "Alexa" from another clip in front fixes the English mis-hearings but not the run-on tries: both causes are real.
+  - Doesn't work: `--listen-during-wake-sound` alone (23 of 120 change, about even), or a shorter pre-roll (0.5 s turns the word's tail into "Guter", "Wechsel", "Hexer" in front of the command).
+  - Needs: an LVA patch that sends its pre-roll ahead of the stream (~1 s), and the STT server stripping a leading "Computer"/"Alexa". A retrain with later cuts (Wake word — Training plan) would shorten the delay but not give the context.
+  - Scripts and data: scratchpad `live3/stt/` (`start.py`, `canned.py`, `late.py`).
+
 ## 2. Text-to-speech: Pocket TTS (German)
 
 Measured on SRV-VOICE (6 typical replies from "Erledigt." to a three-sentence weather report):

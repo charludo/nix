@@ -55,7 +55,10 @@ let
 
   outdated = "Ich kenne keine Abholtermine mehr, der Müllkalender muss aktualisiert werden.";
 
-  aliases = c: "(${lib.concatStringsSep "|" c.aliases})";
+  # One sentence per name of the collection: closest_intent expands each
+  # pattern into at most 16 forms, and with all names in one pattern most of
+  # them were cut off.
+  perAlias = c: patterns: lib.concatMap (alias: map (p: p alias) patterns) c.aliases;
 
   perCollection =
     c:
@@ -65,10 +68,10 @@ let
     in
     {
       "MuellWann_${c.slug}" = {
-        sentences = [
-          "Wann (muss|kommt) [der |die |das ]${aliases c}[ raus]"
-          "Wann wird [der |die |das ]${aliases c} abgeholt"
-          "Wann ist [der |die |das ]${aliases c}"
+        sentences = perAlias c [
+          (a: "Wann (muss|kommt) [der |die |das ]${a}[ raus]")
+          (a: "Wann wird [der |die |das ]${a} abgeholt")
+          (a: "Wann ist [der |die |das ]${a}")
         ];
         script.speech.text = prelude + ''
           {% set x = ${mine} %}
@@ -77,11 +80,11 @@ let
       };
 
       "MuellHeute_${c.slug}" = {
-        sentences = [
-          "Ist heute [der |die |das ]${aliases c}"
-          "(Kommt|Muss) heute [der |die |das ]${aliases c}[ raus]"
-          "Muss [der |die |das ]${aliases c} heute raus"
-          "Wird heute [der |die |das ]${aliases c} abgeholt"
+        sentences = perAlias c [
+          (a: "Ist heute [der |die |das ]${a}")
+          (a: "(Kommt|Muss) heute [der |die |das ]${a}[ raus]")
+          (a: "Muss [der |die |das ]${a} heute raus")
+          (a: "Wird heute [der |die |das ]${a} abgeholt")
         ];
         script.speech.text = prelude + ''
           {% set x = ${mine} %}

@@ -36,6 +36,19 @@
     description: A reminder's or alarm's time of day.
     selector:
       time:
+  text:
+    name: Timer as said
+    description: >-
+      A timer as a request names it, e.g. "60 Minuten Timer", "Eine Stunde
+      Timer", "Nudeltimer": its set duration and label, read with Duckling,
+      replace `duration` and `label`. Needs `duckling_url`.
+    selector:
+      text:
+  language:
+    name: Language
+    description: Of `text`; default Home Assistant's. Parsers so far - de.
+    selector:
+      language:
   area:
     name: Area
     description: Breaks ties between otherwise equal matches.
@@ -84,6 +97,20 @@ timer_adjust:
       name: Set time left
       selector:
         duration:
+    delta_text:
+      name: Change as said
+      description: >-
+        The change in words, e.g. "eine halbe Stunde", read with Duckling (in
+        `language`); the response's `parsed.delta` says what was understood.
+        Needs `duckling_url`.
+      selector:
+        text:
+    shorten:
+      name: Shorten
+      description: Remove `delta_text` instead of adding it.
+      default: false
+      selector:
+        boolean:
 
 timer_pause:
   name: Pause timer
@@ -207,7 +234,8 @@ snooze:
   name: Snooze
   description: >-
     Ring again later. Without a target, what is ringing, else what rang last
-    (in the area, if given).
+    (in the area, if given). The response's `parsed.at` says when it rings
+    again.
   fields:
     <<: *target
     delay:
@@ -215,6 +243,22 @@ snooze:
       description: Defaults to the configured snooze delay.
       selector:
         duration:
+    delay_text:
+      name: When, as said
+      description: >-
+        Instead of `delay`: "10 Minuten", "in 10 Minuten", "morgen um 17 Uhr",
+        read with Duckling (in `language`). Needs `duckling_url`.
+      selector:
+        text:
+    kind:
+      name: Kind
+      description: Only what is (or was) ringing of this kind.
+      selector:
+        select:
+          options:
+            - timer
+            - reminder
+            - alarm
 
 parse:
   name: Parse sentence
@@ -258,6 +302,65 @@ create_from_text:
       description: "Where it rings (none: everywhere)."
       selector:
         area:
+    description:
+      name: Description
+      description: >-
+        A reminder's or alarm's description, passed on uninterpreted (e.g. how
+        the ring script should wake you). Not read from the sentence.
+      selector:
+        text:
+          multiline: true
+
+alarm_delete_from_text:
+  name: Delete alarms from sentence
+  description: >-
+    Alarms as a request names them, gone. A repeat said ("werktags um 6")
+    deletes that repeating alarm; one occurrence ("morgen um 7", "um 7")
+    leaves out just that one (a one-off alarm is deleted); a day alone
+    ("morgen") leaves out every alarm that day. Without a time only with
+    `all`, else `no time`. The response says what was understood
+    (`parsed`). Needs `duckling_url`.
+  fields:
+    text:
+      name: Alarms as said
+      description: e.g. "morgen um 7", "werktags um 6:30", "für Samstag".
+      required: true
+      selector:
+        text:
+    all:
+      name: All
+      description: >-
+        Needed when no time is said ("alle Wecker für morgen"): every alarm
+        that day, or every repeating one on those days.
+      default: false
+      selector:
+        boolean:
+    language: *language
+    area:
+      name: Area
+      description: Breaks ties between otherwise equal matches.
+      selector:
+        area:
+
+reminder_delete_from_text:
+  name: Delete a reminder from sentence
+  description: >-
+    The reminder a request names, deleted: by what it is about ("den
+    Zahnarzt", matched fuzzily), when it rings ("morgen um 9", "morgen"), or
+    both. Several match: `ambiguous`. Needs `duckling_url`.
+  fields:
+    text:
+      name: Reminder as said
+      description: e.g. "den Zahnarzt", "morgen um 9", "den Zahnarzt morgen".
+      required: true
+      selector:
+        text:
+    language: *language
+    area:
+      name: Area
+      description: Breaks ties between otherwise equal matches.
+      selector:
+        area:
 
 query:
   name: Query
@@ -291,3 +394,11 @@ query:
       name: To
       selector:
         datetime:
+    when_text:
+      name: Window as said
+      description: >-
+        Instead of `from`/`to`: "heute", "nächsten Samstag", "am 17. April",
+        "nächste Woche", read with Duckling (in `language`); the response's
+        `parsed` has the window. Needs `duckling_url`.
+      selector:
+        text:

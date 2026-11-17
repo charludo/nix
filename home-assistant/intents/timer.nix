@@ -1,34 +1,20 @@
 { lib, ... }:
 let
   r = lib.ha.remembrance;
-  inherit (r) area callService secondsOf;
+  inherit (r) area callService;
 
-  # "den Timer", "den 5-Minuten-Timer" (speech-to-text hyphens arrive as
-  # spaces in closest_intent), "den Nudel-Timer". The label is its own
-  # sentence, so the wildcard doesn't compete with a duration in one pattern.
-  # Timers are named by minutes only; hours and seconds are rare enough.
-  timerShapes = [
-    "Timer"
-    "{timer_zahl:set_minutes} Minuten Timer"
-    "{timer_label:label} Timer"
-  ];
-
-  expand = r.expand {
-    # Changes in one unit only: "um eine Minute", "um 30 Sekunden".
-    "<aenderung>" = lib.take 3 (r.durationShapes "delta_");
-    "<timer>" = timerShapes;
-  };
-
+  # `label`: a timer's name as said ("Nudel", "60 Minuten", "Eine Stunde");
+  # `text`: a duration as said. Both read by remembrance (with Duckling).
   lists = {
-    inherit (r.lists) timer_zahl;
     timer_label.wildcard = true;
+    remembrance_text.wildcard = true;
   };
 
-  # What was said about the timer, and where (only breaks ties). Unsaid
-  # fields render empty or 0, which remembrance treats as not given.
-  target = {
-    label = "{{ label | default('') }}";
-    duration = "{{ ${secondsOf "set_"} }}";
+  # A timer as said ("Timer", "60 Minuten Timer", "Eine Stunde Timer",
+  # "Nudel Timer"): remembrance reads its set duration or label from it, and
+  # with neither takes the only timer.
+  named = {
+    text = "{{ label ~ ' ' if label is defined else '' }}Timer";
     inherit area;
   };
 
@@ -39,101 +25,97 @@ let
     {%- set r = action_response -%}
     {%- set t = r['items'][0] if r['items'] else none -%}
     {%- if r.status == 'ok' -%}${ok}
-    {%- elif r.status == 'ambiguous' -%}Welchen meinst du? {{ timer_choices(r.candidates) }}?
+    {%- elif r.status == 'ambiguous' -%}{{ timer_choices(r.candidates) }}
     {%- elif r.status == 'no_match' -%}Diesen Timer gibt es nicht.
+    {%- elif r.reason == 'no duration' -%}Ich habe nicht verstanden, um wie viel.
     {%- else -%}Das geht bei {{ 'dem ' ~ timer_name(t) if t else 'diesem Timer' }} gerade nicht.
     {%- endif -%}
   '';
 
   mkIntent = sentences: service: data: ok: {
-    sentences = expand sentences;
-    inherit lists;
+    inherit sentences lists;
     script = {
       action = callService service data;
       speech.text = speak ok;
     };
   };
 
-  # "<timer> um 1 Minute verlängern" / "verkürzen"; `sign` 1 or -1.
+  # "[<name>] Timer um <duration> <verb>", "<Imperative> den [<name>] Timer
+  # um <duration>"; any duration Duckling reads. The timer keeps its name:
+  # "the 20 minute timer" stays that.
   adjust =
-    verb: imperative: participle: extra: sign:
+    verbs: imperatives: shorten: participle:
     mkIntent
-      (
-        [
-          "<timer> um <aenderung> ${verb}"
-          "${imperative} den <timer> um <aenderung>"
-        ]
-        ++ extra
-      )
+      [
+        "{timer_label:label} Timer um {remembrance_text:text} (${verbs})"
+        "Timer um {remembrance_text:text} (${verbs})"
+        "(${imperatives}) den {timer_label:label} Timer um {remembrance_text:text}"
+        "(${imperatives}) den Timer um {remembrance_text:text}"
+      ]
       "timer_adjust"
-      (target // { delta = "{{ ${toString sign} * ${secondsOf "delta_"} }}"; })
-      "{{ timer_name(t) }} um {{ dauer(${secondsOf "delta_"}) }} ${participle}, noch {{ dauer(t.remaining) }}.";
+      (
+        named
+        // {
+          delta_text = "{{ text }}";
+          inherit shorten;
+        }
+      )
+      "{{ timer_name(t) }} um {{ dauer(r.parsed.delta | abs) }} ${participle}, noch {{ dauer(t.remaining) }}.";
 
-  # Started from the sentence as said: remembrance reads the duration
-  # ("anderthalb Stunden", "3,5 Minuten") and the label ("Nudeltimer",
-  # "Nudel Timer", "Timer für die Nudeln").
-  startIntents = r.fromText {
-    name = "TimerStellen";
-    kind = "timer";
-    sentences = [
-      "Stelle einen {remembrance_text:text}"
-      "Starte einen {remembrance_text:text}"
-      "Timer {remembrance_text:text}"
-      # closest_intent drops what comes before a pattern: "Nudel Timer auf …"
-      # needs its own.
-      "{remembrance_text:label} Timer auf {remembrance_text:text}"
-      "{remembrance_text:text} ab jetzt"
-    ];
-    speech = ''
-      ${r.jinja}
-      {%- set res = action_response -%}
-      {%- set t = res['items'][0] if res['items'] else none -%}
-      {%- if res.status == 'ok' -%}
-        {{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else "" }} - ab jetzt.
-      {%- elif res.reason == 'no duration' -%}Ich habe nicht verstanden, wie lange der Timer laufen soll.
-      ${r.notUnderstood}
-      {%- else -%}Das hat nicht geklappt.
-      {%- endif -%}
-    '';
-  };
 in
 {
-  hass.voice.intents = startIntents // {
-    TimerVerlaengern = adjust "verlängern" "Verlängere" "verlängert" [
-      "<aenderung> (hinzufügen|dazu|drauf)"
-      "Füge <aenderung> hinzu"
-      "Füge dem <timer> <aenderung> hinzu"
-    ] 1;
-    TimerVerkuerzen = adjust "verkürzen" "Verkürze" "verkürzt" [
-      "<aenderung> abziehen"
-      "Ziehe <aenderung> ab"
-      "Ziehe vom <timer> <aenderung> ab"
-    ] (-1);
+  hass.voice.intents = {
+    # "10 Minuten Timer[, ab jetzt]", "10 Minuten, ab jetzt", "Stelle einen
+    # Timer auf 10 Minuten", "[Nudel] Timer (auf|für) 10 Minuten [starten]":
+    # any duration Duckling reads ("anderthalb Stunden", "3,5 Minuten").
+    # One intent: remembrance gets the same sentence for every pattern, as
+    # "[<label>] Timer auf <duration>". Said without a duration (chatter
+    # caught by a pattern), nothing starts.
+    # "Nudeltimer" (one word) works too: closest_intent splits the compound.
+    TimerStellen = {
+      sentences = [
+        # "auf"/"für" required: "<name> Timer <text>" and "Timer <text>" took
+        # any sentence containing "Timer" ("Verlängere den Timer um …"
+        # started a timer).
+        "{timer_label:label} Timer (auf|für) {remembrance_text:text} [starten]"
+        "Stelle einen Timer auf {remembrance_text:text}"
+        "Timer (auf|für) {remembrance_text:text} [starten]"
+        "{remembrance_text:text} Timer ab jetzt"
+        "{remembrance_text:text} Timer"
+        "{remembrance_text:text} ab jetzt"
+      ];
+      inherit lists;
+      script = {
+        action = callService "create_from_text" {
+          kind = "timer";
+          text = "{{ label ~ ' ' if label is defined else '' }}Timer auf {{ text }}";
+          inherit area;
+        };
+        speech.text = ''
+          ${r.jinja}
+          {%- set res = action_response -%}
+          {%- set t = res['items'][0] if res['items'] else none -%}
+          {%- if res.status == 'ok' -%}
+            {{ timer_name(t) }}{{ ' auf ' ~ dauer(t.duration) if t.label else "" }} - ab jetzt.
+          {%- elif res.reason == 'no duration' -%}Ich habe nicht verstanden, wie lange der Timer laufen soll.
+          ${r.notUnderstood}
+          {%- else -%}Das hat nicht geklappt.
+          {%- endif -%}
+        '';
+      };
+    };
 
-    TimerPausieren = mkIntent [
-      "Pausiere den <timer>"
-      "Halte den <timer> an"
-      "<timer> (pausieren|anhalten)"
-    ] "timer_pause" target "{{ timer_name(t) }} pausiert, noch {{ dauer(t.remaining) }}.";
+    TimerVerlaengern = adjust "verlängern" "Verlängere" false "verlängert";
+    TimerVerkuerzen = adjust "verkürzen|reduzieren" "Verkürze|Reduziere" true "verkürzt";
 
-    TimerFortsetzen = mkIntent [
-      "Setze den <timer> fort"
-      "Lass den <timer> weiterlaufen"
-      "<timer> (fortsetzen|weiterlaufen lassen)"
-    ] "timer_resume" target "{{ timer_name(t) }} läuft weiter, noch {{ dauer(t.remaining) }}.";
-
+    # Without a name, the only timer (several: lists them).
     TimerLoeschen = mkIntent [
-      "(Lösche|Stoppe|Beende) den <timer>"
-      "Brich den <timer> ab"
-      "<timer> (löschen|abbrechen|stoppen|beenden)"
-    ] "timer_cancel" target "{{ timer_name(t) }} gelöscht.";
+      "{timer_label:label} Timer (löschen|abbrechen|beenden)"
+      "Timer (löschen|abbrechen|beenden)"
+    ] "timer_cancel" named "{{ timer_name(t) }} gelöscht.";
 
     TimerAlleLoeschen = {
-      sentences = [
-        "(Brich|Stoppe) alle Timer ab"
-        "Alle Timer (abbrechen|stoppen|löschen)"
-        "Lösche alle Timer"
-      ];
+      sentences = [ "Alle Timer (löschen|abbrechen|beenden)" ];
       script = {
         action = callService "timer_cancel" { all = true; };
         speech.text = ''
@@ -143,20 +125,21 @@ in
       };
     };
 
+    # Without a name, all timers.
     TimerRestzeit = {
-      sentences = expand [
-        "Wie lange läuft der <timer> noch"
-        "Wie lange noch"
-        "Wie viel Zeit (ist|bleibt|verbleibt) [noch] [auf dem Timer]"
-        "Wie viel Zeit (ist|bleibt|verbleibt) bis der Timer (geht|klingelt)"
+      sentences = [
+        "Wie lang[e] noch auf dem {timer_label:label} Timer"
+        "Wann geht der {timer_label:label} Timer"
+        "Wie lang[e] (ist|läuft) [noch] der {timer_label:label} Timer [noch]"
+        "Wie lang[e] noch"
+        "Wann geht [mein|der] Timer"
+        # "Wie lang ist mein Timer?" went to TimerStellen ("{text} Timer").
+        "Wie lang[e] (ist|läuft) [noch] (mein|der) Timer"
+        "Wie lang[e] läuft (mein|der) Timer noch"
       ];
       inherit lists;
       script = {
-        # Narrowed down only by what was said; otherwise all timers.
-        action = callService "query" {
-          kind = "timer";
-          inherit (target) label duration;
-        };
+        action = callService "query" ({ kind = "timer"; } // named);
         speech.text = ''
           ${r.jinja}
           {%- set items = action_response['items'] | rejectattr('state', 'eq', 'ringing') | list -%}

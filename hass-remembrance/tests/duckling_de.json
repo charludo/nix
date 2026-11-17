@@ -1,4 +1,23 @@
 {
+ "de_DE duration 3,5 Minuten Timer": [
+  {
+   "body": "3,5 Minuten",
+   "dim": "duration",
+   "end": 11,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Second": 210,
+    "normalized": {
+     "unit": "second",
+     "value": 210
+    },
+    "type": "value",
+    "unit": "second",
+    "value": 210
+   }
+  }
+ ],
  "de_DE duration 5 Minuten Timer ab jetzt": [
   {
    "body": "5 Minuten",
@@ -15,6 +34,44 @@
     "type": "value",
     "unit": "minute",
     "value": 5
+   }
+  }
+ ],
+ "de_DE duration 60 Minuten Timer": [
+  {
+   "body": "60 Minuten",
+   "dim": "duration",
+   "end": 10,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Minute": 60,
+    "normalized": {
+     "unit": "second",
+     "value": 3600
+    },
+    "type": "value",
+    "unit": "minute",
+    "value": 60
+   }
+  }
+ ],
+ "de_DE duration Eine Stunde Timer": [
+  {
+   "body": "Eine Stunde",
+   "dim": "duration",
+   "end": 11,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Hour": 1,
+    "normalized": {
+     "unit": "second",
+     "value": 3600
+    },
+    "type": "value",
+    "unit": "hour",
+    "value": 1
    }
   }
  ],
@@ -37,6 +94,9 @@
    }
   }
  ],
+ "de_DE duration Nudel Timer": [],
+ "de_DE duration Nudel-Timer": [],
+ "de_DE duration Nudeltimer Timer": [],
  "de_DE duration Starte den Eier-Timer mit zwei Stunden und eine halbe": [
   {
    "body": "zwei Stunden und eine halbe",
@@ -152,6 +212,7 @@
    }
   }
  ],
+ "de_DE duration Timer": [],
  "de_DE duration Timer auf 3,5 Minuten": [
   {
    "body": "3,5 Minuten",
@@ -209,6 +270,57 @@
    }
   }
  ],
+ "de_DE duration eineinhalb Stunden Timer": [
+  {
+   "body": "eineinhalb Stunden",
+   "dim": "duration",
+   "end": 18,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Minute": 90,
+    "normalized": {
+     "unit": "second",
+     "value": 5400
+    },
+    "type": "value",
+    "unit": "minute",
+    "value": 90
+   }
+  }
+ ],
+ "de_DE time         ": [],
+ "de_DE time          um 12 Uhr mittags": [
+  {
+   "body": "um 12 Uhr mittags",
+   "dim": "time",
+   "end": 26,
+   "latent": false,
+   "start": 9,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T12:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T12:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-30T12:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-31T12:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
  "de_DE time 6 Uhr morgens Wecker           ": [
   {
    "body": "6 Uhr morgens",
@@ -240,6 +352,37 @@
    }
   }
  ],
+ "de_DE time Dienstag": [
+  {
+   "body": "Dienstag",
+   "dim": "time",
+   "end": 8,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-11-03T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-11-03T00:00:00.000+01:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-11-10T00:00:00.000+01:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-11-17T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
  "de_DE time Erinnere mich am Samstag an den Müll": [
   {
    "body": "am Samstag",
@@ -266,6 +409,37 @@
       "grain": "day",
       "type": "value",
       "value": "2026-11-14T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time Erinnere mich an Blumen gießen am 17. April um 5 Uhr nachmittags": [
+  {
+   "body": "am 17. April um 5 Uhr nachmittags",
+   "dim": "time",
+   "end": 64,
+   "latent": false,
+   "start": 31,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2027-04-17T17:00:00.000+02:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2027-04-17T17:00:00.000+02:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2028-04-17T17:00:00.000+02:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2029-04-17T17:00:00.000+02:00"
      }
     ]
    }
@@ -324,6 +498,32 @@
    }
   }
  ],
+ "de_DE time Erinnere mich für den Zahnarzt morgen um 9": [
+  {
+   "body": "morgen um 9",
+   "dim": "time",
+   "end": 42,
+   "latent": false,
+   "start": 31,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T09:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T09:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T21:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
  "de_DE time Erinnere mich heute Abend an die Wäsche": [
   {
    "body": "heute Abend",
@@ -373,6 +573,27 @@
       "grain": "second",
       "type": "value",
       "value": "2026-10-28T14:10:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time Erinnere mich morgen um 10 Uhr vormittags an den Zahnarzt": [
+  {
+   "body": "morgen um 10 Uhr vormittags",
+   "dim": "time",
+   "end": 41,
+   "latent": false,
+   "start": 14,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T10:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T10:00:00.000+01:00"
      }
     ]
    }
@@ -483,6 +704,37 @@
   }
  ],
  "de_DE time Stelle einen Wecker": [],
+ "de_DE time Stelle einen Wecker               um 9": [
+  {
+   "body": "um 9",
+   "dim": "time",
+   "end": 38,
+   "latent": false,
+   "start": 34,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-28T21:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-28T21:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T09:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T21:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
  "de_DE time Stelle einen Wecker               um 9                              ": [
   {
    "body": "um 9",
@@ -731,6 +983,37 @@
    }
   }
  ],
+ "de_DE time Weck mich          um halb sieben": [
+  {
+   "body": "um halb sieben",
+   "dim": "time",
+   "end": 33,
+   "latent": false,
+   "start": 19,
+   "value": {
+    "grain": "minute",
+    "type": "value",
+    "value": "2026-10-28T18:30:00.000+01:00",
+    "values": [
+     {
+      "grain": "minute",
+      "type": "value",
+      "value": "2026-10-28T18:30:00.000+01:00"
+     },
+     {
+      "grain": "minute",
+      "type": "value",
+      "value": "2026-10-29T06:30:00.000+01:00"
+     },
+     {
+      "grain": "minute",
+      "type": "value",
+      "value": "2026-10-29T18:30:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
  "de_DE time Weck mich          um halb sieben mit Musik": [
   {
    "body": "um halb sieben",
@@ -757,6 +1040,37 @@
       "grain": "minute",
       "type": "value",
       "value": "2026-10-29T18:30:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time Weck mich am Samstag um 9 Uhr": [
+  {
+   "body": "am Samstag um 9 Uhr",
+   "dim": "time",
+   "end": 29,
+   "latent": false,
+   "start": 10,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-31T09:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-31T09:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-31T21:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-11-07T09:00:00.000+01:00"
      }
     ]
    }
@@ -951,6 +1265,372 @@
       "grain": "hour",
       "type": "value",
       "value": "2026-10-30T18:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time am 17. April": [
+  {
+   "body": "am 17. April",
+   "dim": "time",
+   "end": 12,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2027-04-17T00:00:00.000+02:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2027-04-17T00:00:00.000+02:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2028-04-17T00:00:00.000+02:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2029-04-17T00:00:00.000+02:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time am Samstag": [
+  {
+   "body": "am Samstag",
+   "dim": "time",
+   "end": 10,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-31T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-31T00:00:00.000+01:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-11-07T00:00:00.000+01:00"
+     },
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-11-14T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time den Zahnarzt": [],
+ "de_DE time den Zahnarzt morgen": [
+  {
+   "body": "morgen",
+   "dim": "time",
+   "end": 19,
+   "latent": false,
+   "start": 13,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-29T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-29T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time für morgen": [
+  {
+   "body": "morgen",
+   "dim": "time",
+   "end": 10,
+   "latent": false,
+   "start": 4,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-29T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-29T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time heute": [
+  {
+   "body": "heute",
+   "dim": "time",
+   "end": 5,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-28T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-28T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time morgen": [
+  {
+   "body": "morgen",
+   "dim": "time",
+   "end": 6,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-29T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-29T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time morgen um 5 Uhr früh": [
+  {
+   "body": "morgen um 5 Uhr früh",
+   "dim": "time",
+   "end": 20,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T05:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T05:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time morgen um 9": [
+  {
+   "body": "morgen um 9",
+   "dim": "time",
+   "end": 11,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T09:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T09:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T21:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time nächste Woche": [
+  {
+   "body": "nächste Woche",
+   "dim": "time",
+   "end": 13,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "week",
+    "type": "value",
+    "value": "2026-11-02T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "week",
+      "type": "value",
+      "value": "2026-11-02T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time nächsten Samstag": [
+  {
+   "body": "nächsten Samstag",
+   "dim": "time",
+   "end": 16,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "day",
+    "type": "value",
+    "value": "2026-10-31T00:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "day",
+      "type": "value",
+      "value": "2026-10-31T00:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time um 7": [
+  {
+   "body": "um 7",
+   "dim": "time",
+   "end": 4,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-28T19:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-28T19:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T07:00:00.000+01:00"
+     },
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T19:00:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time,duration 10 Minuten": [
+  {
+   "body": "10 Minuten",
+   "dim": "duration",
+   "end": 10,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Minute": 10,
+    "normalized": {
+     "unit": "second",
+     "value": 600
+    },
+    "type": "value",
+    "unit": "minute",
+    "value": 10
+   }
+  }
+ ],
+ "de_DE time,duration eine halbe Stunde": [
+  {
+   "body": "eine halbe Stunde",
+   "dim": "duration",
+   "end": 17,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "Minute": 30,
+    "normalized": {
+     "unit": "second",
+     "value": 1800
+    },
+    "type": "value",
+    "unit": "minute",
+    "value": 30
+   }
+  },
+  {
+   "body": "eine halbe Stunde",
+   "dim": "time",
+   "end": 17,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "second",
+    "type": "value",
+    "value": "2026-10-28T14:30:00.000+01:00",
+    "values": [
+     {
+      "grain": "second",
+      "type": "value",
+      "value": "2026-10-28T14:30:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time,duration in 10 Minuten": [
+  {
+   "body": "in 10 Minuten",
+   "dim": "time",
+   "end": 13,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "second",
+    "type": "value",
+    "value": "2026-10-28T14:10:00.000+01:00",
+    "values": [
+     {
+      "grain": "second",
+      "type": "value",
+      "value": "2026-10-28T14:10:00.000+01:00"
+     }
+    ]
+   }
+  }
+ ],
+ "de_DE time,duration morgen um 17 Uhr": [
+  {
+   "body": "morgen um 17 Uhr",
+   "dim": "time",
+   "end": 16,
+   "latent": false,
+   "start": 0,
+   "value": {
+    "grain": "hour",
+    "type": "value",
+    "value": "2026-10-29T17:00:00.000+01:00",
+    "values": [
+     {
+      "grain": "hour",
+      "type": "value",
+      "value": "2026-10-29T17:00:00.000+01:00"
      }
     ]
    }

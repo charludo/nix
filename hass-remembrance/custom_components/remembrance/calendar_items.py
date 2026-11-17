@@ -269,6 +269,21 @@ def _master(calendar: Calendar, uid: str) -> Event:
     raise KeyError(uid)
 
 
+def repeat_days(entry: Entry) -> set[str]:
+    """The weekdays (MO … SU) a repeating entry rings on; empty for one-offs
+    and repeats other than daily or weekly."""
+    if not entry.recurring:
+        return set()
+    rule = _master(entry.calendar, entry.uid).get("RRULE") or {}
+    freq = [str(f).upper() for f in rule.get("FREQ", [])]
+    if freq == ["DAILY"]:
+        return set(WEEKDAYS)
+    if freq == ["WEEKLY"]:
+        days = {str(d).upper()[-2:] for d in rule.get("BYDAY", [])}
+        return days or {WEEKDAYS[entry.start.weekday()]}
+    return set()
+
+
 def with_exdate(entry: Entry, occurrence: datetime) -> str:
     """The entry's resource with `occurrence` excluded from the series."""
     calendar = Calendar.from_ical(entry.to_ical())

@@ -140,18 +140,18 @@ in
         "0.1"
         "--pad-end"
         "0.3"
-        # Start transcribing after 64 ms of silence instead of when Smart Turn
-        # is asked: the transcript is ready by the verdict (cut -> transcript
-        # 124 -> 56 ms median on the NPU), but it misses the end of the audio
-        # up to the cut, which clips some last words ("Strahler an." ->
-        # "Strahler.", "Büro stumm" -> "Büro Sturm"; about 1 in 150 commands).
-        # TODO: RECOMMENDED: drop this (no early start); trial of option "cG".
-        "--speculate-after"
-        "0.064"
-        # TODO: RECOMMENDED: drop this (default 4 threads); 3 made no
-        # measurable difference (±3 ms). Trial of option "cG".
-        "--turn-threads"
-        "3"
+        # TODO: FASTER: start transcribing after 64 ms of silence instead of
+        # when Smart Turn is asked: the transcript is ready by the verdict
+        # (cut -> transcript 124 -> 56 ms median on the NPU), but it misses
+        # the end of the audio up to the cut, which clips some last words
+        # ("Strahler an." -> "Strahler.", "Büro stumm" -> "Büro Sturm"; about
+        # 1 in 150 commands, more in practice). Option "cG", tried live.
+        # "--speculate-after"
+        # "0.064"
+        # TODO: FASTER: 3 Smart Turn threads instead of the default 4; made no
+        # measurable difference (±3 ms). Part of option "cG".
+        # "--turn-threads"
+        # "3"
       ];
       DynamicUser = true;
       StateDirectory = lib.removePrefix "/var/lib/" stt.dataDir;

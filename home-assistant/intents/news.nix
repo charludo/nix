@@ -11,7 +11,9 @@ in
   hass.voice.intents = {
     NewsTagesschau = silent (unmute {
       sentences = [
-        "[Spiele|Spiel|Starte] [die] Tagesschau [in (hundert|100) Sekunden]"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "[Spiele|Spiel|Starte] [die] Tagesschau"
+        "[Spiele|Spiel|Starte] [die] Tagesschau in (hundert|100) Sekunden"
       ];
       script = {
         action = actions.tagesschau;
@@ -31,7 +33,9 @@ in
 
     NewsTaeglicheZusammenfassung = silent (unmute {
       sentences = [
-        "[Spiele|Spiel|Starte] [die|meine] (Nachrichten|tägliche Zusammenfassung)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "[Spiele|Spiel|Starte] [die|meine] Nachrichten"
+        "[Spiele|Spiel|Starte] [die|meine] tägliche Zusammenfassung"
       ];
       script = {
         action = actions.summary;

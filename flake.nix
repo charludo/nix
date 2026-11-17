@@ -54,6 +54,9 @@
     # Fork with PT-P300BT support, until it is upstream.
     haos-labelprinter.url = "path:/home/charlotte/Projekte/haos-labelprinter";
     haos-labelprinter.flake = false;
+    # Local checkout: matcher fixes not yet released (Nov 14).
+    hass-closest-intent.url = "path:/home/charlotte/Projekte/hass-closest-intent";
+    hass-closest-intent.flake = false;
     dwd-proxy.url = "path:./dwd-proxy";
     dwd-proxy.inputs.nixpkgs.follows = "nixpkgs";
   };

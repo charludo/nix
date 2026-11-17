@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   e = config.hass.entities;
   s = e.sensor;
@@ -36,12 +36,50 @@ let
     {% set m = ns.m %}
   '';
 
+  hourWords = [
+    "null"
+    "eins"
+    "zwei"
+    "drei"
+    "vier"
+    "fünf"
+    "sechs"
+    "sieben"
+    "acht"
+    "neun"
+    "zehn"
+    "elf"
+    "zwölf"
+    "dreizehn"
+    "vierzehn"
+    "fünfzehn"
+    "sechzehn"
+    "siebzehn"
+    "achtzehn"
+    "neunzehn"
+    "zwanzig"
+    "einundzwanzig"
+    "zweiundzwanzig"
+    "dreiundzwanzig"
+  ];
+
   hourIntent = sentences: body: {
     inherit sentences;
-    lists.hours.range = {
-      from = 0;
-      to = 23;
-    };
+    # Digits and words: closest_intent scores a spoken "achtzehn" against the
+    # list, and with digits only the slot fails ("Wetter um achtzehn Uhr"
+    # then went to the alarm intent).
+    lists.hours.values = lib.concatLists (
+      lib.imap0 (h: word: [
+        {
+          "in" = toString h;
+          out = toString h;
+        }
+        {
+          "in" = word;
+          out = toString h;
+        }
+      ]) hourWords
+    );
     script.speech.text = findHourly + body;
   };
 
@@ -106,7 +144,9 @@ in
     WetterStunde =
       hourIntent
         [
-          "Wie ((wird|ist) das Wetter|warm (wird|ist) es) um {hours} Uhr"
+          # "Uhr" optional: "Wie wird das Wetter heute um neun?" went to
+          # WetterTemperaturMaxHeute.
+          "Wie ((wird|ist) das Wetter|warm (wird|ist) es) [heute] um {hours} [Uhr]"
         ]
         ''
           {% if m %}

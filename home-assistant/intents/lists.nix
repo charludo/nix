@@ -21,7 +21,13 @@
 
     ToDoAdd = {
       sentences = [
-        "(setze|setz|pack|tu|schreib) {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+        # One per verb: closest_intent expands a pattern into at most 16
+        # forms, and as one pattern "tu …" and "schreib …" were cut off.
+        "setze {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+        "setz {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+        "pack {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+        "tu {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
+        "schreib {item} auf (die|meine) (ToDo|To-Do|To Do)-Liste"
         "Füge {item} zur ToDo-Liste hinzu"
       ];
       script = {

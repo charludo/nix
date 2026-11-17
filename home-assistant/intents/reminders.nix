@@ -3,83 +3,107 @@ let
   r = lib.ha.remembrance;
   inherit (r) area callService;
 
-  expand = r.expand {
-    "<tag>" = [ "{remembrance_tag:day}" ];
-  };
+  # `text`: as said, read by remembrance with Duckling.
+  lists.remembrance_text.wildcard = true;
 
-  lists = {
-    inherit (r.lists) remembrance_tag;
-    erinnerung_text.wildcard = true;
-  };
-
-  # Set from the sentence as said: remembrance reads when ("in 10 Minuten",
-  # "morgen um 7 Uhr 15", "am Samstag": at 9) and what about (after "an" or
-  # "dass", wherever the time is).
-  createIntents = r.fromText {
-    name = "ErinnerungStellen";
-    kind = "reminder";
-    sentences = [ "Erinnere mich {remembrance_text:text}" ];
-    speech = ''
-      ${r.jinja}
-      {%- set res = action_response -%}
-      {%- if res.status == 'ok' -%}
-        {%- set i = res['items'][0] -%}
-        Okay, Erinnerung {{ zeitpunkt(i.start) }}: {{ i.label }}.
-      {%- elif res.reason == 'no summary' -%}Ich habe nicht verstanden, woran ich dich erinnern soll.
-      ${r.notUnderstood}
-      ${r.failed "Erinnerungen"}
-      {%- else -%}Das hat nicht geklappt.
-      {%- endif -%}
-    '';
-  };
+  # "Erinnerung an …" (or "für …") says what about first, "Erinnere mich
+  # morgen um 10 an …" when first; remembrance finds both, from "Erinnere
+  # mich <text>" (what about follows "an", "für" or "dass").
+  remindText = "Erinnere mich {{ text }}";
 in
 {
-  hass.voice.intents = createIntents // {
-    ErinnerungenHeute = {
-      sentences = expand [
-        "Was steht <tag> an"
-        "Was steht an"
-        "Welche Erinnerungen habe ich <tag>"
-        "Welche Erinnerungen habe ich"
-      ];
-      inherit lists;
-      script = {
-        action = callService "query" {
-          kind = "reminder";
-          from = "${r.jinja}{{ zieltag(day | default('0')) }}T00:00:00";
-          to = "${r.jinja}{{ zieltag(day | default('0')) }}T23:59:59";
-        };
-        speech.text = ''
-          ${r.jinja}
-          {%- set items = action_response['items'] -%}
-          {%- set tag = tag_name(day | default('0')) -%}
-          {%- if not items -%}{{ tag[:1] | upper ~ tag[1:] }} steht nichts an.
-          {%- else -%}
-            {{ tag[:1] | upper ~ tag[1:] }}:
-            {%- for i in items %} um {{ uhrzeit(as_local(as_datetime(i.start))) }} {{ i.label }}{{ ',' if not loop.last else '.' }}
-            {%- endfor -%}
-          {%- endif -%}
-        '';
-      };
-    };
-
-    ErinnerungLoeschen = {
+  hass.voice.intents = {
+    # "Erinnere mich morgen um 10 Uhr vormittags an xyz", "Erinnerung an
+    # xyz am 17. April um 5 Uhr nachmittags", "Erinnerung für xyz in 10
+    # Minuten". The preposition stays in `text` (remembrance needs it).
+    ErinnerungStellen = {
       sentences = [
-        "Lösche die Erinnerung an {erinnerung_text:text}"
-        "Erinnerung an {erinnerung_text:text} löschen"
+        "Erinnere mich {remembrance_text:text}"
+        "Erinnerung {remembrance_text:text}"
       ];
       inherit lists;
       script = {
-        action = callService "reminder_delete" {
-          label = "{{ text }}";
+        action = callService "create_from_text" {
+          kind = "reminder";
+          text = remindText;
           inherit area;
         };
         speech.text = ''
           ${r.jinja}
           {%- set res = action_response -%}
-          {%- if res.status == 'ok' -%}Erinnerung an {{ res['items'][0].label }} gelöscht.
-          {%- elif res.status == 'ambiguous' -%}Welche meinst du? {{ erinnerung_choices(res.candidates) }}?
+          {%- if res.status == 'ok' -%}
+            {%- set i = res['items'][0] -%}
+            Okay, Erinnerung {{ zeitpunkt(i.start) }}: {{ i.label }}.
+          {%- elif res.reason == 'no summary' -%}Ich habe nicht verstanden, woran ich dich erinnern soll.
+          ${r.notUnderstood}
+          ${r.failed "Erinnerungen"}
+          {%- else -%}Das hat nicht geklappt.
+          {%- endif -%}
+        '';
+      };
+    };
+
+    # "Was steht an" (today), "Was steht <wann> an": "morgen", "Dienstag",
+    # "nächsten Samstag", "am 17. April", "nächste Woche".
+    ErinnerungenHeute = {
+      sentences = [
+        "Was steht an"
+        "Was steht {remembrance_text:text} an"
+      ];
+      inherit lists;
+      script = {
+        action = callService "query" {
+          kind = "reminder";
+          when_text = "{{ text if text is defined else 'heute' }}";
+        };
+        speech.text = ''
+          ${r.jinja}
+          {%- set res = action_response -%}
+          {%- set items = res['items'] -%}
+          {%- if res.status == 'ok' -%}
+            {%- set one_day = (as_datetime(res.parsed.to) - as_datetime(res.parsed['from'])).total_seconds() <= 86400 -%}
+            {%- set tag = datum(res.parsed['from']) -%}
+            {%- set tag = tag[:1] | upper ~ tag[1:] -%}
+            {%- if not items -%}{{ tag if one_day else 'Da' }} steht nichts an.
+            {%- elif one_day -%}
+              {{ tag }}:
+              {%- for i in items %} um {{ uhrzeit(as_local(as_datetime(i.start))) }} {{ i.label }}{{ ',' if not loop.last else '.' }}
+              {%- endfor -%}
+            {%- else -%}
+              {{ items | length }} {{ 'Erinnerung' if items | length == 1 else 'Erinnerungen' }}:
+              {%- for i in items %} {{ zeitpunkt(i.start) }} {{ i.label }}{{ ',' if not loop.last else '.' }}
+              {%- endfor -%}
+            {%- endif -%}
+          ${r.notUnderstood}
+          ${r.failed "Erinnerungen"}
+          {%- else -%}Das hat nicht geklappt.
+          {%- endif -%}
+        '';
+      };
+    };
+
+    # "Erinnerung an <was/wann> löschen", "Lösche [die|meine] Erinnerung an
+    # <was/wann>": what about ("den Zahnarzt"), when ("morgen um 9"), or both.
+    ErinnerungLoeschen = {
+      sentences = [
+        "Erinnerung an {remembrance_text:text} löschen"
+        "Lösche [die|meine] Erinnerung an {remembrance_text:text}"
+      ];
+      inherit lists;
+      script = {
+        action = callService "reminder_delete_from_text" {
+          text = "{{ text }}";
+          inherit area;
+        };
+        speech.text = ''
+          ${r.jinja}
+          {%- set res = action_response -%}
+          {%- if res.status == 'ok' -%}
+            {%- set i = res['items'][0] -%}
+            Erinnerung {{ zeitpunkt(i.start) }} an {{ i.label }} gelöscht.
+          {%- elif res.status == 'ambiguous' -%}{{ erinnerung_choices(res.candidates) }}
           {%- elif res.status == 'no_match' -%}Diese Erinnerung gibt es nicht.
+          ${r.notUnderstood}
           ${r.failed "Erinnerungen"}
           {%- else -%}Das hat nicht geklappt.
           {%- endif -%}

@@ -122,6 +122,27 @@ TARGET_FIELDS = {
     vol.Optional("time"): _blank_or(cv.time),
     vol.Optional("area"): _blank_or(cv.string),
     vol.Optional("all", default=False): cv.boolean,
+    # A timer as a request names it, read by the language's parser (with
+    # Duckling): "60 Minuten Timer", "Eine Stunde Timer", "Nudeltimer". Its
+    # duration and label take the place of `duration` and `label`.
+    vol.Optional("text"): _blank_or(cv.string),
+    vol.Optional("language"): _blank_or(cv.string),
+}
+
+# The services that act on existing items (`TARGET_FIELDS`).
+TARGETED = {
+    "timer_adjust",
+    "timer_pause",
+    "timer_resume",
+    "timer_cancel",
+    "reminder_delete",
+    "alarm_skip",
+    "alarm_enable",
+    "alarm_disable",
+    "alarm_delete",
+    "dismiss",
+    "snooze",
+    "query",
 }
 
 SERVICES: dict[str, vol.Schema] = {
@@ -138,9 +159,13 @@ SERVICES: dict[str, vol.Schema] = {
                 **TARGET_FIELDS,
                 vol.Exclusive("delta", "change"): _signed_seconds,
                 vol.Exclusive("set_remaining", "change"): _seconds,
+                # The change as said ("eine halbe Stunde"), read with
+                # Duckling; added, or removed with `shorten`.
+                vol.Exclusive("delta_text", "change"): cv.string,
+                vol.Optional("shorten", default=False): cv.boolean,
             }
         ),
-        cv.has_at_least_one_key("delta", "set_remaining"),
+        cv.has_at_least_one_key("delta", "set_remaining", "delta_text"),
     ),
     "timer_pause": vol.Schema(TARGET_FIELDS),
     "timer_resume": vol.Schema(TARGET_FIELDS),
@@ -171,7 +196,16 @@ SERVICES: dict[str, vol.Schema] = {
     "alarm_disable": vol.Schema(TARGET_FIELDS),
     "alarm_delete": vol.Schema(TARGET_FIELDS),
     "dismiss": vol.Schema(TARGET_FIELDS),
-    "snooze": vol.Schema({**TARGET_FIELDS, vol.Optional("delay"): _blank_or(_seconds)}),
+    "snooze": vol.Schema(
+        {
+            **TARGET_FIELDS,
+            vol.Exclusive("delay", "when"): _blank_or(_seconds),
+            # When, as said ("10 Minuten", "in 10 Minuten", "morgen um 17
+            # Uhr"), read with Duckling in `language`.
+            vol.Exclusive("delay_text", "when"): _blank_or(cv.string),
+            vol.Optional("kind"): _blank_or(vol.In(KINDS)),
+        }
+    ),
     # A sentence, whole ("Weck mich werktags um halb sieben"), in `language`
     # (default: Home Assistant's).
     "parse": vol.Schema(
@@ -187,6 +221,15 @@ SERVICES: dict[str, vol.Schema] = {
             vol.Optional("kind"): _blank_or(vol.In(KINDS)),
             vol.Optional("language"): _blank_or(cv.string),
             vol.Optional("area"): _blank_or(cv.string),
+            vol.Optional("description"): _blank_or(cv.string),
+        }
+    ),
+    "alarm_delete_from_text": vol.Schema(
+        {
+            vol.Required("text"): cv.string,
+            vol.Optional("all", default=False): cv.boolean,
+            vol.Optional("language"): _blank_or(cv.string),
+            vol.Optional("area"): _blank_or(cv.string),
         }
     ),
     "query": vol.Schema(
@@ -198,6 +241,16 @@ SERVICES: dict[str, vol.Schema] = {
             ),
             vol.Optional("from"): _blank_or(cv.datetime),
             vol.Optional("to"): _blank_or(cv.datetime),
+            # Instead of `from`/`to`: the window as said ("heute", "nächsten
+            # Samstag", "nächste Woche"), read with Duckling in `language`.
+            vol.Optional("when_text"): _blank_or(cv.string),
+        }
+    ),
+    "reminder_delete_from_text": vol.Schema(
+        {
+            vol.Required("text"): cv.string,
+            vol.Optional("language"): _blank_or(cv.string),
+            vol.Optional("area"): _blank_or(cv.string),
         }
     ),
 }
@@ -210,8 +263,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     await engine.async_load()
     hass.data[DOMAIN] = engine
 
-    def target_of(call: ServiceCall) -> Target:
+    async def target_of(call: ServiceCall) -> Target | Result:
         data = call.data
+        label, duration = data.get("label"), data.get("duration") or None
+        if data.get("text"):
+            said = await engine.describe_timer(data["text"], data.get("language"))
+            if isinstance(said, Result):
+                return said
+            label, duration = said.label or label, said.duration or duration
         ids = list(data.get("id", []))
         registry = er.async_get(hass)
         for entity_id in data.get("entity_id", []):
@@ -223,8 +282,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         return Target(
             ids=ids,
             selector=Selector(
-                label=data.get("label"),
-                duration=data.get("duration") or None,
+                label=label,
+                duration=duration,
                 remaining=data.get("remaining") or None,
                 area=data.get("area"),
             ),
@@ -248,19 +307,32 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     async def handle(call: ServiceCall) -> ServiceResponse:
         d = call.data
+        target: Target | Result | None = None
+        if call.service in TARGETED:
+            target = await target_of(call)
+            if isinstance(target, Result):
+                return respond(call, target)
         match call.service:
             case "timer_start":
                 result = engine.timer_start(d["duration"], d.get("label"), d.get("area"))
+            case "timer_adjust" if d.get("delta_text"):
+                said = await engine.describe_timer(d["delta_text"], d.get("language"))
+                if isinstance(said, Result):
+                    result = said
+                elif not said.duration:
+                    result = Result(STATUS_INVALID, reason="no duration")
+                else:
+                    delta = -said.duration if d["shorten"] else said.duration
+                    result = engine.timer_adjust(target, delta, None)
+                    result.parsed = {"delta": delta}
             case "timer_adjust":
-                result = engine.timer_adjust(
-                    target_of(call), d.get("delta"), d.get("set_remaining")
-                )
+                result = engine.timer_adjust(target, d.get("delta"), d.get("set_remaining"))
             case "timer_pause":
-                result = engine.timer_pause(target_of(call))
+                result = engine.timer_pause(target)
             case "timer_resume":
-                result = engine.timer_resume(target_of(call))
+                result = engine.timer_resume(target)
             case "timer_cancel":
-                result = engine.timer_cancel(target_of(call))
+                result = engine.timer_cancel(target)
             case "reminder_create":
                 at: datetime | None = d.get("at")
                 if at is None and not d.get("in"):
@@ -275,7 +347,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         d.get("description"),
                     )
             case "reminder_delete":
-                result = engine.entry_delete(target_of(call), KIND_REMINDER)
+                result = engine.entry_delete(target, KIND_REMINDER)
             case "alarm_create":
                 when: time = d["time"]
                 on: date | None = d.get("date")
@@ -283,17 +355,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     when, d.get("days"), on, d.get("label"), d.get("area"), d.get("description")
                 )
             case "alarm_skip":
-                result = engine.alarm_skip(target_of(call), d.get("date"))
+                result = engine.alarm_skip(target, d.get("date"))
             case "alarm_enable":
-                result = engine.alarm_set_enabled(target_of(call), True)
+                result = engine.alarm_set_enabled(target, True)
             case "alarm_disable":
-                result = engine.alarm_set_enabled(target_of(call), False)
+                result = engine.alarm_set_enabled(target, False)
             case "alarm_delete":
-                result = engine.entry_delete(target_of(call), KIND_ALARM)
+                result = engine.entry_delete(target, KIND_ALARM)
             case "dismiss":
-                result = engine.dismiss(target_of(call))
+                result = engine.dismiss(target)
+            case "snooze" if d.get("delay_text"):
+                delay = await engine.delay_from_text(d["delay_text"], d.get("language"))
+                result = (
+                    delay
+                    if isinstance(delay, Result)
+                    else engine.snooze(target, delay, d.get("kind"))
+                )
             case "snooze":
-                result = engine.snooze(target_of(call), d.get("delay"))
+                result = engine.snooze(target, d.get("delay"), d.get("kind"))
             case "parse":
                 parsed = await engine.parse(d["text"], d.get("kind"), d.get("language"))
                 result = (
@@ -307,11 +386,26 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 )
             case "create_from_text":
                 result = engine.create_from_text(
-                    d["text"], d.get("kind"), d.get("language"), d.get("area")
+                    d["text"], d.get("kind"), d.get("language"), d.get("area"), d.get("description")
                 )
+            case "alarm_delete_from_text":
+                result = engine.alarm_delete_from_text(
+                    d["text"], d.get("language"), d.get("area"), d["all"]
+                )
+            case "reminder_delete_from_text":
+                result = engine.reminder_delete_from_text(
+                    d["text"], d.get("language"), d.get("area")
+                )
+            case "query" if d.get("when_text"):
+                window = await engine.window_from_text(d["when_text"], d.get("language"))
+                if isinstance(window, Result):
+                    result = window
+                else:
+                    result = engine.query(target, d.get("kind"), d.get("state"), *window)
+                    result.parsed = {"from": window[0].isoformat(), "to": window[1].isoformat()}
             case "query":
                 result = engine.query(
-                    target_of(call), d.get("kind"), d.get("state"), d.get("from"), d.get("to")
+                    target, d.get("kind"), d.get("state"), d.get("from"), d.get("to")
                 )
         if inspect.isawaitable(result):
             result = await result

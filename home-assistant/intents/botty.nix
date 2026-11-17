@@ -61,7 +61,10 @@ in
 
     BottyBuero = {
       sentences = [
-        "(Reinige|Sauge|Botty) [im|das|ins] (Büro|Arbeitszimmer)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Reinige [im|das|ins] (Büro|Arbeitszimmer)"
+        "Sauge [im|das|ins] (Büro|Arbeitszimmer)"
+        "Botty [im|das|ins] (Büro|Arbeitszimmer)"
         "[Botty] (Büro|Arbeitszimmer) (reinigen|saugen)"
       ];
       script = {
@@ -83,8 +86,13 @@ in
 
     BottySofa = {
       sentences = [
-        "(Reinige|Sauge|Botty) [vor|unter|am] [dem] (Fernseher|Sofa)"
-        "[Botty] [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Reinige [vor|unter|am] [dem] (Fernseher|Sofa)"
+        "Sauge [vor|unter|am] [dem] (Fernseher|Sofa)"
+        "Botty [vor|unter|am] [dem] (Fernseher|Sofa)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Botty [vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
+        "[vorm|vor dem] (Sofa|Fernseher) (reinigen|saugen)"
       ];
       script = {
         action = cleanRoom rooms.Sofa;

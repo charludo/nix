@@ -931,6 +931,19 @@
         "type": "path"
       }
     },
+    "hass-closest-intent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794841262,
+        "narHash": "sha256-BLrwTdyie3dLgyjgfbL2+ei4UTxcb1Z7zRuLSJTfaKU=",
+        "path": "/home/charlotte/Projekte/hass-closest-intent",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/charlotte/Projekte/hass-closest-intent",
+        "type": "path"
+      }
+    },
     "hass-custom-integrations": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -1563,6 +1576,7 @@
         "eso-reshade": "eso-reshade",
         "firefox-addons": "firefox-addons",
         "haos-labelprinter": "haos-labelprinter",
+        "hass-closest-intent": "hass-closest-intent",
         "hass-custom-integrations": "hass-custom-integrations",
         "home-manager": "home-manager",
         "idagio": "idagio",

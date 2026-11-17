@@ -92,6 +92,26 @@ def test_timer_without_duration(duckling):
     assert parse(duckling, "Stelle einen Timer").reason == "no duration"
 
 
+# An existing timer as a request names it (what an intent hands on as
+# "<what was said> Timer").
+@pytest.mark.parametrize(
+    ("text", "duration", "label"),
+    [
+        ("60 Minuten Timer", 3600, None),
+        ("Eine Stunde Timer", 3600, None),
+        ("eineinhalb Stunden Timer", 5400, None),
+        ("3 5 Minuten Timer", 210, None),
+        ("Nudel Timer", None, "Nudel"),
+        ("Nudeltimer Timer", None, "Nudel"),
+        ("Nudel-Timer", None, "Nudel"),
+        ("Timer", None, None),
+    ],
+)
+def test_describe_timer(duckling, text, duration, label):
+    p = asyncio.run(de.describe_timer(text, duckling))
+    assert (p.kind, p.reason, p.duration, p.label) == ("timer", None, duration, label)
+
+
 @pytest.mark.parametrize(
     ("text", "start", "summary"),
     [
@@ -128,53 +148,50 @@ def test_reminder_not_enough(duckling, text, reason):
 
 
 @pytest.mark.parametrize(
-    ("text", "clock", "day", "days", "description"),
+    ("text", "clock", "day", "days"),
     [
-        ("Weck mich morgen um 6:30", time(6, 30), date(2026, 10, 29), [], "Sanft"),
-        ("Stelle einen Wecker auf 7 Uhr", time(7), date(2026, 10, 29), [], None),
-        ("Wecker um 18 Uhr", time(18), date(2026, 10, 28), [], None),
-        ("Weck mich um 12", time(12), date(2026, 10, 29), [], "Sanft"),
-        ("Stelle einen Wecker am 3. November um 7", time(7), date(2026, 11, 3), [], None),
-        ("Stelle einen Wecker am 3 11 um 7", time(7), date(2026, 11, 3), [], None),
-        ("Weck mich morgen um 6 30", time(6, 30), date(2026, 10, 29), [], "Sanft"),
-        ("Weck mich sanft am Samstag um 9 Uhr", time(9), date(2026, 10, 31), [], "Sanft"),
-        (
-            "Weck mich werktags um halb sieben mit Musik",
-            time(6, 30),
-            None,
-            ["werktags"],
-            "Sanft\nMusik",
-        ),
-        ("6 Uhr morgens Wecker wochentags", time(6), None, ["werktags"], None),
-        ("Stelle einen Wecker für Montag bis Freitag um 6", time(6), None, ["werktags"], None),
-        ("Weck mich jeden Tag um 8", time(8), None, ["täglich"], "Sanft"),
-        ("Weck mich jeden Montag um 7", time(7), None, ["montag"], "Sanft"),
+        ("Weck mich morgen um 6:30", time(6, 30), date(2026, 10, 29), []),
+        ("Stelle einen Wecker auf 7 Uhr", time(7), date(2026, 10, 29), []),
+        ("Wecker um 18 Uhr", time(18), date(2026, 10, 28), []),
+        ("Weck mich um 12", time(12), date(2026, 10, 29), []),
+        ("Stelle einen Wecker am 3. November um 7", time(7), date(2026, 11, 3), []),
+        ("Stelle einen Wecker am 3 11 um 7", time(7), date(2026, 11, 3), []),
+        ("Weck mich morgen um 6 30", time(6, 30), date(2026, 10, 29), []),
+        ("Weck mich am Samstag um 9 Uhr", time(9), date(2026, 10, 31), []),
+        ("Weck mich werktags um halb sieben", time(6, 30), None, ["werktags"]),
+        ("6 Uhr morgens Wecker wochentags", time(6), None, ["werktags"]),
+        ("Stelle einen Wecker für Montag bis Freitag um 6", time(6), None, ["werktags"]),
+        ("Weck mich jeden Tag um 8", time(8), None, ["täglich"]),
+        ("Weck mich jeden Montag um 7", time(7), None, ["montag"]),
         (
             "Weck mich montags und mittwochs um Viertel nach sieben",
             time(7, 15),
             None,
             ["montag", "mittwoch"],
-            "Sanft",
         ),
-        (
-            "Stelle einen Wecker am Wochenende um 9 mit der Playlist Guten Morgen",
-            time(9),
-            None,
-            ["wochenende"],
-            "Musik: Guten Morgen",
-        ),
+        ("Stelle einen Wecker am Wochenende um 9", time(9), None, ["wochenende"]),
     ],
 )
-def test_alarm(duckling, text, clock, day, days, description):
+def test_alarm(duckling, text, clock, day, days):
     p = parse(duckling, text)
-    assert (p.kind, p.reason, p.time, p.date, p.days, p.description) == (
-        "alarm",
-        None,
-        clock,
-        day,
-        days,
-        description,
-    )
+    assert (p.kind, p.reason, p.time, p.date, p.days) == ("alarm", None, clock, day, days)
+
+
+# Existing alarms as a request names them.
+@pytest.mark.parametrize(
+    ("text", "clock", "day", "days"),
+    [
+        ("morgen um 5 Uhr früh", time(5), date(2026, 10, 29), []),
+        ("um 7", time(7), date(2026, 10, 29), []),
+        ("werktags um 12 Uhr mittags", time(12), None, ["werktags"]),
+        ("für morgen", None, date(2026, 10, 29), []),
+        ("am Samstag", None, date(2026, 10, 31), []),
+        ("werktags", None, None, ["werktags"]),
+    ],
+)
+def test_describe_alarm(duckling, text, clock, day, days):
+    p = asyncio.run(de.describe_alarm(text, duckling))
+    assert (p.kind, p.reason, p.time, p.date, p.days) == ("alarm", None, clock, day, days)
 
 
 @pytest.mark.parametrize(
@@ -225,3 +242,82 @@ def test_repair(said, repaired):
 def test_parser_for():
     assert parser_for("de") is parser_for("de-CH") is parser_for("de_DE") is de.parse
     assert parser_for("en") is None
+
+
+@pytest.mark.parametrize(
+    ("text", "duration", "at"),
+    [
+        ("10 Minuten", 600, None),
+        ("in 10 Minuten", None, at(28, 14, 10)),
+        ("morgen um 17 Uhr", None, at(29, 17)),
+        ("eine halbe Stunde", 1800, None),
+    ],
+)
+def test_describe_when(duckling, text, duration, at):
+    p = asyncio.run(de.describe_when(text, duckling))
+    assert (p.reason, p.duration, p.at) == (None, duration, at)
+
+
+# Both orders, as the intents hand them on ("Erinnerung an … " arrives as
+# "Erinnere mich an …").
+@pytest.mark.parametrize(
+    ("text", "start", "summary"),
+    [
+        (
+            "Erinnere mich morgen um 10 Uhr vormittags an den Zahnarzt",
+            at(29, 10),
+            "den Zahnarzt",
+        ),
+        (
+            "Erinnere mich an Blumen gießen am 17. April um 5 Uhr nachmittags",
+            datetime(2027, 4, 17, 17, 0, tzinfo=ZoneInfo(TZ)),
+            "Blumen gießen",
+        ),
+        ("Erinnere mich für den Zahnarzt morgen um 9", at(29, 9), "den Zahnarzt"),
+    ],
+)
+def test_reminder_both_orders(duckling, text, start, summary):
+    p = parse(duckling, text, "reminder")
+    assert (p.reason, p.at, p.summary) == (None, start, summary)
+
+
+@pytest.mark.parametrize(
+    ("text", "start", "end"),
+    [
+        ("heute", at(28, 0), at(29, 0)),
+        ("morgen", at(29, 0), at(30, 0)),
+        (
+            "Dienstag",
+            datetime(2026, 11, 3, tzinfo=ZoneInfo(TZ)),
+            datetime(2026, 11, 4, tzinfo=ZoneInfo(TZ)),
+        ),
+        # Duckling: the coming Saturday (said on a Wednesday).
+        ("nächsten Samstag", at(31, 0), datetime(2026, 11, 1, tzinfo=ZoneInfo(TZ))),
+        (
+            "am 17. April",
+            datetime(2027, 4, 17, tzinfo=ZoneInfo(TZ)),
+            datetime(2027, 4, 18, tzinfo=ZoneInfo(TZ)),
+        ),
+        (
+            "nächste Woche",
+            datetime(2026, 11, 2, tzinfo=ZoneInfo(TZ)),
+            datetime(2026, 11, 9, tzinfo=ZoneInfo(TZ)),
+        ),
+    ],
+)
+def test_describe_span(duckling, text, start, end):
+    p = asyncio.run(de.describe_span(text, duckling))
+    assert (p.reason, p.at, p.until) == (None, start, end)
+
+
+@pytest.mark.parametrize(
+    ("text", "summary", "start", "end"),
+    [
+        ("den Zahnarzt", "den Zahnarzt", None, None),
+        ("morgen um 9", None, at(29, 9), None),
+        ("den Zahnarzt morgen", "den Zahnarzt", at(29, 0), at(30, 0)),
+    ],
+)
+def test_describe_reminder(duckling, text, summary, start, end):
+    p = asyncio.run(de.describe_reminder(text, duckling))
+    assert (p.reason, p.summary, p.at, p.until) == (None, summary, start, end)

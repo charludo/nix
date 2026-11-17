@@ -8,7 +8,9 @@ in
   hass.voice.intents = {
     TVHell = ack {
       sentences = [
-        "[Mach] [den|das] (Fernseher|Bild) hell[er]"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "[Mach] [den|das] (Fernseher|Bild) hell"
+        "[Mach] [den|das] (Fernseher|Bild) heller"
       ];
       script = {
         action = [ { action = "rest_command.lgtv_picture_day"; } ];
@@ -18,7 +20,9 @@ in
 
     TVDunkel = ack {
       sentences = [
-        "[Mach] [den|das] (Fernseher|Bild) (dunkel|dunkler)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "[Mach] [den|das] (Fernseher|Bild) dunkel"
+        "[Mach] [den|das] (Fernseher|Bild) dunkler"
       ];
       script = {
         action = [ { action = "rest_command.lgtv_picture_night"; } ];

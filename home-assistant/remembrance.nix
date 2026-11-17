@@ -1,5 +1,14 @@
-{ lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
+  inherit (config.hass.voice) sounds;
+  # Timers and alarms ring their chime with 3 s of quiet in between: a
+  # round every chime + 3 s.
+  every = sound: lib.ha.soundDurationMs pkgs sound / 1000.0 + 3;
   # Reminders and alarms come from the CalDAV calendar (Radicale on gsv).
   # Off until its login is in the HA secrets (`hass-secrets`):
   #   remembrance_caldav_url  the calendar's own URL
@@ -17,7 +26,7 @@ in
       # Seconds between rounds, and until it gives up.
       ring = {
         timer = {
-          interval = 20;
+          interval = every sounds.timer;
           limit = 120;
         };
         # One round, said twice by the ring script; "stopp" within the
@@ -26,9 +35,10 @@ in
           interval = 60;
           limit = 30;
         };
-        # Louder every round (see the ring script), for up to ten minutes.
+        # "Sanft" ones get louder with time (see the ring script); up to ten
+        # minutes.
         alarm = {
-          interval = 10;
+          interval = every sounds.alarmclock;
           limit = 600;
         };
       };

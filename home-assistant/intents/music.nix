@@ -179,7 +179,12 @@ in
 
     MusikNeueMusik = silent (unmute {
       sentences = [
-        "(Spiele|Spiel) ([die] neue[sten|n]|kürzlich hinzugefügte) (Musik|Tracks|Titel|Lieder)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Spiele die neue[sten|n] (Musik|Tracks|Titel|Lieder)"
+        "Spiele neue[sten|n] (Musik|Tracks|Titel|Lieder)"
+        "Spiel die neue[sten|n] (Musik|Tracks|Titel|Lieder)"
+        "Spiel neue[sten|n] (Musik|Tracks|Titel|Lieder)"
+        "(Spiele|Spiel) kürzlich hinzugefügte (Musik|Tracks|Titel|Lieder)"
       ];
       script = {
         action = playPlaylist "Recently added tracks";
@@ -189,7 +194,9 @@ in
 
     MusikKuerzlichGespielt = silent (unmute {
       sentences = [
-        "(Spiele|Spiel) [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Spiele [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
+        "Spiel [die ]zuletzt (gehörten|gespielten) (Titel|Lieder|Tracks)"
         "Spiel (die|den) selben Song[s] nochmal"
       ];
       script = {
@@ -248,7 +255,10 @@ in
 
     MusikSong = silent (unmute {
       sentences = [
-        "(Spiele|Spiel|Starte) (das|den) (Lied|Stück|Song) {mass_track}"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Spiele (das|den) (Lied|Stück|Song) {mass_track}"
+        "Spiel (das|den) (Lied|Stück|Song) {mass_track}"
+        "Starte (das|den) (Lied|Stück|Song) {mass_track}"
       ];
       script = {
         action = [ (playMA "track" "{{ mass_track }}") ];
@@ -265,8 +275,17 @@ in
       sentences = [
         "Was ist das"
         "Was (läuft|spielt) [da|hier|gerade|jetzt]"
-        "Was [für ein|ein] (Lied|Song|Titel|Stück) (ist das|läuft [da|hier|gerade|jetzt])"
-        "Welche[s|r|n] (Lied|Song|Titel|Stück|Album) ist das"
+        # Split: closest_intent expands each pattern into at most 16 forms,
+        # and as one pattern "Was für ein Titel ist das" was cut off.
+        "Was [für ein|ein] (Lied|Song|Titel|Stück) ist das"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Was [für ein|ein] (Lied|Song|Titel|Stück) läuft"
+        "Was für ein (Lied|Song|Titel|Stück) läuft (da|hier|gerade|jetzt)"
+        "Was ein (Lied|Song|Titel|Stück) läuft (da|hier|gerade|jetzt)"
+        "Was (Lied|Song|Titel|Stück) läuft (da|hier|gerade|jetzt)"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Welche[s] (Lied|Song|Titel|Stück|Album) ist das"
+        "Welche(r|n) (Lied|Song|Titel|Stück|Album) ist das"
       ];
       script.speech.text = ''
         {%- set p = '${player}' -%}
@@ -291,7 +310,11 @@ in
 
     MusikSongVonKuenstler = silent (unmute {
       sentences = [
-        "(Spiele|Spiel|Starte) [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
+        # One per verb: closest_intent expands a pattern into at most 16
+        # forms, and as one pattern the "Starte" forms were cut off.
+        "Spiele [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
+        "Spiel [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
+        "Starte [das|den] [Lied|Stück|Song] {mass_track} von {mass_artist}"
       ];
       script = {
         action = [

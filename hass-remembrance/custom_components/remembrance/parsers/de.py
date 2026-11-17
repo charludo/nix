@@ -1,8 +1,9 @@
 """German sentences about timers, reminders and alarms.
 
 Duckling reads the times and durations. Added here: which kind a sentence
-is about, repeats ("werktags", "montags", "jeden Tag"), gentle alarms and
-wake-up music, a timer's label and a reminder's text.
+is about, repeats ("werktags", "montags", "jeden Tag"), a timer's label and
+a reminder's text. How an alarm rings (gently, with music) is not read from
+the sentence: the caller passes it as the description.
 
 Before Duckling sees the sentence, what it would misread is masked: replaced
 by spaces, so its positions stay those of the sentence ("am Wochenende um 9"
@@ -16,7 +17,7 @@ are dropped. Reminders on a day without a time start at 9.
 from __future__ import annotations
 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from ..const import KIND_ALARM, KIND_REMINDER, KIND_TIMER
 from . import Ask, Parsed
@@ -55,13 +56,6 @@ _DAY_LISTS = re.compile(
 )
 _DAY = re.compile(_WD, re.I)
 
-_GENTLE = re.compile(r"\bsanft\w*", re.I)
-# "Weck mich …": asleep, so gently.
-_WAKE_ME = re.compile(r"\bweck\w*\s+mich\b", re.I)
-_PLAYLIST = re.compile(
-    r"\bmit\s+(?:der\s+)?(?:playlist|wiedergabeliste)\s+(?P<name>.+?)[\s.!?]*$", re.I
-)
-_MUSIC = re.compile(r"\bmit\s+musik\b", re.I)
 
 # Timers: "Nudeltimer", "Nudel-Timer", "Nudel Timer", "Timer für die Nudeln".
 _LABEL_COMPOUND = re.compile(r"\b(?P<label>\w+?)-?timer\b", re.I)
@@ -96,7 +90,7 @@ _NOT_LABELS = {
 
 # Reminders: what is said before the text, and what introduces it.
 _REMIND_ME = re.compile(r"^\W*(?:bitte\s+)?erinnere?\s+(?:mich|uns)\b(?:\s+bitte\b)?", re.I)
-_ABOUT = re.compile(r"\b(?:daran,?\s+dass|daran,?|an|dass)\b", re.I)
+_ABOUT = re.compile(r"\b(?:daran,?\s+dass|daran,?|an|für|dass)\b", re.I)
 
 
 # Voice pipelines may turn punctuation into spaces (closest_intent does):
@@ -170,6 +164,20 @@ async def _timer(text: str, duckling: Ask) -> Parsed:
     )
 
 
+async def describe_timer(text: str, duckling: Ask) -> Parsed:
+    """An existing timer as a request names it, by its name as set: the
+    duration it was set to ("60 Minuten Timer", "Eine Stunde Timer") or its
+    label ("Nudel Timer", "Nudeltimer"). Either may be missing."""
+    text = repair(text)
+    durations = [e for e in await duckling(text, LOCALE, ["duration"]) if e["dim"] == "duration"]
+    longest = max(durations, key=lambda e: e["end"] - e["start"]) if durations else None
+    return Parsed(
+        KIND_TIMER,
+        duration=float(longest["value"]["normalized"]["value"]) if longest else None,
+        label=_label(text, durations),
+    )
+
+
 def _label(text: str, durations: list[dict]) -> str | None:
     for rx in (_LABEL_FOR, _LABEL_COMPOUND, _LABEL_BEFORE):
         for m in rx.finditer(text):
@@ -207,9 +215,81 @@ async def _reminder(text: str, duckling: Ask) -> Parsed:
     return Parsed(KIND_REMINDER, summary=summary, at=at)
 
 
-async def _alarm(text: str, duckling: Ask) -> Parsed:
-    masked: list[tuple[int, int]] = []
+async def describe_when(text: str, duckling: Ask) -> Parsed:
+    """When something should ring again, as said: after a duration ("10
+    Minuten", `duration`) or at a time ("in 10 Minuten", "morgen um 17
+    Uhr", `at`)."""
+    text = repair(text)
+    entities = await duckling(text, LOCALE, ["time", "duration"])
+    found = [e for e in entities if e["dim"] == "duration"] + _times(entities)
+    if not found:
+        return Parsed(reason="no time")
+    best = max(found, key=lambda e: e["end"] - e["start"])
+    if best["dim"] == "duration":
+        return Parsed(duration=float(best["value"]["normalized"]["value"]))
+    instants = _instants(best)
+    if not instants or best["value"].get("grain") not in ("hour", "minute", "second"):
+        return Parsed(reason="vague time")
+    return Parsed(at=instants[0])
 
+
+def _span_end(start: datetime, grain: str) -> datetime:
+    """The end of the `grain` ("day", "week", …) that begins at `start`."""
+    if grain == "month":
+        return start.replace(year=start.year + start.month // 12, month=start.month % 12 + 1)
+    if grain == "year":
+        return start.replace(year=start.year + 1)
+    steps = {"second": 1, "minute": 60, "hour": 3600, "day": 86400, "week": 7 * 86400}
+    return start + timedelta(seconds=steps.get(grain, 86400))
+
+
+async def describe_span(text: str, duckling: Ask) -> Parsed:
+    """A stretch of time as said ("heute", "nächsten Samstag", "am 17.
+    April", "nächste Woche"): from `at` until `until`."""
+    text = repair(text)
+    entities = _times(await duckling(text, LOCALE, ["time"]))
+    if not entities:
+        return Parsed(reason="no time")
+    value = entities[0]["value"]
+    if value.get("type") == "interval":
+        start, end = value.get("from"), value.get("to")
+        if not start or not end:
+            return Parsed(reason="vague time")
+        return Parsed(
+            at=datetime.fromisoformat(start["value"]), until=datetime.fromisoformat(end["value"])
+        )
+    instants = _instants(entities[0])
+    if not instants:
+        return Parsed(reason="vague time")
+    return Parsed(at=instants[0], until=_span_end(instants[0], value.get("grain", "day")))
+
+
+async def describe_reminder(text: str, duckling: Ask) -> Parsed:
+    """Existing reminders as a request names them: what about ("den
+    Zahnarzt", `summary`), when ("morgen um 9": `at`; "morgen": `at` and
+    `until` span the day), or both."""
+    text = repair(text)
+    entities = _times(await duckling(text, LOCALE, ["time"]))
+    entity = entities[0] if entities else None
+    summary = _clean(_mask(text, [(entity["start"], entity["end"])]) if entity else text)
+    summary = re.sub(r"^(?:an|für)\s+", "", summary, flags=re.I) or None
+    if entity is None:
+        return Parsed(KIND_REMINDER, summary=summary, reason=None if summary else "no time")
+    instants = _instants(entity)
+    grain = entity["value"].get("grain")
+    if not instants:
+        return Parsed(KIND_REMINDER, summary=summary, reason="vague time")
+    if grain in ("hour", "minute", "second"):
+        return Parsed(KIND_REMINDER, summary=summary, at=instants[0])
+    return Parsed(
+        KIND_REMINDER, summary=summary, at=instants[0], until=_span_end(instants[0], grain or "day")
+    )
+
+
+def _repeats(text: str) -> tuple[list[str], list[tuple[int, int]]]:
+    """The repeats a sentence says ("werktags", "montags und mittwochs"), as
+    `alarm_create`'s `days` takes them, and where they are."""
+    masked: list[tuple[int, int]] = []
     days: list[str] = []
     for rx, repeat in _REPEATS:
         for m in rx.finditer(text):
@@ -218,22 +298,42 @@ async def _alarm(text: str, duckling: Ask) -> Parsed:
     for m in _DAY_LISTS.finditer(_mask(text, masked)):
         days += [d.lower() for d in _DAY.findall(m.group()) if d.lower() not in days]
         masked.append(m.span())
+    return days, masked
 
-    playlist = None
-    if m := _PLAYLIST.search(text):
-        playlist = _clean(m.group("name"))
-        masked.append(m.span())
-    elif m := _MUSIC.search(text):
-        playlist = ""
-    gentle = bool(_GENTLE.search(text) or _WAKE_ME.search(text))
-    description = (
-        "\n".join(
-            (["Sanft"] if gentle else [])
-            + ([f"Musik: {playlist}" if playlist else "Musik"] if playlist is not None else [])
+
+def _clock(instants: list[datetime]) -> datetime:
+    """A clock time as said: "um 7" is 7:00, not 19:00 (and "um 12" noon);
+    Duckling's readings already say on which day it comes next."""
+    return min(instants, key=lambda i: (i.hour == 0, i.hour, i))
+
+
+async def describe_alarm(text: str, duckling: Ask) -> Parsed:
+    """Existing alarms as a request names them: a repeat ("werktags um 6",
+    `days`), one occurrence ("morgen um 7", "um 7": `date` and `time`) or a
+    whole day ("morgen": `date` alone)."""
+    text = repair(text)
+    days, masked = _repeats(text)
+    entities = _times(await duckling(_mask(text, masked), LOCALE, ["time"]))
+    if not entities:
+        return Parsed(KIND_ALARM, days=days, reason=None if days else "no time")
+    entity = entities[0]
+    instants = _instants(entity)
+    grain = entity["value"].get("grain")
+    if instants and grain in ("hour", "minute"):
+        at = _clock(instants)
+        return Parsed(
+            KIND_ALARM,
+            time=at.time().replace(second=0, microsecond=0),
+            date=None if days else at.date(),
+            days=days,
         )
-        or None
-    )
+    if instants and grain == "day" and not days:
+        return Parsed(KIND_ALARM, date=instants[0].date())
+    return Parsed(KIND_ALARM, days=days, reason="vague time")
 
+
+async def _alarm(text: str, duckling: Ask) -> Parsed:
+    days, masked = _repeats(text)
     entities = _times(await duckling(_mask(text, masked), LOCALE, ["time"]))
     if not entities:
         return Parsed(KIND_ALARM, days=days, reason="no time")
@@ -241,15 +341,10 @@ async def _alarm(text: str, duckling: Ask) -> Parsed:
     instants = _instants(entity)
     if not instants or entity["value"].get("grain") not in ("hour", "minute"):
         return Parsed(KIND_ALARM, days=days, reason="vague time")
-    # A clock time as said: "um 7" is 7:00, not 19:00 (and "um 12" noon);
-    # Duckling's readings already say on which day it comes next.
-    at = min(instants, key=lambda i: (i.hour == 0, i.hour, i))
+    at = _clock(instants)
     return Parsed(
         KIND_ALARM,
         time=at.time().replace(second=0, microsecond=0),
         date=None if days else at.date(),
         days=days,
-        gentle=gentle,
-        playlist=playlist,
-        description=description,
     )

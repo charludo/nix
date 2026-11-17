@@ -11,15 +11,22 @@ let
   #
   # probabilityCutoff is only the default: once a sensitivity is set on the
   # device page in Home Assistant, LVA uses that instead (per wake word slot).
+  # Cutoffs: set per model on labelled room recordings it never trained on
+  # (day 1 + Nov 13-15, 92 h), for about 0.1 false wakes/h.
   models = {
     computer_wohnzimmer = {
       name = "Computer (Wohnzimmer)";
-      # Room day 1, 20 h: 40/40 tries, 0.45 false wakes/h.
-      probabilityCutoff = 0.97;
+      # v5 (Nov 17, run v5nw8-c6: negatives weighted 8x), best of 16 runs:
+      # 99/103 tries at 0.08 false wakes/h, Marie 7/9 (v4-c5 at 0.995:
+      # 97/103, Marie 7/9, 0.05/h). Usable from 0.92 (99/103, 0.09/h) to
+      # 0.97 (94/103, 0.08/h); 0.98 gives 92/103 at 0.04/h.
+      probabilityCutoff = 0.95;
     };
     alexa_wohnzimmer = {
       name = "Alexa (Wohnzimmer)";
-      # Room day 1, 20 h: 13/14 tries, 0.30 false wakes/h.
+      # v5 (Nov 17, run v5nw8-c4: negatives weighted 8x), best of 16 runs:
+      # 31/33 tries at 0.09 false wakes/h, Marie 13/13 (v4-c17 at 0.97:
+      # 31/33, Marie 12/13, 0.10/h). Counts after the Nov 17 word check.
       probabilityCutoff = 0.95;
     };
   };

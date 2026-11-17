@@ -55,7 +55,16 @@ from .const import (
     STORAGE_KEY,
     STORAGE_VERSION,
 )
-from .parsers import Parsed, parser_for
+from .parsers import (
+    Ask,
+    Parsed,
+    alarm_describer_for,
+    parser_for,
+    reminder_describer_for,
+    span_describer_for,
+    timer_describer_for,
+    when_describer_for,
+)
 from .timers import Selector, Timer, TimerBook, TimerError, TimerState, resolve
 
 _LOGGER = logging.getLogger(__name__)
@@ -292,6 +301,89 @@ class Engine:
         parser = parser_for(language)
         if parser is None:
             return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        return await self._with_duckling(lambda ask: parser(text, kind, ask))
+
+    async def describe_timer(self, text: str, language: str | None) -> Parsed | Result:
+        """The duration and label a request names a timer by ("60 Minuten
+        Timer", "Eine Stunde Timer", "Nudeltimer"); a Result when it can't be
+        read at all."""
+        language = language or self.hass.config.language
+        describe = timer_describer_for(language)
+        if describe is None:
+            return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        return await self._with_duckling(lambda ask: describe(text, ask))
+
+    async def delay_from_text(self, text: str, language: str | None) -> float | Result:
+        """Seconds until something should ring again, as said ("10 Minuten",
+        "in 10 Minuten", "morgen um 17 Uhr")."""
+        language = language or self.hass.config.language
+        describe = when_describer_for(language)
+        if describe is None:
+            return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        said = await self._with_duckling(lambda ask: describe(text, ask))
+        if isinstance(said, Result):
+            return said
+        if said.reason:
+            return Result(STATUS_INVALID, reason=said.reason)
+        if said.at is not None:
+            delay = (said.at - dt_util.now()).total_seconds()
+        else:
+            delay = said.duration or 0.0
+        if delay <= 0:
+            return Result(STATUS_INVALID, reason="in the past")
+        return delay
+
+    async def _describe(self, registry, text: str, language: str | None) -> Parsed | Result:
+        """`text` read by the language's describer from `registry`."""
+        language = language or self.hass.config.language
+        describe = registry(language)
+        if describe is None:
+            return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        said = await self._with_duckling(lambda ask: describe(text, ask))
+        if isinstance(said, Parsed) and said.reason:
+            return Result(STATUS_INVALID, reason=said.reason, parsed=said.as_dict())
+        return said
+
+    async def window_from_text(
+        self, text: str, language: str | None
+    ) -> tuple[datetime, datetime] | Result:
+        """The stretch of time a request says ("heute", "nächsten Samstag",
+        "nächste Woche")."""
+        said = await self._describe(span_describer_for, text, language)
+        if isinstance(said, Result):
+            return said
+        assert said.at and said.until
+        return said.at, said.until
+
+    async def reminder_delete_from_text(
+        self, text: str, language: str | None, area: str | None
+    ) -> Result:
+        """The reminder a request names ("den Zahnarzt", "morgen um 9", "den
+        Zahnarzt morgen"), deleted: by what it is about (matched fuzzily),
+        when it rings, or both. Several: ambiguous."""
+        if not self.calendar:
+            return self._no_calendar()
+        said = await self._describe(reminder_describer_for, text, language)
+        if isinstance(said, Result):
+            return said
+        cal = self.calendar
+        pool = cal.select(Selector(label=said.summary, area=area), [], False, KIND_REMINDER, None)
+        if said.at is not None:
+            start = said.at - timedelta(minutes=1)
+            end = said.until or said.at + timedelta(minutes=1)
+            rings = {e.uid for e, _occ, _end in cal.occurrences(start, end, KIND_REMINDER)}
+            pool = [e for e in pool if e.uid in rings]
+        if not pool:
+            return Result(STATUS_NO_MATCH, parsed=said.as_dict())
+        if len(pool) > 1:
+            return Result(
+                STATUS_AMBIGUOUS, candidates=[cal.item(e) for e in pool], parsed=said.as_dict()
+            )
+        result = await self.entry_delete(Target(ids=[pool[0].uid]), KIND_REMINDER)
+        result.parsed = said.as_dict()
+        return result
+
+    async def _with_duckling(self, run: Callable[[Ask], Any]) -> Parsed | Result:
         url = self.config.get(CONF_DUCKLING_URL)
         if not url:
             return Result(STATUS_INVALID, reason="no duckling configured")
@@ -299,15 +391,21 @@ class Engine:
             async_get_clientsession(self.hass), url, self.hass.config.time_zone, dt_util.now()
         )
         try:
-            return await parser(text, kind, ask)
+            return await run(ask)
         except duckling.DucklingError as err:
             return Result(STATUS_INVALID, reason=f"duckling: {err}")
 
     async def create_from_text(
-        self, text: str, kind: str | None, language: str | None, area: str | None
+        self,
+        text: str,
+        kind: str | None,
+        language: str | None,
+        area: str | None,
+        description: str | None = None,
     ) -> Result:
         """A timer, reminder or alarm as a sentence says it; the response
-        also says what was understood (`parsed`)."""
+        also says what was understood (`parsed`). `description` is the
+        caller's (how an alarm rings is not read from the sentence)."""
         parsed = await self.parse(text, kind, language)
         if isinstance(parsed, Result):
             return parsed
@@ -317,18 +415,60 @@ class Engine:
             result = self.timer_start(parsed.duration or 0, parsed.label, area)
         elif parsed.kind == KIND_REMINDER:
             assert parsed.summary and parsed.at
-            result = await self.reminder_create(parsed.summary, parsed.at, None, None, area)
+            result = await self.reminder_create(
+                parsed.summary, parsed.at, None, None, area, description
+            )
         else:
             assert parsed.time
             result = await self.alarm_create(
-                parsed.time, parsed.days, parsed.date, parsed.label, area, parsed.description
+                parsed.time, parsed.days, parsed.date, parsed.label, area, description
             )
         result.parsed = parsed.as_dict()
         return result
 
-    async def alarm_skip(self, target: Target, on: date | None) -> Result:
+    async def alarm_delete_from_text(
+        self, text: str, language: str | None, area: str | None, all_: bool = False
+    ) -> Result:
+        """Alarms as a request names them, gone: a repeat said ("werktags um
+        6") deletes that repeating alarm; one occurrence ("morgen um 7", "um
+        7") leaves out just that one (a one-off alarm is deleted); a day
+        alone ("morgen") leaves out every alarm that day. Without a time, only
+        with `all_` (said as "alle Wecker …"); otherwise `no time`."""
+        language = language or self.hass.config.language
+        describe = alarm_describer_for(language)
+        if describe is None:
+            return Result(STATUS_INVALID, reason=f"no parser for {language}")
+        said = await self._with_duckling(lambda ask: describe(text, ask))
+        if isinstance(said, Result):
+            return said
+        if said.reason:
+            return Result(STATUS_INVALID, reason=said.reason, parsed=said.as_dict())
+        if said.time is None and not all_:
+            return Result(STATUS_INVALID, reason="no time", parsed=said.as_dict())
+        where = Selector(area=area)
+        if said.days:
+            # Every repeating alarm on exactly those days (at that time).
+            if not self.calendar:
+                return self._no_calendar()
+            wanted = set(ci.weekday_codes(said.days))
+            pool = self.calendar.select(where, [], said.time is None, KIND_ALARM, said.time)
+            ids = [e.uid for e in pool if ci.repeat_days(e) == wanted]
+            if not ids:
+                return Result(STATUS_NO_MATCH, parsed=said.as_dict())
+            result = await self.entry_delete(Target(ids=ids, all=True), KIND_ALARM)
+        else:
+            result = await self.alarm_skip(
+                Target(selector=where, at_time=said.time, all=said.time is None),
+                said.date,
+                many=True,
+            )
+        result.parsed = said.as_dict()
+        return result
+
+    async def alarm_skip(self, target: Target, on: date | None, *, many: bool = False) -> Result:
         """Leave out one occurrence (default: the next) of a repeating alarm;
-        a one-off alarm is deleted."""
+        a one-off alarm is deleted. `many`: every alarm the target matches
+        that rings on `on`, instead of exactly one."""
         if not self.calendar:
             return self._no_calendar()
 
@@ -348,7 +488,7 @@ class Engine:
                 return None
             return await self.calendar.async_rewrite(entry, ci.with_exdate(entry, occ))
 
-        return await self._each_entry(target, KIND_ALARM, apply)
+        return await self._each_entry(target, KIND_ALARM, apply, many=many)
 
     async def alarm_set_enabled(self, target: Target, enabled: bool) -> Result:
         if not self.calendar:
@@ -450,22 +590,30 @@ class Engine:
             self._dismiss_id(r.id, "dismissed")
         return Result(items=items)
 
-    def snooze(self, target: Target, delay: float | None = None) -> Result:
+    def snooze(self, target: Target, delay: float | None = None, kind: str | None = None) -> Result:
         """Ring again after `delay`. Without a target: what is ringing, else
-        what rang last (in `area` if given, else anywhere)."""
+        what rang last (in `area` if given, else anywhere); `kind` only that
+        kind. The response's `parsed.at` says when it rings again."""
         delay = delay or self.config.get(CONF_SNOOZE_DELAY, DEFAULT_SNOOZE_DELAY)
-        chosen = self._pick_ringing(target, all_in_area=False)
+        chosen = self._pick_ringing(target, all_in_area=False, kind=kind)
         if isinstance(chosen, Result):
             if not target.is_empty():
                 return chosen
-            recent = self._recent_item(target.selector.area)
+            recent = self._recent_item(target.selector.area, kind)
             if recent is None:
                 return Result(STATUS_NO_MATCH, reason="nothing rang recently")
-            return self._snooze_item(recent, delay)
-        return self._snooze_item(self._ringing_item(chosen[0]), delay)
+            result = self._snooze_item(recent, delay)
+        else:
+            result = self._snooze_item(self._ringing_item(chosen[0]), delay)
+        if result.status == STATUS_OK:
+            again = dt_util.now() + timedelta(seconds=delay)
+            result.parsed = {"delay": delay, "at": again.isoformat()}
+        return result
 
-    def _pick_ringing(self, target: Target, *, all_in_area: bool) -> list[Ringing] | Result:
-        ringing = self.ringing()
+    def _pick_ringing(
+        self, target: Target, *, all_in_area: bool, kind: str | None = None
+    ) -> list[Ringing] | Result:
+        ringing = [r for r in self.ringing() if kind is None or r.kind == kind]
         if not ringing:
             return Result(STATUS_NO_MATCH, reason="nothing ringing")
         if target.is_empty():
@@ -719,9 +867,13 @@ class Engine:
         self._recent = [(t, i) for t, i in self._recent if now - t <= RECENT_WINDOW]
         self._recent.append((now, item))
 
-    def _recent_item(self, area: str | None) -> dict | None:
+    def _recent_item(self, area: str | None, kind: str | None = None) -> dict | None:
         now = self._now()
-        recent = [i for t, i in self._recent if now - t <= RECENT_WINDOW]
+        recent = [
+            i
+            for t, i in self._recent
+            if now - t <= RECENT_WINDOW and (kind is None or i["kind"] == kind)
+        ]
         pick = [i for i in recent if _in_area(i["areas"], area)] or recent
         return pick[-1] if pick else None
 

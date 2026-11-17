@@ -6,7 +6,13 @@ in
   hass.voice.intents.TueralarmAktivieren = {
     sentences = [
       "(Alarmanlage|Türalarm|Alarm) (aktivieren|scharfschalten|einschalten|anschalten)"
-      "(Aktiviere|Schalte) [den |die ](Türalarm|Alarmanlage|Alarm) [scharf|ein|an]"
+      # Split: closest_intent expands a pattern into at most 16 forms.
+      "Aktiviere [den |die ]Türalarm [scharf|ein|an]"
+      "Aktiviere [den |die ]Alarmanlage [scharf|ein|an]"
+      "Aktiviere [den |die ]Alarm [scharf|ein|an]"
+      "Schalte [den |die ]Türalarm [scharf|ein|an]"
+      "Schalte [den |die ]Alarmanlage [scharf|ein|an]"
+      "Schalte [den |die ]Alarm [scharf|ein|an]"
       "Sicherheitsmodus"
     ];
     script = {

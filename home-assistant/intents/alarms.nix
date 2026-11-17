@@ -3,102 +3,99 @@ let
   r = lib.ha.remembrance;
   inherit (r) area callService;
 
-  expand = r.expand {
-    "<zeit>" = r.timeShapes;
-    "<tag>" = [ "{remembrance_tag:day}" ];
-  };
-
+  # `text`: when, as said ("um 7", "morgen um 6:30", "werktags um halb
+  # sieben", "für Samstag"), read by remembrance with Duckling. Prepositions
+  # stay in it: "7" alone isn't a time.
   lists = {
-    inherit (r.lists)
-      remembrance_stunde
-      remembrance_minute
-      remembrance_uhrzeit
-      remembrance_tag
-      ;
+    remembrance_text.wildcard = true;
+    wecker_sanft.values = [
+      "sanft"
+      "sanften"
+    ];
+    wecker_musik.values = [ "mit Musik" ];
   };
 
-  hhmm = "'%02d:%02d' | format(${r.hourOf}, ${r.minuteOf})";
-
-  # Speech for an action on existing alarms: `ok` (Jinja; `i` is the first
-  # alarm, `items` all of them) on success, the shared answers otherwise.
-  speak = ok: ''
-    ${r.jinja}
-    {%- set res = action_response -%}
-    {%- set items = res['items'] -%}
-    {%- set i = items[0] if items else none -%}
-    {%- if res.status == 'ok' -%}${ok}
-    {%- elif res.status == 'ambiguous' -%}Welchen meinst du? {{ wecker_choices(res.candidates) }}?
-    {%- elif res.status == 'no_match' -%}Da ist kein Wecker.
-    ${r.failed "Wecker"}
-    {%- else -%}Das hat nicht geklappt.
-    {%- endif -%}
+  # "sanft", "mit Musik" (the default wake-up playlist) or a playlist from
+  # Music Assistant's list (`mass_playlist`, so a misheard name still finds
+  # it). Passed on as the alarm's description, which the ring script reads
+  # ("Sanft", "Musik", "Musik: <playlist>"). Slots, as the script only sees
+  # what a slot caught.
+  description = ''
+    {%- set music = 'Musik: ' ~ mass_playlist if mass_playlist is defined else ('Musik' if wecker_musik is defined else "") -%}
+    {{- ['Sanft' if wecker_sanft is defined else "", music] | select | join('\n') -}}
   '';
 
-  # Set from the sentence as said: remembrance reads the time ("um halb
-  # sieben", "6 Uhr morgens"), a day or repeats ("werktags", "montags und
-  # mittwochs"), "sanft" and the music ("mit Musik", "mit der Playlist …").
-  # "Weck mich …" rings gently (you're asleep), "Stelle einen Wecker …" at
-  # full volume. A playlist named on its own comes from Music Assistant's
-  # list (`mass_playlist`), so a misheard name still finds it.
-  setIntents = r.fromText {
-    name = "WeckerStellen";
-    kind = "alarm";
-    sentences = [
-      "Stelle einen Wecker {remembrance_text:text}"
-      "Stelle einen Wecker {remembrance_text:text} mit der Playlist {mass_playlist}"
-      "Wecker {remembrance_text:text}"
-      "Weck mich {remembrance_text:text}"
-      "Weck mich {remembrance_text:text} mit der Playlist {mass_playlist}"
-    ];
-    speech = ''
-      ${r.jinja}
-      {%- set res = action_response -%}
-      {%- if res.status == 'ok' -%}
-        {%- set i = res['items'][0] -%}
-        {%- set p = res.parsed -%}
-        {%- if p.days -%}
-          {%- set names = {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende', 'werktags': 'werktags'} -%}
-          {%- set ns = namespace(n=[]) -%}
-          {%- for d in p.days -%}{%- set ns.n = ns.n + [names.get(d, d ~ 's')] -%}{%- endfor -%}
-          Wecker {{ ns.n | join(' und ') }} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt
-        {%- else -%}Wecker {{ zeitpunkt(i.start) }} gestellt
+  # Days as remembrance returns them (`parsed.days`), spoken.
+  dayNames = ''
+    {%- set names = {'täglich': 'jeden Tag', 'wochenende': 'am Wochenende', 'werktags': 'werktags'} -%}
+    {%- set ns = namespace(n=[]) -%}
+    {%- for d in p.days -%}{%- set ns.n = ns.n + [names.get(d, d ~ 's')] -%}{%- endfor -%}
+  '';
+  # Delete alarms as said (see `WeckerLoeschen`); `all` for "alle Wecker …".
+  deleteAlarms = all: sentences: {
+    inherit sentences lists;
+    script = {
+      action = callService "alarm_delete_from_text" {
+        text = "{{ text }}";
+        inherit all area;
+      };
+      speech.text = ''
+        ${r.jinja}
+        {%- set res = action_response -%}
+        {%- set p = res.parsed or {} -%}
+        {%- set um = ' um ' ~ uhrzeit(as_datetime('2000-01-01T' ~ p.time)) if p.time else "" -%}
+        {%- if res.status == 'ok' and p.days -%}
+          ${dayNames}
+          Alle Wecker {{ ns.n | join(' und ') }}{{ um }} gelöscht.
+        {%- elif res.status == 'ok' and p.time -%}Wecker für {{ datum(p.date ~ 'T00:00:00') }}{{ um }} gelöscht.
+        {%- elif res.status == 'ok' -%}Alle Wecker für {{ datum(p.date ~ 'T00:00:00') }} gelöscht.
+        {%- elif res.status == 'ambiguous' -%}{{ wecker_choices(res.candidates) }}
+        {%- elif res.status == 'no_match' -%}Da ist kein Wecker.
+        {%- elif res.reason == 'no time' and (p.date or p.days) -%}Welche Uhrzeit? Oder sag „alle Wecker“.
+        ${r.notUnderstood}
+        ${r.failed "Wecker"}
+        {%- else -%}Das hat nicht geklappt.
         {%- endif -%}
-        {{- (', mit der Playlist ' ~ p.playlist if p.playlist else ', mit Musik') if p.playlist is defined else "" -}}.
-      ${r.notUnderstood}
-      ${r.failed "Wecker"}
-      {%- else -%}Das hat nicht geklappt.
-      {%- endif -%}
-    '';
-  };
-
-  # The alarm a sentence names by its time ("den Wecker um 7 Uhr"), if any.
-  target = {
-    time = "{{ ${hhmm} if ${r.timeSaid} else '' }}";
-    inherit area;
+      '';
+    };
   };
 in
 {
-  hass.voice.intents = setIntents // {
-    # One day off, for every alarm that rings that day.
-    WeckerAuslassen = {
-      sentences = expand [
-        "Wecker <tag> aus"
-        "Kein Wecker <tag>"
-        "<tag> kein Wecker"
-        "Wecker für <tag> (ausschalten|aus)"
-        "Weck mich <tag> nicht"
+  hass.voice.intents = {
+    # "[Stelle einen] [sanften] Wecker [auf|für] <wann>", "Weck mich
+    # [um|am] <wann> [sanft] [mit Musik|mit der Playlist <playlist>]": one intent, the
+    # time read from "Wecker <wann>". Gentle only when said.
+    WeckerStellen = {
+      sentences = [
+        "[Stelle einen] {wecker_sanft} Wecker {remembrance_text:text}"
+        "[Stelle einen] Wecker {remembrance_text:text}"
+        "Weck mich {remembrance_text:text} {wecker_sanft} mit der Playlist {mass_playlist}"
+        "Weck mich {remembrance_text:text} mit der Playlist {mass_playlist}"
+        "Weck mich {remembrance_text:text} {wecker_sanft} {wecker_musik}"
+        "Weck mich {remembrance_text:text} {wecker_musik}"
+        "Weck mich {remembrance_text:text} {wecker_sanft}"
+        "Weck mich {remembrance_text:text}"
       ];
       inherit lists;
       script = {
-        action = callService "alarm_skip" {
-          all = true;
-          date = "${r.jinja}{{ zieltag(day) }}";
+        action = callService "create_from_text" {
+          kind = "alarm";
+          text = "Wecker {{ text }}";
+          inherit area description;
         };
         speech.text = ''
           ${r.jinja}
           {%- set res = action_response -%}
-          {%- if res.status == 'ok' -%}Okay, {{ tag_name(day) }} kein Wecker.
-          {%- elif res.status == 'no_match' -%}{{ tag_name(day)[:1] | upper ~ tag_name(day)[1:] }} ist sowieso kein Wecker gestellt.
+          {%- if res.status == 'ok' -%}
+            {%- set i = res['items'][0] -%}
+            {%- set p = res.parsed -%}
+            {%- if p.days -%}
+              ${dayNames}
+              {{- 'Sanfter ' if wecker_sanft is defined else "" }}Wecker {{ ns.n | join(' und ') }} um {{ uhrzeit(as_local(as_datetime(i.start))) }} gestellt
+            {%- else -%}{{ 'Sanfter ' if wecker_sanft is defined else "" }}Wecker {{ zeitpunkt(i.start) }} gestellt
+            {%- endif -%}
+            {{- ', mit der Playlist ' ~ mass_playlist if mass_playlist is defined else (', mit Musik' if wecker_musik is defined else "") -}}.
+          ${r.notUnderstood}
           ${r.failed "Wecker"}
           {%- else -%}Das hat nicht geklappt.
           {%- endif -%}
@@ -106,37 +103,24 @@ in
       };
     };
 
-    # Not "Wecker aus" or "Schalte den Wecker aus": said while it rings,
-    # they mean stop (`Stopp`), not off for good.
-    WeckerDeaktivieren = {
-      sentences = expand [
-        "Wecker deaktivieren"
-        "Deaktiviere den Wecker"
-        "Deaktiviere den Wecker um <zeit>"
-      ];
-      inherit lists;
-      script = {
-        action = callService "alarm_disable" target;
-        speech.text = speak "Wecker um {{ uhrzeit(as_local(as_datetime(i.start))) }} deaktiviert.";
-      };
-    };
-
-    WeckerAktivieren = {
-      sentences = expand [
-        "Wecker aktivieren"
-        "Aktiviere den Wecker"
-        "Aktiviere den Wecker um <zeit>"
-      ];
-      inherit lists;
-      script = {
-        action = callService "alarm_enable" target;
-        speech.text = speak "Wecker wieder aktiviert, er klingelt {{ zeitpunkt(i.next_ring) }}.";
-      };
-    };
+    # "Wecker [für|um] <wann> löschen", "<wann> Wecker löschen". A repeat
+    # said ("werktags um 6") deletes every alarm on those days at that
+    # time; one occurrence ("morgen um 7", "um 7") leaves out just that one
+    # (a one-off alarm is gone). Without a time it fails: a whole day or
+    # repeat needs "alle" (`WeckerAlleLoeschen`).
+    WeckerLoeschen = deleteAlarms false [
+      "Wecker {remembrance_text:text} löschen"
+      "{remembrance_text:text} Wecker löschen"
+    ];
+    # "Alle Wecker für morgen löschen", "Alle Wecker werktags löschen".
+    WeckerAlleLoeschen = deleteAlarms true [ "Alle Wecker {remembrance_text:text} löschen" ];
 
     WeckerWann = {
       sentences = [
-        "Wann (klingelt|geht|ist) (der|mein) [nächste|nächster] Wecker"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Wann klingelt (der|mein) [nächste|nächster] Wecker"
+        "Wann geht (der|mein) [nächste|nächster] Wecker"
+        "Wann ist (der|mein) [nächste|nächster] Wecker"
         "Ist ein Wecker gestellt"
       ];
       script = {
@@ -148,19 +132,6 @@ in
           {%- else -%}Es ist kein Wecker gestellt.
           {%- endif -%}
         '';
-      };
-    };
-
-    WeckerLoeschen = {
-      sentences = expand [
-        "Lösche den Wecker"
-        "Lösche den Wecker um <zeit>"
-        "Wecker um <zeit> löschen"
-      ];
-      inherit lists;
-      script = {
-        action = callService "alarm_delete" target;
-        speech.text = speak "Wecker um {{ uhrzeit(as_local(as_datetime(i.start))) }} gelöscht.";
       };
     };
   };

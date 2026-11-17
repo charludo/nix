@@ -45,7 +45,13 @@ in
   hass.voice.intents = {
     DeviceTurnOn = ack {
       sentences = [
-        "[Schalte |Mach ][den | die | das ]{geraet} (an|ein)[schalten|machen]"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Schalte [den | die | das ]{geraet} an[schalten|machen]"
+        "Schalte [den | die | das ]{geraet} ein[schalten|machen]"
+        "Mach [den | die | das ]{geraet} an[schalten|machen]"
+        "Mach [den | die | das ]{geraet} ein[schalten|machen]"
+        "[den | die | das ]{geraet} an[schalten|machen]"
+        "[den | die | das ]{geraet} ein[schalten|machen]"
       ];
       lists.geraet.values = geraetSlotValues;
       script = {
@@ -61,7 +67,10 @@ in
 
     DeviceTurnOff = ack {
       sentences = [
-        "[Schalte |Mach ][den | die | das ]{geraet} aus[schalten]"
+        # Split: closest_intent expands a pattern into at most 16 forms.
+        "Schalte [den | die | das ]{geraet} aus[schalten]"
+        "Mach [den | die | das ]{geraet} aus[schalten]"
+        "[den | die | das ]{geraet} aus[schalten]"
       ];
       lists.geraet.values = geraetSlotValues;
       script = {

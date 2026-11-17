@@ -12,7 +12,7 @@ in
 
   config = lib.mkIf cfg.enable {
     services.home-assistant.customComponents = [
-      pkgs.home-assistant-custom-components.closest_intent
+      pkgs.ours.home-assistant.custom-components.closest_intent
     ];
 
     services.home-assistant.config.closest_intent = {

@@ -21,8 +21,8 @@ class TimerState(StrEnum):
 @dataclass
 class Timer:
     id: str
-    # As set, in seconds. Extensions don't change it, so "the 5-minute timer"
-    # keeps meaning the same timer after it was extended.
+    # As set, in seconds: the timer's name ("the 5-minute timer"), which
+    # extensions and shortenings never change.
     duration: float
     created: float
     label: str | None = None
@@ -179,10 +179,9 @@ def resolve(timers: list[Timer], sel: Selector, now: float) -> list[Timer]:
         candidates = [t for score, t in scored if score >= best - 0.05]
 
     if sel.duration is not None:
+        # The duration as set: a timer's name never changes, so the extended
+        # 5-minute timer is still only "the 5-minute timer".
         exact = [t for t in candidates if abs(t.duration - sel.duration) < 1]
-        if not exact:
-            # Also accept the duration including extensions.
-            exact = [t for t in candidates if abs(t.duration + t.extended - sel.duration) < 1]
         if not exact:
             return []
         candidates = exact

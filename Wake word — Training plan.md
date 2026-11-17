@@ -108,6 +108,86 @@ Own microWakeWord models for **Computer** and **Alexa**, trained on this room an
   - Next run: bring all positive sources to one speech level first (Pocket sits 15 dB below Piper), then a gain range that matches live levels (about −50…−12 dBFS, some clipping via the existing TanhDistortion). Needs a small change to wakesmith's augmentation settings (`mww.py`, `_AUG`), as they aren't project options.
   - First collect more of Marie's tries from the running recording; label in batches (label2 page). Hold some of hers out, so her rate is measurable.
 
+- **Live, Nov 12 18:17 – Nov 15 16:00** (70 h, room recording, all 311 clips labelled: wakes, transcript tries and live peaks ≥ 0.35; scratchpad `live3/room/label/`). Thresholds 0.97 / 0.95.
+
+  | Speaker | Word | Woke |
+  |---|---|---|
+  | Charlotte | Computer | 45/52 (87 %); misses 0.55–0.96, 4 of 7 at 0.79–0.96 |
+  | Charlotte | Alexa | 14/21 (67 %); misses 0.43–0.94 |
+  | Marie | Computer | 10/16 (63 %); misses 0.00–0.94 |
+  | Marie | Alexa | 17/28 (61 %); misses 0.00–0.90, five at 0.00 |
+
+  - False wakes: 7 in 70 h (0.10/h): TV (Tagesschau, a podcast, English), night noise, "Yeah"/"I think". Coughs score 0.5–0.9 and almost never reach the threshold.
+  - Threshold sweep (live scores only): Computer 0.93 catches 4 more tries for 2 more false wakes in 70 h (worth trying, set in HA); Alexa below 0.95 adds false wakes fast (0.90: 3 more tries, 9 more false wakes), keep.
+  - Level confirms the loudness problem: above −15 dBFS (loudest 0.5 s) 3/10 woke, below −35 dBFS 12/13, in between 71/94. Marie is louder (6 of her 44 above −15 dBFS, 1 woke).
+  - Labels: "misfire" = not a try (mostly never fired); only the 7 wakes are real false wakes. All are negatives for training, ≥ 0.5 hard negatives, no extra weight.
+- **Next run, planned (Nov 15):** current mic settings (AGC/HPF experiment later, only if the retrain isn't enough). Held out: room day 1 again (Nov 11 10:50 – Nov 12 10:50), for a 1:1 comparison; everything else goes into training, including all of Marie's new tries. Her rate is then measured live afterwards, with a labelling round like this one as the baseline.
+- **Run v2, Nov 15/16: no improvement; v1 stays.** Full report: `/tmp/claude-1000/-home-charlotte-Projekte-nix/10ecb331-4cf4-419e-884c-9b45f0c64a3b/scratchpad/ws2/REPORT.md`.
+  - Ablations on v2 data: two cuts → word-end cut only → without gain patch → without background negatives. None was measurably better or worse than v1 on day 1.
+  - **Main finding: seed noise.** v1 retrained twice on identical data, on the 70 h labelled recording:
+    - Computer: 58/57/65 of 68 at 0.95, with false wakes from 0.06 to 0.37/h;
+    - Alexa: 32/36/22 of 54.
+    - Even at equal false-wake rates the spread is ±5 (Computer) and ±7 (Alexa) tries. That's bigger than any data effect we looked for.
+    - wakesmith's pick among its 3 seeds (8 Alexa / 25 Computer clean clips, which all seeds pass) can't see it.
+  - Fold test (v2a trained without each half of the labelled recording, tested on that half):
+    - Computer is as good as v1 (60 vs 59/68 at ≤5 false wakes in 70 h).
+    - Alexa is at the low end of the v1 seeds (26 vs 33/54 at ≤10).
+    - No gain for Marie, despite 2–3× more of her clips.
+  - Marie's failed Alexa tries are clean (SNR above 20 dB, better than Charlotte's). Pronunciation, not noise.
+  - **Next, if we retrain again:** select the model, not the data. Train ~8 candidates, pick by streaming score on one labelled recording at equal false-wake rate, set its threshold there, and report on the other recording. Then try a heavier weight on real positives (Marie).
+
+- **Runs v3/v4 and lever rounds, Nov 16: v4 is in the repo** (`pkgs/by-name/wohnzimmer-wake-words`: Alexa `alexa-v4-c17` @0.97, Computer `computer-v4-c5` @0.995; not deployed). Scratch files: `scratchpad/ws2/` (scripts, `select_*.txt`, `cands3/`, `cands4/`).
+  - **Setup.** Training on two rented Hetzner CCX63 (one per word, 6 runs at a time, scoring on the same machine); recordings for scoring uploaded, models and score traces back to hub.
+  - **Split.** Training: activation log, Nov 12, Nov 16. Selection: room day 1 + Nov 13–15 (92 h; Computer 103 tries, Marie 9; Alexa 35 tries, Marie 14). Every run gets its own threshold for ≤ 0.1 false wakes/h on the selection recordings; the pick is the run catching most there.
+  - **Model selection (part 1).**
+    - 9 runs on v1's data differ by ±5–10 tries at equal false-wake rate.
+    - Picking by room score avoids the bad runs and was worth +3 to +7 Alexa tries.
+    - A threshold per model is worth as much: v1 Computer at 0.905 instead of 0.97 catches 95 instead of 90 of 103.
+    - Day 1 alone was too small and too untypical to pick on.
+  - **Weight on real clips (part 2).** `real.sampling_weight` 2 is worse than 0: Alexa −4 tries on Marie's unseen session, and 4 of 16 Computer runs unusable. Kept at 0.
+    - Marie's own data helps: on her unseen session the weight-0 runs catch 14.5 of her 22 tries, v1 10.
+  - **Label hygiene.**
+    - v1's 1,638 activation-log negatives were never reviewed (rule: no wake word in the transcript). Reviewed now: 16 Alexa tries were among them (about 4%); 0 of 164 Computer clips.
+    - Since Nov 1 the log has two clips per wake: 439 duplicates removed.
+    - Day-1 hard negatives: 2 tries in 219. Room background: 0 tries in 75 checked.
+    - Removing the unreviewed negatives alone changed nothing measurable.
+  - **Hard tries.** Of the 12 Alexa tries most runs miss: 4 overlapped (TV, music, people), 2 quiet/far, 5 clear, 1 mention (talking *about* Alexa: neither try nor false wake, neither positive nor negative).
+  - **Room noise in training (v4) is the only lever with a gain so far.**
+    - wakesmith's noise (MUSAN) has no speech or music. Adding the room's own background (TV, music, talk) as augmentation noise helped:
+      - Alexa: median +1.3 to +1.8 tries;
+      - overlapped hard tries caught twice as often;
+      - no unusable runs.
+    - v4 also uses only reviewed negatives, log duplicates removed, and the log-review tries as positives.
+    - Result:
+      - Computer v4: median 94/103, best 97 (v1 95). The first runs better than v1, but "hot" (11 of 24 never reach 0.1/h; the best need 0.995).
+      - Alexa v4: median 26/35, best 31 (v1 23); Marie 11–12 of 14 (v1 8).
+  - **Levers without gain** (12 runs each per word, against v4):
+    - `partial_weight` 1.0: Computer −2 to −4 tries on the median, Alexa unchanged.
+    - `finetune_steps` 10k: hotter (Computer: 1 of 12 usable at 0.1/h), not better.
+    - `house_rirs` (10 clean claps, Nov 16 17:53, AGC off): like v4; the quiet/far tries are not caught more often.
+    - An ensemble of the 3–5 best runs: no gain.
+  - **Training is restless, a likely cause of the spread** (one full 20k log so far; curves of the 10k/15k runs being collected):
+    - The validation score every 500 steps jumps between 0.28 and 0.89 without a trend, and the validation false wakes between 8 and 36/h.
+    - The learning rate stays at 0.001 for all steps.
+    - The exported model is the checkpoint with the best validation score: often a lucky spike (here step 18,500 of 20,000).
+    - So no classic overtraining. Which checkpoint wins is largely chance, which would explain the spread between runs and the "hot" runs.
+    - `finetune_steps` doesn't fix it, probably because the best checkpoint is still picked across both phases.
+  - **Fix to test next.**
+    - (1) Decaying learning rate (e.g. 0.001 → 0.0003 → 0.0001) and export of the last checkpoint instead of the best.
+    - (2) Averaging the weights over the last 20–30 % of training (EMA/SWA).
+    - Both need a small wakesmith patch. Expectation if the hypothesis holds: less spread between runs, fewer hot runs, the typical run at least as good as v4.
+  - **Not reachable by training so far.** Quiet/far tries (microphone side: the AGC experiment). Marie's Computer: only ~25 of her tries in training, so a session from her is the most promising data lever.
+- **Night of Nov 16 to 17: training fixes.** Full report: `scratchpad/ws2/REPORT-night.md`. The repo stays on v4.
+  - **No overtraining.** 10k/15k steps make the models less hot but not better.
+  - **Restless training confirmed.** Alexa's validation score jumps by 0.13–0.18 between checkpoints, and the exported "best" checkpoint is a lucky cool moment.
+  - **Weight averaging over the last 30% of training (SWA, patched trainer) gives consistently better typical runs.** Alexa median 29/35 instead of 26, worst run 27 instead of 21; Computer worst run 90 instead of 85.
+  - **"Hot" = saturation.** A few false wakes get the maximum score 0.996. A 10-step `sliding_window_size` instead of 5 halves them without costing tries; that's computed offline from the traces, exactly.
+  - **partial / finetune / house_rirs add little on top of averaging.** Only partial makes Alexa slightly more consistent.
+  - **The best of 24 averaging runs is about equal to the v4 picks at 0.1/h** (+1 Computer, −1 Alexa), and better at 0.2/h (+3 / +1).
+  - **For future rounds:** use weight averaging, 8 runs per word, and window 10.
+  - **Remaining gains:** data (Marie's Computer tries, live labelling, hard negatives) and the microphone (AGC).
+  - **Mic note.** Claps right at the array clip at full scale even with AGC off and gain 4×. Temporary AGC changes go through `respeaker-tuning-apply` with `sudo` on the satellite; a reboot resets them.
+
 - **High-pass filter is at 125 Hz, not 180 Hz.** The chip reads `HPFONOFF 2`, the config says 3: the tuning service was a plain oneshot, run only when the array appears on USB (last boot Nov 10, when the config still said 2), so the change to 3 never reached the chip. Everything recorded since Nov 10, all training material from the room and the post-deploy data, is at HPF 2. Fixed in `modules/nixos/respeaker-mic-array.nix` (Nov 12, not deployed): the service now stays active while the array is plugged in (bound to its device), so a deploy that changes the parameters reapplies them. After the first deploy with this change it still needs one reboot or replug before the device unit exists. The config is set back to `HPFONOFF = 2` (comment in `home-assistant/satellite/default.nix`), so a reboot doesn't change the recording conditions; switch to 3 together with the AGC experiment above.
 
 ## Time
