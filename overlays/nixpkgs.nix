@@ -81,6 +81,23 @@ _: prev: {
     };
   });
 
+  # Fixes CVE-2026-123007, CVE-2026-123633 (HTTP/2 RCE) and others.
+  # Can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/589970
+  nginxStable = prev.nginxStable.overrideAttrs rec {
+    version = "1.30.7";
+    src = prev.fetchurl {
+      url = "https://nginx.org/download/nginx-${version}.tar.gz";
+      hash = "sha256-JWW1yDcFDpWPcPsPc8SOK8pFQq00n9NW9G+wxyYQvG4=";
+    };
+  };
+  nginxMainline = prev.nginxMainline.overrideAttrs rec {
+    version = "1.31.9";
+    src = prev.fetchurl {
+      url = "https://nginx.org/download/nginx-${version}.tar.gz";
+      hash = "sha256-oRxe7uLiV/RHjw5kn4SwBAeH0nfS0+UjOVKqa23LgK0=";
+    };
+  };
+
   # Can be dropped once nixpkgs carries https://github.com/NixOS/nixpkgs/pull/585183
   lrcget = prev.lrcget.overrideAttrs (old: {
     buildInputs = old.buildInputs ++ [ prev.sqlite ];
